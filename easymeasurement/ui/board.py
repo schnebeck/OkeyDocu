@@ -110,11 +110,16 @@ def pane(bar: Strip, view: QAbstractScrollArea) -> QWidget:
     return widget
 
 
+RULE_GAP = 4  # background between the left pane, often ending in its scroll bar, and the line
+
+
 class _Rule(QSplitterHandle):
-    """A thin line between two panes. Qt widens its grip beyond what is drawn."""
+    """Background, then a thin line at the right edge, where the next pane begins."""
 
     def paintEvent(self, event) -> None:
-        QPainter(self).fillRect(self.rect(), rule_colour(self))
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), self.palette().color(QPalette.ColorRole.Window))
+        painter.fillRect(self.width() - 1, 0, 1, self.height(), rule_colour(self))
 
 
 class _Splitter(QSplitter):
@@ -149,7 +154,7 @@ class Board(QWidget):
     def __init__(self, name: str, *panes: QWidget, head: QWidget | None = None):
         super().__init__()
         self.splitter = _Splitter(objectName=name)
-        self.splitter.setHandleWidth(1)
+        self.splitter.setHandleWidth(RULE_GAP + 1)
         self.splitter.setChildrenCollapsible(False)
         for widget in panes:
             self.splitter.addWidget(widget)
