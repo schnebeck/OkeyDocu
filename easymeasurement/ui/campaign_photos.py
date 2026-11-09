@@ -34,10 +34,16 @@ class CampaignPhotos:
             table.viewport(), self._photo_dropped, allowed=self._row_takes_photo
         )
         self.values.detail_shown.connect(self._show_detail_room)
+        self.values.place_requested.connect(self.structure.select)
 
-    def _show_detail_room(self, chosen: bool, photos: int) -> None:
+    def _show_detail_room(self, chosen: bool, photos: int, run: str) -> None:
         """Sections without anything to show shrink to a line that says why."""
-        self.detail_section.set_empty(None if chosen else "Eine Zeile der Tabelle wählen.")
+        if run:
+            self.detail_section.set_empty(f"„{run}“ hat mehrere Schritte. Ein Klick auf die"
+                                          " Zeit klappt sie auf, dann lässt sich jeder einzeln"
+                                          " bearbeiten.")
+        else:
+            self.detail_section.set_empty(None if chosen else "Eine Zeile der Tabelle wählen.")
         if photos:
             self.photo_section.set_empty(None)
         elif chosen:
@@ -49,7 +55,10 @@ class CampaignPhotos:
     def _row_takes_photo(self, position) -> bool:
         campaign = self._campaign()
         open_campaign = bool(campaign) and campaign["status"] == "open"
-        return open_campaign and self.values.table.indexAt(position).isValid()
+        index = self.values.table.indexAt(position)
+        # A line for a whole run is no single measurement a photo could belong to.
+        return (open_campaign and index.isValid()
+                and self.values.table.item(index.row(), 0).data(ROW_ID) is not None)
 
     def _photo_dropped(self, photo_id: int, position) -> None:
         table = self.values.table

@@ -48,7 +48,7 @@ class CleanupOverlay(Overlay):
         self.body.addWidget(self.list)
         if not empty:
             self.ok_button.hide()
-            self.cancel_button.setText("Schließen")
+            self.cancel_button.setText("Zurück")
         self._update()
 
     def chosen(self) -> list[int]:

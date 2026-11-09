@@ -45,7 +45,7 @@ class UsersOverlay(Overlay):
     def __init__(self, app: AppContext, parent=None):
         super().__init__("Benutzer", parent, 520)
         self.app = app
-        self.ok_button.setText("Fertig")
+        self.ok_button.setText("Zurück")
         self.cancel_button.hide()
         self.list = QListWidget()
         self.list.setItemDelegate(CampaignDelegate(self.list))

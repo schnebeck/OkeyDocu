@@ -59,7 +59,7 @@ class InstrumentSetupOverlay(Overlay):
         guide.setWordWrap(True)
         self.start_button = self.ok_button
         self.start_button.setText("Einrichten")
-        self.cancel_button.setText("Schließen")
+        self.cancel_button.setText("Zurück")
         form = QFormLayout()
         form.addRow("PIN des Geräts", self.pin)
         self.body.addWidget(guide)

@@ -43,13 +43,14 @@ class ElementForm(QWidget):
         super().__init__()
         self.app = app
         self.asset_id: int | None = None
+        self.live = True  # every finished field is stored; otherwise only by `save`
         self.catalog = KindCatalog(app.db)
         self.fields = {key: QLineEdit() for key in TEXTS}
         self.kind = QComboBox()
         self.kind.activated.connect(lambda _: self._kind_chosen())
         self.interval = QSpinBox(minimum=AS_KIND, maximum=240, suffix=" Monate")
         self.interval.setSpecialValueText("wie der Typ")
-        self.interval.editingFinished.connect(self.save)
+        self.interval.editingFinished.connect(self._edited)
         self.interval_hint = QLabel()
         self.interval_hint.setEnabled(False)
         form = QFormLayout()
@@ -62,7 +63,7 @@ class ElementForm(QWidget):
         repeat.addWidget(self.interval_hint, 1)
         form.addRow("Prüfintervall", repeat)
         for field in self.fields.values():
-            field.editingFinished.connect(self.save)
+            field.editingFinished.connect(self._edited)
         self.features = QGroupBox("Merkmale")
         self.feature_form = QFormLayout(self.features)
         self.feature_fields: dict[str, QLineEdit] = {}
@@ -99,7 +100,7 @@ class ElementForm(QWidget):
         values = self.app.db.asset_features(self.asset_id)
         for feature in kind.features if kind else ():
             field = QLineEdit(values.get(feature.key, ""))
-            field.editingFinished.connect(self.save)
+            field.editingFinished.connect(self._edited)
             self.feature_fields[feature.key] = field
             row = QHBoxLayout()
             row.addWidget(field, 1)
@@ -110,8 +111,12 @@ class ElementForm(QWidget):
         self.features.setTitle(f"Merkmale: {kind.label}" if kind else "Merkmale")
         self.features.setVisible(bool(self.feature_fields))
 
+    def _edited(self) -> None:
+        if self.live:
+            self.save()
+
     def _kind_chosen(self) -> None:
-        self.save()
+        self._edited()
         self._show_features(self.kind.currentData())
         self._hint()
 
@@ -156,9 +161,9 @@ class ElementForm(QWidget):
 class ElementOverlay(Overlay):
     def __init__(self, app: AppContext, asset_id: int, parent=None):
         super().__init__("Eigenschaften", parent, width=560)
-        self.ok_button.setText("Fertig")
-        self.cancel_button.hide()
+        self.ok_button.setText("Übernehmen")
         self.form = ElementForm(app)
+        self.form.live = False  # Abbrechen leaves the element as it was
         self.form.load(asset_id)
         self.body.addWidget(self.form)
 

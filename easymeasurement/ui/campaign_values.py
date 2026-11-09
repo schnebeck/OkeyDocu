@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 from ..model import Verdict
 from ..store.search import MeasurementFilter
 from .board import Strip
-from .common import ROW_ID, AppContext, row_of, selected_ids
+from .common import ROW_ID, RUN_ID, AppContext, row_of, selected_ids
 from .measurement_overlays import MeasurementOverlay
 from .measurement_view import ASSET, CAMPAIGN, CUSTOMER, MeasurementView
 from .move_overlay import MoveOverlay
@@ -33,7 +33,8 @@ class CampaignValues(MeasurementView):
     """The measurements of one campaign, with what it is known for repeated nowhere."""
 
     named_columns = (CUSTOMER, ASSET, CAMPAIGN)
-    detail_shown = Signal(bool, int)  # a row is chosen; how many photos it has
+    place_requested = Signal(int)  # the element of the measurement should be shown
+    detail_shown = Signal(bool, int, str)  # a row is chosen; its photos; the run of the line
 
     def __init__(self, app: AppContext):
         super().__init__(app)
@@ -68,6 +69,10 @@ class CampaignValues(MeasurementView):
             button.hide()
         self.move_action = QAction("Verschieben nach …", self)
         self.move_action.triggered.connect(self._move_to)
+        self.table.itemSelectionChanged.connect(self._update_move)
+        self.editor.movable = True
+        self.editor.place.move_requested.connect(self._move_to)
+        self.editor.place.chosen.connect(self.place_requested)
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self._row_menu)
         self.find = QLineEdit(placeholderText="Messwerte filtern …")
@@ -118,7 +123,13 @@ class CampaignValues(MeasurementView):
             self.refresh()
 
     def select_measurement(self, measurement_id: int) -> None:
+        """A step of a folded run opens the run first, so the step can be seen."""
         row = row_of(self.table, measurement_id)
+        if row < 0:
+            found = self.app.db.one("SELECT run_id FROM measurements WHERE id=?", measurement_id)
+            if found and found["run_id"] is not None and found["run_id"] not in self.open_runs:
+                self.toggle_run(found["run_id"])
+                row = row_of(self.table, measurement_id)
         if row >= 0:
             self.table.selectRow(row)
             self.table.scrollToItem(self.table.item(row, 0))
@@ -128,7 +139,7 @@ class CampaignValues(MeasurementView):
         if self.table.rowCount() and not self.editor.dirty:
             # Wherever the sorting put it, the newest reading has the highest number.
             row = max(range(self.table.rowCount()),
-                      key=lambda row: self.table.item(row, 0).data(ROW_ID))
+                      key=lambda row: self.table.item(row, 0).data(ROW_ID) or -1)
             self.table.selectRow(row)
             self.table.scrollToItem(self.table.item(row, 0))
 
@@ -144,7 +155,10 @@ class CampaignValues(MeasurementView):
 
     def _show_detail(self) -> None:
         super()._show_detail()
-        self.detail_shown.emit(self.editor.row is not None, self.gallery.count())
+        current = self.table.currentItem()
+        run = self.table.item(current.row(), 0).data(RUN_ID) if current else None
+        name = self.app.service.run(run)["name"] if run is not None else ""
+        self.detail_shown.emit(self.editor.row is not None, self.gallery.count(), name)
 
     def _move_common_to_head(self, day: str, area: str) -> None:
         super()._move_common_to_head(day, area)
@@ -155,8 +169,13 @@ class CampaignValues(MeasurementView):
         campaign = self.app.service.campaign(self.campaign_id) if self.campaign_id else None
         is_open = bool(campaign) and campaign["status"] == "open"
         self.manual_action.setEnabled(is_open)
-        self.move_action.setEnabled(is_open and row is not None)
+        self._update_move()
         self.manual_button.setVisible(is_open)
+
+    def _update_move(self) -> None:
+        campaign = self.app.service.campaign(self.campaign_id) if self.campaign_id else None
+        is_open = bool(campaign) and campaign["status"] == "open"
+        self.move_action.setEnabled(is_open and bool(selected_ids(self.table)))
 
     def _row_menu(self, point) -> None:
         if self.table.indexAt(point).row() < 0:

@@ -126,6 +126,17 @@ def _extras(db, campaign) -> dict:
     return extras
 
 
+def _run_of(db, measurement: dict) -> dict:
+    """The run a measurement is a step of. Only what is there enters the digest."""
+    found = {}
+    if measurement["step_name"]:
+        found["step_name"] = measurement["step_name"]
+    if measurement["run_id"] is not None:
+        run = db.one("SELECT * FROM runs WHERE id=?", measurement["run_id"])
+        found["run"] = _without(dict(run), "id", "campaign_id")
+    return found
+
+
 def content(db, campaign_id: int, closed_at: str) -> bytes:
     """Everything a campaign recorded, in a fixed form. Database row numbers stay out."""
     campaign = db.one("SELECT * FROM campaigns WHERE id=?", campaign_id)
@@ -135,10 +146,12 @@ def content(db, campaign_id: int, closed_at: str) -> bytes:
             db, "SELECT * FROM measured_values WHERE measurement_id=? ORDER BY position, id",
             row["id"],
         )
-        measurements.append({
-            "measurement": _without(row, "id", "campaign_id", "step_id"),
+        entry = {
+            "measurement": _without(row, "id", "campaign_id", "step_id", "run_id", "step_name"),
             "values": [_without(value, "id", "measurement_id") for value in values],
-        })
+        }
+        entry.update(_run_of(db, row))
+        measurements.append(entry)
     record = {
         "campaign": {
             key: campaign[key]

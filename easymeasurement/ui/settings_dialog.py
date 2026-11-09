@@ -20,7 +20,7 @@ class SettingsOverlay(Overlay):
 
     def __init__(self, parent=None):
         super().__init__("Messgeräte", parent)
-        self.ok_button.setText("Fertig")
+        self.ok_button.setText("Zurück")
         self.cancel_button.hide()
         self.instruments = QListWidget()
         self.instruments.setMinimumHeight(110)

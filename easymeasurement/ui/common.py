@@ -36,6 +36,8 @@ from ..store import Database
 T = TypeVar("T")
 
 ROW_ID = Qt.ItemDataRole.UserRole
+RUN_ID = Qt.ItemDataRole.UserRole + 30  # on a line standing for a whole run
+MEMBERS = Qt.ItemDataRole.UserRole + 31  # the measurements such a line stands for
 
 
 SIMULATED_FAILURE_RATE = 0.15
@@ -150,9 +152,16 @@ def row_of(table: QTableWidget, row_id: int | None) -> int:
 
 
 def selected_ids(table: QTableWidget) -> list[int]:
-    """Every selected row's ID, top to bottom."""
+    """Every selected row's ID, top to bottom; a line for a run gives all its members."""
     rows = sorted({index.row() for index in table.selectionModel().selectedRows()})
-    return [table.item(row, 0).data(ROW_ID) for row in rows if table.item(row, 0)]
+    ids = []
+    for row in rows:
+        item = table.item(row, 0)
+        if item is None:
+            continue
+        own = item.data(ROW_ID)
+        ids += [own] if own is not None else list(item.data(MEMBERS) or ())
+    return list(dict.fromkeys(ids))
 
 
 def selected_id(table: QTableWidget) -> int | None:

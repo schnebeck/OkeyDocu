@@ -22,7 +22,8 @@ WITH RECURSIVE tree(id) AS (
 """
 
 _MEASUREMENT_COLUMNS = """
-SELECT m.*, c.title AS campaign_title, c.tester, c.status AS campaign_status,
+SELECT m.*, r.name AS run_name, r.kind AS run_kind, r.started_at AS run_started,
+       c.title AS campaign_title, c.tester, c.status AS campaign_status,
        a.id AS campaign_asset_id, a.name AS asset_name, a.identifier AS asset_identifier,
        cu.id AS customer_id, cu.name AS customer_name,
        (SELECT group_concat(v.label || ' ' || reading_text(v.raw), '   ') FROM measured_values v
@@ -36,6 +37,7 @@ SELECT m.*, c.title AS campaign_title, c.tester, c.status AS campaign_status,
                       AND a.key = 'answer')) AS checks,
        (SELECT count(*) FROM photos p WHERE p.measurement_id = m.id) AS photo_count
 FROM measurements m
+LEFT JOIN runs r ON r.id = m.run_id
 JOIN campaigns c ON c.id = m.campaign_id
 JOIN assets a ON a.id = c.asset_id
 JOIN customers cu ON cu.id = a.customer_id

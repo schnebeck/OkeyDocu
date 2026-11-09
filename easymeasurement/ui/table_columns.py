@@ -14,10 +14,24 @@ from PySide6.QtWidgets import QMenu, QTableWidget, QTableWidgetItem
 from .report_signing import settings
 
 SORT_KEY = Qt.ItemDataRole.UserRole + 20
+GROUP = Qt.ItemDataRole.UserRole + 21  # lines that stay together, as a run and its steps
+ORDER = Qt.ItemDataRole.UserRole + 22  # their order inside the group, the head first
+HEAD = Qt.ItemDataRole.UserRole + 23  # what a member sorts by among others: its head's key
+
+
+def _key(item: QTableWidgetItem):
+    for role in (HEAD, SORT_KEY):
+        if item.data(role) is not None:
+            return item.data(role)
+    return item.text().casefold()
 
 
 class SortItem(QTableWidgetItem):
-    """Ordered by a key of its own where the text would sort wrongly, as dates and numbers do."""
+    """Ordered by a key of its own where the text would sort wrongly, as dates and numbers do.
+
+    Lines of one group keep together under their head, whichever column sorts and in
+    which direction: inside the group the order never turns.
+    """
 
     def __init__(self, text: str, key=None):
         super().__init__(text)
@@ -25,10 +39,17 @@ class SortItem(QTableWidgetItem):
             self.setData(SORT_KEY, key)
 
     def __lt__(self, other: QTableWidgetItem) -> bool:
-        mine, theirs = self.data(SORT_KEY), other.data(SORT_KEY)
-        if mine is not None and theirs is not None:
-            return mine < theirs
-        return self.text().casefold() < other.text().casefold()
+        group = self.data(GROUP)
+        if group is not None and group == other.data(GROUP):
+            table = self.tableWidget()
+            down = (table is not None and table.horizontalHeader().sortIndicatorOrder()
+                    == Qt.SortOrder.DescendingOrder)
+            mine, theirs = self.data(ORDER), other.data(ORDER)
+            return mine > theirs if down else mine < theirs
+        mine, theirs = _key(self), _key(other)
+        if type(mine) is not type(theirs):
+            return str(mine) < str(theirs)
+        return mine < theirs
 
 
 class TableColumns(QObject):

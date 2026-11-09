@@ -46,7 +46,7 @@ class PhotoPreview(Overlay):
         room = QSize(max(host.width() - 120, 240), max(host.height() - LARGE_MARGIN_PX, 180))
         super().__init__(title, parent, width=room.width() + 40)
         self.cancel_button.hide()
-        self.ok_button.setText("Schließen")
+        self.ok_button.setText("Zurück")
         picture = QLabel(alignment=Qt.AlignmentFlag.AlignCenter)
         pixmap = read_large(path, room)
         if pixmap.isNull():

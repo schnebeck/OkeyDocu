@@ -18,7 +18,6 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QLabel,
     QListWidget,
-    QTableWidgetItem,
     QToolButton,
     QWidget,
 )
@@ -26,35 +25,30 @@ from PySide6.QtWidgets import (
 from ..campaign.service import LOCATION_SEPARATOR
 from ..store.search import MeasurementFilter, search_measurements
 from .common import (
-    ROW_ID,
+    RUN_ID,
     AppContext,
     filling,
-    function_short,
     make_table,
     row_of,
     selected_id,
-    verdict_item,
 )
 from .measurement_cells import (
     ASSET,
     CAMPAIGN,
-    CAPTURE,
     CUSTOMER,
     PLACE,
     SHARED_COLUMNS,
     VALUES,
-    VERDICT,
     path_of,
     shared_start,
-    sort_key,
-    values_text,
 )
-from .measurement_detail import THUMB, MeasurementDetail, capture_text
+from .measurement_detail import THUMB, MeasurementDetail
 from .measurement_editor import MeasurementEditor
+from .measurement_runs import table_lines, write_line
 from .photo_shared import shared_thumbs
 from .report_signing import settings
-from .table_columns import SortItem, TableColumns
-from .verdict_marks import verdict_icon
+from .table_columns import TableColumns
+from .verdict_marks import MARK_SIZE
 
 class MeasurementView(MeasurementDetail, QWidget):
     """The table, what the selected row holds, and what may be done to it."""
@@ -86,7 +80,10 @@ class MeasurementView(MeasurementDetail, QWidget):
         self.common.setWordWrap(True)
         self.common.setTextFormat(Qt.TextFormat.RichText)
         self.table.currentCellChanged.connect(lambda *_: self._show_detail())
-        self.table.cellDoubleClicked.connect(self._cell_double_clicked)
+        self.open_runs: set[int] = set()  # runs whose steps are shown one by one
+        self.table.setIconSize(MARK_SIZE)
+        self.table.cellClicked.connect(lambda row, column: self._clicked(row, column, False))
+        self.table.cellDoubleClicked.connect(lambda row, column: self._clicked(row, column, True))
         # On the table, Enter goes to the field beside it and Delete asks to delete the row.
         for key, slot in ((Qt.Key.Key_Return, self._edit_measurement),
                           (Qt.Key.Key_Enter, self._edit_measurement),
@@ -120,6 +117,24 @@ class MeasurementView(MeasurementDetail, QWidget):
         self.actions_row.addStretch()
         self.actions_row.addWidget(self.count)
 
+    def toggle_run(self, run_id: int) -> None:
+        """A run's steps open under its line, or fold back into it."""
+        (self.open_runs.discard if run_id in self.open_runs else self.open_runs.add)(run_id)
+        self.refresh()
+
+    def _run_row(self, run_id: int | None) -> int:
+        for row in range(self.table.rowCount()):
+            if run_id is not None and self.table.item(row, 0).data(RUN_ID) == run_id:
+                return row
+        return -1
+
+    def _clicked(self, row: int, column: int, double: bool) -> None:
+        run = self.table.item(row, 0).data(RUN_ID)
+        if run is not None and (double or column == 0):
+            self.toggle_run(run)
+        elif double:
+            self._cell_double_clicked(row, column)
+
     def _keep_width(self, column: int, _old: int, new: int) -> None:
         mode = self.table.horizontalHeader().sectionResizeMode(column)
         if mode == QHeaderView.ResizeMode.Interactive and new > 0:
@@ -144,6 +159,8 @@ class MeasurementView(MeasurementDetail, QWidget):
 
     def refresh(self) -> None:
         selected = selected_id(self.table)
+        current = self.table.currentItem()
+        run = self.table.item(current.row(), 0).data(RUN_ID) if current else None
         # The search returns the newest first, so a limit keeps the recent ones.
         # Read as a record, the day runs from top to bottom.
         query = self.current_filter()
@@ -153,26 +170,16 @@ class MeasurementView(MeasurementDetail, QWidget):
         paths = [path_of(row) for row in rows]
         area = shared_start(paths) if len(rows) > 1 else []
         time_format = "%H:%M:%S" if one_day else "%d.%m.%Y %H:%M:%S"
+        lines = table_lines(rows, self.open_runs, time_format, area, paths)
         with filling(self.table):
-            self.table.setRowCount(len(rows))
-            for index, row in enumerate(rows):
-                cells = [
-                    moments[index].strftime(time_format), row["customer_name"], row["asset_name"],
-                    row["campaign_title"], LOCATION_SEPARATOR.join(paths[index][len(area):]),
-                    function_short(row["function"]),
-                    values_text(row), str(row["photo_count"] or ""),
-                ]
-                for column, text in enumerate(cells):
-                    self.table.setItem(index, column, SortItem(text, sort_key(column, row)))
-                self.table.setItem(index, VERDICT, verdict_item(row["verdict"]))
-                self.table.setItem(index, CAPTURE, QTableWidgetItem(capture_text(row)))
-                self.table.item(index, 0).setData(ROW_ID, row["id"])
-                self.table.item(index, 0).setIcon(verdict_icon(row["verdict"]))
+            self.table.setRowCount(len(lines))
+            for index, line in enumerate(lines):
+                write_line(self.table, index, line)
         self._move_common_to_head(
             f"{moments[0]:%d.%m.%Y}" if one_day else "", LOCATION_SEPARATOR.join(area)
         )
         self.count.setText("1 Messung" if len(rows) == 1 else f"{len(rows)} Messungen")
-        restore = row_of(self.table, selected)
+        restore = row_of(self.table, selected) if selected is not None else self._run_row(run)
         if restore >= 0:
             self.table.setCurrentCell(restore, 0)
         self._show_detail()

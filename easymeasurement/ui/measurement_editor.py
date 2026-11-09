@@ -27,6 +27,7 @@ from .common import AppContext, function_short, stored_parameters
 from .attachment_list import AttachmentList
 from .growing_edit import GrowingEdit
 from .measurement_editing import MeasurementEditing
+from .place_line import PlaceLine
 from .value_rows import QuietCombo, ValueRows, verdict_combo
 
 READ_ONLY_STYLE = "background: transparent; border: none;"
@@ -70,6 +71,14 @@ class MeasurementEditor(MeasurementEditing, QWidget):
         for key, label in FUNCTION_LABELS.items():
             self.function.addItem(label, key)
         self.location = QLineEdit(placeholderText="Wo gemessen wurde")
+        # Booked onto an element, the element says where; the text is for what has none.
+        self.place = PlaceLine(app)
+        self.movable = False  # the view offers booking elsewhere
+        where = QWidget()
+        where_layout = QVBoxLayout(where)
+        where_layout.setContentsMargins(0, 0, 0, 0)
+        where_layout.addWidget(self.place)
+        where_layout.addWidget(self.location)
         self.operator = QLineEdit()
         self.verdict = verdict_combo("")
         self.comment = GrowingEdit("Bemerkung zur Messung")
@@ -85,7 +94,7 @@ class MeasurementEditor(MeasurementEditing, QWidget):
         form.setContentsMargins(0, 0, 0, 0)
         form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         form.addRow("Funktion", self.function)
-        form.addRow("Messort", self.location)
+        form.addRow("Messort", where)
         form.addRow("Prüfer", self.operator)
         form.addRow("Bewertung", self.verdict)
         form.addRow("Bemerkung", self.comment)
@@ -154,6 +163,11 @@ class MeasurementEditor(MeasurementEditing, QWidget):
             self.function.setCurrentIndex(self.function.findData(row["function"]))
             self.verdict.setCurrentIndex(self.verdict.findData(row["verdict"]))
             self.location.setText(row["location"])
+            booked = row["asset_id"] is not None
+            if booked:
+                self.place.show_asset(row["asset_id"], editable and self.movable)
+            self.place.setVisible(booked)
+            self.location.setVisible(not booked)
             self.operator.setText(row["operator"])
             self.comment.setPlainText(row["comment"])
             self.rows.fill(self.app.service.values(row["id"]), editable)

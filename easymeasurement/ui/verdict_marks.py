@@ -10,30 +10,46 @@ from __future__ import annotations
 
 from functools import cache
 
-from PySide6.QtCore import QPointF, Qt
-from PySide6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
+from PySide6.QtCore import QPointF, QSize, Qt
+from PySide6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap, QPolygonF
 
 from ..model import Verdict
 
-SIZE, SCALE = 14, 2  # drawn at twice the size, so it stays sharp on dense screens
+# Room for a fold arrow on the left and the mark on the right, the same in every row,
+# so the text after it starts in one column.
+MARK_SIZE = QSize(26, 14)
+SCALE = 2  # drawn at twice the size, so it stays sharp on dense screens
 _COLOURS = {Verdict.PASSED: "#27ae60", Verdict.FAILED: "#c0392b"}
+_GREY = "#8a8f94"
+
+
+def _arrow(painter: QPainter, opened: bool) -> None:
+    painter.setPen(Qt.PenStyle.NoPen)
+    painter.setBrush(QColor(_GREY))
+    points = ((1, 4), (9, 4), (5, 9.5)) if opened else ((3, 2.5), (8.5, 7), (3, 11.5))
+    painter.drawPolygon(QPolygonF([QPointF(x, y) for x, y in points]))
 
 
 @cache
-def verdict_icon(verdict: str) -> QIcon:
+def verdict_icon(verdict: str, opened: bool | None = None) -> QIcon:
     """A tick on green, a cross on red, an empty ring for what was not judged.
 
     Shape and colour both differ, so the marks also part for colour-blind eyes.
+    `opened` adds the arrow of a line that folds several steps.
     """
-    pixmap = QPixmap(SIZE * SCALE, SIZE * SCALE)
+    pixmap = QPixmap(MARK_SIZE * SCALE)
     pixmap.setDevicePixelRatio(SCALE)
     pixmap.fill(Qt.GlobalColor.transparent)
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+    if opened is not None:
+        _arrow(painter, opened)
+    painter.translate(12, 0)
     kind = Verdict(verdict)
-    colour = QColor(_COLOURS.get(kind, "#8a8f94"))
+    colour = QColor(_COLOURS.get(kind, _GREY))
     if kind not in _COLOURS:
         painter.setPen(QPen(colour, 1.6))
+        painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawEllipse(QPointF(7, 7), 5, 5)
         painter.end()
         return QIcon(pixmap)

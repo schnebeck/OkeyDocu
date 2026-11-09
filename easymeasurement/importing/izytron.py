@@ -81,6 +81,7 @@ def import_day(
     )
     offset = timedelta(seconds=clock_offset_s)
     moments, measurements, checks = [], 0, 0
+    runs: dict[str, int] = {}  # a testing entered on the PC is one run of its steps
     for step in steps:
         data = json.loads(step["Measurement_Data"] or "{}")
         location = _location(source, step["Abstract_Device_ID"])
@@ -95,10 +96,17 @@ def import_day(
             measurement = _check_measurement(step, data, location)
             local_time, device_time = measurement.taken_at, None
             checks += 1
-        service.insert_imported(
+        measurement_id = service.insert_imported(
             campaign_id, measurement, SOURCE, local_time, device_time, identity,
             clock_offset_s if from_device else None, asset_id,
         )
+        if not from_device:
+            testing = step["Testing_ID"].lower()
+            if testing not in runs:
+                runs[testing] = service.add_run(
+                    campaign_id, step["Name"] or step["Kind"], step["Kind"], local_time, testing
+                )
+            service.join_run(measurement_id, runs[testing], step["Step_Description"] or "")
         moments.append(local_time)
     service.date_import(campaign_id, min(moments))
     return ImportResult(campaign_id, measurements, checks, len(assets))

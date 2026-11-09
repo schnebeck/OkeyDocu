@@ -37,6 +37,7 @@ from .structure import StructureError, StructureMixin
 from .photo_values import PhotoMixin
 from .plan_steps import PlanStepMixin
 from .plan import Plan
+from .runs import RunMixin
 from .records import (
     EDITABLE_FIELDS,
     EDITABLE_VALUE_FIELDS,
@@ -81,7 +82,7 @@ __all__ = [
 
 class CampaignService(
     ReadingMixin, ClockMixin, FilingMixin, EditingMixin, PhotoMixin, AttachmentMixin, PlanStepMixin,
-    ClosingMixin, OverviewMixin, StructureMixin, DueMixin,
+    ClosingMixin, OverviewMixin, StructureMixin, DueMixin, RunMixin,
 ):
     def __init__(self, db: Database, archive_root: Path, key_store: KeyStore | None = None):
         self.db = db
