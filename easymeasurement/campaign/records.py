@@ -21,11 +21,11 @@ IMPORTED = "izytron"
 NO_INSTRUMENT = (MANUAL, IMPORTED)  # nothing to connect to
 # What may be overwritten. Value, unit and time are not on these lists, and the
 # database refuses them as well.
-EDITABLE_FIELDS = ("function", "location", "comment", "operator", "verdict")
+EDITABLE_FIELDS = ("function", "location", "comment", "operator", "verdict", "hint")
 EDITABLE_VALUE_FIELDS = ("label", "lower_limit", "upper_limit", "verdict")
 # Fixing a text is everyday work. Whatever changes the meaning of a result is
 # registered and marked in the report.
-TEXT_FIELDS = ("location", "comment", "label")
+TEXT_FIELDS = ("location", "comment", "label", "hint")
 LOCATION_SEPARATOR = " / "
 
 

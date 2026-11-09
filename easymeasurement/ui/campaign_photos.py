@@ -35,6 +35,13 @@ class CampaignPhotos:
         )
         self.values.detail_shown.connect(self._show_detail_room)
         self.values.place_requested.connect(self.structure.select)
+        self.values.point_chosen.connect(self._point_chosen)
+
+    def _point_chosen(self, asset_id: int) -> None:
+        """New readings go to the chosen point's element, so they take that point."""
+        if self.campaign_id is not None:
+            self.place_targets[self.campaign_id] = asset_id or None
+            self._show_place(asset_id or None)
 
     def _show_detail_room(self, chosen: bool, photos: int, run: str) -> None:
         """Sections without anything to show shrink to a line that says why."""

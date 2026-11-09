@@ -8,10 +8,10 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import QComboBox, QFormLayout, QLineEdit
+from PySide6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QLineEdit
 
 from ..devices import FoundInstrument, find_instruments
 from .common import AppContext
@@ -53,6 +53,7 @@ class CampaignDialog(Overlay):
 
     def __init__(self, app: AppContext, parent=None, plans: list | None = None):
         super().__init__("Neue Kampagne", parent)
+        self.app = app
         self.ok_button.setText("Kampagne starten")
         self.plan = QComboBox()
         for plan in plans or ():
@@ -62,6 +63,11 @@ class CampaignDialog(Overlay):
         fill_assets(self.asset, app)
         self.tester = UserChoice(app, app.service.last_user_id())
         self.title = QLineEdit(f"Prüfung vom {date.today():%d.%m.%Y}")
+        # The usual case: what was recorded last time is the list to take again.
+        self.repeat = QCheckBox()
+        self.previous = None
+        self.repeat.toggled.connect(self._repeat_toggled)
+        self.asset.currentIndexChanged.connect(self._offer_repeat)
         self.source = QComboBox()
         self._fill_sources()
         self.plan.currentIndexChanged.connect(self._fill_sources)
@@ -74,11 +80,31 @@ class CampaignDialog(Overlay):
         form = QFormLayout()
         form.addRow("Anlage", self.asset)
         form.addRow("Prüfer", self.tester)
+        form.addRow("", self.repeat)
         form.addRow("Messplan", self.plan)
         form.addRow("Titel", self.title)
         form.addRow("Messgerät", self.source)
         self.body.addLayout(form)
+        self._offer_repeat()
         self._update()
+
+    def _offer_repeat(self) -> None:
+        asset = self.asset.currentData()
+        self.previous = self.app.service.last_closed(asset) if asset is not None else None
+        if self.previous is not None:
+            count = self.app.db.one("SELECT count(*) FROM measurements WHERE campaign_id=?",
+                                    self.previous["id"])[0]
+            day = datetime.fromisoformat(self.previous["closed_at"])
+            self.repeat.setText(f"Wie die Prüfung vom {day:%d.%m.%Y} wiederholen"
+                                f" ({count} Punkte)")
+        self.repeat.setVisible(self.previous is not None)
+        self.repeat.setChecked(self.previous is not None)
+
+    def _repeat_toggled(self, on: bool) -> None:
+        """A repeat inspection brings its own list; a plan beside it would lead elsewhere."""
+        if on:
+            self.plan.setCurrentIndex(self.plan.findData(None))
+        self.plan.setEnabled(not on)
 
     def first_field(self):
         return self.title

@@ -116,6 +116,7 @@ CREATE TABLE measurements (
     asset_id INTEGER REFERENCES assets(id) ON DELETE SET NULL,
     run_id INTEGER REFERENCES runs(id) ON DELETE SET NULL,
     step_name TEXT NOT NULL DEFAULT '',
+    hint TEXT NOT NULL DEFAULT '',  -- how to measure here, for the next time; not printed
     UNIQUE (campaign_id, device_uid)
 );
 

@@ -56,6 +56,17 @@ class PlanStep:
     text: str = ""  # explains a question or holds a note
     expected: str = "yes"  # the answer that counts as passed
     dut: str = ""  # how the test object has to be operated
+    # A point of a repeat inspection: where, with which limits and settings, and what
+    # the last inspection there left to know. `origin` is "<campaign uuid>/<device uid>".
+    asset_id: int | None = None
+    limits: tuple[tuple[str, str, str, str], ...] = ()  # key, label, lower, upper
+    parameters: tuple[tuple[str, str], ...] = ()
+    origin: str = ""
+    hint: str = ""
+    remark: str = ""
+    question: str = ""  # a check asks this; the title is its short name
+    run: str = ""  # the run the step belonged to, by name
+    run_kind: str = ""
 
     def accepts(self, function: str) -> bool:
         return function == self.function or function in self.also_accepts
@@ -87,6 +98,15 @@ class PlanStep:
             text=data.get("text", ""),
             expected=data.get("expected", "yes"),
             dut=data.get("dut", ""),
+            asset_id=data.get("asset_id"),
+            limits=tuple(tuple(item) for item in data.get("limits", ())),
+            parameters=tuple(tuple(item) for item in data.get("parameters", ())),
+            origin=data.get("origin", ""),
+            hint=data.get("hint", ""),
+            remark=data.get("remark", ""),
+            question=data.get("question", ""),
+            run=data.get("run", ""),
+            run_kind=data.get("run_kind", ""),
         )
 
 

@@ -13,6 +13,7 @@ from datetime import datetime
 from pathlib import Path
 
 from .records import IMPORTED, _iso
+from .repeat import REPEAT
 from .seal import SealCheck, SealState, authenticate, deletion_mark, digest, genuine
 
 
@@ -24,6 +25,8 @@ class ClosingMixin:
         steps = self.steps(campaign_id)
         if not steps:
             return []
+        if self.campaign(campaign_id)["plan_key"] == REPEAT:
+            return self.repeat_blockers(campaign_id)
         problems = [
             f"Schritt offen: {self.plan_step(step).title}"
             for step in steps

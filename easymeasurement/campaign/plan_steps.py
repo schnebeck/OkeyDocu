@@ -68,15 +68,17 @@ class PlanStepMixin:
         self._forget_answer(step_id)
         verdict = Verdict.PASSED if answer == step.expected else Verdict.FAILED
         values = [
-            ResultValue("question", "Prüffrage", Quantity(raw=step.title)),
+            ResultValue("question", "Prüffrage", Quantity(raw=step.question or step.title)),
             ResultValue("answer", "Antwort", Quantity(raw=answer), verdict, setpoint=step.expected),
         ]
         if comment:
             values.append(ResultValue("note", "Bemerkung", Quantity(raw=comment)))
-        self.add_measurement(
-            row["campaign_id"], SIGHT_CHECK_FUNCTION, values, verdict=verdict, step_id=step_id
+        measurement_id = self.add_measurement(
+            row["campaign_id"], SIGHT_CHECK_FUNCTION, values, verdict=verdict, step_id=step_id,
+            asset_id=step.asset_id,
         )
         self.db.execute("UPDATE steps SET status='done', note='' WHERE id=?", step_id)
+        self.took_point(row, step, measurement_id)
 
     def step_answer(self, step_id: int) -> tuple[str, str]:
         """The answer and comment given so far, empty if there are none."""

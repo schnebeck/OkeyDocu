@@ -23,21 +23,24 @@ from PySide6.QtWidgets import (
 from ..model import Verdict
 from ..store.search import MeasurementFilter
 from .board import Strip
+from .campaign_points import CampaignPoints
 from .common import ROW_ID, RUN_ID, AppContext, row_of, selected_ids
 from .measurement_overlays import MeasurementOverlay
 from .measurement_view import ASSET, CAMPAIGN, CUSTOMER, MeasurementView
 from .move_overlay import MoveOverlay
 
 
-class CampaignValues(MeasurementView):
+class CampaignValues(CampaignPoints, MeasurementView):
     """The measurements of one campaign, with what it is known for repeated nowhere."""
 
     named_columns = (CUSTOMER, ASSET, CAMPAIGN)
     place_requested = Signal(int)  # the element of the measurement should be shown
+    point_chosen = Signal(int)  # new readings belong to this element now (0: the whole)
     detail_shown = Signal(bool, int, str)  # a row is chosen; its photos; the run of the line
 
     def __init__(self, app: AppContext):
         super().__init__(app)
+        self._build_points()
         self.campaign_id: int | None = None
         self.point_id: int | None = None
         self.unplaced = False  # only what is booked onto no element
@@ -155,10 +158,12 @@ class CampaignValues(MeasurementView):
 
     def _show_detail(self) -> None:
         super()._show_detail()
+        self._show_point_or_measurement()
         current = self.table.currentItem()
         run = self.table.item(current.row(), 0).data(RUN_ID) if current else None
         name = self.app.service.run(run)["name"] if run is not None else ""
-        self.detail_shown.emit(self.editor.row is not None, self.gallery.count(), name)
+        chosen = self.editor.row is not None or self.current_point() is not None
+        self.detail_shown.emit(chosen, self.gallery.count(), name)
 
     def _move_common_to_head(self, day: str, area: str) -> None:
         super()._move_common_to_head(day, area)

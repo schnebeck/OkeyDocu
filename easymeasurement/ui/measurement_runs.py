@@ -15,15 +15,16 @@ from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QTableWidget
 
 from ..campaign.service import LOCATION_SEPARATOR
-from ..model import Verdict
+from ..model import Parameter, Verdict, conductor_of
 from ..reporting.context import VERDICT_TEXT
-from .common import MEMBERS, ROW_ID, RUN_ID, function_short
+from .common import MEMBERS, POINT_ID, ROW_ID, RUN_ID, function_short
 from .measurement_cells import PLACE, VALUES, VERDICT, sort_key, values_text
 from .measurement_detail import capture_text
 from .table_columns import GROUP, HEAD, ORDER, SortItem
 from .verdict_marks import verdict_icon
 
 STEP_INDENT = "   "
+POINT_GREY = "#8a8f94"
 
 
 @dataclass
@@ -37,6 +38,7 @@ class Line:
     order: int = 0  # 0 for the head, then the steps as they were taken
     head: list | None = None  # a step sorts among other lines as its head does
     opened: bool = False
+    point: int | None = None  # a point of a repeat inspection still to be taken
 
 
 def _place(path: list[str], area: list[str]) -> str:
@@ -117,6 +119,28 @@ def table_lines(rows, opened: set[int], time_format: str, area: list[str], paths
     return result
 
 
+def point_line(row, step, place: str) -> Line:
+    """A point of a repeat inspection not taken yet: what to take, in grey.
+
+    The conductor leads as it does for a measurement, it tells points of one kind apart.
+    """
+    skipped = row["status"] == "skipped"
+    parameters = [Parameter(key, value) for key, value in step.parameters]
+    conductor = conductor_of(parameters)
+    parts = [f"ausgelassen: {row['note']}" if skipped else "fehlt"]
+    if step.kind == "check" and step.question and step.question != step.title:
+        parts[0] += f" – {step.question}"
+    parts += [p.value for p in parameters if p.value != conductor]
+    parts += [f"Grenze {' '.join(x for x in (low, up) if x)}" for _, _, low, up in step.limits]
+    detail = "  ·  ".join(parts)
+    texts = ["ausgelassen" if skipped else "offen", "", "", "", place, step.title,
+             f"{conductor}:  {detail}" if conductor else detail, "", "", ""]
+    keys = [("~", row["position"]), None, None, None, None, None, None, None, None, None]
+    line = Line(texts, keys, Verdict.NOT_EVALUATED.value)
+    line.point = row["id"]
+    return line
+
+
 def write_line(table: QTableWidget, index: int, line: Line) -> None:
     for column, text in enumerate(line.texts):
         item = SortItem(text, line.keys[column])
@@ -133,9 +157,14 @@ def write_line(table: QTableWidget, index: int, line: Line) -> None:
         font.setBold(True)
         cell.setFont(font)
     first = table.item(index, 0)
+    if line.point is not None:
+        first.setData(POINT_ID, line.point)
+        for column in range(len(line.texts)):
+            table.item(index, column).setForeground(QColor(POINT_GREY))
     first.setData(ROW_ID, line.row_id)
-    first.setIcon(verdict_icon(line.verdict, line.opened if line.row_id is None else None))
-    if line.row_id is None:
+    head = line.row_id is None and line.run_id is not None
+    first.setIcon(verdict_icon(line.verdict, line.opened if head else None))
+    if line.row_id is None and line.run_id is not None:
         first.setData(RUN_ID, line.run_id)
         first.setData(MEMBERS, line.members)
         first.setToolTip("Klick auf die Zeit klappt die Schritte auf und zu")

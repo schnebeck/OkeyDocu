@@ -129,6 +129,8 @@ class EditingMixin:
                                 new,
                             )
                         changed += 1
+        if "function" in changes:
+            self.rematch(row["campaign_id"])
         return changed
 
     def delete_measurement(self, measurement_id: int) -> None:
@@ -145,6 +147,7 @@ class EditingMixin:
             connection.execute("DELETE FROM measurements WHERE id=?", (measurement_id,))
             self._log(connection, row, "delete")
         self.assign_timeline(row["campaign_id"])
+        self.rematch(row["campaign_id"])
 
     def measurement_changes(self, measurement_id: int):
         """Matched on the reading too: SQLite hands the ID of a deleted row out again."""

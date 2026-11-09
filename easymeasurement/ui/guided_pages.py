@@ -157,8 +157,8 @@ class NotePage(QWidget):
 class ReasonOverlay(Overlay):
     """Why a measurement is left out. The reason goes into the report."""
 
-    def __init__(self, parent=None):
-        super().__init__("Schritt auslassen", parent)
+    def __init__(self, parent=None, title: str = "Schritt auslassen"):
+        super().__init__(title, parent)
         self.ok_button.setText("Auslassen")
         self.reason = GrowingEdit("Begründung, sie erscheint im Protokoll")
         self.reason.textChanged.connect(self._update)

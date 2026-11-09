@@ -38,6 +38,7 @@ T = TypeVar("T")
 ROW_ID = Qt.ItemDataRole.UserRole
 RUN_ID = Qt.ItemDataRole.UserRole + 30  # on a line standing for a whole run
 MEMBERS = Qt.ItemDataRole.UserRole + 31  # the measurements such a line stands for
+POINT_ID = Qt.ItemDataRole.UserRole + 32  # on a line for a point still to be taken
 
 
 SIMULATED_FAILURE_RATE = 0.15

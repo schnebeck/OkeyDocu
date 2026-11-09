@@ -12,6 +12,7 @@ from html import escape
 
 from PySide6.QtWidgets import QMenu, QWidget
 
+from ..campaign.repeat import REPEAT
 from ..campaign.service import NO_INSTRUMENT
 from .campaign_list import count_text
 from .dashboard_card import MAKE_REPORT, OPEN_REPORT, RESUME
@@ -47,7 +48,8 @@ class CampaignDisplay:
             f"{escape(customer['name'])}  ·  {escape(asset['name'])}  ·  {tester}"
             f"  ·  {escape(plan)}"
         )
-        has_plan = bool(campaign["plan_key"])
+        # A repeat inspection is filled in any order, it is no plan to be led through.
+        has_plan = bool(campaign["plan_key"]) and campaign["plan_key"] != REPEAT
         working = self._plan_is_worked_on(campaign)
         self.values.show_campaign(campaign_id, with_steps=has_plan, by_step=working)
         self.guided.show_campaign(campaign_id if has_plan else None)
@@ -121,7 +123,7 @@ class CampaignDisplay:
 
     def _plan_is_worked_on(self, campaign) -> bool:
         """With an instrument that takes the connection, without one it is always so."""
-        if not campaign["plan_key"] or campaign["status"] != "open":
+        if campaign["plan_key"] in ("", REPEAT) or campaign["status"] != "open":
             return False
         return campaign["driver"] in NO_INSTRUMENT or self.live_id == campaign["id"]
 

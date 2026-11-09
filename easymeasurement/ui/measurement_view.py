@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
 from ..campaign.service import LOCATION_SEPARATOR
 from ..store.search import MeasurementFilter, search_measurements
 from .common import (
+    POINT_ID,
     RUN_ID,
     AppContext,
     filling,
@@ -62,7 +63,7 @@ class MeasurementView(MeasurementDetail, QWidget):
         self.app = app
         self.count = QLabel()
         self.table = make_table(
-            ["Zeitpunkt", "Kunde", "Anlage", "Kampagne", "Messort", "Funktion", "Messwerte",
+            ["Zeitpunkt", "Kunde", "Anlage", "Kampagne", "Messort", "Bezeichnung", "Messwerte",
              "Fotos", "Bewertung", "Erfassung"],
             stretch=VALUES,
         )
@@ -116,6 +117,10 @@ class MeasurementView(MeasurementDetail, QWidget):
         )
         self.actions_row.addStretch()
         self.actions_row.addWidget(self.count)
+
+    def point_lines(self, area: list[str]) -> list:
+        """Lines for what is still to be taken; only a repeat inspection has them."""
+        return []
 
     def toggle_run(self, run_id: int) -> None:
         """A run's steps open under its line, or fold back into it."""
@@ -171,6 +176,8 @@ class MeasurementView(MeasurementDetail, QWidget):
         area = shared_start(paths) if len(rows) > 1 else []
         time_format = "%H:%M:%S" if one_day else "%d.%m.%Y %H:%M:%S"
         lines = table_lines(rows, self.open_runs, time_format, area, paths)
+        points = self.point_lines(area)
+        lines += points
         with filling(self.table):
             self.table.setRowCount(len(lines))
             for index, line in enumerate(lines):
@@ -178,7 +185,8 @@ class MeasurementView(MeasurementDetail, QWidget):
         self._move_common_to_head(
             f"{moments[0]:%d.%m.%Y}" if one_day else "", LOCATION_SEPARATOR.join(area)
         )
-        self.count.setText("1 Messung" if len(rows) == 1 else f"{len(rows)} Messungen")
+        self.count.setText(("1 Messung" if len(rows) == 1 else f"{len(rows)} Messungen")
+                           + (f"  ·  {len(points)} offen" if points else ""))
         restore = row_of(self.table, selected) if selected is not None else self._run_row(run)
         if restore >= 0:
             self.table.setCurrentCell(restore, 0)
@@ -186,14 +194,18 @@ class MeasurementView(MeasurementDetail, QWidget):
 
     def _move_common_to_head(self, day: str, area: str) -> None:
         """What every row shares is said once above the table, not in each line."""
-        rows = self.table.rowCount()
+        # Points still to be taken have no values yet, only a place and a name to tell.
+        rows = [row for row in range(self.table.rowCount())
+                if self.table.item(row, 0).data(POINT_ID) is None]
+        points = [row for row in range(self.table.rowCount()) if row not in rows]
         shared = [("Datum", day)] if day else []
         if area:
             shared.append(("Bereich", area))
         alike = {}
         for column in SHARED_COLUMNS:
-            texts = {self.table.item(row, column).text() for row in range(rows)}
-            if rows > 1 and len(texts) == 1:
+            told = rows + (points if column in (PLACE, 5) else [])
+            texts = {self.table.item(row, column).text() for row in told}
+            if len(told) > 1 and len(texts) == 1:
                 alike[column] = texts.pop()
         gathered = self.columns.apply(set(alike))
         shared += [(label, alike[column]) for column, label in SHARED_COLUMNS.items()

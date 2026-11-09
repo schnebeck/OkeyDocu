@@ -96,7 +96,7 @@ class TemplateForms:
     def _form_steps(self, block: dict, form: QFormLayout) -> None:
         form.addRow(QLabel(
             "Alles, was hier eingerückt steht, erscheint im Protokoll einmal je Messschritt\n"
-            "oder, ohne Messplan, einmal je Messfunktion."
+            "oder, ohne Messplan, einmal je Messgröße."
         ))
 
     def _form_attachments(self, block: dict, form: QFormLayout) -> None:

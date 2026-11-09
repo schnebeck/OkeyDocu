@@ -131,7 +131,7 @@ class GuidedSteps:
             return ""
         wanted = step.selector or function_short(step.function)
         if not position.label:
-            return f"⚠ Der Drehschalter steht auf keiner Messfunktion, gebraucht wird {wanted}."
+            return f"⚠ Der Drehschalter steht auf keiner Messstellung, gebraucht wird {wanted}."
         if position.rules_out(step.function):
             return f"⚠ Der Drehschalter steht auf {position.label}, gebraucht wird {wanted}."
         mark = "✓ " if position.functions else ""

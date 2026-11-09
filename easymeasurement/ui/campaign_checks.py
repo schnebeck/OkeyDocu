@@ -9,10 +9,11 @@
 from __future__ import annotations
 
 from ..model import Verdict
-from .common import ROW_ID
+from ..campaign.repeat import REPEAT
+from .common import POINT_ID, ROW_ID
 from .structure_tree import UNPLACED
 
-UNPLACED_LINK, FAILED_LINK = "unplaced", "failed"
+UNPLACED_LINK, FAILED_LINK, POINTS_LINK = "unplaced", "failed", "points"
 ALERT, DONE = "#c0392b", "#27ae60"
 
 
@@ -33,10 +34,17 @@ class CampaignChecks:
         if failed:
             word = "Mangel" if failed == 1 else "Mängel"
             parts.append(f'<a href="{FAILED_LINK}" style="color:{ALERT}">{failed} {word}</a>')
-        if blockers:
+        if campaign["plan_key"] == REPEAT:
+            missing = sum(row["status"] in ("pending", "active")
+                          for row, _ in self.app.service.points(campaign["id"]))
+            if missing:
+                parts.append(f'<a href="{POINTS_LINK}">{missing} offen</a>')
+            if len(blockers) > (1 if missing else 0):
+                parts.append(f'<span style="color:{ALERT}">Einstellung abweichend</span>')
+        elif blockers:
             count = len(blockers)
             parts.append(f"{count} {'Punkt' if count == 1 else 'Punkte'} offen")
-        else:
+        if not blockers:
             parts.append(f'<span style="color:{DONE}">✓ bereit zum Bestätigen</span>')
         label.setText("  ·  ".join(parts))
         label.setToolTip("\n".join(blockers))
@@ -52,6 +60,18 @@ class CampaignChecks:
             self.structure.select(UNPLACED)
         elif link == FAILED_LINK:
             self._next_defect()
+        elif link == POINTS_LINK:
+            self._next_point()
+
+    def _next_point(self) -> None:
+        """Each click goes on to the next open point, the whole campaign in view."""
+        self.structure.select(self._campaign()["asset_id"])
+        table = self.values.table
+        rows = [row for row in range(table.rowCount()) if table.item(row, 0).data(POINT_ID)]
+        if rows:
+            after = [row for row in rows if row > table.currentRow()]
+            table.selectRow((after or rows)[0])
+            table.scrollToItem(table.item((after or rows)[0], 0))
 
     def _next_defect(self) -> None:
         """Each click goes on to the next defect, in the order they were measured."""

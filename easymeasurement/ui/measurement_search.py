@@ -60,7 +60,7 @@ class MeasurementsPage(MeasurementView):
             )
             combo.setMinimumContentsLength(14)
 
-        self.function.addItem("Alle Messfunktionen", _ANY)
+        self.function.addItem("Alle Messungen und Prüfungen", _ANY)
         for key, label in FUNCTION_LABELS.items():
             self.function.addItem(label, key)
         self.verdict.addItem("Jede Bewertung", _ANY)

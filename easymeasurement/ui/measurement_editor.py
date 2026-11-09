@@ -43,6 +43,9 @@ def _facts(row, capture: str) -> str:
     return " · ".join([f"{when:%d.%m.%Y %H:%M:%S}", capture, *extra])
 
 
+HINT_PLACEHOLDER = "Wie hier zu messen ist (intern)"
+
+
 class MeasurementEditor(MeasurementEditing, QWidget):
     """Nothing is written while typing.
 
@@ -74,7 +77,7 @@ class MeasurementEditor(MeasurementEditing, QWidget):
         # Booked onto an element, the element says where; the text is for what has none.
         self.place = PlaceLine(app)
         self.movable = False  # the view offers booking elsewhere
-        where = QWidget()
+        self.where = where = QWidget()
         where_layout = QVBoxLayout(where)
         where_layout.setContentsMargins(0, 0, 0, 0)
         where_layout.addWidget(self.place)
@@ -82,6 +85,9 @@ class MeasurementEditor(MeasurementEditing, QWidget):
         self.operator = QLineEdit()
         self.verdict = verdict_combo("")
         self.comment = GrowingEdit("Bemerkung zur Messung")
+        self.hint = GrowingEdit(HINT_PLACEHOLDER)
+        self.hint.setToolTip("Wie hier zu messen ist. Bleibt intern und erscheint bei der"
+                             " Wiederholungsprüfung wieder, nicht im Protokoll.")
         self.rows = ValueRows()
         self.values = self.rows.table
         # The measurement has its remark field, so only files are attached; images join its photos.
@@ -93,11 +99,12 @@ class MeasurementEditor(MeasurementEditing, QWidget):
         form = QFormLayout(self.form)
         form.setContentsMargins(0, 0, 0, 0)
         form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
-        form.addRow("Funktion", self.function)
+        form.addRow("Bezeichnung", self.function)
         form.addRow("Messort", where)
         form.addRow("Prüfer", self.operator)
         form.addRow("Bewertung", self.verdict)
         form.addRow("Bemerkung", self.comment)
+        form.addRow("Hinweis", self.hint)
 
         self.pending = QWidget()
         self.pending_hint = QLabel()
@@ -129,6 +136,7 @@ class MeasurementEditor(MeasurementEditing, QWidget):
         for box in (self.function, self.verdict):
             box.currentIndexChanged.connect(self._edited)
         self.comment.textChanged.connect(self._edited)
+        self.hint.textChanged.connect(self._edited)
         self.rows.edited.connect(self._edited)
         for keys in ("Ctrl+Return", "Ctrl+Enter"):
             self._shortcut(keys, self.apply)
@@ -168,17 +176,23 @@ class MeasurementEditor(MeasurementEditing, QWidget):
                 self.place.show_asset(row["asset_id"], editable and self.movable)
             self.place.setVisible(booked)
             self.location.setVisible(not booked)
+            # A tight side panel would press the two lines of the place into one.
+            shown = self.place if booked else self.location
+            self.where.setMinimumHeight(shown.sizeHint().height())
             self.operator.setText(row["operator"])
             self.comment.setPlainText(row["comment"])
+            self.hint.setPlainText(row["hint"])
             self.rows.fill(self.app.service.values(row["id"]), editable)
             self.attachments.show_target(row["campaign_id"], editable, measurement_id=row["id"])
         self.location.setPlaceholderText("Wo gemessen wurde" if editable else "")
         self.comment.setPlaceholderText("Bemerkung zur Messung" if editable else "")
-        for field in (self.location, self.operator, self.comment):
+        self.hint.setPlaceholderText(HINT_PLACEHOLDER if editable else "")
+        for field in (self.location, self.operator, self.comment, self.hint):
             field.setReadOnly(not editable)
             # Read-only, a field reads as text rather than as a box waiting for input.
             field.setStyleSheet("" if editable else READ_ONLY_STYLE)
         self.comment.refit()
+        self.hint.refit()
         for box in (self.function, self.verdict):
             box.setEnabled(editable)
         self._filling = False

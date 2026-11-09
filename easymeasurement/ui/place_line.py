@@ -82,6 +82,8 @@ class PlaceLine(QWidget):
         names.setSpacing(0)
         names.addWidget(self.way)
         names.addWidget(self.name)
+        # Two lines that must not be pressed into one when the side panel runs short.
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         row = QHBoxLayout(self)
         row.setContentsMargins(0, 0, 0, 0)
         row.addWidget(self.icon)

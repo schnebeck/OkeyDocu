@@ -69,6 +69,8 @@ class StructureMixin:
                     "UPDATE measurements SET asset_id=?, location=? WHERE id=?",
                     (asset_id, self.place_path(asset_id, root), row["id"]),
                 )
+        for campaign_id in {row["campaign_id"] for row in rows}:
+            self.rematch(campaign_id)
 
     def _relocate(self, asset_id: int) -> None:
         """Open measurements below an element read its new name or place."""

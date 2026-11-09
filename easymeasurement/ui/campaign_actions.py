@@ -48,6 +48,9 @@ class CampaignActions:
         created = self.app.db.one("SELECT max(id) AS id FROM campaigns")["id"] or 0
         if follows and created > newest:
             self.app.service.mark_follow_up(created, follows)
+        if dialog.repeat.isChecked() and dialog.previous is not None and created > newest:
+            self.app.service.make_repeat(created, dialog.previous["id"])
+            self.show_campaign(created)
         self.list.refresh()
         self._update()
         self.changed.emit()

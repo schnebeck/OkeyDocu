@@ -18,7 +18,7 @@ CUSTOMER, ASSET, CAMPAIGN = 1, 2, 3
 PLACE, VALUES, VERDICT = 4, 6, 8
 CAPTURE = 9
 SHARED_COLUMNS = {
-    CUSTOMER: "Kunde", ASSET: "Anlage", CAMPAIGN: "Kampagne", PLACE: "Messort", 5: "Funktion",
+    CUSTOMER: "Kunde", ASSET: "Anlage", CAMPAIGN: "Kampagne", PLACE: "Messort", 5: "Bezeichnung",
     7: "Fotos", VERDICT: "Bewertung", CAPTURE: "Erfassung",
 }
 

@@ -47,7 +47,7 @@ class PlanStepForm(QWidget):
         self.form = QFormLayout(self)
         self.form.addRow(self.heading)
         self.form.addRow("Titel", self.title)
-        self.form.addRow("Messfunktion", self.function)
+        self.form.addRow("Messgröße", self.function)
         self.form.addRow("", self.instruction_state)
         self.form.addRow("Text", self.text)
         self.form.addRow("Erwartete Antwort", self.expected)
@@ -85,7 +85,7 @@ class PlanStepForm(QWidget):
         known = self.function.currentData() in self.instructions
         self.instruction_state.setText(
             "Anschlussbild und Anleitung kommen aus der Sammlung." if known
-            else "Für diese Funktion gibt es noch keine Anleitung."
+            else "Für diese Messung gibt es noch keine Anleitung."
         )
         placeholder = self.instructions.get(self.function.currentData())
         self.title.setPlaceholderText(placeholder.title if placeholder else "")

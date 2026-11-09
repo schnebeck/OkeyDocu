@@ -92,7 +92,7 @@ class TemplateDataForms:
 
     def _form_measurements(self, block: dict, form: QFormLayout) -> None:
         function = QComboBox()
-        function.addItem("Alle Messfunktionen", "*")
+        function.addItem("Alle Messungen und Prüfungen", "*")
         for key, label in FUNCTION_LABELS.items():
             function.addItem(label, key)
         function.setCurrentIndex(max(function.findData(block.get("function", "*")), 0))

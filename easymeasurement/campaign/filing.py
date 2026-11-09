@@ -67,6 +67,7 @@ class FilingMixin:
                         result.upper_limit, result.setpoint, result.verdict.value,
                     ),
                 )
+        self.rematch(campaign_id)
         return measurement_id
 
     def add_measurement(

@@ -12,7 +12,7 @@ from ..campaign.service import TEXT_FIELDS
 from ..store import CampaignClosed
 from .common import show_error
 
-FIELD_NAMES = {"function": "Messfunktion", "operator": "Prüfer", "verdict": "Bewertung",
+FIELD_NAMES = {"function": "Bezeichnung", "operator": "Prüfer", "verdict": "Bewertung",
                "lower_limit": "Grenzwert", "upper_limit": "Grenzwert"}
 CLOSED_MEANWHILE = (
     "Die Kampagne wurde inzwischen abgeschlossen. Die Änderung an der Messung ist nicht gespeichert."
@@ -31,6 +31,7 @@ class MeasurementEditing:
             "operator": self.operator.text().strip(),
             "comment": self.comment.toPlainText().strip(),
             "verdict": self.verdict.currentData(),
+            "hint": self.hint.toPlainText().strip(),
         }
         return {field: new for field, new in current.items() if new != self.row[field]}
 

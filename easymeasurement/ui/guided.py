@@ -148,7 +148,7 @@ class GuidedPage(GuidedSteps, GuidedActions, QWidget):
         navigation.addWidget(self.back_button)
         navigation.addWidget(self.next_button)
 
-        self.open_table = make_table(["Zeitpunkt", "Funktion", "Messwerte", "Grund"], 2)
+        self.open_table = make_table(["Zeitpunkt", "Bezeichnung", "Messwerte", "Grund"], 2)
         self.assign_button = QPushButton("Dem gewählten Schritt zuordnen")
         self.assign_button.clicked.connect(self._assign_open)
         self.open_box = QWidget()

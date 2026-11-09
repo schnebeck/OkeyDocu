@@ -83,7 +83,7 @@ class MeasurementOverlay(Overlay):
         add.clicked.connect(self._add_row)
         remove.clicked.connect(lambda: self.table.removeRow(self.table.currentRow()))
         form = QFormLayout()
-        form.addRow("Messfunktion", self.function)
+        form.addRow("Bezeichnung", self.function)
         form.addRow("Zeitpunkt", self.moment)
         form.addRow("Messort", self.location)
         form.addRow("Bewertung", self.verdict)
