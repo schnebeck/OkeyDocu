@@ -12,18 +12,21 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QLabel, QPushButton, QStackedWidget, QVBoxLayout, QWidget
 
+from .board import EDGE, GUTTER, Board, GutterSplitter
 from .campaign_actions import CampaignActions
+from .campaign_checks import CampaignChecks
 from .campaign_confirm import CampaignConfirm
 from .campaign_display import CampaignDisplay
+from .campaign_header import CampaignHeader
 from .campaign_list import CampaignList
 from .campaign_photos import CampaignPhotos
 from .campaign_places import CampaignPlaces
 from .campaign_reports import CampaignReports
 from .campaign_values import CampaignValues
-from .campaign_views import CampaignHeader, FreeRunView
-from .board import EDGE, GUTTER, Board, GutterSplitter
+from .campaign_views import FreeRunView
 from .common import AppContext
 from .dashboard import Dashboard
+from .edge_drawer import EdgeDrawer
 from .guided import GuidedPage
 from .instrument_control import InstrumentControl
 from .live_session import LiveSession
@@ -33,7 +36,7 @@ from .status_badges import ClockBadge, LinkBadge
 
 
 class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPhotos,
-                   CampaignPlaces, QWidget):
+                   CampaignPlaces, CampaignChecks, QWidget):
     """Choosing a campaign only shows it. The instrument stays with the one measuring."""
 
     changed = Signal()
@@ -72,7 +75,7 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.side = SidePanel()
         self.place = PlacePanel(app)
         self.place_files = self.place.files
-        self.asset_section = self.side.add("Ort", self.place)
+        self.asset_section = self.side.add("Ort", self.place, grows=False)
         self.plan_add_button = QPushButton("Messplan zuweisen …")
         self.plan_add_button.clicked.connect(self.assign_plan)
         plan_box = QWidget()
@@ -82,7 +85,7 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         plan_layout.addWidget(self.plan_add_button)
         self.plan_section = self.side.add("Messplan", plan_box)
         self.loose_section = self.side.add("Nicht zugeordnet", self.guided.open_box)
-        self.detail_section = self.side.add("Messung", self.values.detail)
+        self.detail_section = self.side.add("Messung", self.values.detail, grows=False)
         self.photo_section = self.side.add("Fotos", self.values.gallery)
         self._build_photos()
         self.stack_section = self.side.add("Nicht zugeordnete Fotos", self.stack)
@@ -99,7 +102,7 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.board = Board("campaign-board", self.structure_panel, self.values,
                            head=self.values.head)
         self.board.splitter.setStretchFactor(1, 1)
-        self.board.splitter.setSizes([250, 610])
+        self.board.splitter.setSizes([320, 900])
         self.work.addWidget(self.board)
         self.work.addWidget(self.timeline)
         # The table is what all of this is for, the step only tells how to get there.
@@ -129,6 +132,9 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         layout = QVBoxLayout(self)
         layout.setContentsMargins(EDGE, EDGE, EDGE, 0)
         layout.addWidget(self.splitter)
+        # Not pinned, the list waits at the left edge and leaves the room to the work.
+        self.drawer = EdgeDrawer(self)
+        self.pin_list(False)
 
         self.home_action = self._action("Übersicht", self.show_home)
         self.new_action = self._action("Neue Kampagne …", self.new_campaign)
@@ -160,6 +166,8 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.home.due_requested.connect(self.new_campaign)
         self.header.tester_requested.connect(self.change_tester)
         self.header.edit_requested.connect(self.edit_campaign)
+        self.header.home_requested.connect(self.show_home)
+        self.header.check_requested.connect(self._follow_check)
         self.list.menu_requested.connect(self._campaign_menu)
         self.header.resume_button.clicked.connect(self.resume)
         self.header.pause_button.clicked.connect(self.pause)
@@ -181,6 +189,16 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.values.edit_requested.connect(self._show_editor)
         self.reports.changed.connect(self.changed)
         self._update()
+
+    def pin_list(self, pinned: bool) -> None:
+        """Pinned, the list stands beside the pages; otherwise it slides in at the edge."""
+        if pinned:
+            self.drawer.set_active(False)
+            self.splitter.insertWidget(0, self.list)
+        else:
+            self.drawer.hold(self.list)
+            self.drawer.set_active(True)
+        self.list.show()
 
     def _action(self, text: str, slot) -> QAction:
         action = QAction(text, self)

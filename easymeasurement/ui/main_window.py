@@ -163,13 +163,14 @@ class MainWindow(MainMenus, QMainWindow):
     def _restore_view(self) -> None:
         memory = self.memory
         memory.restore_window("main", self)
+        # Pinned first: the stored widths of the list belong to the splitter it stands in.
+        memory.keep_toggle("list_pinned", self.list_action, default=False)
         memory.keep_splitters(self.campaign)
         for page, window in self.page_windows.items():
             memory.restore_window(type(page).__name__, window)
             memory.keep_splitters(page)
         for section in self.campaign.side.sections:
             memory.keep_section(section)
-        memory.keep_toggle("list", self.list_action)
         memory.keep_toggle("side", self.side_action)
         memory.keep_toggle("timeline", self.campaign.timeline_action)
 

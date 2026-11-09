@@ -170,6 +170,7 @@ class CampaignDisplay:
         self.header.finish_button.setStyleSheet("font-weight: bold;" if ready else "")
         self.header.draft_button.setVisible(is_open)
         self.header.report_button.setVisible(bool(campaign) and not is_open)
+        self._show_checks(campaign)
         self._show_status(campaign)
 
     def _show_status(self, campaign) -> None:

@@ -33,6 +33,18 @@ class CampaignPhotos:
         self.photo_drops = accept_photo_drops(
             table.viewport(), self._photo_dropped, allowed=self._row_takes_photo
         )
+        self.values.detail_shown.connect(self._show_detail_room)
+
+    def _show_detail_room(self, chosen: bool, photos: int) -> None:
+        """Sections without anything to show shrink to a line that says why."""
+        self.detail_section.set_empty(None if chosen else "Eine Zeile der Tabelle wählen.")
+        if photos:
+            self.photo_section.set_empty(None)
+        elif chosen:
+            self.photo_section.set_empty("Keine Fotos zu dieser Messung. Fotos auf die Zeile"
+                                         " ziehen oder per Rechtsklick anhängen.")
+        else:
+            self.photo_section.set_empty("Zeigt die Fotos der gewählten Messung.")
 
     def _row_takes_photo(self, position) -> bool:
         campaign = self._campaign()

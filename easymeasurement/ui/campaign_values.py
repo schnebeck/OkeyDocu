@@ -8,20 +8,32 @@
 
 from __future__ import annotations
 
-from PySide6.QtWidgets import QAbstractItemView, QCheckBox, QFrame, QSizePolicy, QVBoxLayout
+from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QCheckBox,
+    QFrame,
+    QLineEdit,
+    QMenu,
+    QSizePolicy,
+    QVBoxLayout,
+)
 
 from ..model import Verdict
 from ..store.search import MeasurementFilter
 from .board import Strip
-from .common import ROW_ID, AppContext
+from .common import ROW_ID, AppContext, row_of, selected_ids
 from .measurement_overlays import MeasurementOverlay
 from .measurement_view import ASSET, CAMPAIGN, CUSTOMER, MeasurementView
+from .move_overlay import MoveOverlay
 
 
 class CampaignValues(MeasurementView):
     """The measurements of one campaign, with what it is known for repeated nowhere."""
 
     named_columns = (CUSTOMER, ASSET, CAMPAIGN)
+    detail_shown = Signal(bool, int)  # a row is chosen; how many photos it has
 
     def __init__(self, app: AppContext):
         super().__init__(app)
@@ -50,6 +62,21 @@ class CampaignValues(MeasurementView):
         self.head.row.addWidget(self.only_step)
         self.head.row.addSpacing(12)
         self.head.row.addWidget(self.count)
+        # Row actions live in the row's context menu and on keys; the bar keeps entering
+        # by hand and a filter, so nothing in it stands grey most of the time.
+        for button in (self.edit_measurement, self.delete_measurement, self.add_photo):
+            button.hide()
+        self.move_action = QAction("Verschieben nach …", self)
+        self.move_action.triggered.connect(self._move_to)
+        self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.table.customContextMenuRequested.connect(self._row_menu)
+        self.find = QLineEdit(placeholderText="Messwerte filtern …")
+        self.find.setClearButtonEnabled(True)
+        self.find.setFixedWidth(260)
+        self._typing = QTimer(self, singleShot=True, interval=250)
+        self._typing.timeout.connect(self.refresh)
+        self.find.textChanged.connect(lambda: self._typing.start())
+        self.actions_row.addWidget(self.find)
         self.bar = Strip(self.actions_row)
         self.bar.even_out()
         self.table.setFrameShape(QFrame.Shape.NoFrame)
@@ -65,6 +92,10 @@ class CampaignValues(MeasurementView):
         self.refresh()
 
     def show_campaign(self, campaign_id: int, with_steps: bool = False, by_step: bool = False) -> None:
+        if campaign_id != self.campaign_id:
+            self.find.blockSignals(True)
+            self.find.clear()  # a filter belongs to the campaign it was typed for
+            self.find.blockSignals(False)
         self.campaign_id = campaign_id
         self.point_id, self.unplaced = None, False
         self.only_step.blockSignals(True)
@@ -86,6 +117,12 @@ class CampaignValues(MeasurementView):
         if self.only_step.isChecked():
             self.refresh()
 
+    def select_measurement(self, measurement_id: int) -> None:
+        row = row_of(self.table, measurement_id)
+        if row >= 0:
+            self.table.selectRow(row)
+            self.table.scrollToItem(self.table.item(row, 0))
+
     def show_newest(self) -> None:
         """A reading just came in: this is the one to look at, unless one is being corrected."""
         if self.table.rowCount() and not self.editor.dirty:
@@ -100,9 +137,14 @@ class CampaignValues(MeasurementView):
             return None
         narrowed = self.only_step.isChecked() and self.step_id is not None
         return MeasurementFilter(
+            text=self.find.text().strip(),
             campaign_id=self.campaign_id, point_id=self.point_id, unplaced=self.unplaced,
             step_id=self.step_id if narrowed else None,
         )
+
+    def _show_detail(self) -> None:
+        super()._show_detail()
+        self.detail_shown.emit(self.editor.row is not None, self.gallery.count())
 
     def _move_common_to_head(self, day: str, area: str) -> None:
         super()._move_common_to_head(day, area)
@@ -113,10 +155,27 @@ class CampaignValues(MeasurementView):
         campaign = self.app.service.campaign(self.campaign_id) if self.campaign_id else None
         is_open = bool(campaign) and campaign["status"] == "open"
         self.manual_action.setEnabled(is_open)
-        # A closed record offers nothing to do, so its buttons leave the row to the count.
-        for button in (self.manual_button, self.edit_measurement, self.delete_measurement,
-                       self.add_photo):
-            button.setVisible(is_open)
+        self.move_action.setEnabled(is_open and row is not None)
+        self.manual_button.setVisible(is_open)
+
+    def _row_menu(self, point) -> None:
+        if self.table.indexAt(point).row() < 0:
+            return
+        menu = QMenu(self)
+        for action in (self.edit_action, self.photo_action, self.move_action, None,
+                       self.delete_action):
+            menu.addSeparator() if action is None else menu.addAction(action)
+        menu.exec(self.table.viewport().mapToGlobal(point))
+        menu.deleteLater()
+
+    def _move_to(self) -> None:
+        ids = selected_ids(self.table)
+        root = self.app.service.campaign(self.campaign_id)["asset_id"]
+        current = self.app.db.one("SELECT asset_id FROM measurements WHERE id=?", ids[0])
+        overlay = MoveOverlay(self.app, root, len(ids), current["asset_id"], self)
+        if overlay.exec():
+            self.app.service.move_measurements(ids, overlay.chosen())
+            self._after_change()
 
     def _place_path(self) -> str:
         root = self.app.service.campaign(self.campaign_id)["asset_id"]

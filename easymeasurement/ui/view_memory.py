@@ -49,8 +49,8 @@ class ViewMemory:
         section.toggle.setChecked(not self.stored.value(key, False, type=bool))
         section.folded.connect(lambda: self.stored.setValue(key, not section.expanded))
 
-    def keep_toggle(self, key: str, action: QAction) -> None:
-        action.setChecked(self.stored.value(f"view/{key}", True, type=bool))
+    def keep_toggle(self, key: str, action: QAction, default: bool = True) -> None:
+        action.setChecked(self.stored.value(f"view/{key}", default, type=bool))
         action.toggled.connect(lambda checked: self.stored.setValue(f"view/{key}", checked))
 
     def restore_window(self, key: str, window: QWidget) -> None:

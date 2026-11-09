@@ -29,6 +29,11 @@ SELECT m.*, c.title AS campaign_title, c.tester, c.status AS campaign_status,
         WHERE v.measurement_id = m.id) AS value_text,
        (SELECT v.base_value FROM measured_values v WHERE v.measurement_id = m.id
         ORDER BY v.position, v.id LIMIT 1) AS first_value,
+       (SELECT group_concat(c.key || char(31) || reading_text(c.raw), char(30))
+        FROM (SELECT v.key, v.raw FROM measured_values v WHERE v.measurement_id = m.id
+              AND v.key IN ('question', 'answer', 'note') ORDER BY v.position, v.id) c
+        WHERE EXISTS (SELECT 1 FROM measured_values a WHERE a.measurement_id = m.id
+                      AND a.key = 'answer')) AS checks,
        (SELECT count(*) FROM photos p WHERE p.measurement_id = m.id) AS photo_count
 FROM measurements m
 JOIN campaigns c ON c.id = m.campaign_id

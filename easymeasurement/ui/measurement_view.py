@@ -24,7 +24,6 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.service import LOCATION_SEPARATOR
-from ..model import conductor_of
 from ..store.search import MeasurementFilter, search_measurements
 from .common import (
     ROW_ID,
@@ -34,58 +33,28 @@ from .common import (
     make_table,
     row_of,
     selected_id,
-    stored_parameters,
     verdict_item,
+)
+from .measurement_cells import (
+    ASSET,
+    CAMPAIGN,
+    CAPTURE,
+    CUSTOMER,
+    PLACE,
+    SHARED_COLUMNS,
+    VALUES,
+    VERDICT,
+    path_of,
+    shared_start,
+    sort_key,
+    values_text,
 )
 from .measurement_detail import THUMB, MeasurementDetail, capture_text
 from .measurement_editor import MeasurementEditor
 from .photo_shared import shared_thumbs
 from .report_signing import settings
 from .table_columns import SortItem, TableColumns
-
-CUSTOMER, ASSET, CAMPAIGN = 1, 2, 3
-_PLACE, _VALUES, _VERDICT = 4, 6, 8
-_CAPTURE = 9
-_SHARED_COLUMNS = {
-    CUSTOMER: "Kunde", ASSET: "Anlage", CAMPAIGN: "Kampagne", _PLACE: "Messort", 5: "Funktion",
-    7: "Fotos", _VERDICT: "Bewertung", _CAPTURE: "Erfassung",
-}
-
-
-def _values(row) -> str:
-    """Only some functions have a conductor, so it stands with the reading it belongs to."""
-    values = row["value_text"] or ""
-    conductor = conductor_of(stored_parameters(row))
-    return f"{conductor}:  {values}" if conductor else values
-
-
-def _path(row) -> list[str]:
-    """Where in the installation, without repeating the installation itself."""
-    parts = row["location"].split(LOCATION_SEPARATOR) if row["location"] else []
-    return parts[1:] if parts[:1] == [row["asset_name"]] else parts
-
-
-def _sort_key(column: int, row):
-    """Time and photos sort as what they are; values by function first, then by size."""
-    if column == 0:
-        return (row["local_time"], row["id"])
-    if column == 7:
-        return row["photo_count"] or 0
-    if column == _VALUES:
-        first = row["first_value"]
-        return (row["function"] or "", float("inf") if first is None else first)
-    return None
-
-
-def _shared_start(paths: list[list[str]]) -> list[str]:
-    """What all paths begin with. The last part of each stays, it names the place."""
-    shared = []
-    for parts in zip(*(path[:-1] for path in paths)):
-        if len(set(parts)) > 1:
-            break
-        shared.append(parts[0])
-    return shared
-
+from .verdict_marks import verdict_icon
 
 class MeasurementView(MeasurementDetail, QWidget):
     """The table, what the selected row holds, and what may be done to it."""
@@ -101,11 +70,11 @@ class MeasurementView(MeasurementDetail, QWidget):
         self.table = make_table(
             ["Zeitpunkt", "Kunde", "Anlage", "Kampagne", "Messort", "Funktion", "Messwerte",
              "Fotos", "Bewertung", "Erfassung"],
-            stretch=_VALUES,
+            stretch=VALUES,
         )
         # The values are what this table is for, so names give way and can be widened.
         header = self.table.horizontalHeader()
-        for column, width in ((CUSTOMER, 110), (ASSET, 110), (CAMPAIGN, 120), (_PLACE, 180)):
+        for column, width in ((CUSTOMER, 110), (ASSET, 110), (CAMPAIGN, 120), (PLACE, 180)):
             header.setSectionResizeMode(column, QHeaderView.ResizeMode.Interactive)
             key = f"columns/{type(self).__name__}/{column}"
             header.resizeSection(column, settings().value(key, width, type=int))
@@ -181,8 +150,8 @@ class MeasurementView(MeasurementDetail, QWidget):
         rows = list(reversed(search_measurements(self.app.db, query))) if query else []
         moments = [datetime.fromisoformat(row["local_time"]) for row in rows]
         one_day = len(rows) > 1 and len({moment.date() for moment in moments}) == 1
-        paths = [_path(row) for row in rows]
-        area = _shared_start(paths) if len(rows) > 1 else []
+        paths = [path_of(row) for row in rows]
+        area = shared_start(paths) if len(rows) > 1 else []
         time_format = "%H:%M:%S" if one_day else "%d.%m.%Y %H:%M:%S"
         with filling(self.table):
             self.table.setRowCount(len(rows))
@@ -191,13 +160,14 @@ class MeasurementView(MeasurementDetail, QWidget):
                     moments[index].strftime(time_format), row["customer_name"], row["asset_name"],
                     row["campaign_title"], LOCATION_SEPARATOR.join(paths[index][len(area):]),
                     function_short(row["function"]),
-                    _values(row), str(row["photo_count"] or ""),
+                    values_text(row), str(row["photo_count"] or ""),
                 ]
                 for column, text in enumerate(cells):
-                    self.table.setItem(index, column, SortItem(text, _sort_key(column, row)))
-                self.table.setItem(index, _VERDICT, verdict_item(row["verdict"]))
-                self.table.setItem(index, _CAPTURE, QTableWidgetItem(capture_text(row)))
+                    self.table.setItem(index, column, SortItem(text, sort_key(column, row)))
+                self.table.setItem(index, VERDICT, verdict_item(row["verdict"]))
+                self.table.setItem(index, CAPTURE, QTableWidgetItem(capture_text(row)))
                 self.table.item(index, 0).setData(ROW_ID, row["id"])
+                self.table.item(index, 0).setIcon(verdict_icon(row["verdict"]))
         self._move_common_to_head(
             f"{moments[0]:%d.%m.%Y}" if one_day else "", LOCATION_SEPARATOR.join(area)
         )
@@ -214,12 +184,12 @@ class MeasurementView(MeasurementDetail, QWidget):
         if area:
             shared.append(("Bereich", area))
         alike = {}
-        for column in _SHARED_COLUMNS:
+        for column in SHARED_COLUMNS:
             texts = {self.table.item(row, column).text() for row in range(rows)}
             if rows > 1 and len(texts) == 1:
                 alike[column] = texts.pop()
         gathered = self.columns.apply(set(alike))
-        shared += [(label, alike[column]) for column, label in _SHARED_COLUMNS.items()
+        shared += [(label, alike[column]) for column, label in SHARED_COLUMNS.items()
                    if column in gathered and alike[column]]
         self.common.setText(
             " &nbsp;·&nbsp; ".join(f"{label}: <b>{escape(text)}</b>" for label, text in shared)

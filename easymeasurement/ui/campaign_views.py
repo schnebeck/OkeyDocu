@@ -1,5 +1,5 @@
 # EasyMeasurement - easymeasurement/ui/campaign_views.py
-# The parts of the campaign workspace: its head, the change of tester and the run without a plan.
+# Parts of the campaign workspace: the change of tester, another plan and the run without one.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
@@ -8,11 +8,9 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QAction, QIcon, QKeySequence
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import (
-    QStyle,
-    QToolButton,
     QCheckBox,
     QComboBox,
     QFormLayout,
@@ -26,7 +24,7 @@ from PySide6.QtWidgets import (
 from ..campaign.service import IMPORTED
 from ..devices import Capability
 from ..devices.simulator import SIMULATED_FUNCTIONS
-from .campaign_list import count_text, heading
+from .campaign_list import count_text
 from .common import AppContext, function_short
 from .instruction_panel import InstructionPanel
 from .overlay import Overlay
@@ -49,51 +47,6 @@ IMPORT_GUIDANCE = (
     "<b>Importierte Daten prüfen und überarbeiten.</b>"
     " Mit dem Abschluss wird der Datensatz versiegelt, erst dann entsteht das Protokoll."
 )
-
-
-class CampaignHeader(QWidget):
-    """Says which campaign this is and offers what can be done with it now."""
-
-    tester_requested = Signal()
-    edit_requested = Signal()
-
-    def __init__(self):
-        super().__init__()
-        self.title = heading("", 15)
-        self.edit_button = QToolButton()
-        fallback = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogDetailedView)
-        self.edit_button.setIcon(QIcon.fromTheme("document-edit", fallback))
-        self.edit_button.setAccessibleName("Kampagne bearbeiten")
-        self.edit_button.setToolTip("Titel und Anlage ändern")
-        self.edit_button.setAutoRaise(True)
-        self.edit_button.clicked.connect(self.edit_requested)
-        self.details = QLabel()
-        self.details.setTextFormat(Qt.TextFormat.RichText)
-        self.details.linkActivated.connect(lambda _: self.tester_requested.emit())
-        self.resume_button = QPushButton("Messung fortsetzen")
-        self.pause_button = QPushButton("Messung unterbrechen")
-        self.photos_button = QPushButton("Fotos …")
-        self.draft_button = QPushButton("Entwurf ansehen")
-        self.draft_button.setToolTip("Das Protokoll, wie es jetzt aussähe. Es ist noch nicht gültig.")
-        self.finish_button = QPushButton("Bestätigen …")
-        self.finish_button.setToolTip("Abschließen, versiegeln, Protokoll ablegen und signieren")
-        self.report_button = QPushButton("Protokoll erstellen …")
-        text = QVBoxLayout()
-        text.setSpacing(0)
-        title = QHBoxLayout()
-        title.addWidget(self.title)
-        title.addWidget(self.edit_button)
-        title.addStretch(1)
-        text.addLayout(title)
-        text.addWidget(self.details)
-        row = QHBoxLayout(self)
-        row.setContentsMargins(0, 0, 0, 0)
-        row.addLayout(text, 1)
-        for button in (self.resume_button, self.pause_button, self.photos_button,
-                       self.draft_button, self.finish_button, self.report_button):
-            row.addWidget(button)
-            # Shown by the campaign that needs them; hidden pages keep their first layout.
-            button.hide()
 
 
 class TesterOverlay(Overlay):
