@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+<!-- SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net> -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<rect x="1" y="1" width="22" height="22" rx="5" fill="#2b7bb9"/>
+<path d="M13.2 4.5l-5.2 8.3h4.2l-1.4 6.7 5.2-8.3h-4.2z" fill="#fff"/>
+</svg>

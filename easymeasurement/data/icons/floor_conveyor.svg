@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+<!-- SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net> -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<rect x="1" y="1" width="22" height="22" rx="5" fill="#4a8a2a"/>
+<path d="M4.5 16.5h8V10H9.3l-2.2 3H4.5z" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/><path d="M15 5v11.5h4.5" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/><circle cx="7" cy="17.6" r="1.6" fill="#fff"/><circle cx="11.5" cy="17.6" r="1.6" fill="#fff"/>
+</svg>

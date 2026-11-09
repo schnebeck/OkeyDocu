@@ -1,0 +1,41 @@
+# EasyMeasurement - instruction for one measuring function, draft.
+# Connections follow the PROFITEST PRIME manual (3-349-933-03).
+# `dut` says how the test object has to be operated during the measurement.
+title: Isolationswiderstand
+function: riso
+selector: RISO
+settings:
+- Prüfspannung: 500 V
+- Grenzwert: 1,00 MΩ
+- Prüfdauer: AUTO
+- Leiterbezug: passend zum Messpunkt wählen (L1-PE … L1-L3)
+warnings:
+- Nur an spannungsfreien Anlagenteilen messen.
+- Prüfspitzen während der Messung nicht berühren.
+- Kapazitive Prüflinge werden aufgeladen. Verbindung erst trennen, wenn die Spannung an den Sonden unter
+  10 V gefallen ist.
+- Bei Anlagen ohne RCD müssen N und PE getrennt sein.
+instructions:
+- Vorab die Prüfspitzen kurzschließen. Das Gerät muss unter 1 kΩ anzeigen.
+- Sonde 3(PE) auf PE setzen.
+- Sonde 1(L) auf den aktiven Leiter setzen.
+- Am Gerät ON/START drücken und den stabilen Wert abwarten.
+- Wert mit „Save Value“ speichern.
+source: Bedienungsanleitung, Abschnitt 11.1.4
+wiring:
+  instrument: PROFITEST PRIME
+  sockets:
+  - 1(L)
+  - 2(N)
+  - 3(PE)
+  object_label: Stromkreis (spannungsfrei)
+  terminals:
+  - id: l
+    label: Aktiver Leiter
+  - id: pe
+    label: PE
+  wires:
+  - socket: 3(PE)
+    target: pe
+  - socket: 1(L)
+    target: l

@@ -1,0 +1,11 @@
+cryptography==50.0.2
+Jinja2==3.1.6
+pillow==13.0.0
+pyHanko==0.38.1
+pyserial==3.5
+pytest==9.2.0
+pytest-qt==4.5.0
+PyYAML==6.0.3
+reportlab==5.1.0
+setuptools==84.2.1
+wheel==0.48.0

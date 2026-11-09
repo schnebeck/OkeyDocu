@@ -1,0 +1,65 @@
+# EasyMeasurement - default template for test reports.
+#
+# A "measurements" block defines its look for each amount of data:
+#   none: no measurement   one: exactly one   many: several
+name: Standardprotokoll
+blocks:
+  - type: heading
+    text: "Prüfprotokoll"
+  - type: fields
+    rows:
+      - [Kunde, "{{ customer.name }}"]
+      - [Anschrift, "{{ customer.street }} {{ customer.zip }} {{ customer.city }}"]
+      - ["{{ asset.kind_text }}", "{{ asset.name }}"]
+      - [Kennung, "{{ asset.identifier }}"]
+    features: asset
+  - type: fields
+    rows:
+      - [Prüfung, "{{ campaign.title }}"]
+      - [Messplan, "{{ campaign.plan }}"]
+      - [Prüfer, "{{ campaign.tester }}"]
+      - [Beginn, "{{ campaign.started }}"]
+      - [Abschluss, "{{ campaign.closed }}"]
+  - type: heading
+    when: device.model
+    level: 2
+    text: Messgerät
+  - type: fields
+    when: device.model
+    rows:
+      - [Typ, "{{ device.manufacturer }} {{ device.model }}"]
+      - [Seriennummer, "{{ device.serial_no }}"]
+      - [Firmware, "{{ device.firmware }}"]
+      - [Kalibriert am, "{{ device.calibrated_on }}"]
+      - [Rekalibrierung fällig, "{{ device.recalibration_due }}"]
+      - [Geräteuhr, "{{ campaign.clock_summary }}"]
+  - type: notice
+    when: device.overdue
+    text: "Die Rekalibrierung des Messgeräts war zum Prüfzeitpunkt überfällig ({{ device.recalibration_due }})."
+  - type: steps
+    blocks:
+      - type: heading
+        level: 2
+        text: "{{ step.title }}"
+      - type: measurements
+        none:
+          text: "Nicht gemessen.{% if step.note %} Begründung: {{ step.note }}{% endif %}"
+        one: {}
+        many:
+          summary: true
+      - type: photos
+  - type: heading
+    when: places
+    level: 2
+    text: Notizen und Anhänge
+  - type: attachments
+  - type: heading
+    level: 2
+    text: Ergebnis
+  - type: text
+    text: "Ergebnis der Messwerte: {{ verdict }}"
+  - type: text
+    when: campaign.seal
+    text: "Datensatz-Siegel: {{ campaign.seal }}"
+  - type: signature
+    labels: ["Ort, Datum", "Unterschrift Prüfer"]

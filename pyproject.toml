@@ -1,0 +1,42 @@
+# EasyMeasurement - pyproject.toml
+#
+# SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "easymeasurement"
+version = "0.1.0"
+description = "Geführte Messwerterfassung, Protokollvorlagen und Protokollablage für den Plasma-Desktop"
+requires-python = ">=3.12"
+license = "GPL-3.0-or-later"
+authors = [{ name = "Thorsten Schnebeck", email = "thorsten.schnebeck@gmx.net" }]
+dependencies = [
+    "PySide6>=6.6",
+    "pyserial>=3.5",
+    "PyYAML>=6",
+    "Jinja2>=3.1",
+    "reportlab>=4",
+    "Pillow>=10",
+    "pyHanko>=0.25",
+    "cryptography>=42",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-qt>=4.4"]
+
+[project.gui-scripts]
+easymeasurement = "easymeasurement.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["easymeasurement*"]
+
+[tool.setuptools.package-data]
+easymeasurement = ["data/**/*.yaml", "data/**/*.svg"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+qt_api = "pyside6"

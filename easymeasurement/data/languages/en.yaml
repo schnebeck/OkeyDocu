@@ -1,0 +1,270 @@
+# EasyMeasurement - protocol texts in English, looked up by their German original.
+# A text missing here stays German in the protocol.
+name: English
+formats:
+  date: "%Y-%m-%d"
+  decimal: "."
+texts:
+  # Templates
+  Prüfprotokoll: Test report
+  Kunde: Customer
+  Anschrift: Address
+  Kennung: Identifier
+  Prüfung: Inspection
+  Messplan: Test plan
+  Prüfer: Inspector
+  Beginn: Started
+  Abschluss: Completed
+  Messgerät: Test instrument
+  Typ: Type
+  Gerät: Device
+  Anlage: Installation
+  Seriennummer: Serial number
+  Firmware: Firmware
+  Kalibriert am: Calibrated on
+  Rekalibrierung fällig: Recalibration due
+  Geräteuhr: Instrument clock
+  "Die Rekalibrierung des Messgeräts war zum Prüfzeitpunkt überfällig ({{ device.recalibration_due }}).": "Recalibration of the test instrument was overdue at the time of testing ({{ device.recalibration_due }})."
+  "Nicht gemessen.{% if step.note %} Begründung: {{ step.note }}{% endif %}": "Not measured.{% if step.note %} Reason: {{ step.note }}{% endif %}"
+  Notizen und Anhänge: Notes and attachments
+  Ergebnis: Result
+  "Ergebnis der Messwerte: {{ verdict }}": "Result of the measurements: {{ verdict }}"
+  "Datensatz-Siegel: {{ campaign.seal }}": "Record seal: {{ campaign.seal }}"
+  Ort, Datum: Place, date
+  Unterschrift Prüfer: Signature of inspector
+  Keine Messung.: No measurement.
+  # Verdicts and outcomes
+  bestanden: passed
+  nicht bestanden: failed
+  nicht bewertet: not evaluated
+  Bestanden: Passed
+  Nicht bestanden: Failed
+  Nicht vollständig geprüft: Not completely tested
+  rechts: clockwise
+  links: anticlockwise
+  Fehler: error
+  ja: "yes"
+  nein: "no"
+  # Measurements
+  Zeitpunkt: Time
+  Leiter: Conductors
+  Messort im Gerät: Location in the equipment
+  Messort: Location
+  Grenzwert: limit
+  Soll: expected
+  Fotos: Photos
+  Bewertung: Verdict
+  Kommentar: Comment
+  Notiz: Note
+  Anhang: Attachment
+  Nr.: No.
+  Min: Min
+  Max: Max
+  manuell: manual
+  geändert: changed
+  Prüfung allgemein: Inspection in general
+  # Kinds of installation parts
+  Maschine: Machine
+  Verteiler: Distribution board
+  RCD: RCD
+  Stromkreis: Circuit
+  Betriebsmittel: Equipment
+  Messpunkt: Measuring point
+  # Functions
+  U – Spannung: U – Voltage
+  U3~ – Drehfeld: U3~ – Phase sequence
+  RLO – Schutzleiterwiderstand: RLO – Protective conductor resistance
+  RLO-25A – Schutzleiterwiderstand 25 A: RLO-25A – Protective conductor resistance 25 A
+  RISO – Isolationswiderstand: RISO – Insulation resistance
+  RISO-Rampe – Isolationswiderstand: RISO ramp – Insulation resistance
+  IL – Ableitstrom: IL – Leakage current
+  I_ZANGE – Zangenstrom: I_CLAMP – Clamp current
+  URES – Restspannung: URES – Residual voltage
+  IMD – Isolationsüberwachung: IMD – Insulation monitoring
+  RCD UIΔN – Berührungsspannung: RCD UIΔN – Touch voltage
+  RCD IΔN – Auslösezeit: RCD IΔN – Tripping time
+  RCD IF-UIΔN – Berührungsspannung bei Rampe: RCD IF-UIΔN – Touch voltage with ramp
+  RCD IF – Auslösestrom: RCD IF – Tripping current
+  I_RAMP – Stromrampe: I_RAMP – Current ramp
+  RCM UIΔN – Berührungsspannung: RCM UIΔN – Touch voltage
+  ZLOOP – Schleifenimpedanz: ZLOOP – Loop impedance
+  ZLOOP+DC – Schleifenimpedanz: ZLOOP+DC – Loop impedance
+  ZLOOP+RLO – Schleifenimpedanz: ZLOOP+RLO – Loop impedance
+  ZLOOP+0,5x – Schleifenimpedanz: ZLOOP+0.5x – Loop impedance
+  ZLN-ΔU – Netzimpedanz und Spannungsfall: ZLN-ΔU – Line impedance and voltage drop
+  Sichtprüfung: Visual inspection
+  Sonstige Messung: Other measurement
+  Unlesbarer Gerätedatensatz: Unreadable instrument record
+  # Steps of the shipped plans
+  Spannung und Drehfeld: Voltage and phase sequence
+  Isolationswiderstand: Insulation resistance
+  Durchgängigkeit Schutzleiter: Continuity of protective conductors
+  RCD – Auslöseprüfung: RCD – Tripping test
+  Schleifenimpedanz L-PE: Loop impedance L-PE
+  # Clock
+  "am {moment} gestellt (Abweichung vorher {offset} s)": "set on {moment} (deviation before {offset} s)"
+  "Versatz am {moment} von Hand auf {offset} s festgelegt": "offset set by hand to {offset} s on {moment}"
+  "Versatz {offset} s, die Zeiten unten sind korrigiert": "offset {offset} s, the times below are corrected"
+  Abweichung 0 s: deviation 0 s
+  # Notices and page
+  "ENTWURF – die Kampagne ist noch offen, dieses Protokoll ist nicht gültig.": "DRAFT – the inspection is still open, this report is not valid."
+  "SIMULIERTE MESSWERTE – kein gültiges Prüfprotokoll.": "SIMULATED VALUES – not a valid test report."
+  "ENTWURF – nicht gültig": "DRAFT – not valid"
+  "Seite {page} von {total}": "Page {page} of {total}"
+  Vorschau mit Beispieldaten: Preview with sample data
+# Kinds of structure elements and their features, by their key in the settings.
+# A kind or feature added there keeps its German name.
+kinds:
+  installation: Installation
+  machine: Machine
+  device: Device
+  distribution_board: Distribution board
+  construction_distributor: Construction site distribution board
+  rcd: RCD
+  rcm: Residual current monitor
+  imd: Insulation monitoring device
+  circuit: Circuit
+  cable: Cable
+  pa_conductor: Equipotential bonding conductor
+  ground: Earthing system
+  equipment: Equipment
+  electric_engine: Electric motor
+  generator: Generator
+  wind_power: Wind turbine
+  photovoltaic: PV system
+  charging_station: Charging station
+  battery: Battery
+  battery_bank: Battery system
+  vehicle: Vehicle
+  floor_conveyor: Industrial truck
+  extinguisher: Fire extinguisher
+  ladder: Ladder
+  scaffolding: Scaffolding
+  sling: Lifting accessory
+  ppe: Protective equipment
+  building_access: Door or gate
+  esd: ESD workstation
+  measuring_point: Measuring point
+features:
+  betreiber: Operator
+  anlagenverantwortlicher: Person responsible
+  errichter: Installer
+  errichtungsjahr: Year of installation
+  netzbetreiber: Network operator
+  netzform: Earthing system type
+  netzspannung: Supply voltage
+  netzfrequenz: Supply frequency
+  nennstrom: Rated current
+  leitungstyp: Cable type
+  querschnitt: Cross-section
+  leitungslaenge: Cable length
+  ce_kennzeichnung: CE marking
+  schutzart_ip: IP rating
+  schutzklasse: Protection class
+  nennspannung: Rated voltage
+  zuleitung: Supply cable
+  nennleistung: Rated power
+  aderzahl: Number of cores
+  leistungsfaktor: Power factor
+  charakteristik: Characteristic
+  ex_nummer: Ex number
+  ex_zone: Ex zone
+  zuendschutzart: Type of ignition protection
+  verteilerart: Board type
+  material: Material
+  installationsart: Installation method
+  materialnummer: Material number
+  isolationsklasse: Insulation class
+  baujahr: Year of manufacture
+  phasen: Phases
+  polzahl: Number of poles
+  bemessungsspannung: Rated voltage
+  gewicht: Weight
+  rcd_typ: RCD type
+  bemessungsdifferenzstrom: Rated residual current
+  leitungsschutz_charakteristik: Circuit breaker characteristic
+  rcm_typ: RCM type
+  alarmschwelle: Alarm threshold
+  imd_art: IMD type
+  netznennspannung: Nominal system voltage
+  messspannung: Measuring voltage
+  messstrom: Measuring current
+  warnwert: Warning value
+  alarmwert: Alarm value
+  leitermaterial: Conductor material
+  erderart: Earth electrode type
+  zusammensetzung: Composition
+  bodenbeschaffenheit: Soil condition
+  zweck: Purpose
+  betriebsmittelart: Equipment type
+  schutzart: Degree of protection
+  getriebe: Gearbox
+  betriebsart: Duty type
+  drehzahl: Speed
+  waermeklasse: Thermal class
+  wirkleistung: Active power
+  scheinleistung: Apparent power
+  modultyp: Module type
+  leerlaufspannung: Open-circuit voltage
+  kurzschlussstrom: Short-circuit current
+  steckverbinder: Connector
+  zellen_je_modul: Cells per module
+  ladeeinrichtung: Charging equipment
+  gesamtleistung: Total power
+  lademodus: Charging mode
+  ladeart: Charging type
+  ladestrom: Charging current
+  ladespannung_dc: DC charging voltage
+  steckertyp: Plug type
+  ladepunkte_dreiphasig: Three-phase charging points
+  ladepunkte_einphasig: Single-phase charging points
+  technologie: Technology
+  zellenzahl: Number of cells
+  zellenspannung: Cell voltage
+  nennkapazitaet: Rated capacity
+  entladeschlussspannung: Final discharge voltage
+  batterietyp: Battery type
+  blockzahl: Number of blocks
+  blockspannung: Block voltage
+  gesamtspannung: Total voltage
+  ladespannung: Charging voltage
+  erhaltungsladespannung: Float charge voltage
+  inbetriebnahme: Commissioning
+  fahrzeug_identnummer: Vehicle identification number
+  erstzulassung: First registration
+  leergewicht: Unladen weight
+  gesamtgewicht: Gross weight
+  bordspannung: On-board voltage
+  hv_batteriespannung: HV battery voltage
+  hv_batteriekapazitaet: HV battery capacity
+  artikelnummer: Article number
+  sitzplaetze: Seats
+  nutzlast: Payload
+  hoechstlast: Maximum load
+  bereifung: Tyres
+  loeschmittel: Extinguishing agent
+  brandklasse: Fire class
+  fuellmenge: Filling quantity
+  bauart: Design
+  treibmittel: Propellant
+  loeschvermoegen: Extinguishing rating
+  leiterart: Ladder type
+  laenge: Length
+  sprossenzahl: Number of rungs
+  anschaffung: Purchased
+  aussonderung: Withdrawn
+  geruestart: Scaffold type
+  breitenklasse: Width class
+  lastklasse: Load class
+  tragfaehigkeit: Working load limit
+  prueflast: Proof load
+  eigengewicht: Dead weight
+  norm: Standard
+  kennzeichnung: Marking
+  oeffnungsart: Opening type
+  oeffnungsrichtung: Opening direction
+  breite: Width
+  hoehe: Height
+  pruefgegenstand: Test object
+  messart: Measurement type
+  messpunkte: Measuring points

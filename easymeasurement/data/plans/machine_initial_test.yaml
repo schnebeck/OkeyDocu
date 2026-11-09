@@ -1,0 +1,17 @@
+# EasyMeasurement - measuring plan, draft.
+# Limits and order are proposals. `released: true` marks a plan as approved.
+# A step of kind `measure` takes its instruction from data/instructions by its function.
+key: machine_initial_test
+title: Maschine – elektrische Prüfung (Entwurf)
+released: false
+steps:
+- key: rlo
+  function: rlo
+- key: riso
+  function: riso
+- key: u3
+  function: u3
+- key: zloop
+  function: zloop
+- key: rcd
+  function: rcd_time

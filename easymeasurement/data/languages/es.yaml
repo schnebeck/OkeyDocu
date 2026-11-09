@@ -1,0 +1,270 @@
+# EasyMeasurement - protocol texts in Spanish, looked up by their German original.
+# A text missing here stays German in the protocol.
+name: Español
+formats:
+  date: "%d/%m/%Y"
+  decimal: ","
+texts:
+  # Templates
+  Prüfprotokoll: Informe de ensayo
+  Kunde: Cliente
+  Anschrift: Dirección
+  Kennung: Identificador
+  Prüfung: Inspección
+  Messplan: Plan de ensayo
+  Prüfer: Inspector
+  Beginn: Inicio
+  Abschluss: Fin
+  Messgerät: Instrumento de medida
+  Typ: Tipo
+  Gerät: Aparato
+  Anlage: Instalación
+  Seriennummer: Número de serie
+  Firmware: Firmware
+  Kalibriert am: Calibrado el
+  Rekalibrierung fällig: Próxima calibración
+  Geräteuhr: Reloj del instrumento
+  "Die Rekalibrierung des Messgeräts war zum Prüfzeitpunkt überfällig ({{ device.recalibration_due }}).": "La calibración del instrumento estaba vencida en el momento del ensayo ({{ device.recalibration_due }})."
+  "Nicht gemessen.{% if step.note %} Begründung: {{ step.note }}{% endif %}": "No medido.{% if step.note %} Motivo: {{ step.note }}{% endif %}"
+  Notizen und Anhänge: Notas y anexos
+  Ergebnis: Resultado
+  "Ergebnis der Messwerte: {{ verdict }}": "Resultado de las mediciones: {{ verdict }}"
+  "Datensatz-Siegel: {{ campaign.seal }}": "Sello del registro: {{ campaign.seal }}"
+  Ort, Datum: Lugar, fecha
+  Unterschrift Prüfer: Firma del inspector
+  Keine Messung.: Sin medición.
+  # Verdicts and outcomes
+  bestanden: correcto
+  nicht bestanden: no correcto
+  nicht bewertet: sin evaluar
+  Bestanden: Correcto
+  Nicht bestanden: No correcto
+  Nicht vollständig geprüft: Ensayo incompleto
+  rechts: horario
+  links: antihorario
+  Fehler: error
+  ja: sí
+  nein: "no"
+  # Measurements
+  Zeitpunkt: Hora
+  Leiter: Conductores
+  Messort im Gerät: Punto de medida en el equipo
+  Messort: Punto de medida
+  Grenzwert: límite
+  Soll: esperado
+  Fotos: Fotos
+  Bewertung: Evaluación
+  Kommentar: Comentario
+  Notiz: Nota
+  Anhang: Anexo
+  Nr.: N.º
+  Min: Mín
+  Max: Máx
+  manuell: manual
+  geändert: modificado
+  Prüfung allgemein: Inspección en general
+  # Kinds of installation parts
+  Maschine: Máquina
+  Verteiler: Cuadro de distribución
+  RCD: Diferencial
+  Stromkreis: Circuito
+  Betriebsmittel: Equipo
+  Messpunkt: Punto de medida
+  # Functions
+  U – Spannung: U – Tensión
+  U3~ – Drehfeld: U3~ – Secuencia de fases
+  RLO – Schutzleiterwiderstand: RLO – Resistencia del conductor de protección
+  RLO-25A – Schutzleiterwiderstand 25 A: RLO-25A – Resistencia del conductor de protección 25 A
+  RISO – Isolationswiderstand: RISO – Resistencia de aislamiento
+  RISO-Rampe – Isolationswiderstand: Rampa RISO – Resistencia de aislamiento
+  IL – Ableitstrom: IL – Corriente de fuga
+  I_ZANGE – Zangenstrom: I_PINZA – Corriente con pinza
+  URES – Restspannung: URES – Tensión residual
+  IMD – Isolationsüberwachung: IMD – Vigilancia de aislamiento
+  RCD UIΔN – Berührungsspannung: Diferencial UIΔN – Tensión de contacto
+  RCD IΔN – Auslösezeit: Diferencial IΔN – Tiempo de disparo
+  RCD IF-UIΔN – Berührungsspannung bei Rampe: Diferencial IF-UIΔN – Tensión de contacto con rampa
+  RCD IF – Auslösestrom: Diferencial IF – Corriente de disparo
+  I_RAMP – Stromrampe: I_RAMP – Rampa de corriente
+  RCM UIΔN – Berührungsspannung: RCM UIΔN – Tensión de contacto
+  ZLOOP – Schleifenimpedanz: ZLOOP – Impedancia de bucle
+  ZLOOP+DC – Schleifenimpedanz: ZLOOP+DC – Impedancia de bucle
+  ZLOOP+RLO – Schleifenimpedanz: ZLOOP+RLO – Impedancia de bucle
+  ZLOOP+0,5x – Schleifenimpedanz: ZLOOP+0,5x – Impedancia de bucle
+  ZLN-ΔU – Netzimpedanz und Spannungsfall: ZLN-ΔU – Impedancia de red y caída de tensión
+  Sichtprüfung: Inspección visual
+  Sonstige Messung: Otra medición
+  Unlesbarer Gerätedatensatz: Registro del instrumento ilegible
+  # Steps of the shipped plans
+  Spannung und Drehfeld: Tensión y secuencia de fases
+  Isolationswiderstand: Resistencia de aislamiento
+  Durchgängigkeit Schutzleiter: Continuidad de los conductores de protección
+  RCD – Auslöseprüfung: Diferencial – Prueba de disparo
+  Schleifenimpedanz L-PE: Impedancia de bucle L-PE
+  # Clock
+  "am {moment} gestellt (Abweichung vorher {offset} s)": "ajustado el {moment} (desviación previa {offset} s)"
+  "Versatz am {moment} von Hand auf {offset} s festgelegt": "desfase fijado a mano en {offset} s el {moment}"
+  "Versatz {offset} s, die Zeiten unten sind korrigiert": "desfase {offset} s, las horas abajo están corregidas"
+  Abweichung 0 s: desviación 0 s
+  # Notices and page
+  "ENTWURF – die Kampagne ist noch offen, dieses Protokoll ist nicht gültig.": "BORRADOR – la inspección sigue abierta, este informe no es válido."
+  "SIMULIERTE MESSWERTE – kein gültiges Prüfprotokoll.": "VALORES SIMULADOS – no es un informe de ensayo válido."
+  "ENTWURF – nicht gültig": "BORRADOR – no válido"
+  "Seite {page} von {total}": "Página {page} de {total}"
+  Vorschau mit Beispieldaten: Vista previa con datos de ejemplo
+# Kinds of structure elements and their features, by their key in the settings.
+# A kind or feature added there keeps its German name.
+kinds:
+  installation: Instalación
+  machine: Máquina
+  device: Aparato
+  distribution_board: Cuadro de distribución
+  construction_distributor: Cuadro de obra
+  rcd: Diferencial
+  rcm: Monitor de corriente diferencial
+  imd: Vigilante de aislamiento
+  circuit: Circuito
+  cable: Cable
+  pa_conductor: Conductor de equipotencialidad
+  ground: Instalación de puesta a tierra
+  equipment: Equipo
+  electric_engine: Motor eléctrico
+  generator: Generador
+  wind_power: Aerogenerador
+  photovoltaic: Instalación fotovoltaica
+  charging_station: Estación de carga
+  battery: Batería
+  battery_bank: Instalación de baterías
+  vehicle: Vehículo
+  floor_conveyor: Carretilla industrial
+  extinguisher: Extintor
+  ladder: Escalera
+  scaffolding: Andamio
+  sling: Accesorio de elevación
+  ppe: Equipo de protección
+  building_access: Puerta o portón
+  esd: Puesto de trabajo ESD
+  measuring_point: Punto de medida
+features:
+  betreiber: Titular
+  anlagenverantwortlicher: Responsable de la instalación
+  errichter: Instalador
+  errichtungsjahr: Año de instalación
+  netzbetreiber: Distribuidora
+  netzform: Esquema de conexión a tierra
+  netzspannung: Tensión de red
+  netzfrequenz: Frecuencia de red
+  nennstrom: Corriente nominal
+  leitungstyp: Tipo de cable
+  querschnitt: Sección
+  leitungslaenge: Longitud del cable
+  ce_kennzeichnung: Marcado CE
+  schutzart_ip: Grado IP
+  schutzklasse: Clase de protección
+  nennspannung: Tensión nominal
+  zuleitung: Cable de alimentación
+  nennleistung: Potencia nominal
+  aderzahl: Número de conductores
+  leistungsfaktor: Factor de potencia
+  charakteristik: Característica
+  ex_nummer: Número Ex
+  ex_zone: Zona Ex
+  zuendschutzart: Modo de protección
+  verteilerart: Tipo de cuadro
+  material: Material
+  installationsart: Tipo de montaje
+  materialnummer: Número de material
+  isolationsklasse: Clase de aislamiento
+  baujahr: Año de fabricación
+  phasen: Fases
+  polzahl: Número de polos
+  bemessungsspannung: Tensión asignada
+  gewicht: Peso
+  rcd_typ: Tipo de diferencial
+  bemessungsdifferenzstrom: Corriente diferencial asignada
+  leitungsschutz_charakteristik: Curva del magnetotérmico
+  rcm_typ: Tipo de RCM
+  alarmschwelle: Umbral de alarma
+  imd_art: Tipo de vigilante
+  netznennspannung: Tensión nominal de red
+  messspannung: Tensión de medida
+  messstrom: Corriente de medida
+  warnwert: Valor de aviso
+  alarmwert: Valor de alarma
+  leitermaterial: Material del conductor
+  erderart: Tipo de electrodo de tierra
+  zusammensetzung: Composición
+  bodenbeschaffenheit: Tipo de terreno
+  zweck: Finalidad
+  betriebsmittelart: Tipo de equipo
+  schutzart: Grado de protección
+  getriebe: Reductor
+  betriebsart: Régimen de servicio
+  drehzahl: Velocidad
+  waermeklasse: Clase térmica
+  wirkleistung: Potencia activa
+  scheinleistung: Potencia aparente
+  modultyp: Tipo de módulo
+  leerlaufspannung: Tensión en circuito abierto
+  kurzschlussstrom: Corriente de cortocircuito
+  steckverbinder: Conector
+  zellen_je_modul: Células por módulo
+  ladeeinrichtung: Equipo de carga
+  gesamtleistung: Potencia total
+  lademodus: Modo de carga
+  ladeart: Tipo de carga
+  ladestrom: Corriente de carga
+  ladespannung_dc: Tensión de carga CC
+  steckertyp: Tipo de conector
+  ladepunkte_dreiphasig: Puntos de carga trifásicos
+  ladepunkte_einphasig: Puntos de carga monofásicos
+  technologie: Tecnología
+  zellenzahl: Número de celdas
+  zellenspannung: Tensión de celda
+  nennkapazitaet: Capacidad nominal
+  entladeschlussspannung: Tensión final de descarga
+  batterietyp: Tipo de batería
+  blockzahl: Número de bloques
+  blockspannung: Tensión de bloque
+  gesamtspannung: Tensión total
+  ladespannung: Tensión de carga
+  erhaltungsladespannung: Tensión de flotación
+  inbetriebnahme: Puesta en servicio
+  fahrzeug_identnummer: Número de bastidor
+  erstzulassung: Primera matriculación
+  leergewicht: Peso en vacío
+  gesamtgewicht: Masa máxima
+  bordspannung: Tensión de a bordo
+  hv_batteriespannung: Tensión de la batería AT
+  hv_batteriekapazitaet: Capacidad de la batería AT
+  artikelnummer: Referencia
+  sitzplaetze: Plazas
+  nutzlast: Carga útil
+  hoechstlast: Carga máxima
+  bereifung: Neumáticos
+  loeschmittel: Agente extintor
+  brandklasse: Clase de fuego
+  fuellmenge: Carga
+  bauart: Construcción
+  treibmittel: Agente propulsor
+  loeschvermoegen: Eficacia de extinción
+  leiterart: Tipo de escalera
+  laenge: Longitud
+  sprossenzahl: Número de peldaños
+  anschaffung: Adquisición
+  aussonderung: Retirada
+  geruestart: Tipo de andamio
+  breitenklasse: Clase de anchura
+  lastklasse: Clase de carga
+  tragfaehigkeit: Carga máxima de utilización
+  prueflast: Carga de prueba
+  eigengewicht: Peso propio
+  norm: Norma
+  kennzeichnung: Marcado
+  oeffnungsart: Tipo de apertura
+  oeffnungsrichtung: Sentido de apertura
+  breite: Anchura
+  hoehe: Altura
+  pruefgegenstand: Objeto de ensayo
+  messart: Tipo de medida
+  messpunkte: Puntos de medida

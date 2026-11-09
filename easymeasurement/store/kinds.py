@@ -1,0 +1,155 @@
+# EasyMeasurement - easymeasurement/store/kinds.py
+# Kinds of structure elements, the features each can carry, and the values noted on an element.
+#
+# Producer: thorsten.schnebeck@gmx.net
+# Generator: Claude Opus 5.5
+# SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+from __future__ import annotations
+
+import json
+import re
+from dataclasses import dataclass, field
+from importlib import resources
+
+import yaml
+
+FALLBACK_ICON = "element"
+DEVICE_TYPES = ("", "MACHINE", "DISTRIBUTIONCABINET", "RCD", "CIRCUIT", "ELECTRICALEQUIPMENT",
+                "MEASURINGPOINT")
+_FOLDED = str.maketrans({"ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss"})
+
+
+@dataclass(frozen=True)
+class Feature:
+    key: str
+    label: str
+    unit: str = ""
+
+
+@dataclass(frozen=True)
+class Kind:
+    key: str
+    label: str
+    icon: str = FALLBACK_ICON
+    device_type: str = ""
+    izytron_type: int | None = None
+    interval_months: int = 0
+    features: tuple[Feature, ...] = field(default_factory=tuple)
+
+
+def slug(text: str) -> str:
+    """A stable key from a German label: lower case, ASCII, words joined by underscores."""
+    folded = text.casefold().translate(_FOLDED)
+    return re.sub(r"[^a-z0-9]+", "_", folded).strip("_") or "merkmal"
+
+
+def _feature(spec: str) -> Feature:
+    label, _, unit = spec.partition("|")
+    return Feature(slug(label), label.strip(), unit.strip())
+
+
+def shipped_kinds() -> list[Kind]:
+    raw = yaml.safe_load(
+        (resources.files("easymeasurement") / "data" / "kinds.yaml").read_text(encoding="utf-8")
+    )
+    return [
+        Kind(item["key"], item["label"], item.get("icon", FALLBACK_ICON), item.get("device", ""),
+             item.get("izytron"), item.get("interval", 0),
+             tuple(_feature(spec) for spec in item.get("features", ())))
+        for item in raw["kinds"]
+    ]
+
+
+class KindsMixin:
+    """Kinds are shared by every customer, so changing one changes it everywhere."""
+
+    def seed_kinds(self) -> None:
+        for position, kind in enumerate(shipped_kinds()):
+            self.save_kind(kind, position)
+
+    def kinds(self) -> list[Kind]:
+        rows = self.query("SELECT * FROM asset_kinds ORDER BY position, label COLLATE NOCASE")
+        features: dict[str, list[Feature]] = {}
+        for row in self.query("SELECT * FROM kind_features ORDER BY position, id"):
+            features.setdefault(row["kind"], []).append(
+                Feature(row["key"], row["label"], row["unit"])
+            )
+        return [
+            Kind(row["key"], row["label"], row["icon"], row["device_type"], row["izytron_type"],
+                 row["interval_months"], tuple(features.get(row["key"], ())))
+            for row in rows
+        ]
+
+    def kind(self, key: str) -> Kind | None:
+        return next((kind for kind in self.kinds() if kind.key == key), None)
+
+    def kind_labels(self) -> dict[str, str]:
+        rows = self.query("SELECT key, label FROM asset_kinds")
+        return {row["key"]: row["label"] for row in rows}
+
+    def new_kind_key(self, label: str) -> str:
+        base = slug(label)
+        taken = {row["key"] for row in self.query("SELECT key FROM asset_kinds")}
+        key, number = base, 2
+        while key in taken:
+            key, number = f"{base}_{number}", number + 1
+        return key
+
+    def save_kind(self, kind: Kind, position: int | None = None) -> None:
+        """Insert or replace, features included. Values noted on elements stay untouched."""
+        if position is None:
+            row = self.one("SELECT position FROM asset_kinds WHERE key=?", kind.key)
+            position = row["position"] if row else self._next_position()
+        with self.transaction() as connection:
+            connection.execute(
+                "INSERT INTO asset_kinds (key, label, icon, device_type, izytron_type,"
+                " interval_months, position) VALUES (?, ?, ?, ?, ?, ?, ?)"
+                " ON CONFLICT(key) DO UPDATE SET label=excluded.label, icon=excluded.icon,"
+                " device_type=excluded.device_type, izytron_type=excluded.izytron_type,"
+                " interval_months=excluded.interval_months, position=excluded.position",
+                (kind.key, kind.label, kind.icon, kind.device_type, kind.izytron_type,
+                 kind.interval_months, position),
+            )
+            connection.execute("DELETE FROM kind_features WHERE kind=?", (kind.key,))
+            for number, feature in enumerate(kind.features):
+                connection.execute(
+                    "INSERT OR IGNORE INTO kind_features (kind, key, label, unit, position)"
+                    " VALUES (?, ?, ?, ?, ?)",
+                    (kind.key, feature.key, feature.label, feature.unit, number),
+                )
+
+    def _next_position(self) -> int:
+        row = self.one("SELECT max(position) AS last FROM asset_kinds")
+        return (row["last"] or 0) + 1
+
+    def kind_usage(self, key: str) -> int:
+        return self.one("SELECT count(*) AS n FROM assets WHERE kind=?", key)["n"]
+
+    def delete_kind(self, key: str, replacement: str | None = None) -> None:
+        """Elements of the kind take `replacement`; without one, only an unused kind goes."""
+        with self.transaction() as connection:
+            if replacement is not None:
+                connection.execute("UPDATE assets SET kind=? WHERE kind=?", (replacement, key))
+            connection.execute("DELETE FROM asset_kinds WHERE key=?", (key,))
+
+    # Values on an element -------------------------------------------------
+
+    def asset_features(self, asset_id: int) -> dict[str, str]:
+        row = self.one("SELECT features_json FROM assets WHERE id=?", asset_id)
+        return json.loads(row["features_json"]) if row else {}
+
+    def set_asset_features(self, asset_id: int, values: dict[str, str]) -> None:
+        """Empty values are not kept: an empty feature is as good as none."""
+        kept = {key: value.strip() for key, value in values.items() if value.strip()}
+        self.execute(
+            "UPDATE assets SET features_json=? WHERE id=?",
+            json.dumps(kept, ensure_ascii=False, sort_keys=True), asset_id,
+        )
+
+    def set_asset_kind(self, asset_id: int, kind: str) -> None:
+        self.execute("UPDATE assets SET kind=? WHERE id=?", kind, asset_id)
+
+    def set_asset_interval(self, asset_id: int, months: int | None) -> None:
+        self.execute("UPDATE assets SET interval_months=? WHERE id=?", months, asset_id)

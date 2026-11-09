@@ -1,0 +1,37 @@
+# EasyMeasurement - instruction for one measuring function, draft.
+# Connections follow the PROFITEST PRIME manual (3-349-933-03).
+# `dut` says how the test object has to be operated during the measurement.
+title: Spannung und Drehfeld
+function: u3
+selector: U (Ansicht U3~)
+settings:
+- Ansicht: U3~ per Softkey wählen
+warnings:
+- Die Belegung ist über Kreuz. L2 gehört auf Sonde 3(PE), L3 auf Sonde 2(N).
+instructions:
+- Sonde 1(L) auf L1 setzen.
+- Sonde 3(PE) auf L2 setzen.
+- Sonde 2(N) auf L3 setzen.
+- Die Messung läuft ohne Start. Drehfeld ablesen und mit „Save Value“ speichern.
+source: Bedienungsanleitung, Abschnitt 9.2.4
+wiring:
+  instrument: PROFITEST PRIME
+  sockets:
+  - 1(L)
+  - 2(N)
+  - 3(PE)
+  object_label: Drehstromanschluss
+  terminals:
+  - id: l1
+    label: L1
+  - id: l2
+    label: L2
+  - id: l3
+    label: L3
+  wires:
+  - socket: 1(L)
+    target: l1
+  - socket: 3(PE)
+    target: l2
+  - socket: 2(N)
+    target: l3
