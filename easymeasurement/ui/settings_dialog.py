@@ -13,8 +13,10 @@ from PySide6.QtWidgets import QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
 
 from ..devices import find_instruments
 from ..devices.profitest_prime.discovery import DRIVER_KEY
+from .instrument_log import InstrumentLogOverlay
 from .instrument_prepare import InstrumentPrepareOverlay
 from .instrument_setup import InstrumentSetupOverlay
+from .instrument_test import InstrumentTestOverlay
 from .overlay import Overlay
 
 FOUND = Qt.ItemDataRole.UserRole
@@ -40,15 +42,28 @@ class SettingsOverlay(Overlay):
         self.prepare_button.setToolTip("Prüft, was das Messgerät hier schon hat, und überträgt,"
                                        " was fehlt. Drehrad dafür auf Setup.")
         self.prepare_button.clicked.connect(self._prepare_chosen)
+        self.test_button = QPushButton("Testen …")
+        self.test_button.setToolTip("Verbindet kurz und prüft das Messgerät, ohne etwas zu stellen"
+                                    " oder zu messen. Das Ergebnis kommt ins Geräteprotokoll.")
+        self.test_button.clicked.connect(self._test_chosen)
+        self.log_button = QPushButton("Geräteprotokoll …")
+        self.log_button.setToolTip("Tests und Kampagnen je Messgerät, ohne Verbindung")
+        self.log_button.clicked.connect(
+            lambda: InstrumentLogOverlay(self.app, self).exec() if self.app else None)
         self.instruments.currentRowChanged.connect(lambda _: self._update())
         self.instruments.itemDoubleClicked.connect(lambda _: self._prepare_chosen())
-        row = QHBoxLayout()
-        row.addWidget(self.set_up_button)
+        row = QHBoxLayout()  # what is done with the instrument chosen above
         row.addStretch()
+        row.addWidget(self.log_button)
+        row.addWidget(self.test_button)
         row.addWidget(self.prepare_button)
+        pair_row = QHBoxLayout()
+        pair_row.addWidget(self.set_up_button)
+        pair_row.addStretch()
         self.body.addWidget(self.instruments)
         self.body.addWidget(self.hint)
         self.body.addLayout(row)
+        self.body.addLayout(pair_row)
         self.refresh()
 
     def refresh(self) -> None:
@@ -65,13 +80,22 @@ class SettingsOverlay(Overlay):
         self._update()
 
     def _update(self) -> None:
-        self.prepare_button.setEnabled(self.app is not None and self.instruments.currentRow() >= 0)
+        chosen = self.app is not None and self.instruments.currentRow() >= 0
+        self.prepare_button.setEnabled(chosen)
+        self.test_button.setEnabled(chosen)
+        self.log_button.setEnabled(self.app is not None)
 
     def _set_up_instrument(self) -> None:
         pairing = InstrumentSetupOverlay(self)
         if pairing.exec() and pairing.address and self.app is not None:
             self.prepare(DRIVER_KEY, f"bt:{pairing.address}")
         self.refresh()
+
+    def _test_chosen(self) -> None:
+        item = self.instruments.currentItem()
+        if item is not None and self.app is not None:
+            found = item.data(FOUND)
+            InstrumentTestOverlay(self.app, found.key, found.port, found.label, self).exec()
 
     def _prepare_chosen(self) -> None:
         item = self.instruments.currentItem()

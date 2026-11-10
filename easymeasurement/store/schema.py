@@ -24,7 +24,7 @@ from .schema_parts import (
     _USERS_TABLE,
     _VALUES_FROZEN_UPDATE,
 )
-from .schema_runs import _COMPANY, _DEVICE_TEXTS, _PHOTO_MARKS, _RUNS
+from .schema_runs import _COMPANY, _DEVICE_TEXTS, _INSTRUMENT_TESTS, _PHOTO_MARKS, _RUNS
 
 _SCHEMA = """
 CREATE TABLE customers (
@@ -44,7 +44,7 @@ CREATE TABLE assets (
 """ + _ASSET_COLUMNS + """
 );
 
-""" + _USERS_TABLE + _COMPANY + _DEVICE_TEXTS + """
+""" + _USERS_TABLE + _COMPANY + _DEVICE_TEXTS + _INSTRUMENT_TESTS + """
 CREATE TABLE campaigns (
     id INTEGER PRIMARY KEY,
     uuid TEXT NOT NULL UNIQUE,

@@ -153,6 +153,15 @@ Abgleich mit Wartefenster. Angezeigt werden Einstellungen in Worten, etwa „RLO
 Umpolung“; ohne Texte bleibt der Code. Der IZYTRON-Import schlüsselt Einstellungen ebenso nach Code,
 Leiterbezüge neutral als `conductor`. Die Herstellertexte gehören zu den lokalen Daten, nie ins Repo.
 
+**Test und Geräteprotokoll:** „Einstellungen → Messgeräte → Testen …“ verbindet kurz und prüft
+Verbindung, Gerätekennung, Kalibrierung, Uhr, Drehrad, An- und Abmelden von Push/Print und die
+Gerätetexte (`devices/instrument_check.py`, `ui/instrument_test.py`). Gestellt und gemessen wird dabei
+nichts; eine abweichende Uhr oder eine überfällige Kalibrierung ist ein Hinweis, kein Fehler. Jeder Lauf
+bleibt in `instrument_tests`. „Geräteprotokoll …“ zeigt je Seriennummer den Lebenslauf aus diesen Läufen
+und den Kampagnen, in denen das Gerät benutzt wurde, mit Firmware, Kalibrierung und der Abweichung der
+Uhr, wie sie vor dem Stellen gefunden wurde (`campaign/instrument_history.py`, `ui/instrument_log.py`).
+Das Protokoll braucht keine Verbindung.
+
 `transport.py` führt eine feste Liste erlaubter Befehle: Lesebefehle, die drei Befehle des
 Push-Modus und die Abfrage des Drehschalters. Alles andere wird vor dem Senden abgewiesen, weil Schreibbefehle den Geräteinhalt
 ersetzen und ein unbekannter Befehl eine Messung mit echter Prüfspannung auslösen könnte.

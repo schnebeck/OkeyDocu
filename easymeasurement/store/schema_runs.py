@@ -81,3 +81,21 @@ CREATE TABLE device_text_sets (
     read_at TEXT NOT NULL
 );
 """
+
+# Each test of an instrument, kept for good: together with the campaigns it is its history.
+_INSTRUMENT_TESTS = """
+CREATE TABLE instrument_tests (
+    id INTEGER PRIMARY KEY,
+    driver TEXT NOT NULL,
+    connection TEXT NOT NULL DEFAULT '',  -- USB or Bluetooth
+    tested_at TEXT NOT NULL,
+    model TEXT NOT NULL DEFAULT '',
+    serial_no TEXT NOT NULL DEFAULT '',  -- empty when the instrument could not be identified
+    firmware TEXT NOT NULL DEFAULT '',
+    calibrated_on TEXT,
+    recalibration_due TEXT,
+    clock_offset_s REAL,
+    ready INTEGER NOT NULL,  -- fit to measure with
+    checks_json TEXT NOT NULL  -- each check: key, title, state, detail
+);
+"""
