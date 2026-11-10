@@ -62,8 +62,9 @@ class AttachmentMixin:
 
     def add_attachment(
         self, campaign_id: int, source: Path, measurement_id: int | None = None,
-        asset_id: int | None = None, text: str = "",
+        asset_id: int | None = None, text: str = "", name: str = "",
     ) -> int:
+        """`name` is the file's name as shown; by default the name of `source`."""
         kind = ATTACHMENT_KINDS.get(source.suffix.lower())
         if kind is None:
             raise AttachmentError(f"{source.name}: Nur Bilder und PDF lassen sich anhängen.")
@@ -72,7 +73,8 @@ class AttachmentMixin:
         attachment = self.db.execute(
             "INSERT INTO attachments (campaign_id, measurement_id, asset_id, kind, text, file_name,"
             " original_name, sha256, added_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            campaign_id, measurement_id, asset_id, kind, text, file_name, source.name, digest,
+            campaign_id, measurement_id, asset_id, kind, text, file_name, name or source.name,
+            digest,
             _iso(datetime.now()),
         )
         target = self.attachment_path(campaign_id, file_name)

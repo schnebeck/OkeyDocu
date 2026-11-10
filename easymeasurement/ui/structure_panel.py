@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from .attachment_list import AttachmentList
+from .place_files import PlaceFiles
 from .board import Strip, menu_button
 from .common import AppContext
 from .dashboard_card import dim
@@ -108,7 +108,7 @@ class PlacePanel(QWidget):
         self.muted = self.kind.palette().color(self.kind.foregroundRole()).name()
         self.edit_button = QPushButton("Eigenschaften …")
         self.edit_button.clicked.connect(lambda: self.properties_requested.emit(self.asset_id))
-        self.files = AttachmentList(app, "diesem Ort")
+        self.files = PlaceFiles(app, "diesem Ort")
         names = QVBoxLayout()
         names.setSpacing(0)
         names.addWidget(self.name)

@@ -388,6 +388,13 @@ Anlagen (`attachments`) sind Kommentare, Bilder und PDFs an einer Messung oder e
 immer zu einer Kampagne, damit ein Datensatz in sich vollständig bleibt. Entfernen löst sie von Messung
 und Ort, Löschen beendet sie samt Datei. Fotos, Lücken, Anlagen und ihre Dateien gehören zum Siegel.
 
+Dateien und Notizen der letzten bestätigten Prüfung derselben Anlage stehen in einer neuen Kampagne
+grau mit Datum beim jeweiligen Element (`campaign/carry_over.py`, `ui/place_files.py`). Was damals an
+einer Messung des Elements hing, gilt als am Element; was an der Kampagne selbst hing, als an der
+Anlage. „Übernehmen“ kopiert den Eintrag in die offene Kampagne, die abgeschlossene bleibt unverändert
+und versiegelt. Übernommenes erscheint nicht mehr als Angebot. Eine kampagnenunabhängige Ablage an
+Elementen gibt es bewusst nicht: Erst eine Bauteilliste mit Historie gäbe ihr einen Sinn.
+
 ## Benutzer
 
 Ein Benutzer hat Titel, Name, Unterschrift und optional ein Zertifikat (`ui/users.py`). Vom Zertifikat
