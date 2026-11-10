@@ -1,0 +1,95 @@
+# EasyMeasurement - vocabulary of electrical safety testing.
+# Keys are stored with every measurement and never change; symbols and names are English
+# and translated by the language catalogues (data/languages/<code>/vocabulary_*.yaml).
+#
+# quantities: what is measured, with its unit (base unit for prefixes such as mΩ)
+# results:    one figure a function produces: symbol, quantity, name
+# functions:  a measuring function as the inspector chooses it: symbol, name and,
+#             optionally, the results it produces
+# outcomes:   neutral words of checks without a number
+# settings:   known settings of a function
+#
+# Producer: thorsten.schnebeck@gmx.net
+# Generator: Claude Opus 5.5
+# SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+quantities:
+  resistance: {unit: Ω, name: Resistance}
+  impedance: {unit: Ω, name: Impedance}
+  voltage: {unit: V, name: Voltage}
+  current: {unit: A, name: Current}
+  frequency: {unit: Hz, name: Frequency}
+  time: {unit: s, name: Duration}
+  direction: {unit: "", name: Direction}
+
+results:
+  u: {symbol: U, quantity: voltage, name: Voltage}
+  u_ln: {symbol: ULN, quantity: voltage, name: Voltage L-N}
+  u_lpe: {symbol: ULPE, quantity: voltage, name: Voltage L-PE}
+  u_npe: {symbol: UNPE, quantity: voltage, name: Voltage N-PE}
+  u_l1l2: {symbol: UL1L2, quantity: voltage, name: Voltage L1-L2}
+  u_l2l3: {symbol: UL2L3, quantity: voltage, name: Voltage L2-L3}
+  u_l3l1: {symbol: UL3L1, quantity: voltage, name: Voltage L3-L1}
+  u_delta: {symbol: ΔU, quantity: voltage, name: Voltage drop}
+  u_iso: {symbol: UISO, quantity: voltage, name: Test voltage}
+  u_idn: {symbol: UIΔN, quantity: voltage, name: Touch voltage}
+  ue: {symbol: UE, quantity: voltage, name: Voltage UE}
+  f: {symbol: f, quantity: frequency, name: Frequency}
+  rotation: {symbol: Rotating field, quantity: direction, name: Phase sequence}
+  rlo: {symbol: RLO, quantity: resistance, name: Protective conductor resistance}
+  rlo_plus: {symbol: RLO+, quantity: resistance, name: "Protective conductor resistance, positive"}
+  rlo_minus: {symbol: RLO-, quantity: resistance, name: "Protective conductor resistance, negative"}
+  rlo_delta: {symbol: ΔRLO, quantity: resistance, name: Difference of the polarities}
+  rlo_offset: {symbol: RLO-OFFSET, quantity: resistance, name: Lead compensation}
+  riso: {symbol: RISO, quantity: resistance, name: Insulation resistance}
+  re: {symbol: RE, quantity: resistance, name: Earth resistance}
+  il: {symbol: IL, quantity: current, name: Leakage current}
+  i: {symbol: I, quantity: current, name: Current}
+  i_clamp: {symbol: I_CLAMP, quantity: current, name: Clamp current}
+  i_f: {symbol: IΔ, quantity: current, name: Tripping current}
+  ik: {symbol: IK, quantity: current, name: Prospective short-circuit current}
+  ta: {symbol: ta, quantity: time, name: Tripping time}
+  zlpe: {symbol: ZLPE, quantity: impedance, name: Loop impedance L-PE}
+  zln: {symbol: ZLN, quantity: impedance, name: Line impedance L-N}
+  zloop: {symbol: Z-AC, quantity: impedance, name: Loop impedance}
+  z_dc: {symbol: Z-DC+, quantity: impedance, name: Loop impedance with DC pre-magnetisation}
+  z_rlo: {symbol: Z+RLO, quantity: impedance, name: Loop impedance and protective conductor}
+  z_half: {symbol: Z-1/2xIdN, quantity: impedance, name: Loop impedance at half the residual current}
+  z: {symbol: Z, quantity: impedance, name: Impedance}
+
+functions:
+  u: {symbol: U, name: Voltage}
+  u3: {symbol: U3~, name: Phase sequence}
+  rlo: {symbol: RLO, name: Protective conductor resistance}
+  rlo_25a: {symbol: RLO-25A, name: Protective conductor resistance 25 A}
+  riso: {symbol: RISO, name: Insulation resistance}
+  riso_ramp: {symbol: RISO ramp, name: Insulation resistance}
+  il: {symbol: IL, name: Leakage current}
+  i_clamp: {symbol: I_CLAMP, name: Clamp current}
+  ures: {symbol: URES, name: Residual voltage}
+  imd: {symbol: IMD, name: Insulation monitoring}
+  rcd_touch: {symbol: RCD UIΔN, name: Touch voltage}
+  rcd_time: {symbol: RCD IΔN, name: Tripping time}
+  rcd_ramp_touch: {symbol: RCD IF-UIΔN, name: Touch voltage with ramp}
+  rcd_current: {symbol: RCD IF, name: Tripping current}
+  i_ramp: {symbol: I_RAMP, name: Current ramp}
+  rcm_touch: {symbol: RCM UIΔN, name: Touch voltage}
+  zloop: {symbol: ZLOOP, name: Loop impedance}
+  zloop_dc: {symbol: ZLOOP+DC, name: Loop impedance}
+  zloop_rlo: {symbol: ZLOOP+RLO, name: Loop impedance}
+  zloop_half: {symbol: ZLOOP+0.5x, name: Loop impedance}
+  zln_du: {symbol: ZLN-ΔU, name: Line impedance and voltage drop}
+  visual_inspection: {name: Visual inspection}
+  other: {name: Other measurement}
+  unreadable: {name: Unreadable instrument record}
+
+outcomes:
+  right: {name: clockwise}
+  left: {name: anticlockwise}
+  error: {name: error}
+  "yes": {name: "yes"}
+  "no": {name: "no"}
+
+settings:
+  conductor: {name: Conductors}

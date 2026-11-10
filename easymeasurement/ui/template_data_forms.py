@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..l10n import tr
-from ..model import FUNCTION_LABELS
+from ..vocabulary import function_keys, function_label
 
 
 class TemplateDataForms:
@@ -95,8 +95,8 @@ class TemplateDataForms:
     def _form_measurements(self, block: dict, form: QFormLayout) -> None:
         function = QComboBox()
         function.addItem(tr("All measurements and checks"), "*")
-        for key, label in FUNCTION_LABELS.items():
-            function.addItem(label, key)
+        for key in function_keys():
+            function.addItem(function_label(key), key)
         function.setCurrentIndex(max(function.findData(block.get("function", "*")), 0))
 
         def function_changed() -> None:

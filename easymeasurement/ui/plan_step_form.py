@@ -13,7 +13,7 @@ from PySide6.QtWidgets import QComboBox, QFormLayout, QLabel, QLineEdit, QWidget
 
 from ..campaign.plan import load_instructions
 from ..l10n import N_, tr
-from ..model import FUNCTION_LABELS
+from ..vocabulary import function_keys
 from .common import function_short
 from .growing_edit import GrowingEdit
 
@@ -37,7 +37,7 @@ class PlanStepForm(QWidget):
         self.heading.setFont(font)
         self.title = QLineEdit()
         self.function = QComboBox()
-        for key in sorted(FUNCTION_LABELS, key=function_short):
+        for key in sorted(function_keys(), key=function_short):
             self.function.addItem(function_short(key), key)
         self.instruction_state = QLabel()
         self.instruction_state.setWordWrap(True)

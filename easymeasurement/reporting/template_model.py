@@ -116,7 +116,9 @@ def block_summary(block: dict) -> str:
         short = " ".join(str(text).split())
         for name, code in PLACEHOLDERS:
             short = short.replace(code, f"[{tr(name)}]")
-        return f"{label}: {short[:60]}"
+        if len(short) > SUMMARY_LENGTH:
+            short = short[:SUMMARY_LENGTH].rstrip() + " …"
+        return f"{label}: {short}"
     if block["type"] == "fields":
         return plural(len(block.get("rows", ())), "{label} ({count} line)",
                       "{label} ({count} lines)", label=label)
@@ -134,6 +136,7 @@ def block_summary(block: dict) -> str:
     return label
 
 
+SUMMARY_LENGTH = 60  # characters of a block's text shown in the outline
 TEXT_KEYS = {"title", "lines", "client", "contractor", "rows", "text", "result", "labels",
              "name"}
 

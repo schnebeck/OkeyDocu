@@ -13,7 +13,8 @@ from dataclasses import replace
 from datetime import datetime
 
 from ..l10n import day, tr
-from ..model import FUNCTION_LABELS, SIGHT_CHECK_FUNCTION, Parameter, conductor_of
+from ..model import SIGHT_CHECK_FUNCTION, Parameter, conductor_of
+from ..vocabulary import function_symbol
 from .plan import Plan, PlanStep
 
 REPEAT = "repeat"  # the plan key of a campaign whose steps came from the last inspection
@@ -29,7 +30,7 @@ def _parameters(text: str) -> list[Parameter]:
 
 
 def _short(function: str) -> str:
-    return FUNCTION_LABELS.get(function, function).split(" – ")[0]
+    return function_symbol(function)
 
 
 class RepeatMixin:

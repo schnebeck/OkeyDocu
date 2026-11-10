@@ -10,7 +10,8 @@ from __future__ import annotations
 
 from ..campaign.photo_marks import ROLES
 from ..l10n import N_, in_language, tr
-from ..model import check_text, conductor_of
+from ..model import conductor_of
+from ..vocabulary import outcome_text, result_label
 from .context import VERDICT_TEXT, ReportMeasurement, ReportStep, function_label
 from .language import moment, value_text
 from .nodes import Fields, Node, Paragraph, Photos, Table
@@ -57,7 +58,7 @@ def _marks(measurement: ReportMeasurement) -> str:
 def _word(text: str) -> str:
     """A reading in the protocol's language: neutral words such as yes or right are
     translated, numbers get its decimal sign."""
-    return value_text(in_language(check_text(text)))
+    return value_text(in_language(outcome_text(text)))
 
 
 def _time(measurement: ReportMeasurement) -> str:
@@ -81,7 +82,7 @@ def _single(measurement: ReportMeasurement, options: dict) -> Fields:
     for result in data.results:
         limit = _limit(result)
         shown = _word(result.quantity.raw)
-        label = in_language(result.label)
+        label = result_label(result.key, result.label)
         rows.append((label, f"{shown}  ({tr('limit')} {limit})" if limit else shown))
     if measurement.photos:
         rows.append((tr("Photos"), str(len(measurement.photos))))
@@ -119,7 +120,7 @@ def _columns(group: list[ReportMeasurement]) -> list[tuple[str, str]]:
     columns: dict[str, str] = {}
     for measurement in group:
         for result in measurement.data.results:
-            columns.setdefault(result.key, in_language(result.label))
+            columns.setdefault(result.key, result_label(result.key, result.label))
     return list(columns.items())
 
 

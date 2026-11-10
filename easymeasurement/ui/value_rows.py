@@ -12,7 +12,8 @@ from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtWidgets import QAbstractItemView, QComboBox, QHeaderView, QTableWidgetItem
 
 from ..l10n import N_, tr
-from ..model import Verdict, check_text
+from ..model import Verdict
+from ..vocabulary import outcome_text
 from ..reporting.context import VERDICT_TEXT
 from .common import make_table, verdict_item
 
@@ -63,10 +64,10 @@ def mark_failed(box: QComboBox) -> None:
 
 
 def _value_text(value) -> str:
-    text = check_text(value["raw"])
+    text = outcome_text(value["raw"])
     if not value["setpoint"]:
         return text
-    return tr("{value} (target {setpoint})", value=text, setpoint=check_text(value["setpoint"]))
+    return tr("{value} (target {setpoint})", value=text, setpoint=outcome_text(value["setpoint"]))
 
 
 class ValueRows(QObject):

@@ -15,15 +15,15 @@ from pathlib import Path
 from ..campaign.repeat import REPEAT
 from ..campaign.service import MANUAL, CampaignService
 from ..model import (
-    FUNCTION_LABELS,
     SIGHT_CHECK_FUNCTION,
     MeterMeasurement,
     Parameter,
     Verdict,
     conductor_of,
 )
-from .attached import Attached, places, sort_attached
 from ..l10n import N_, in_language, tr
+from ..vocabulary import function_label as vocabulary_label
+from .attached import Attached, places, sort_attached
 from .language import UNIT_SPACE, day, moment
 from .logo import LogoError, decode_logo
 
@@ -231,4 +231,4 @@ def _date_text(value: str | None) -> str:
 
 
 def function_label(key: str) -> str:
-    return in_language(FUNCTION_LABELS.get(key, key))
+    return vocabulary_label(key)

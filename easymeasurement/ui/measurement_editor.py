@@ -23,7 +23,8 @@ from PySide6.QtWidgets import (
 )
 
 from ..l10n import N_, moment, tr
-from ..model import CONDUCTOR, FUNCTION_LABELS
+from ..model import CONDUCTOR
+from ..vocabulary import function_keys, function_label
 from ..store.device_texts import CODE
 from .common import AppContext, function_short, stored_parameters
 from .attachment_list import AttachmentList
@@ -78,8 +79,8 @@ class MeasurementEditor(MeasurementEditing, QWidget):
         self.facts.setWordWrap(True)
         self.facts.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.function = QuietCombo()
-        for key, label in FUNCTION_LABELS.items():
-            self.function.addItem(label, key)
+        for key in function_keys():
+            self.function.addItem(function_label(key), key)
         self.location = QLineEdit(placeholderText=tr(LOCATION_PLACEHOLDER))
         # Booked onto an element, the element says where; the text is for what has none.
         self.place = PlaceLine(app)

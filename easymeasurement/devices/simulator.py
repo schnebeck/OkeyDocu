@@ -13,7 +13,6 @@ import uuid
 from datetime import date, datetime, timedelta
 
 from ..model import (
-    FUNCTION_LABELS,
     DeviceIdentity,
     MeterMeasurement,
     Parameter,
@@ -22,6 +21,7 @@ from ..model import (
     Verdict,
 )
 from ..l10n import tr
+from ..vocabulary import function_symbol
 from .base import Capability, DeviceError, LiveReading, MeterDriver, SelectorPosition
 
 _READINGS = {
@@ -125,7 +125,7 @@ class SimulatedMeter(MeterDriver):
     def read_selector(self) -> SelectorPosition:
         if not self.selector:
             raise DeviceError(tr("The rotary switch has not been moved yet."))
-        label = FUNCTION_LABELS.get(self.selector, self.selector).split(" – ")[0]
+        label = function_symbol(self.selector)
         return SelectorPosition(label, frozenset({self.selector}))
 
     def simulate_measurement(self, function: str, at: datetime | None = None) -> MeterMeasurement:

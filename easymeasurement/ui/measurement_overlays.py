@@ -24,7 +24,8 @@ from PySide6.QtWidgets import (
 )
 
 from ..l10n import N_, tr
-from ..model import FUNCTION_LABELS, Quantity, ResultValue, Verdict
+from ..model import Quantity, ResultValue, Verdict
+from ..vocabulary import function_keys, function_label
 from .common import function_short
 from .growing_edit import GrowingEdit
 from .overlay import Overlay
@@ -64,8 +65,8 @@ class MeasurementOverlay(Overlay):
         self.ok_button.setText(tr("Add"))
         self._named = ""
         self.function = QuietCombo()
-        for key, label in FUNCTION_LABELS.items():
-            self.function.addItem(label, key)
+        for key in function_keys():
+            self.function.addItem(function_label(key), key)
         self.function.setCurrentIndex(self.function.findData("other"))
         self.function.currentIndexChanged.connect(self._name_first_value)
         self.moment = QDateTimeEdit(QDateTime.currentDateTime())

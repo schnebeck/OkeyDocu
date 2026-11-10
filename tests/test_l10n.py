@@ -16,6 +16,7 @@ import yaml
 
 from easymeasurement import l10n
 from easymeasurement.l10n.catalog import STORED, catalog, folder
+from easymeasurement.vocabulary.terms import GROUPS, vocabulary
 
 PACKAGE = Path(l10n.__file__).parents[1]
 MARKERS = {"tr": (0,), "plural": (1, 2), "N_": (0,)}
@@ -74,8 +75,24 @@ def _stored_words(code: str) -> set[str]:
     return found
 
 
+def vocabulary_texts() -> tuple[set[str], set[str]]:
+    """Names of the vocabulary, which every language has to know, and its symbols, which
+    a language may write its own way."""
+    words = vocabulary()
+    terms = [term for group in GROUPS for term in getattr(words, group).values()]
+    return {term.name for term in terms}, {term.symbol for term in terms if term.symbol}
+
+
+def test_every_name_of_the_vocabulary_has_a_german_entry():
+    names, _ = vocabulary_texts()
+    missing = sorted(name for name in names if catalog("de").text(name) is None)
+    assert not missing, "\n".join(missing)
+
+
 def test_every_german_entry_is_used():
+    names, symbols = vocabulary_texts()
     used = {(text, context) for _, text, context in marked_texts()}
+    used |= {(text, "") for text in names | symbols}
     german = catalog("de")
     stored = _stored_words("de")
     unused = [text for text in german.texts if (text, "") not in used and text not in stored]

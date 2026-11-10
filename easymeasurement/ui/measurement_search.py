@@ -21,7 +21,8 @@ from PySide6.QtWidgets import (
 )
 
 from ..l10n import in_language, tr
-from ..model import FUNCTION_LABELS, Quantity
+from ..model import Quantity
+from ..vocabulary import function_keys, function_label
 from ..store.search import MeasurementFilter
 from .board import GutterSplitter
 from .common import AppContext
@@ -29,6 +30,17 @@ from .measurement_view import MeasurementView
 
 _ANY = None
 
+
+
+COMBO_MARGIN_PX = 36  # frame and arrow of a combo box
+EDIT_MARGIN_PX = 12  # frame and text margins of a line edit
+
+
+def _fit_first(combo: QComboBox) -> None:
+    """The first entry is the program's own "any" choice: it is never cut, while long
+    names of customers or campaigns further down may be."""
+    width = combo.fontMetrics().horizontalAdvance(combo.itemText(0)) + COMBO_MARGIN_PX
+    combo.setMinimumWidth(width)
 
 class MeasurementsPage(MeasurementView):
     """Finds measurements across all campaigns."""
@@ -64,8 +76,12 @@ class MeasurementsPage(MeasurementView):
             combo.setMinimumContentsLength(14)
 
         self.function.addItem(tr("All measurements and inspections"), _ANY)
-        for key, label in FUNCTION_LABELS.items():
-            self.function.addItem(label, key)
+        for key in function_keys():
+            self.function.addItem(function_label(key), key)
+        _fit_first(self.function)
+        for edit in (self.value_min, self.value_max):
+            edit.setMinimumWidth(edit.fontMetrics().horizontalAdvance(edit.placeholderText())
+                                 + EDIT_MARGIN_PX)
         self.verdict.addItem(tr("Any verdict"), _ANY)
         self.verdict.addItem(tr("passed"), "passed")
         self.verdict.addItem(tr("failed"), "failed")
@@ -133,6 +149,7 @@ class MeasurementsPage(MeasurementView):
         index = combo.findData(current)
         combo.setCurrentIndex(max(index, 0))
         combo.blockSignals(False)
+        _fit_first(combo)
 
     def reload_choices(self) -> None:
         db = self.app.db

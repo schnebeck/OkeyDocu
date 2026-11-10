@@ -25,7 +25,6 @@ from ..l10n import N_, plural, tr
 from .common import AppContext
 from .dashboard_card import dim
 
-TILE_WIDTH = 220
 ICON_SIZE = 32
 MASTER_DATA, PLANS, TEMPLATES, ARCHIVE, USERS, INSTRUMENT = (
     "master_data", "plans", "templates", "archive", "users", "instrument",
@@ -56,7 +55,6 @@ class Tile(QPushButton):
         self.setToolTip(purpose)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.setMinimumHeight(60)
-        self.setMinimumWidth(160)
         picture = QLabel()
         picture.setPixmap(icon.pixmap(ICON_SIZE, ICON_SIZE))
         self.name = QLabel(title)
@@ -104,7 +102,6 @@ class AdminTiles(QWidget):
         self.refresh()
 
     def _place(self, columns: int) -> None:
-        """All in one row where the width allows, else in rows of three."""
         if columns == self.columns:
             return
         self.columns = columns
@@ -115,10 +112,22 @@ class AdminTiles(QWidget):
         for column in range(len(self.buttons)):
             self.grid.setColumnStretch(column, 1 if column < columns else 0)
 
+    def _needed(self) -> int:
+        """The width the widest tile needs to show its texts uncut."""
+        return max(tile.layout().sizeHint().width() for tile in self.buttons.values())
+
+    def _fitting(self, width: int) -> int:
+        """All in one row where every text fits, else rows of three, two or one."""
+        needed = self._needed()
+        spacing = self.grid.spacing()
+        for columns in (len(self.buttons), 3, 2):
+            if columns * needed + (columns - 1) * spacing <= width:
+                return columns
+        return 1
+
     def resizeEvent(self, event) -> None:
         super().resizeEvent(event)
-        count = len(self.buttons)
-        self._place(count if self.width() >= count * (TILE_WIDTH + 12) else 3)
+        self._place(self._fitting(self.width()))
 
     def refresh(self) -> None:
         db = self.app.db
@@ -132,3 +141,7 @@ class AdminTiles(QWidget):
         }
         for key, tile in self.buttons.items():
             tile.figure.setText(figures.get(key, self.purposes[key]))
+        needed = self._needed()
+        for tile in self.buttons.values():
+            tile.setMinimumWidth(needed)
+        self._place(self._fitting(self.width()))

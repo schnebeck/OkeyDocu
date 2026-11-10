@@ -21,7 +21,7 @@ from easymeasurement.devices.profitest_prime.transport import (
     PrimeTransport,
 )
 from easymeasurement.devices.simulator import SimulatedMeter
-from easymeasurement.model import FUNCTION_LABELS
+from easymeasurement.vocabulary import function_keys
 
 from .prime_helpers import FakeInstrument, event, reply
 
@@ -104,7 +104,7 @@ def test_no_answer_ends_in_an_error_and_not_in_a_hang(instrument):
 
 def test_every_function_named_by_a_position_exists():
     for value in range(12, 33):
-        assert selector_position(value).functions <= FUNCTION_LABELS.keys()
+        assert selector_position(value).functions <= set(function_keys())
 
 
 @pytest.mark.parametrize("value", [11, 36])

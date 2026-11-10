@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QMessageBox,
     QProgressDialog,
+    QStyle,
     QTableWidget,
     QTableWidgetItem,
 )
@@ -28,8 +29,9 @@ from PySide6.QtWidgets import (
 from ..campaign.service import CampaignService
 from ..devices import MeterDriver, create_driver
 from ..devices.simulator import SimulatedMeter
-from ..l10n import in_language, tr
-from ..model import FUNCTION_LABELS, Parameter, Verdict, check_text, conductor_of
+from ..l10n import tr
+from ..model import Parameter, Verdict, conductor_of
+from ..vocabulary import function_label, function_symbol, outcome_text, result_label
 from ..reporting.archive import ReportArchive
 from ..reporting.context import VERDICT_TEXT
 from ..store import Database
@@ -87,11 +89,11 @@ class AppContext:
 
 
 def function_text(key: str) -> str:
-    return FUNCTION_LABELS.get(key, key)
+    return function_label(key)
 
 
 def function_short(key: str) -> str:
-    return function_text(key).split(" – ")[0]
+    return function_symbol(key)
 
 
 def verdict_item(verdict: str) -> QTableWidgetItem:
@@ -142,6 +144,11 @@ def make_table(headers: list[str], stretch: int | None = None) -> QTableWidget:
     header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
     if stretch is not None:
         header.setSectionResizeMode(stretch, QHeaderView.ResizeMode.Stretch)
+        # A stretched column gives way when the table is narrow, but never below its title:
+        # the table scrolls sideways instead.
+        margins = 2 * header.style().pixelMetric(QStyle.PixelMetric.PM_HeaderMargin)
+        title = header.fontMetrics().horizontalAdvance(headers[stretch]) + margins
+        header.setMinimumSectionSize(max(header.minimumSectionSize(), title))
     return table
 
 
@@ -228,7 +235,7 @@ def stored_parameters(row) -> list[Parameter]:
 def value_line(service, row) -> str:
     """One measurement in a line: which conductors, then what was read."""
     values = "   ".join(
-        f"{in_language(v['label'])} {check_text(v['raw'])}"
+        f"{result_label(v['key'], v['label'])} {outcome_text(v['raw'])}"
         for v in service.values(row["id"])
     )
     conductor = conductor_of(stored_parameters(row))

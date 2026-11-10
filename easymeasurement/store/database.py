@@ -13,7 +13,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from ..l10n import tr
-from ..model import check_text
+from ..vocabulary import outcome_text
 from .kinds import KindsMixin
 from .device_texts import DeviceTextsMixin
 from .master_data import MasterDataMixin
@@ -50,7 +50,7 @@ class Database(KindsMixin, MasterDataMixin, DeviceTextsMixin):
             deterministic=True,
         )
         # Readings are stored as measured; this is how they read, also in a search.
-        self.connection.create_function("reading_text", 1, check_text, deterministic=True)
+        self.connection.create_function("reading_text", 1, outcome_text, deterministic=True)
         version = self.connection.execute("PRAGMA user_version").fetchone()[0]
         if version == 0:
             self.connection.executescript(_SCHEMA)
