@@ -36,6 +36,10 @@ class Term:
     unit: str = ""  # quantities only
     quantity: str = ""  # results only
     results: tuple[str, ...] = ()  # functions only, optional
+    # Functions only: results that tell under which conditions the others were taken, and
+    # results that count only where the measurement did not pass.
+    conditions: tuple[str, ...] = ()
+    on_fail: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -51,16 +55,17 @@ def folder():
     return resources.files("easymeasurement") / "data" / "vocabulary"
 
 
-FIELDS = {"name", "symbol", "unit", "quantity", "results"}
+FIELDS = {"name", "symbol", "unit", "quantity", "results", "conditions", "on_fail"}
+_LISTS = ("results", "conditions", "on_fail")
 
 
 def _term(key, spec: dict) -> Term:
     unknown = set(spec) - FIELDS
     if unknown:  # a comma in an unquoted name splits it into a field of its own
         raise VocabularyError(f"{key}: unknown fields {sorted(unknown)}")
+    lists = {name: tuple(str(result) for result in spec.get(name, ())) for name in _LISTS}
     return Term(str(key), str(spec.get("name", key)), str(spec.get("symbol", "")),
-                str(spec.get("unit", "")), str(spec.get("quantity", "")),
-                tuple(str(result) for result in spec.get("results", ())))
+                str(spec.get("unit", "")), str(spec.get("quantity", "")), **lists)
 
 
 @cache

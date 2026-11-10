@@ -21,7 +21,7 @@ from ...model import (
     ResultValue,
     Verdict,
 )
-from ...vocabulary import vocabulary
+from ...vocabulary import plain, vocabulary
 from .mapping import conductor, function_key, is_conductor_setting, outcome, result_key
 
 # The instrument has one voltage function. A three-phase reading is what makes
@@ -72,7 +72,7 @@ def _label(key: str) -> str:
     term = vocabulary().results.get(key)
     if term is None:
         return key
-    return term.symbol or term.name
+    return plain(term.symbol) if term.symbol else term.name
 
 
 def _parse_result(node: ET.Element) -> ResultValue:

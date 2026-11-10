@@ -90,9 +90,9 @@ def test_voltage_is_not_a_rotating_field_measurement():
 def test_line_voltages_keep_the_instrument_order_and_names():
     three_phase = parse_database(THREE_PHASE)[1][0]
     assert [(r.key, r.label, r.quantity.raw) for r in three_phase.results[:3]] == [
-        ("u_l3l1", "UL3L1", "398V"),
-        ("u_l1l2", "UL1L2", "399V"),
-        ("u_l2l3", "UL2L3", "400V"),
+        ("u_l3l1", "UL3-L1", "398V"),
+        ("u_l1l2", "UL1-L2", "399V"),
+        ("u_l2l3", "UL2-L3", "400V"),
     ]
 
 

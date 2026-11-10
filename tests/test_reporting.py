@@ -72,7 +72,7 @@ def test_zero_measurements_can_be_hidden():
 def test_one_measurement_reads_like_a_form():
     (node,) = run(context(reading()))
     assert isinstance(node, Fields)
-    assert ("RISO", "2,00\u202fMΩ  (Grenzwert >1,00\u202fMΩ)") in node.rows
+    assert ("RISO", "2,00\u202fMΩ  (Grenzwert >\u202f1,00\u202fMΩ)") in node.rows
 
 
 def test_many_measurements_become_a_table_with_summary():

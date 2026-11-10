@@ -5,7 +5,11 @@
 # quantities: what is measured, with its unit (base unit for prefixes such as mΩ)
 # results:    one figure a function produces: symbol, quantity, name
 # functions:  a measuring function as the inspector chooses it: symbol, name and,
-#             optionally, the results it produces
+#             optionally, the results it produces, those that state its conditions
+#             (conditions) and those that count only if it did not pass (on_fail)
+#
+# Symbols are written as in vocabulary/notation.py: one letter for the quantity, `_` before
+# the subscript, `^` before the superscript, such as R_LO, ΔR_LO or U_L1-L2.
 # outcomes:   neutral words of checks without a number
 # settings:   known settings of a function
 #
@@ -25,61 +29,63 @@ quantities:
 
 results:
   u: {symbol: U, quantity: voltage, name: Voltage}
-  u_ln: {symbol: ULN, quantity: voltage, name: Voltage L-N}
-  u_lpe: {symbol: ULPE, quantity: voltage, name: Voltage L-PE}
-  u_npe: {symbol: UNPE, quantity: voltage, name: Voltage N-PE}
-  u_l1l2: {symbol: UL1L2, quantity: voltage, name: Voltage L1-L2}
-  u_l2l3: {symbol: UL2L3, quantity: voltage, name: Voltage L2-L3}
-  u_l3l1: {symbol: UL3L1, quantity: voltage, name: Voltage L3-L1}
+  u_ln: {symbol: U_L-N, quantity: voltage, name: Voltage L-N}
+  u_lpe: {symbol: U_L-PE, quantity: voltage, name: Voltage L-PE}
+  u_npe: {symbol: U_N-PE, quantity: voltage, name: Voltage N-PE}
+  u_l1l2: {symbol: U_L1-L2, quantity: voltage, name: Voltage L1-L2}
+  u_l2l3: {symbol: U_L2-L3, quantity: voltage, name: Voltage L2-L3}
+  u_l3l1: {symbol: U_L3-L1, quantity: voltage, name: Voltage L3-L1}
   u_delta: {symbol: ΔU, quantity: voltage, name: Voltage drop}
-  u_iso: {symbol: UISO, quantity: voltage, name: Test voltage}
-  u_idn: {symbol: UIΔN, quantity: voltage, name: Touch voltage}
-  ue: {symbol: UE, quantity: voltage, name: Voltage UE}
+  u_iso: {symbol: U_ISO, quantity: voltage, name: Test voltage}
+  u_idn: {symbol: U_IΔN, quantity: voltage, name: Touch voltage}
+  ue: {symbol: U_E, quantity: voltage, name: Voltage UE}
   f: {symbol: f, quantity: frequency, name: Frequency}
   rotation: {symbol: Rotating field, quantity: direction, name: Phase sequence}
-  rlo: {symbol: RLO, quantity: resistance, name: Protective conductor resistance}
-  rlo_plus: {symbol: RLO+, quantity: resistance, name: "Protective conductor resistance, positive"}
-  rlo_minus: {symbol: RLO-, quantity: resistance, name: "Protective conductor resistance, negative"}
-  rlo_delta: {symbol: ΔRLO, quantity: resistance, name: Difference of the polarities}
-  rlo_offset: {symbol: RLO-OFFSET, quantity: resistance, name: Lead compensation}
-  riso: {symbol: RISO, quantity: resistance, name: Insulation resistance}
-  re: {symbol: RE, quantity: resistance, name: Earth resistance}
-  il: {symbol: IL, quantity: current, name: Leakage current}
+  rlo: {symbol: R_LO, quantity: resistance, name: Protective conductor resistance}
+  rlo_plus: {symbol: R_LO+, quantity: resistance, name: "Protective conductor resistance, positive"}
+  rlo_minus: {symbol: R_LO−, quantity: resistance, name: "Protective conductor resistance, negative"}
+  rlo_delta: {symbol: ΔR_LO, quantity: resistance, name: Difference of the polarities}
+  rlo_offset: {symbol: "R_LO,offset", quantity: resistance, name: Lead compensation}
+  riso: {symbol: R_ISO, quantity: resistance, name: Insulation resistance}
+  re: {symbol: R_E, quantity: resistance, name: Earth resistance}
+  il: {symbol: I_L, quantity: current, name: Leakage current}
   i: {symbol: I, quantity: current, name: Current}
-  i_clamp: {symbol: I_CLAMP, quantity: current, name: Clamp current}
-  i_f: {symbol: IΔ, quantity: current, name: Tripping current}
-  ik: {symbol: IK, quantity: current, name: Prospective short-circuit current}
-  ta: {symbol: ta, quantity: time, name: Tripping time}
-  zlpe: {symbol: ZLPE, quantity: impedance, name: Loop impedance L-PE}
-  zln: {symbol: ZLN, quantity: impedance, name: Line impedance L-N}
-  zloop: {symbol: Z-AC, quantity: impedance, name: Loop impedance}
-  z_dc: {symbol: Z-DC+, quantity: impedance, name: Loop impedance with DC pre-magnetisation}
-  z_rlo: {symbol: Z+RLO, quantity: impedance, name: Loop impedance and protective conductor}
-  z_half: {symbol: Z-1/2xIdN, quantity: impedance, name: Loop impedance at half the residual current}
+  i_clamp: {symbol: I_clamp, quantity: current, name: Clamp current}
+  i_f: {symbol: I_Δ, quantity: current, name: Tripping current}
+  ik: {symbol: I_K, quantity: current, name: Prospective short-circuit current}
+  ta: {symbol: t_a, quantity: time, name: Tripping time}
+  zlpe: {symbol: Z_L-PE, quantity: impedance, name: Loop impedance L-PE}
+  zln: {symbol: Z_L-N, quantity: impedance, name: Line impedance L-N}
+  zloop: {symbol: Z_AC, quantity: impedance, name: Loop impedance}
+  z_dc: {symbol: Z_DC+, quantity: impedance, name: Loop impedance with DC pre-magnetisation}
+  z_rlo: {symbol: Z_+RLO, quantity: impedance, name: Loop impedance and protective conductor}
+  z_half: {symbol: Z_½IΔN, quantity: impedance, name: Loop impedance at half the residual current}
   z: {symbol: Z, quantity: impedance, name: Impedance}
 
 functions:
-  u: {symbol: U, name: Voltage}
-  u3: {symbol: U3~, name: Phase sequence}
-  rlo: {symbol: RLO, name: Protective conductor resistance}
-  rlo_25a: {symbol: RLO-25A, name: Protective conductor resistance 25 A}
-  riso: {symbol: RISO, name: Insulation resistance}
-  riso_ramp: {symbol: RISO ramp, name: Insulation resistance}
-  il: {symbol: IL, name: Leakage current}
-  i_clamp: {symbol: I_CLAMP, name: Clamp current}
-  ures: {symbol: URES, name: Residual voltage}
+  u: {symbol: U, name: Voltage, conditions: [f]}
+  u3: {symbol: U3~, name: Phase sequence, conditions: [f]}
+  rlo: {symbol: R_LO, name: Protective conductor resistance, conditions: [rlo_offset],
+        on_fail: [rlo_plus, rlo_minus, rlo_delta]}
+  rlo_25a: {symbol: R_LO 25 A, name: Protective conductor resistance 25 A,
+            conditions: [rlo_offset], on_fail: [rlo_plus, rlo_minus, rlo_delta]}
+  riso: {symbol: R_ISO, name: Insulation resistance, conditions: [u_iso]}
+  riso_ramp: {symbol: R_ISO ramp, name: Insulation resistance}
+  il: {symbol: I_L, name: Leakage current, conditions: [f]}
+  i_clamp: {symbol: I_clamp, name: Clamp current}
+  ures: {symbol: U_RES, name: Residual voltage}
   imd: {symbol: IMD, name: Insulation monitoring}
-  rcd_touch: {symbol: RCD UIΔN, name: Touch voltage}
-  rcd_time: {symbol: RCD IΔN, name: Tripping time}
-  rcd_ramp_touch: {symbol: RCD IF-UIΔN, name: Touch voltage with ramp}
-  rcd_current: {symbol: RCD IF, name: Tripping current}
+  rcd_touch: {symbol: RCD U_IΔN, name: Touch voltage, conditions: [u_ln, f]}
+  rcd_time: {symbol: RCD I_ΔN, name: Tripping time, conditions: [u_ln, f]}
+  rcd_ramp_touch: {symbol: RCD I_F – U_IΔN, name: Touch voltage with ramp, conditions: [u_ln, f]}
+  rcd_current: {symbol: RCD I_F, name: Tripping current, conditions: [u_ln, f]}
   i_ramp: {symbol: I_RAMP, name: Current ramp}
-  rcm_touch: {symbol: RCM UIΔN, name: Touch voltage}
-  zloop: {symbol: ZLOOP, name: Loop impedance}
-  zloop_dc: {symbol: ZLOOP+DC, name: Loop impedance}
-  zloop_rlo: {symbol: ZLOOP+RLO, name: Loop impedance}
-  zloop_half: {symbol: ZLOOP+0.5x, name: Loop impedance}
-  zln_du: {symbol: ZLN-ΔU, name: Line impedance and voltage drop}
+  rcm_touch: {symbol: RCM U_IΔN, name: Touch voltage, conditions: [u_ln, f]}
+  zloop: {symbol: Z_LOOP, name: Loop impedance, conditions: [u_ln, f]}
+  zloop_dc: {symbol: Z_LOOP+DC, name: Loop impedance, conditions: [u_ln, f]}
+  zloop_rlo: {symbol: Z_LOOP+RLO, name: Loop impedance, conditions: [u_ln, f]}
+  zloop_half: {symbol: Z_LOOP+0.5x, name: Loop impedance, conditions: [u_ln, f]}
+  zln_du: {symbol: Z_L-N ΔU, name: Line impedance and voltage drop, conditions: [u_ln, f]}
   visual_inspection: {name: Visual inspection}
   other: {name: Other measurement}
   unreadable: {name: Unreadable instrument record}

@@ -123,7 +123,7 @@ def test_the_language_is_left_after_the_protocol(app, asset):
 def test_a_reading_keeps_its_digits_and_takes_the_decimal_sign_of_the_language():
     with speaking("de"):
         assert value_text("2.05MΩ") == "2,05\u202fMΩ"
-        assert value_text(">999MΩ") == ">999\u202fMΩ"
+        assert value_text(">999MΩ") == ">\u202f999\u202fMΩ"
     with speaking("en"):
         assert value_text("2,050MΩ") == "2.050\u202fMΩ"
         assert value_text("i.O.") == "i.O."
@@ -141,10 +141,10 @@ def test_dates_follow_the_language():
 
 def test_the_same_campaign_in_three_languages(app, asset):
     campaign = campaign_with_one_value(app, asset)
-    assert "0,21\u202fΩ" in texts(app, campaign, "de")
-    assert "0.21\u202fΩ" in texts(app, campaign, "en")
+    assert "210\u202fmΩ" in texts(app, campaign, "de")
+    assert "210\u202fmΩ" in texts(app, campaign, "en")
     spanish = texts(app, campaign, "es")
-    assert "Informe de ensayo" in spanish and "0,21\u202fΩ" in spanish and "correcto" in spanish
+    assert "Informe de ensayo" in spanish and "210\u202fmΩ" in spanish and "correcto" in spanish
 
 
 def test_every_report_language_knows_every_stored_word():

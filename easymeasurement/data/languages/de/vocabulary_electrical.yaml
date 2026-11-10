@@ -30,7 +30,9 @@ texts:
   Earth resistance: Erdungswiderstand
   Leakage current: Ableitstrom
   Clamp current: Zangenstrom
+  I_clamp: I_Zange
   I_CLAMP: I_ZANGE
+  R_LO,offset: R_LO,Offset
   Tripping current: Auslösestrom
   Prospective short-circuit current: Kurzschlussstrom
   Tripping time: Auslösezeit
@@ -42,16 +44,22 @@ texts:
   Loop impedance at half the residual current: Schleifenimpedanz bei halbem Fehlerstrom
   # Functions
   Protective conductor resistance 25 A: Schutzleiterwiderstand 25 A
+  R_ISO ramp: R_ISO-Rampe
   RISO ramp: RISO-Rampe
   Residual voltage: Restspannung
   Insulation monitoring: Isolationsüberwachung
   Touch voltage with ramp: Berührungsspannung bei Rampe
   Current ramp: Stromrampe
+  Z_LOOP+0.5x: Z_LOOP+0,5x
   ZLOOP+0.5x: ZLOOP+0,5x
   Line impedance and voltage drop: Netzimpedanz und Spannungsfall
   Visual inspection: Sichtprüfung
   Other measurement: Sonstige Messung
   Unreadable instrument record: Unlesbarer Gerätedatensatz
+  # Roles of results
+  Measuring condition: Messbedingung
+  Counts only if the measurement did not pass: Zählt nur, wenn die Messung nicht bestanden ist
+  Not measured: Nicht gemessen
   # Outcomes and settings
   clockwise: rechts
   anticlockwise: links

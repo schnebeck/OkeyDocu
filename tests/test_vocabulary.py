@@ -39,7 +39,7 @@ def with_files(tmp_path, monkeypatch):
 def test_names_follow_the_language():
     with speaking("de"):
         assert words.function_label("rlo") == "RLO – Schutzleiterwiderstand"
-        assert words.function_symbol("i_clamp") == "I_ZANGE"
+        assert words.function_symbol("i_clamp") == "I_Zange"
         assert words.outcome_text("right") == "rechts"
         assert words.result_label("rotation", "Drehfeld") == "Drehfeld"
     with speaking("en"):

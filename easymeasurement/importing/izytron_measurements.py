@@ -21,7 +21,7 @@ from ..model import (
     ResultValue,
     Verdict,
 )
-from ..vocabulary import vocabulary
+from ..vocabulary import plain, vocabulary
 
 RANGE_MARKS = {1: ">", 2: "<"}  # RangerResult: the reading lies beyond the measuring range
 ROTATION = {"rechts": "right", "links": "left"}
@@ -72,7 +72,9 @@ def _result(entry: dict) -> ResultValue | None:
     code = (entry.get("TsKey") or "").removeprefix("PROFITEST_")
     key = result_key(code)
     known = vocabulary().results.get(key)
-    label = (known.symbol or known.name) if known else entry.get("Description") or code
+    label = entry.get("Description") or code
+    if known is not None:
+        label = plain(known.symbol) if known.symbol else known.name
     lower, upper = _limit_text(entry.get("Min"), ">"), _limit_text(entry.get("Max"), "<")
     verdict = Verdict.NOT_EVALUATED
     if lower or upper:

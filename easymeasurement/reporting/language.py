@@ -16,16 +16,14 @@ recognises them in the catalogues. Template texts may also be given per language
 """
 from __future__ import annotations
 
-import re
-
 from ..l10n import available, current, day, in_language, moment, speaking
-from ..l10n.formats import pattern
+from ..l10n.quantities import NARROW, quantity_text
+from ..vocabulary import units
 
 __all__ = ["UNIT_SPACE", "current", "day", "languages", "moment", "pick", "speaking",
            "value_text"]
 
-_NUMBER = re.compile(r"^([<>≤≥]?)\s*(-?\d+(?:[.,]\d+)?)\s*(\S*)$")
-UNIT_SPACE = "\u202f"  # narrow no-break space, between a number and its unit
+UNIT_SPACE = NARROW  # between a number and its unit
 
 
 def languages() -> dict[str, str]:
@@ -44,12 +42,6 @@ def pick(value) -> str:
 
 
 def value_text(raw: str) -> str:
-    """A reading as the instrument gave it, only with the decimal sign of the language and a
-    narrow space that never breaks before the unit: `2.05MΩ` becomes `2,05 MΩ`. Digits,
-    qualifier and unit stay as they are."""
-    match = _NUMBER.match(raw.strip()) if raw else None
-    if not match:
-        return raw
-    qualifier, number, unit = match.groups()
-    number = number.replace(".", pattern("decimal")).replace(",", pattern("decimal"))
-    return f"{qualifier}{number}" + (f"{UNIT_SPACE}{unit}" if unit else "")
+    """A reading as number and unit in the language of the protocol, its prefix chosen in
+    steps of a thousand: `0.22Ω` becomes `220 mΩ`, `>1.20GΩ` becomes `> 1,20 GΩ`."""
+    return quantity_text(raw, units())
