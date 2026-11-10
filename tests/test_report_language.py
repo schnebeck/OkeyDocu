@@ -19,7 +19,7 @@ def campaign_with_one_value(app, asset):
     campaign = app.service.create(asset, "Prüfung", "Prüfer")
     app.service.add_measurement(
         campaign, "rlo", [ResultValue("rlo", "RLO", Quantity.parse("0.21Ω"), Verdict.PASSED)],
-        datetime(2026, 10, 22, 10, 0), Verdict.PASSED,
+        datetime(2026, 5, 4, 10, 0), Verdict.PASSED,
     )
     return campaign
 
@@ -129,13 +129,13 @@ def test_a_reading_keeps_its_digits_and_takes_the_decimal_sign_of_the_language()
 
 
 def test_dates_follow_the_language():
-    when = datetime(2026, 10, 22, 10, 5, 7)
+    when = datetime(2026, 5, 4, 10, 5, 7)
     with speaking("de"):
-        assert moment(when, seconds=True) == "22.10.2026 10:05:07"
+        assert moment(when, seconds=True) == "04.05.2026 10:05:07"
     with speaking("en"):
-        assert day(when) == "2026-10-22"
+        assert day(when) == "2026-05-04"
     with speaking("es"):
-        assert moment(when) == "22/10/2026 10:05"
+        assert moment(when) == "04/05/2026 10:05"
 
 
 def test_the_same_campaign_in_three_languages(app, asset):

@@ -62,7 +62,7 @@ def test_long_campaign_names_do_not_widen_the_window(window, app):
 def two_places(app):
     asset = app.db.add_asset(app.db.add_customer("Muster AG"), "machine", "Presse")
     campaign = app.service.create(asset, "Prüfung", "Prüfer")
-    moment = datetime(2026, 10, 22, 10, 0, 0)
+    moment = datetime(2026, 5, 4, 10, 0, 0)
     for place, function in (("Presse / Schrank / F1", "rlo"), ("Presse / Schrank / F2", "rlo")):
         app.service.add_measurement(
             campaign, function, [ResultValue("rlo", "RLO", Quantity.parse("0.21Ω"))], moment,
@@ -83,7 +83,7 @@ def test_what_all_rows_share_moves_to_the_head(window, app):
     two_places(app)
     page = data_page(window, app)
     text = page.common.text()
-    for part in ("Muster AG", "Presse", "Prüfung", "RLO", "bestanden", "22.10.2026"):
+    for part in ("Muster AG", "Presse", "Prüfung", "RLO", "bestanden", "04.05.2026"):
         assert part in text
     for column in (1, 2, 3, 5, 8):
         assert page.table.isColumnHidden(column)
@@ -161,7 +161,7 @@ def test_measurements_run_from_oldest_to_newest(window, app):
     asset = app.db.add_asset(app.db.add_customer("Muster AG"), "machine", "Presse")
     campaign = app.service.create(asset, "T", "P")
     for hour in (12, 9, 15):
-        app.service.add_measurement(campaign, "rlo", [], datetime(2026, 10, 22, hour, 0))
+        app.service.add_measurement(campaign, "rlo", [], datetime(2026, 5, 4, hour, 0))
     page = data_page(window, app)
     assert [page.table.item(row, 0).text() for row in range(3)] == [
         "09:00:00", "12:00:00", "15:00:00",
@@ -177,7 +177,7 @@ def voltages(app):
     for conductor, reading in (("L1-PE", "225V"), ("L1-L2", "390V")):
         measurement = app.service.add_measurement(
             campaign, "u", [ResultValue("u", "U", Quantity.parse(reading))],
-            datetime(2026, 10, 22, 11, 0),
+            datetime(2026, 5, 4, 11, 0),
         )
         app.db.execute(
             "UPDATE measurements SET parameters_json=? WHERE id=?",

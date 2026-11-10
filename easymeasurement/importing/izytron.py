@@ -8,7 +8,7 @@
 
 """Reads the database strictly read-only. Usage:
 
-    python -m easymeasurement.importing.izytron COPY.sqlite --offset -648
+    python -m easymeasurement.importing.izytron COPY.sqlite --offset -600
 
 `--offset` says how far the instrument's clock was ahead of local time that day,
 in seconds. It depends on the date, because the clock has no daylight saving.
@@ -59,8 +59,8 @@ def import_day(
         name, customer["Street"] or "", customer["Postal_Code"] or "", customer["City"] or "",
     )
     assets = _import_tree(source, service, customer_id)
-    root = next(
-        asset for key, asset in assets.items()
+    root_key, root = next(
+        (key, asset) for key, asset in assets.items()
         if not _is_structure(source.by_id.get((source.nodes[key]["Parent_ID"] or "").lower()))
     )
     information = json.loads(steps[0]["Testing_Device_Information"] or "{}")
@@ -79,6 +79,9 @@ def import_day(
     service.db.execute(
         "UPDATE clock_checks SET kind='manual' WHERE campaign_id=?", campaign_id
     )
+    contact = _contact(source, customer["ID"], root_key)
+    if any(contact):
+        service.set_contact(campaign_id, *contact)
     offset = timedelta(seconds=clock_offset_s)
     moments, measurements, checks = [], 0, 0
     runs: dict[str, int] = {}  # a testing entered on the PC is one run of its steps
@@ -110,6 +113,27 @@ def import_day(
         moments.append(local_time)
     service.date_import(campaign_id, min(moments))
     return ImportResult(campaign_id, measurements, checks, len(assets))
+
+
+def _text(row, key: str) -> str:
+    """A column that older databases may lack, and that only counts as written words."""
+    value = row[key] if row is not None and key in row.keys() else None
+    return value.strip() if isinstance(value, str) and not value.strip().isdecimal() else ""
+
+
+def _contact(source, customer_id: str, root_key: str) -> tuple[str, str, str, str]:
+    """Department of the installation, else of the person, and the customer's contact.
+
+    IZYTRON keeps a cost centre at each object as well; it is the customer's, while a
+    campaign's cost centre is the contractor's own, so it stays behind.
+    """
+    person = source.contact(customer_id)
+    name = " ".join(part for part in (_text(person, key) for key in
+                    ("Salutation", "Title", "First_Name", "Last_Name")) if part)
+    phone = _text(person, "Phone_Number") or _text(person, "Mobile_Phone_Number")
+    department = (_text(source.device_details(root_key), "Department")
+                  or _text(person, "Department"))
+    return department, name, phone, _text(person, "Email_Address")
 
 
 def main() -> None:

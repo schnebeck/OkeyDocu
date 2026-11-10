@@ -60,7 +60,7 @@ def one_measurement(window, app, close=False):
     campaign = app.service.create(asset, "T", "P")
     measurement = app.service.add_measurement(
         campaign, "rlo", [ResultValue("rlo", "RLO", Quantity.parse("0.21Ω"))],
-        datetime(2026, 10, 22, 10, 0), Verdict.PASSED, comment="alt",
+        datetime(2026, 5, 4, 10, 0), Verdict.PASSED, comment="alt",
     )
     if close:
         app.service.close(campaign)
@@ -126,7 +126,7 @@ def test_discarding_brings_back_what_is_stored(window, app):
 def test_moving_on_takes_the_edits_along(qtbot, window, app):
     page, measurement = one_measurement(window, app)
     campaign = stored_campaign(app, measurement)
-    app.service.add_measurement(campaign, "other", [], datetime(2026, 10, 22, 11, 0))
+    app.service.add_measurement(campaign, "other", [], datetime(2026, 5, 4, 11, 0))
     page.refresh()
     page.table.selectRow(0)
     page.editor.comment.setPlainText("mitgenommen")

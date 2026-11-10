@@ -51,6 +51,18 @@ class _Source:
             raise ImportFailed(f"Erwartet wird genau ein Kunde, gefunden: {len(rows)}.")
         return rows[0]
 
+    def contact(self, customer_id: str):
+        """The customer's first active contact person, where the database keeps them."""
+        known = self.db.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='Contact'").fetchone()
+        if known is None:
+            return None
+        return self.db.execute(
+            "SELECT * FROM Contact WHERE Customer_ID=? COLLATE NOCASE AND Deleted=0"
+            " AND coalesce(Is_Active, 1)=1 ORDER BY Last_Name, First_Name LIMIT 1",
+            (customer_id,),
+        ).fetchone()
+
     def device_details(self, object_id: str):
         return self.db.execute(
             "SELECT * FROM Abstract_Device WHERE ID=? COLLATE NOCASE", (object_id,)

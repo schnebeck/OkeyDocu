@@ -126,9 +126,9 @@ def test_clock_check_leaves_the_clock_alone_when_declined(page):
 
 
 def test_offset_can_be_stated_by_hand(page, monkeypatch):
-    monkeypatch.setattr(QInputDialog, "getInt", lambda *_: (-648, True))
+    monkeypatch.setattr(QInputDialog, "getInt", lambda *_: (-600, True))
     page.window().campaign.correct_clock()
-    assert page._campaign()["clock_offset_s"] == -648
+    assert page._campaign()["clock_offset_s"] == -600
 
 
 def test_badge_shows_the_synchronised_clock(page):

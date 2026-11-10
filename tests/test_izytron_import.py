@@ -27,7 +27,7 @@ from easymeasurement.store import CampaignClosed
 
 from .izytron_helpers import build
 
-OFFSET = -648
+OFFSET = -600
 
 
 @pytest.fixture
@@ -51,14 +51,14 @@ def test_day_becomes_one_campaign_open_for_review(service, imported):
     campaign = service.campaign(imported.campaign_id)
     assert campaign["status"] == "open"
     assert campaign["tester"] == "A. Prüfer"
-    assert "22.10.2026" in campaign["title"]
+    assert "04.05.2026" in campaign["title"]
 
 
 def test_campaign_keeps_the_real_dates(service, imported):
     service.close(imported.campaign_id)
     campaign = service.campaign(imported.campaign_id)
-    assert campaign["started_at"] == "2026-10-22T10:30:00"
-    assert campaign["closed_at"] == "2026-10-22T11:13:48"
+    assert campaign["started_at"] == "2026-05-04T10:30:00"
+    assert campaign["closed_at"] == "2026-05-04T11:13:00"
 
 
 def test_counts(imported):
@@ -122,14 +122,14 @@ def test_failed_measurement_stays_failed(service, imported):
 
 def test_device_times_are_corrected_and_kept(service, imported):
     row, _ = reading(service, imported.campaign_id, "riso")
-    assert row["device_time"] == "2026-10-22T11:00:00"
-    assert row["local_time"] == "2026-10-22T11:10:48"
+    assert row["device_time"] == "2026-05-04T11:00:00"
+    assert row["local_time"] == "2026-05-04T11:10:00"
     assert row["clock_offset_s"] == OFFSET
 
 
 def test_sight_check_was_entered_in_local_time(service, imported):
     row, _ = reading(service, imported.campaign_id, "visual_inspection")
-    assert row["local_time"] == "2026-10-22T10:30:00"
+    assert row["local_time"] == "2026-05-04T10:30:00"
     assert row["device_time"] is None
 
 
@@ -143,14 +143,14 @@ def test_sight_check_keeps_question_answer_and_remark(service, imported):
 def test_instrument_and_overdue_calibration_are_known(service, imported):
     identity = service.identity(imported.campaign_id)
     assert identity.serial_no == "TEST0001"
-    assert identity.calibrated_on == date(2023, 2, 13)
-    assert identity.recalibration_due == date(2024, 8, 13)
+    assert identity.calibrated_on == date(2023, 3, 1)
+    assert identity.recalibration_due == date(2024, 9, 1)
     assert build_context(service, imported.campaign_id)["device"]["overdue"] is True
 
 
 def test_offset_shows_up_in_the_report_data(service, imported):
     summary = build_context(service, imported.campaign_id)["campaign"]["clock_summary"]
-    assert "-648 s" in summary
+    assert "-600 s" in summary
 
 
 def test_parameters_are_readable(service, imported):
@@ -249,3 +249,22 @@ def test_a_visual_inspection_is_one_run_of_named_steps(service, imported):
     assert (run["name"], run["kind"]) == ("Sichtprüfung der Betriebsmittel", "Sichtprüfung")
     device = [m for m in service.measurements(imported.campaign_id) if m["function"] == "rlo"]
     assert all(row["run_id"] is None for row in device)  # a reading from the device is no run
+
+
+def test_department_and_contact_come_along_but_not_the_customers_cost_centre(service, imported):
+    campaign = service.campaign(imported.campaign_id)
+    assert (campaign["department"], campaign["contact"], campaign["contact_phone"],
+            campaign["contact_email"]) == (
+        "Instandhaltung", "Frau Dr. Erika Muster", "0170 2222", "muster@kunde.example")
+    assert campaign["cost_center"] == ""
+
+
+def test_a_database_without_contacts_imports_as_before(service, source):
+    import sqlite3
+    db = sqlite3.connect(source)
+    db.execute("DROP TABLE Contact")
+    db.execute("UPDATE Abstract_Device SET Department=''")
+    db.commit()
+    db.close()
+    campaign = service.campaign(import_day(service, source, -60).campaign_id)
+    assert (campaign["department"], campaign["contact"]) == ("", "")

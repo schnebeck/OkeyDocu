@@ -115,10 +115,10 @@ def test_import_from_the_menu_leaves_the_original_alone(window, app, monkeypatch
     monkeypatch.setattr("easymeasurement.ui.main_window.import_day", fake_import)
     monkeypatch.setattr("easymeasurement.ui.main_window.show_error", lambda _, t: errors.append(t))
     monkeypatch.setattr(QFileDialog, "getOpenFileName", lambda *_: (str(original), ""))
-    monkeypatch.setattr(ImportOverlay, "exec", lambda self: self.offset.setValue(-648) or 1)
+    monkeypatch.setattr(ImportOverlay, "exec", lambda self: self.offset.setValue(-600) or 1)
     window.import_action.trigger()
     assert seen[0][0] != original
-    assert seen[0][1] == -648
+    assert seen[0][1] == -600
     assert errors == ["Die Datenbank enthält keine Prüfungen."]
 
 

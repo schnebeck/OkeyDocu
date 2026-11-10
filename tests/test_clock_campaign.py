@@ -105,13 +105,13 @@ def test_offset_by_hand_recalculates_times_and_keeps_the_device_time(service, as
     meter.simulate_measurement("u")
     service.collect(campaign, meter)
     row = service.measurements(campaign)[0]
-    service.correct_clock_offset(campaign, -648)
+    service.correct_clock_offset(campaign, -600)
 
     changed = service.measurements(campaign)[0]
     device_time = datetime.fromisoformat(row["device_time"])
     assert changed["device_time"] == row["device_time"]
-    assert datetime.fromisoformat(changed["local_time"]) == device_time + timedelta(seconds=648)
-    assert changed["clock_offset_s"] == -648
+    assert datetime.fromisoformat(changed["local_time"]) == device_time + timedelta(seconds=600)
+    assert changed["clock_offset_s"] == -600
     assert service.clock_checks(campaign)[-1]["kind"] == "manual"
 
 

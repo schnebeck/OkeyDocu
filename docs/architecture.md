@@ -182,6 +182,10 @@ Verbindung über einen anderen Weg zurück, bittet die App, das Gerät aus- und 
 `importing/izytron.py` liest eine Kopie der IZYTRON-Datenbank nur lesend und legt einen Prüftag als
 abgeschlossene Kampagne an, mit Anlagenbaum, Messungen und Sichtprüfung. Den Versatz der Geräteuhr
 an jenem Tag nennt der Aufruf, er hängt vom Datum ab. Zeiten aus Sichtprüfungen sind schon Ortszeit.
+Abteilung und Ansprechpartner kommen mit: die Abteilung der Anlage (`Abstract_Device.Department`),
+sonst die des Ansprechpartners, und der erste aktive Ansprechpartner des Kunden (`Contact`) mit
+Telefon, ersatzweise Mobilnummer, und E-Mail. Die Kostenstelle, die IZYTRON je Prüfobjekt führt,
+gehört dem Kunden; sie wird nicht übernommen, weil die Kostenstelle einer Kampagne die eigene ist.
 
     python -m easymeasurement.importing.izytron KOPIE.sqlite --offset -120
 
