@@ -140,8 +140,17 @@ erscheinen sie in der aktuellen Sprache, solange ihr Name einer der mitgeliefert
 Sprache auch immer; erkannt wird er über den Schlüssel, damit „Leiter“ die Leiter bleibt. Ein
 umbenannter Typ behält seinen Namen.
 
-`tests/test_l10n.py` verlangt für jeden markierten Text einen deutschen Eintrag mit denselben
-Platzhaltern und meldet Einträge, die kein Code benutzt.
+Mitgelieferte Messpläne (`data/plans/`) und die Messanleitungen der Treiber sind englisch. Beim
+Laden übersetzt `campaign/plan_language.py` ihre Texte (Titel, Einstellungen, Warnungen, Schritte,
+Quelle, Anschlussbild) in die Programmsprache; die deutschen Fassungen stehen in
+`data/languages/de/instructions.yaml`. Schlüssel, Funktionen, Buchsen und Klemmen-IDs bleiben
+unübersetzt. Ein selbst geschriebener Plan bleibt in der Sprache, in der er geschrieben wurde.
+Eine Kampagne speichert ihre Schritte in der Sprache beim Start; Protokolle in einer anderen
+Sprache finden den Titel über die Kataloge wieder.
+
+`tests/test_l10n.py` verlangt für jeden markierten Text und jedes Wort der mitgelieferten Pläne und
+Anleitungen einen deutschen Eintrag mit denselben Platzhaltern und meldet Einträge, die nichts
+benutzt.
 
 ## Messgeräte-Abstraktion
 

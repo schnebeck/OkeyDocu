@@ -7,6 +7,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import ast
+import re
 import string
 from datetime import date, datetime
 from pathlib import Path
@@ -89,10 +90,35 @@ def test_every_name_of_the_vocabulary_has_a_german_entry():
     assert not missing, "\n".join(missing)
 
 
+def shipped_plan_words() -> set[str]:
+    """The words of the shipped plans and of the drivers' instructions."""
+    from easymeasurement.campaign.plan import builtin_plan_texts
+    from easymeasurement.campaign.plan_language import words
+    from easymeasurement.devices.registry import instruction_folders
+    raws = [yaml.safe_load(text) for text in builtin_plan_texts()]
+    raws += [yaml.safe_load(entry.read_text(encoding="utf-8")) for folder in instruction_folders()
+             for entry in folder.iterdir() if entry.name.endswith(".yaml")]
+    found = set()
+    for raw in raws:
+        found |= set(words(raw))
+        for step in raw.get("steps") or ():
+            found |= set(words(step))
+    return found
+
+
+NEEDS_WORDS = re.compile(r"[a-zäöüß]{2}|\d[.,]\d")  # a sign, a socket or a voltage reads the same
+
+
+def test_every_word_of_the_shipped_plans_has_a_german_entry():
+    missing = sorted(text for text in shipped_plan_words()
+                     if NEEDS_WORDS.search(text) and catalog("de").text(text) is None)
+    assert not missing, "\n".join(missing)
+
+
 def test_every_german_entry_is_used():
     names, symbols = vocabulary_texts()
     used = {(text, context) for _, text, context in marked_texts()}
-    used |= {(text, "") for text in names | symbols}
+    used |= {(text, "") for text in names | symbols | shipped_plan_words()}
     german = catalog("de")
     stored = _stored_words("de")
     unused = [text for text in german.texts if (text, "") not in used and text not in stored]

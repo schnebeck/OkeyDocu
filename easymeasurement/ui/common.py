@@ -21,7 +21,6 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QMessageBox,
     QProgressDialog,
-    QStyle,
     QTableWidget,
     QTableWidgetItem,
 )
@@ -35,6 +34,7 @@ from ..vocabulary import function_label, function_symbol, outcome_text, result_l
 from ..reporting.archive import ReportArchive
 from ..reporting.context import VERDICT_TEXT
 from ..store import Database
+from .table_stretch import TitledStretch
 
 T = TypeVar("T")
 
@@ -143,12 +143,7 @@ def make_table(headers: list[str], stretch: int | None = None) -> QTableWidget:
     header = table.horizontalHeader()
     header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
     if stretch is not None:
-        header.setSectionResizeMode(stretch, QHeaderView.ResizeMode.Stretch)
-        # A stretched column gives way when the table is narrow, but never below its title:
-        # the table scrolls sideways instead.
-        margins = 2 * header.style().pixelMetric(QStyle.PixelMetric.PM_HeaderMargin)
-        title = header.fontMetrics().horizontalAdvance(headers[stretch]) + margins
-        header.setMinimumSectionSize(max(header.minimumSectionSize(), title))
+        TitledStretch(table, stretch)
     return table
 
 

@@ -198,3 +198,23 @@ def test_answers_print_in_a_report(service, campaign):
     service.close(campaign)
     report = ReportArchive(service).generate(campaign, "Standard", default_template_text())
     assert report
+
+
+def test_shipped_instructions_speak_the_language_of_the_program():
+    from easymeasurement.l10n import speaking
+    with speaking("en"):
+        english = load_instructions()["rlo"]
+    with speaking("de"):
+        german = load_instructions()["rlo"]
+    assert english.title == "Protective conductor continuity"
+    assert german.title == "Durchgängigkeit Schutzleiter"
+    assert ("Prüfstrom", "0,2 A") in german.settings and ("Test current", "0.2 A") in english.settings
+    assert german.wiring.wires == english.wiring.wires  # sockets and terminals keep their ids
+
+
+def test_a_plan_written_by_hand_keeps_its_words():
+    from easymeasurement.l10n import speaking
+    with speaking("en"):
+        plan = parse_plan("key: x\ntitle: Eigener Plan\nreleased: true\nsteps:\n"
+                          "- {key: a, kind: check, title: Schalter geprüft}")
+    assert plan.title == "Eigener Plan" and plan.steps[0].title == "Schalter geprüft"

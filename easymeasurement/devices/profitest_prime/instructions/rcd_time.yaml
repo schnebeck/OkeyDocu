@@ -1,36 +1,36 @@
 # EasyMeasurement - instruction for one measuring function, draft.
 # Connections follow the PROFITEST PRIME manual (3-349-933-03).
 # `dut` says how the test object has to be operated during the measurement.
-title: RCD – Auslöseprüfung
+title: RCD – tripping test
 function: rcd_time
 also_accepts:
 - rcd_touch
 - rcd_current
 selector: IΔN
 settings:
-- Nennfehlerstrom IΔN: nach RCD
-- RCD-Typ: nach RCD
-- Berührungsspannung UL: 50 V
+- Rated residual current IΔN: according to the RCD
+- RCD type: according to the RCD
+- Touch voltage UL: 50 V
 warnings:
-- Die Auslöseprüfung schaltet den Stromkreis ab. Vorher Verbraucher sichern.
-- Prüfung mit Gleichfehlerstrom braucht zusätzlich Sonde 2(N) an N.
+- The tripping test switches the circuit off. Secure loads beforehand.
+- A test with smooth DC residual current also needs probe 2(N) on N.
 instructions:
-- Sonde 3(PE) auf PE setzen.
-- Sonde 1(L) auf den Außenleiter setzen.
-- ON/START misst die Berührungsspannung.
-- IΔN startet die Auslöseprüfung.
-- Wert mit „Save Value“ speichern.
-source: Bedienungsanleitung, Abschnitt 12.2.4
+- Place probe 3(PE) on PE.
+- Place probe 1(L) on the line conductor.
+- ON/START measures the touch voltage.
+- IΔN starts the tripping test.
+- Save the value with “Save Value”.
+source: Operating instructions, section 12.2.4
 wiring:
   instrument: PROFITEST PRIME
   sockets:
   - 1(L)
   - 2(N)
   - 3(PE)
-  object_label: Stromkreis hinter dem RCD (unter Spannung)
+  object_label: Circuit behind the RCD (live)
   terminals:
   - id: l
-    label: Außenleiter
+    label: Line conductor
   - id: pe
     label: PE
   wires:

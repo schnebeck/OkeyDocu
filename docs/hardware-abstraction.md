@@ -126,7 +126,9 @@ serial port, such as `LEQ,A,F,78.4,2026-05-04T10:15:02`.
    translations go into `data/languages/<code>/<driver>.yaml`.
 4. **Instructions.** How to set up and connect the instrument for a function lives with the
    driver: `devices/sound_meter/instructions/sound_level.yaml`, in the same form as the
-   PROFITEST PRIME's (`devices/profitest_prime/instructions/`).
+   PROFITEST PRIME's (`devices/profitest_prime/instructions/`). They are written in English;
+   their words go into each language's `instructions.yaml` catalogue, and the l10n test fails
+   until every one has a German entry.
 5. **Plans and limits.** A plan step with function `sound_level` and an upper limit of 80 dB
    works like any other step: the guided measurement waits for a reading of that function, the
    verdict comes from the limit, the report prints the results with their symbols.

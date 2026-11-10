@@ -1,36 +1,36 @@
 # EasyMeasurement - instruction for one measuring function, draft.
 # Connections follow the PROFITEST PRIME manual (3-349-933-03).
 # `dut` says how the test object has to be operated during the measurement.
-title: Durchgängigkeit Schutzleiter
+title: Protective conductor continuity
 function: rlo
 selector: RLO
 settings:
-- Prüfstrom: 0,2 A
-- Polarität: automatische Umpolung (±)
-- Prüfdauer: AUTO
-- Grenzwert: nach Leitungslänge und Querschnitt festlegen
+- Test current: 0.2 A
+- Polarity: automatic reversal (±)
+- Test duration: AUTO
+- Limit: set according to cable length and cross-section
 warnings:
-- Nur an spannungsfreien Teilen messen.
-- Erst kontaktieren, dann starten. Wird zuerst gestartet und danach kontaktiert, löst die Gerätesicherung
-  aus.
+- Measure only on de-energised parts.
+- Make contact first, then start. Starting first and making contact afterwards trips the instrument's
+  fuse.
 instructions:
-- Sonde 3(PE) auf die PE-Schiene setzen.
-- Sonde 1(L) auf den Messpunkt am Körper setzen.
-- Am Gerät ON/START drücken.
-- Wert mit „Save Value“ speichern. Langes Drücken speichert auf das zuletzt gewählte Objekt.
-source: Bedienungsanleitung, Abschnitt 10.1.4 und 10.1.5
+- Place probe 3(PE) on the PE bar.
+- Place probe 1(L) on the measuring point on the enclosure.
+- Press ON/START on the instrument.
+- Save the value with “Save Value”. A long press saves it to the object chosen last.
+source: Operating instructions, sections 10.1.4 and 10.1.5
 wiring:
   instrument: PROFITEST PRIME
   sockets:
   - 1(L)
   - 2(N)
   - 3(PE)
-  object_label: Schutzleitersystem (spannungsfrei)
+  object_label: Protective conductor system (de-energised)
   terminals:
   - id: body
-    label: Körper / Messpunkt
+    label: Enclosure / measuring point
   - id: pe
-    label: PE-Schiene
+    label: PE bar
   wires:
   - socket: 3(PE)
     target: pe

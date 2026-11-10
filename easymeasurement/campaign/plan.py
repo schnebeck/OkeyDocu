@@ -14,7 +14,8 @@ from importlib import resources
 import yaml
 
 from ..devices.registry import instruction_folders
-from ..l10n import N_, available, speaking, tr
+from ..l10n import N_, available, in_language, speaking, tr
+from .plan_language import told
 
 DRAFT = N_("{title} (draft)")
 
@@ -150,7 +151,7 @@ def _raw_instructions() -> dict[str, dict]:
         for entry in sorted(folder.iterdir(), key=lambda e: e.name):
             if entry.name.endswith(".yaml"):
                 raw = yaml.safe_load(entry.read_text(encoding="utf-8"))
-                found.setdefault(raw["function"], raw)
+                found.setdefault(raw["function"], told(raw))
     return found
 
 
@@ -164,9 +165,9 @@ def load_instructions() -> dict[str, PlanStep]:
 
 def _parse_step(raw: dict, instructions: dict[str, dict]) -> PlanStep:
     """A measuring step takes what it does not state itself from its function's instruction."""
-    data = dict(raw)
+    data = told(raw)
     if raw.get("kind", "measure") == "measure":
-        data = {**instructions.get(raw.get("function"), {}), **raw}
+        data = {**instructions.get(raw.get("function"), {}), **data}
     data["settings"] = _settings(data)
     data.setdefault("title", data["key"])
     return PlanStep.from_dict(data)
@@ -177,7 +178,7 @@ def parse_plan(text: str) -> Plan:
     instructions = _raw_instructions()
     return Plan(
         key=raw["key"],
-        title=raw["title"],
+        title=in_language(raw["title"]),
         released=bool(raw.get("released", False)),
         steps=tuple(_parse_step(step, instructions) for step in raw.get("steps") or ()),
     )
