@@ -58,7 +58,7 @@ texts:
   Unreadable instrument record: Unlesbarer Gerätedatensatz
   # Roles of results
   Measuring condition: Messbedingung
-  Counts only if the measurement did not pass: Zählt nur, wenn die Messung nicht bestanden ist
+  Only if not passed: Nur bei nicht bestanden
   Not measured: Nicht gemessen
   # Outcomes and settings
   clockwise: rechts

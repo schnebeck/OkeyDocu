@@ -32,7 +32,7 @@ class Role(str, Enum):
 ROLE_TEXT = {
     Role.RESULT: N_("Result"),
     Role.CONDITION: N_("Measuring condition"),
-    Role.ON_FAIL: N_("Counts only if the measurement did not pass"),
+    Role.ON_FAIL: N_("Only if not passed"),
     Role.NOT_MEASURED: N_("Not measured"),
 }
 

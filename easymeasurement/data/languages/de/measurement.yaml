@@ -131,6 +131,20 @@ texts:
   "Double-click: open": "Doppelklick: öffnen"
   Attach file: Datei anhängen
   Sign here with mouse or pen: Hier mit Maus oder Stift unterschreiben
+  # How a measurement was taken
+  How it was measured …: Wie gemessen wurde …
+  How it was measured: Wie gemessen wurde
+  Where: Wo
+  How: Wie
+  Settings of the instrument: Einstellungen am Messgerät
+  Results: Ergebnisse
+  Remarks: Bemerkungen
+  Symbol: Formelzeichen
+  Reading: Messwert
+  Role: Bedeutung
+  In the report: Im Protokoll
+  Time on the instrument: Zeit am Messgerät
+  Show the instrument's record: Datensatz des Messgeräts zeigen
 contexts:
   state:
     open: offen

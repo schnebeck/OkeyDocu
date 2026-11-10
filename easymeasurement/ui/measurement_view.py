@@ -46,6 +46,7 @@ from .measurement_cells import (
 )
 from .measurement_detail import THUMB, MeasurementDetail
 from .measurement_editor import MeasurementEditor
+from .measurement_menu import RowMenu
 from .measurement_runs import table_lines, write_line
 from .photo_gallery import PhotoGallery
 from .photo_shared import shared_thumbs
@@ -58,7 +59,7 @@ def _clock(when: datetime) -> str:
     return f"{when:%H:%M:%S}"
 
 
-class MeasurementView(MeasurementDetail, QWidget):
+class MeasurementView(RowMenu, MeasurementDetail, QWidget):
     """The table, what the selected row holds, and what may be done to it."""
 
     changed = Signal()
@@ -122,6 +123,7 @@ class MeasurementView(MeasurementDetail, QWidget):
         self.photo_action, self.add_photo = self._action(
             tr("Photo for the measurement …"), tr("Photo …"), self._add_photo
         )
+        self._set_up_row_menu()
         self.actions_row.addStretch()
         self.actions_row.addWidget(self.count)
 

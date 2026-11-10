@@ -8,14 +8,13 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtCore import QTimer, Signal
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
     QFrame,
     QLineEdit,
-    QMenu,
     QSizePolicy,
     QVBoxLayout,
 )
@@ -77,8 +76,6 @@ class CampaignValues(CampaignPoints, MeasurementView):
         self.editor.movable = True
         self.editor.place.move_requested.connect(self._move_to)
         self.editor.place.chosen.connect(self.place_requested)
-        self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.table.customContextMenuRequested.connect(self._row_menu)
         self.find = QLineEdit(placeholderText=tr("Filter readings …"))
         self.find.setClearButtonEnabled(True)
         self.find.setFixedWidth(260)
@@ -183,15 +180,9 @@ class CampaignValues(CampaignPoints, MeasurementView):
         is_open = bool(campaign) and campaign["status"] == "open"
         self.move_action.setEnabled(is_open and bool(selected_ids(self.table)))
 
-    def _row_menu(self, point) -> None:
-        if self.table.indexAt(point).row() < 0:
-            return
-        menu = QMenu(self)
-        for action in (self.edit_action, self.photo_action, self.move_action, None,
-                       self.delete_action):
-            menu.addSeparator() if action is None else menu.addAction(action)
-        menu.exec(self.table.viewport().mapToGlobal(point))
-        menu.deleteLater()
+    def _menu_actions(self) -> tuple:
+        return (self.details_action, None, self.edit_action, self.photo_action, self.move_action,
+                None, self.delete_action)
 
     def _move_to(self) -> None:
         ids = selected_ids(self.table)
