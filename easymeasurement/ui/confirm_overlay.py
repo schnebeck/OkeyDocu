@@ -32,7 +32,13 @@ def _summary(app: AppContext, campaign_id: int) -> str:
     text = "1 Messung" if len(rows) == 1 else f"{len(rows)} Messungen"
     if failed:
         text += f", davon {failed} nicht bestanden"
-    return f"<b>{escape(app.service.campaign(campaign_id)['title'])}:</b> {text}."
+    text = f"<b>{escape(app.service.campaign(campaign_id)['title'])}:</b> {text}."
+    loose = len(app.service.stacked_photos(campaign_id))
+    if loose:
+        photos = "1 Foto ist" if loose == 1 else f"{loose} Fotos sind"
+        text += (f'<br><span style="color:#d35400">{photos} keiner Messung zugeordnet und'
+                 " fehlen im Protokoll.</span>")
+    return text
 
 
 class TemplateChoice(QComboBox):

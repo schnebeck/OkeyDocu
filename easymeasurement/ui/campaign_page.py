@@ -30,6 +30,7 @@ from .edge_drawer import EdgeDrawer
 from .guided import GuidedPage
 from .instrument_control import InstrumentControl
 from .live_session import LiveSession
+from .photo_tabs import PhotoTabs
 from .side_panel import SidePanel
 from .structure_panel import PlacePanel, StructurePanel
 from .status_badges import ClockBadge, LinkBadge
@@ -86,13 +87,12 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.plan_section = self.side.add("Messplan", plan_box)
         self.loose_section = self.side.add("Nicht zugeordnet", self.guided.open_box)
         self.detail_section = self.side.add("Messung", self.values.detail, grows=False)
-        self.photo_section = self.side.add("Fotos", self.values.gallery)
         self._build_photos()
-        self.stack_section = self.side.add("Nicht zugeordnete Fotos", self.stack)
+        self.photo_tabs = PhotoTabs(self.values.gallery, self.stack)
+        self.photo_section = self.side.add("Fotos", self.photo_tabs)
         self.report_section = self.side.add("Protokolle", self.reports)
         # Until a campaign needs them. Shown, they would count towards the minimum window size.
-        for section in (self.plan_section, self.loose_section, self.report_section,
-                        self.stack_section):
+        for section in (self.plan_section, self.loose_section, self.report_section):
             section.hide()
 
         self.work = GutterSplitter(Qt.Orientation.Vertical, objectName="campaign-panes",

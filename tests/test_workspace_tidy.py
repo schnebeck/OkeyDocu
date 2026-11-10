@@ -106,7 +106,7 @@ def test_empty_sections_say_so_in_a_line(shown):
     assert page.detail_section.empty and page.photo_section.empty
     page.values.table.selectRow(0)
     assert not page.detail_section.empty
-    assert "Keine Fotos" in page.photo_section.placeholder.text()
+    assert "Keine Fotos" in page.photo_tabs.note.text() and page.photo_section.empty
 
 
 def test_answers_come_before_their_questions(window, app):

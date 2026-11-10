@@ -13,6 +13,7 @@ from PySide6.QtWidgets import QLabel
 from .common import ROW_ID, selected_id
 from .photo_shared import accept_photo_drops
 from .photo_stack import PhotoStack
+from .photo_tabs import LOOSE
 from .photo_timeline import PhotoTimeline
 from .proxy_progress import ProxyProgress
 
@@ -64,12 +65,13 @@ class CampaignPhotos:
         else:
             self.detail_section.set_empty(None if chosen else "Eine Zeile der Tabelle wählen.")
         if photos:
-            self.photo_section.set_empty(None)
+            self.photo_tabs.show_note(None)
         elif chosen:
-            self.photo_section.set_empty("Keine Fotos zu dieser Messung. Fotos auf die Zeile"
-                                         " ziehen oder per Rechtsklick anhängen.")
+            self.photo_tabs.show_note("Keine Fotos zu dieser Messung. Fotos auf die Zeile"
+                                      " ziehen oder per Rechtsklick anhängen.")
         else:
-            self.photo_section.set_empty("Zeigt die Fotos der gewählten Messung.")
+            self.photo_tabs.show_note("Zeigt die Fotos der gewählten Messung.")
+        self._quiet_photos()
 
     def _row_takes_photo(self, position) -> bool:
         campaign = self._campaign()
@@ -106,8 +108,10 @@ class CampaignPhotos:
         self.timeline_action.setEnabled(placed)
         self.header.assign_button.setVisible(placed)
         self.header.assign_button.setChecked(self.timeline.isVisibleTo(self))
-        self.stack_section.setVisible(self.stack.count > 0)
-        self.stack_section.set_count(self.stack.count)
+        self.photo_tabs.set_loose(self.stack.count)
+        self.photo_section.set_alert(self.stack.count > 0)
+        self._quiet_photos()
+        self._show_checks(self._campaign())
 
     def _refresh_photos(self) -> None:
         """After a change of the measurements, which the timeline shows as well."""
@@ -115,6 +119,18 @@ class CampaignPhotos:
             self.timeline.refresh()
             self.stack.refresh()
             self._fit_photo_panels()
+
+    def show_stack(self) -> None:
+        """Opens the tab of the photos of no measurement and brings it into view."""
+        action = getattr(self.window(), "side_action", None)  # keeps the menu in step
+        action.setChecked(True) if action is not None else self.side.show()
+        self.photo_section.toggle.setChecked(True)
+        self.photo_tabs.setCurrentIndex(LOOSE)
+        self.side.ensureWidgetVisible(self.photo_section)
+
+    def _quiet_photos(self) -> None:
+        """Without any photo to show, the section keeps small."""
+        self.photo_section.set_quiet(self.photo_tabs.gallery.isHidden() and not self.stack.count)
 
     def _photos_changed(self) -> None:
         self.guided.reload()

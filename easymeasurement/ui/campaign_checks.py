@@ -13,8 +13,8 @@ from ..campaign.repeat import REPEAT
 from .common import POINT_ID, ROW_ID
 from .structure_tree import UNPLACED
 
-UNPLACED_LINK, FAILED_LINK, POINTS_LINK = "unplaced", "failed", "points"
-ALERT, DONE = "#c0392b", "#27ae60"
+UNPLACED_LINK, FAILED_LINK, POINTS_LINK, STACK_LINK = "unplaced", "failed", "points", "stack"
+ALERT, DONE, NOTE = "#c0392b", "#27ae60", "#d35400"
 
 
 class CampaignChecks:
@@ -31,6 +31,11 @@ class CampaignChecks:
         parts = []
         if unplaced:
             parts.append(f'<a href="{UNPLACED_LINK}">{unplaced} ohne Ort</a>')
+        loose = len(self.app.service.stacked_photos(campaign["id"]))
+        if loose:
+            word = "Foto" if loose == 1 else "Fotos"
+            parts.append(f'<a href="{STACK_LINK}" style="color:{NOTE}">{loose} {word} nicht'
+                         ' zugeordnet</a>')
         if failed:
             word = "Mangel" if failed == 1 else "Mängel"
             parts.append(f'<a href="{FAILED_LINK}" style="color:{ALERT}">{failed} {word}</a>')
@@ -62,6 +67,8 @@ class CampaignChecks:
             self._next_defect()
         elif link == POINTS_LINK:
             self._next_point()
+        elif link == STACK_LINK:
+            self.show_stack()
 
     def _next_point(self) -> None:
         """Each click goes on to the next open point, the whole campaign in view."""

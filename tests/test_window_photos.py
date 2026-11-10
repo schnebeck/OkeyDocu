@@ -28,7 +28,7 @@ def test_no_photos_no_timeline(window, app, asset):
     window.campaign.refresh()
     window.campaign.show_campaign(campaign)
     assert not window.campaign.timeline.isVisible()
-    assert not window.campaign.stack_section.isVisible()
+    assert window.campaign.photo_tabs.tabText(1) == "Nicht zugeordnet"
 
 
 def test_the_timeline_waits_to_be_asked_for_once_there_are_photos(window, app, asset, tmp_path):
@@ -82,7 +82,7 @@ def test_photo_taken_off_shows_up_on_the_stack_and_in_the_table(window, app, ass
     campaign, _ = photo_campaign(window, app, asset, tmp_path)
     page = window.campaign
     page.timeline._write(app.service.stack_photo, app.service.photos(campaign)[0]["id"])
-    assert page.stack_section.isVisible()
+    assert page.photo_tabs.tabText(1) == "Nicht zugeordnet (1)"
     assert page.stack.count == 1
     assert page.values.table.item(0, 7).text() == ""
 
@@ -114,3 +114,28 @@ def test_a_closed_campaign_takes_no_dropped_photo(window, app, asset, tmp_path):
     page.refresh()
     position = page.values.table.visualItemRect(page.values.table.item(0, 0)).center()
     assert not page._row_takes_photo(position)
+
+
+def test_loose_photos_stand_out_in_the_side_panel_and_the_checks_line(window, app, asset,
+                                                                      tmp_path):
+    campaign, _ = photo_campaign(window, app, asset, tmp_path)
+    page = window.campaign
+    assert "nicht zugeordnet" not in page.header.checks.text()
+    page.timeline._write(app.service.stack_photo, app.service.photos(campaign)[0]["id"])
+    assert "#d35400" in page.photo_section.toggle.styleSheet()
+    assert page.photo_tabs.tabBar().tabTextColor(1).name() == "#d35400"
+    assert "1 Foto nicht zugeordnet" in page.header.checks.text()
+    window.side_action.setChecked(False)
+    page.photo_section.toggle.setChecked(False)
+    page.photo_tabs.setCurrentIndex(0)
+    page._follow_check("stack")
+    assert window.side_action.isChecked() and page.photo_section.expanded
+    assert page.photo_tabs.currentIndex() == 1
+
+
+def test_the_confirmation_says_loose_photos_miss_the_report(window, app, asset, tmp_path):
+    from easymeasurement.ui.confirm_overlay import ConfirmOverlay
+    campaign, _ = photo_campaign(window, app, asset, tmp_path)
+    app.service.stack_photo(app.service.photos(campaign)[0]["id"])
+    overlay = ConfirmOverlay(app, app.service.campaign(campaign), window)
+    assert "1 Foto ist keiner Messung zugeordnet" in overlay.summary.text()

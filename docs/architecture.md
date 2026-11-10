@@ -373,7 +373,11 @@ Aus den Fotos der gewählten Messung in der Seitenleiste (`ui/photo_gallery.py`)
 auf eine andere Zeile der Tabelle ziehen. Es gehört dann nur noch zu jener Messung, eine Mehrfach-
 zuordnung gibt es nicht. Das Kreuz in der Ecke jedes Vorschaubildes löst das Foto von der Messung, solange
 die Kampagne offen ist: Es kommt zu den nicht zugeordneten Fotos, Datei, Markierungen und Einstufung
-bleiben erhalten. Löschen geht nur dort.
+bleiben erhalten. Löschen geht nur dort. Beide Arten stehen im Abschnitt „Fotos“ der Seitenleiste
+als Reiter „Messung“ und „Nicht zugeordnet“ (`ui/photo_tabs.py`); wer ein Foto beim Ziehen über
+einen Reiter hält, öffnet ihn. Solange Fotos keiner Messung gehören, stehen der Abschnitt und der
+Reiter in Orange, die Prüfzeile im Kopf meldet „n Fotos nicht zugeordnet“ und führt per Klick
+dorthin, und „Bestätigen“ weist darauf hin, dass sie im Protokoll fehlen.
 
 Die Fotoansicht (`ui/photo_preview.py`, `ui/photo_canvas.py`) nimmt nummerierte Markierungen auf: Ein
 Rechteck über das Foto gezogen ergibt einen Bereich mit Nummer, der Text daneben erklärt ihn. Ein Klick

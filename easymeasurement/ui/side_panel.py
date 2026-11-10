@@ -21,6 +21,9 @@ from PySide6.QtWidgets import (
 
 
 
+SECTION_ALERT = "#d35400"
+
+
 class Section(QWidget):
     folded = Signal()
 
@@ -64,8 +67,19 @@ class Section(QWidget):
         self.content.setVisible(not self.empty)
         self.folded.emit()
 
+    def set_quiet(self, quiet: bool) -> None:
+        """Keeps its content in view but takes no share of the free room."""
+        self.empty = quiet
+        self.folded.emit()
+
     def set_count(self, count: int | None) -> None:
         self.toggle.setText(self.title if count is None else f"{self.title} ({count})")
+
+    def set_alert(self, on: bool) -> None:
+        """A heading in the warning colour for something still to be done here."""
+        colour = f" color: {SECTION_ALERT};" if on else ""
+        self.toggle.setStyleSheet(
+            f"QToolButton {{ font-weight: bold; text-align: left;{colour} }}")
 
     @property
     def expanded(self) -> bool:
