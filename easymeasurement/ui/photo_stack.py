@@ -35,7 +35,7 @@ from .photo_shared import accept_photo_drops, shared_thumbs, start_photo_drag
 ICON = QSize(96, 72)
 CELL = QSize(112, 112)
 EMPTY_TEXT = "Der Stapel ist leer. Hier landen Fotos, die von einer Messung gelöst wurden."
-HELP_TEXT = "Auf eine Messung ziehen."
+HELP_TEXT = "Auf eine Zeile der Tabelle oder auf den Reiter „Messung“ ziehen."
 READ_ONLY_TEXT = "Abgeschlossene Kampagne: nur ansehen."
 
 

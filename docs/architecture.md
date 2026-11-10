@@ -375,7 +375,7 @@ zuordnung gibt es nicht. Das Kreuz in der Ecke jedes Vorschaubildes löst das Fo
 die Kampagne offen ist: Es kommt zu den nicht zugeordneten Fotos, Datei, Markierungen und Einstufung
 bleiben erhalten. Löschen geht nur dort. Beide Arten stehen im Abschnitt „Fotos“ der Seitenleiste
 als Reiter „Messung“ und „Nicht zugeordnet“ (`ui/photo_tabs.py`); wer ein Foto beim Ziehen über
-einen Reiter hält, öffnet ihn. Solange Fotos keiner Messung gehören, stehen der Abschnitt und der
+einen Reiter hält, öffnet ihn. Auf dem Reiter „Messung“ abgelegt, gehört es zur gewählten Messung. Solange Fotos keiner Messung gehören, stehen der Abschnitt und der
 Reiter in Orange, die Prüfzeile im Kopf meldet „n Fotos nicht zugeordnet“ und führt per Klick
 dorthin, und „Bestätigen“ weist darauf hin, dass sie im Protokoll fehlen.
 

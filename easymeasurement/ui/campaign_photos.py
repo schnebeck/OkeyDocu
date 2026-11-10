@@ -46,6 +46,10 @@ class CampaignPhotos:
         self.photo_drops = accept_photo_drops(
             table.viewport(), self._photo_dropped, allowed=self._row_takes_photo
         )
+        # The measurement's tab takes a photo for the chosen measurement, as its row does.
+        self.tab_drops = [accept_photo_drops(
+            target, self._dropped_on_measurement, allowed=lambda _: self._chosen_takes_photo(),
+        ) for target in (self.photo_tabs.measurement_page, self.values.gallery.viewport())]
         self.values.detail_shown.connect(self._show_detail_room)
         self.values.place_requested.connect(self.structure.select)
         self.values.point_chosen.connect(self._point_chosen)
@@ -80,6 +84,15 @@ class CampaignPhotos:
         # A line for a whole run is no single measurement a photo could belong to.
         return (open_campaign and index.isValid()
                 and self.values.table.item(index.row(), 0).data(ROW_ID) is not None)
+
+    def _chosen_takes_photo(self) -> bool:
+        campaign = self._campaign()
+        return (bool(campaign) and campaign["status"] == "open"
+                and selected_id(self.values.table) is not None)
+
+    def _dropped_on_measurement(self, photo_id: int, _position) -> None:
+        self.app.service.pin_photo(photo_id, selected_id(self.values.table))
+        self._photos_changed()
 
     def _photo_dropped(self, photo_id: int, position) -> None:
         table = self.values.table

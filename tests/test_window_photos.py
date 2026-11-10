@@ -139,3 +139,39 @@ def test_the_confirmation_says_loose_photos_miss_the_report(window, app, asset, 
     app.service.stack_photo(app.service.photos(campaign)[0]["id"])
     overlay = ConfirmOverlay(app, app.service.campaign(campaign), window)
     assert "1 Foto ist keiner Messung zugeordnet" in overlay.summary.text()
+
+
+def _drop(page, index, photo_id):
+    """A drop as the target's filter receives it; Qt itself only delivers one during a drag."""
+    from PySide6.QtCore import QPointF, Qt
+    from PySide6.QtGui import QDropEvent
+    from easymeasurement.ui.photo_shared import photo_mime_data
+    target = page.tab_drops[index]
+    mime = photo_mime_data(photo_id)  # the event does not own it, so it is kept here
+    event = QDropEvent(QPointF(5, 5), Qt.DropAction.MoveAction, mime,
+                       Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier)
+    target.eventFilter(target.parent(), event)
+    return event.isAccepted()
+
+
+def test_a_loose_photo_dropped_on_the_measurement_tab_joins_the_chosen_measurement(
+        window, app, asset, tmp_path):
+    campaign, measurement = photo_campaign(window, app, asset, tmp_path)
+    page = window.campaign
+    photo = app.service.photos(campaign)[0]["id"]
+    app.service.stack_photo(photo)
+    page.show_campaign(campaign)
+    page.values.table.clearSelection()
+    page.values.table.setCurrentItem(None)
+    assert not _drop(page, 0, photo)  # no measurement chosen
+    page.values.table.setCurrentCell(0, 0)
+    assert page.tab_drops[0].parent() is page.photo_tabs.measurement_page
+    assert page.tab_drops[1].parent() is page.values.gallery.viewport()
+    assert _drop(page, 0, photo)
+    assert app.db.one("SELECT measurement_id FROM photos WHERE id=?", photo)[0] == measurement
+    assert page.photo_tabs.tabText(1) == "Nicht zugeordnet"
+    app.service.stack_photo(photo)
+    page.show_campaign(campaign)
+    page.values.table.setCurrentCell(0, 0)
+    assert _drop(page, 1, photo)
+    assert app.db.one("SELECT measurement_id FROM photos WHERE id=?", photo)[0] == measurement

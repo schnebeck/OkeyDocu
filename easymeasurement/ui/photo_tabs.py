@@ -26,7 +26,7 @@ class PhotoTabs(QTabWidget):
         self.note = QLabel(wordWrap=True)
         self.note.setEnabled(False)
         self.note.hide()
-        page = QWidget()
+        page = self.measurement_page = QWidget()  # also where a photo is dropped onto
         column = QVBoxLayout(page)
         column.setContentsMargins(0, 4, 0, 0)
         column.addWidget(gallery, 1)
@@ -38,7 +38,8 @@ class PhotoTabs(QTabWidget):
         bar = self.tabBar()
         bar.setChangeCurrentOnDrag(True)
         bar.setAcceptDrops(True)
-        self.setTabToolTip(MEASUREMENT, "Die Fotos der gewählten Messung")
+        self.setTabToolTip(MEASUREMENT, "Die Fotos der gewählten Messung. Ein Foto hierher"
+                                         " gezogen gehört dann zu ihr.")
         self.setTabToolTip(LOOSE, "Fotos, die keiner Messung gehören. Sie fehlen im Protokoll,"
                                   " bis sie auf eine Messung gezogen werden.")
         self.loose = 0
