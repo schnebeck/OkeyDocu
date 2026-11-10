@@ -19,8 +19,6 @@ import yaml
 from ..l10n import is_translation, tr
 
 FALLBACK_ICON = "element"
-DEVICE_TYPES = ("", "MACHINE", "DISTRIBUTIONCABINET", "RCD", "CIRCUIT", "ELECTRICALEQUIPMENT",
-                "MEASURINGPOINT")
 _FOLDED = str.maketrans({"ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss"})
 
 
@@ -36,7 +34,6 @@ class Kind:
     key: str
     label: str
     icon: str = FALLBACK_ICON
-    device_type: str = ""
     izytron_type: int | None = None
     interval_months: int = 0
     features: tuple[Feature, ...] = field(default_factory=tuple)
@@ -58,8 +55,8 @@ def shipped_kinds() -> list[Kind]:
         (resources.files("easymeasurement") / "data" / "kinds.yaml").read_text(encoding="utf-8")
     )
     return [
-        Kind(item["key"], item["label"], item.get("icon", FALLBACK_ICON), item.get("device", ""),
-             item.get("izytron"), item.get("interval", 0),
+        Kind(item["key"], item["label"], item.get("icon", FALLBACK_ICON), item.get("izytron"),
+             item.get("interval", 0),
              tuple(_feature(spec) for spec in item.get("features", ())))
         for item in raw["kinds"]
     ]
@@ -100,7 +97,7 @@ class KindsMixin:
             features.setdefault(row["kind"], []).append(Feature(row["key"], label, row["unit"]))
         return [
             Kind(row["key"], shown(names.get(row["key"]), row["label"]), row["icon"],
-                 row["device_type"], row["izytron_type"], row["interval_months"],
+                 row["izytron_type"], row["interval_months"],
                  tuple(features.get(row["key"], ())))
             for row in rows
         ]
@@ -128,12 +125,12 @@ class KindsMixin:
             position = row["position"] if row else self._next_position()
         with self.transaction() as connection:
             connection.execute(
-                "INSERT INTO asset_kinds (key, label, icon, device_type, izytron_type,"
-                " interval_months, position) VALUES (?, ?, ?, ?, ?, ?, ?)"
+                "INSERT INTO asset_kinds (key, label, icon, izytron_type,"
+                " interval_months, position) VALUES (?, ?, ?, ?, ?, ?)"
                 " ON CONFLICT(key) DO UPDATE SET label=excluded.label, icon=excluded.icon,"
-                " device_type=excluded.device_type, izytron_type=excluded.izytron_type,"
+                " izytron_type=excluded.izytron_type,"
                 " interval_months=excluded.interval_months, position=excluded.position",
-                (kind.key, kind.label, kind.icon, kind.device_type, kind.izytron_type,
+                (kind.key, kind.label, kind.icon, kind.izytron_type,
                  kind.interval_months, position),
             )
             connection.execute("DELETE FROM kind_features WHERE kind=?", (kind.key,))

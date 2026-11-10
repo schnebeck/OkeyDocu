@@ -11,14 +11,11 @@ from __future__ import annotations
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import QLabel
 
-from ..devices import Capability, DeviceBlocked, DeviceError
+from ..devices import PREPARING, Capability, DeviceError, driver_info
 from ..l10n import N_, tr
 from .common import AppContext
 from .overlay import Overlay
 
-INTRO = N_("The instrument is being prepared for this program. The first time and after a"
-           " firmware update this takes about a minute. Please leave the rotary switch at"
-           " <b>Setup</b> and do not disconnect the instrument.")
 STEPS = (("identify", N_("Recognise the instrument")), ("texts", N_("Transfer instrument texts")))
 MARKS = {"waiting": "○", "running": "…", "done": "✓", "skipped": "–", "failed": "✗"}
 
@@ -39,7 +36,7 @@ def prepare_if_needed(app: AppContext, driver_key: str, port: str, identity, cap
 class PrepareWorker(QThread):
     step = Signal(str, str)  # step, state
     finished_with = Signal(object, object)  # identity, texts or None
-    failed = Signal(str, bool)  # message, whether turning to Setup may help
+    failed = Signal(str)
 
     def __init__(self, driver, known_firmware: str | None, parent=None):
         super().__init__(parent)
@@ -57,10 +54,8 @@ class PrepareWorker(QThread):
                     self.step.emit("texts", "running")
                     texts = self.driver.read_texts()
                 self.step.emit("texts", "done" if texts is not None else "skipped")
-        except DeviceBlocked as err:
-            self.failed.emit(str(err), True)
         except DeviceError as err:
-            self.failed.emit(str(err), False)
+            self.failed.emit(str(err))
         else:
             self.finished_with.emit(identity, texts)
 
@@ -73,7 +68,8 @@ class InstrumentPrepareOverlay(Overlay):
         self.app, self.driver_key, self.port = app, driver_key, port
         self.worker: PrepareWorker | None = None
         self.done = False
-        intro = QLabel(tr(INTRO))
+        info = driver_info(driver_key)
+        intro = QLabel(tr(info.preparing if info else PREPARING))
         intro.setWordWrap(True)
         self.body.addWidget(intro)
         self.lines: dict[str, QLabel] = {}
@@ -115,12 +111,11 @@ class InstrumentPrepareOverlay(Overlay):
         self.ok_button.setEnabled(True)
         self.cancel_button.hide()
 
-    def _failed(self, message: str, setup_helps: bool) -> None:
+    def _failed(self, message: str) -> None:
         for key, state in self.states.items():
             if state == "running":
                 self._show_step(key, "failed")
-        advice = " " + tr("Please turn the rotary switch to Setup.") if setup_helps else ""
-        self.hint.setText(f"{message}{advice}")
+        self.hint.setText(message)
         self.ok_button.setText(tr("Try again"))
         self.ok_button.setEnabled(True)
         self.cancel_button.setEnabled(True)

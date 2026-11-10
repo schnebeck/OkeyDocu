@@ -9,13 +9,15 @@
 from .base import Capability, DeviceError, MeterDriver
 from .base import DeviceBlocked, DeviceTexts, FoundInstrument, LinkState, LiveReading
 from .base import SelectorPosition
+from .driver_info import PREPARING, DriverInfo, Pairing
 from .registry import (
     available_drivers,
     create_driver,
+    driver_info,
     find_instruments,
+    is_simulated,
     register_driver,
     setting_words,
-    structure_types,
 )
 
 __all__ = [
@@ -33,5 +35,9 @@ __all__ = [
     "create_driver",
     "register_driver",
     "setting_words",
-    "structure_types",
+    "DriverInfo",
+    "PREPARING",
+    "Pairing",
+    "driver_info",
+    "is_simulated",
 ]

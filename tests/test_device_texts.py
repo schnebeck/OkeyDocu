@@ -88,7 +88,7 @@ class _Instrument:
 
 def _prepare(app, qtbot, monkeypatch, instrument):
     monkeypatch.setattr(app.devices, "new_driver", lambda key, port="": instrument)
-    overlay = InstrumentPrepareOverlay(app, "prime", "bt:00:11:22:33:44:55")
+    overlay = InstrumentPrepareOverlay(app, "profitest-prime", "bt:00:11:22:33:44:55")
     qtbot.addWidget(overlay)
     qtbot.waitUntil(lambda: not overlay.worker.isRunning(), timeout=3000)
     qtbot.wait(20)  # the worker's signals reach the window
@@ -99,7 +99,7 @@ def test_setting_up_brings_the_texts_over_once_per_firmware(app, qtbot, monkeypa
     instrument = _Instrument()
     overlay = _prepare(app, qtbot, monkeypatch, instrument)
     assert overlay.done and instrument.reads == 1
-    assert app.db.device_text_firmware("prime") == "02.00.00"
+    assert app.db.device_text_firmware("profitest-prime") == "02.00.00"
     assert overlay.states == {"identify": "done", "texts": "done"}
     again = _prepare(app, qtbot, monkeypatch, instrument)
     assert again.states["texts"] == "skipped" and instrument.reads == 1
@@ -114,9 +114,9 @@ def test_an_update_of_the_firmware_asks_for_the_texts_again(app):
 
 def test_a_blocked_instrument_asks_for_setup_and_can_be_tried_again(app, qtbot, monkeypatch):
     overlay = _prepare(app, qtbot, monkeypatch, _Instrument(blocked=True))
-    assert not overlay.done and "Setup" in overlay.hint.text()
+    assert not overlay.done and overlay.hint.text() == "Daten gerade nicht frei."
     assert overlay.ok_button.text() == "Erneut versuchen" and overlay.cancel_button.isEnabled()
-    assert app.db.device_text_firmware("prime") is None
+    assert app.db.device_text_firmware("profitest-prime") is None
 
 
 def test_a_changed_setting_is_judged_in_words_on_both_sides(app):
@@ -166,11 +166,11 @@ def test_pairing_over_bluetooth_goes_straight_on_to_setting_up(app, qtbot, monke
     monkeypatch.setattr(settings_dialog.InstrumentPrepareOverlay, "exec", lambda self: 1)
 
     def paired(self):
-        self.address = "00:11:22:33:44:55"
+        self.port = "bt:00:11:22:33:44:55"
         return 1
 
     monkeypatch.setattr(settings_dialog.InstrumentSetupOverlay, "exec", paired)
     dialog = settings_dialog.SettingsOverlay(None, app)
     qtbot.addWidget(dialog)
-    dialog.set_up_button.click()
+    dialog.pairing_buttons["profitest-prime"].click()
     assert opened == [("profitest-prime", "bt:00:11:22:33:44:55")]

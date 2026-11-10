@@ -2,7 +2,7 @@
 # Limits and order are proposals. `released: true` marks a plan as approved.
 # A step of kind `measure` takes its instruction from the instrument driver, by its function.
 key: machine_initial_test
-title: Maschine – elektrische Prüfung (Entwurf)
+title: Maschine – elektrische Prüfung
 released: false
 steps:
 - key: rlo

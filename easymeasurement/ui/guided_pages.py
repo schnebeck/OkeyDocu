@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QKeySequence
 from PySide6.QtWidgets import (
     QButtonGroup,
     QHBoxLayout,
@@ -27,7 +28,12 @@ CHOICE_STYLE = (
     "QPushButton { padding: 12px 28px; }"
     "QPushButton:checked { background: palette(highlight); color: palette(highlighted-text); }"
 )
-KEYS = {Qt.Key.Key_J: "yes", Qt.Key.Key_N: "no", Qt.Key.Key_S: "skip"}
+
+
+def _mnemonic(button: QPushButton):
+    """The key underlined in the button's text, which answers without the mouse."""
+    sequence = QKeySequence.mnemonic(button.text())
+    return sequence[0].key() if not sequence.isEmpty() else None
 
 
 def _big_label(point_size_step: int) -> QLabel:
@@ -57,6 +63,7 @@ class CheckPage(QWidget):
             "yes": QPushButton(tr("&Yes")), "no": QPushButton(tr("&No")),
             "skip": QPushButton(tr("&Skip")),
         }
+        self.keys = {_mnemonic(button): choice for choice, button in self.buttons.items()}
         self.group = QButtonGroup(self)
         row = QHBoxLayout()
         for key, button in self.buttons.items():
@@ -127,8 +134,8 @@ class CheckPage(QWidget):
         self.show_hint()
 
     def keyPressEvent(self, event) -> None:
-        if event.key() in KEYS:
-            self.buttons[KEYS[event.key()]].click()
+        if event.key() in self.keys:
+            self.buttons[self.keys[event.key()]].click()
         elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
             self.next_requested.emit()
         else:

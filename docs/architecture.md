@@ -32,8 +32,7 @@ Gesamtergebnis ein.
 Die Struktur eines Kunden ist ein Baum beliebiger Tiefe (`assets`), frei verschachtelbar wie bei
 IZYTRON. Die Typen der Elemente stehen in `asset_kinds`, ihre Merkmale in `kind_features`; beides ist
 unter Einstellungen → Strukturtypen änderbar (`ui/kinds_page.py`). Mitgeliefert werden die Typen aus
-`data/kinds.yaml`. Jeder Typ nennt seine Entsprechung am PROFITEST PRIME (einer von dessen sieben
-Strukturtypen), seinen IZYTRON-Typcode für den Import und ein Prüfintervall. Merkmalswerte liegen
+`data/kinds.yaml`. Jeder Typ nennt seinen IZYTRON-Typcode für den Import und ein Prüfintervall. Merkmalswerte liegen
 gesammelt am Element (`features_json`); leere werden nicht gespeichert und nirgends gezeigt. Wird ein
 Typ gelöscht, bekommen seine Elemente einen Ersatztyp, ihre Werte bleiben unsichtbar erhalten.
 Im Protokoll übersetzen die Sprachdateien Typen und Merkmale über ihren Schlüssel (`kinds`,
@@ -519,8 +518,9 @@ Bedienungsanleitung, Grenzwerte und Reihenfolge sind Vorschläge.
 
 `devices/simulator.py` ist ein vollwertiger Treiber: Er liefert Zufallswerte, gelegentlich außerhalb
 der Grenzwerte, und hat einen zufälligen Uhrenversatz. Mit der Messfunktion lässt sich auch ein
-falsch stehender Drehschalter nachstellen. Protokolle aus Simulationen tragen einen Hinweis und
-lassen sich nicht signieren.
+falsch stehender Drehschalter nachstellen. Seine Beschreibung trägt `simulated=True`; daran, nicht
+am Schlüssel, erkennt die Anwendung Simulationen. Protokolle aus Simulationen tragen einen Hinweis
+und lassen sich nicht signieren.
 
 ## Vorlageneditor
 

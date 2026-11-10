@@ -15,6 +15,7 @@ from pathlib import Path
 
 from ..campaign.service import CampaignService
 from .context import build_context
+from ..devices import is_simulated
 from ..l10n import speaking, tr
 from .pdf import render_pdf
 from .sign import PdfSigner
@@ -115,7 +116,7 @@ class ReportArchive:
         """Sign a report. The signed file is a new archive entry; the original stays."""
         report = self.db.one("SELECT * FROM reports WHERE id=?", report_id)
         campaign = self.service.campaign(report["campaign_id"])
-        if campaign["driver"] == "simulator":
+        if is_simulated(campaign["driver"]):
             raise ReportError(tr("Reports with simulated values are not signed."))
         if report["signed_by"]:
             raise ReportError(tr("This report is already signed."))

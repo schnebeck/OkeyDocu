@@ -21,6 +21,7 @@ from ..model import (
     Verdict,
     conductor_of,
 )
+from ..devices import is_simulated
 from ..l10n import N_, in_language, tr
 from ..vocabulary import function_label as vocabulary_label
 from .attached import Attached, places, sort_attached
@@ -163,7 +164,7 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
                 campaign, service.clock_checks(campaign_id),
                 [row["clock_offset_s"] for row in service.measurements(campaign_id)]),
             "seal": campaign["seal"],
-            "simulated": campaign["driver"] == "simulator",
+            "simulated": is_simulated(campaign["driver"]),
             "draft": campaign["status"] == "open",
         },
         "device": {

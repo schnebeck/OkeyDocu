@@ -14,7 +14,7 @@ from typing import Callable
 from PySide6.QtCore import QDateTime
 from PySide6.QtWidgets import QDateTimeEdit, QHBoxLayout, QLabel, QMenu, QPushButton, QWidget
 
-from ..l10n import moment, tr
+from ..l10n import moment, qt_moment, tr
 from ..model import Verdict
 from ..reporting.context import VERDICT_TEXT
 from .common import function_text, value_line
@@ -34,7 +34,7 @@ class PhotoStartOverlay(Overlay):
             tr("Where should the first photo stand? All other photos move along.")
         ))
         self.edit = QDateTimeEdit(QDateTime(place))
-        self.edit.setDisplayFormat("dd.MM.yyyy HH:mm:ss")
+        self.edit.setDisplayFormat(qt_moment())
         self.edit.setCalendarPopup(True)
         reset = QPushButton(tr("Time taken"))
         reset.setToolTip(tr("The camera's time: {moment}", moment=moment(taken, seconds=True)))

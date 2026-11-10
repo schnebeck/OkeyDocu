@@ -12,11 +12,9 @@ import json
 from dataclasses import asdict, dataclass
 from datetime import datetime
 
+from ..devices import available_drivers
 from ..l10n import tr
 from .records import MANUAL, identity_from_json
-
-SIMULATOR = "simulator"
-
 
 @dataclass(frozen=True)
 class HistoryEntry:
@@ -96,5 +94,6 @@ class InstrumentHistoryMixin:
 
     def _instrument_campaigns(self):
         """Measured or imported with a real instrument; a campaign by hand names none."""
-        return self.db.query("SELECT * FROM campaigns WHERE driver NOT IN (?, ?)",
-                             MANUAL, SIMULATOR)
+        simulated = [info.key for info in available_drivers() if info.simulated]
+        rows = self.db.query("SELECT * FROM campaigns WHERE driver != ?", MANUAL)
+        return [row for row in rows if row["driver"] not in simulated]

@@ -11,8 +11,7 @@ from __future__ import annotations
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QPushButton
 
-from ..devices import find_instruments
-from ..devices.profitest_prime.discovery import DRIVER_KEY
+from ..devices import DriverInfo, available_drivers, find_instruments
 from ..l10n import tr
 from .instrument_log import InstrumentLogOverlay
 from .instrument_prepare import InstrumentPrepareOverlay
@@ -37,8 +36,12 @@ class SettingsOverlay(Overlay):
         self.hint = QLabel(tr("No instrument set up yet. Instruments connected by USB"
                               " appear by themselves."))
         self.hint.setWordWrap(True)
-        self.set_up_button = QPushButton(tr("Set up instrument via Bluetooth …"))
-        self.set_up_button.clicked.connect(self._set_up_instrument)
+        self.pairing_buttons: dict[str, QPushButton] = {}
+        for info in available_drivers():
+            if info.pairing is not None:
+                button = QPushButton(tr(info.pairing.button, instrument=info.label))
+                button.clicked.connect(lambda _=False, info=info: self._pair(info))
+                self.pairing_buttons[info.key] = button
         self.prepare_button = QPushButton(tr("Set up …"))
         self.prepare_button.setToolTip(tr("Checks what the instrument already has here and"
                                           " transfers what is missing. Rotary switch to Setup."))
@@ -60,7 +63,8 @@ class SettingsOverlay(Overlay):
         row.addWidget(self.test_button)
         row.addWidget(self.prepare_button)
         pair_row = QHBoxLayout()
-        pair_row.addWidget(self.set_up_button)
+        for button in self.pairing_buttons.values():
+            pair_row.addWidget(button)
         pair_row.addStretch()
         self.body.addWidget(self.instruments)
         self.body.addWidget(self.hint)
@@ -87,10 +91,10 @@ class SettingsOverlay(Overlay):
         self.test_button.setEnabled(chosen)
         self.log_button.setEnabled(self.app is not None)
 
-    def _set_up_instrument(self) -> None:
-        pairing = InstrumentSetupOverlay(self)
-        if pairing.exec() and pairing.address and self.app is not None:
-            self.prepare(DRIVER_KEY, f"bt:{pairing.address}")
+    def _pair(self, info: DriverInfo) -> None:
+        pairing = InstrumentSetupOverlay(info.pairing, self)
+        if pairing.exec() and pairing.port and self.app is not None:
+            self.prepare(info.key, pairing.port)
         self.refresh()
 
     def _test_chosen(self) -> None:

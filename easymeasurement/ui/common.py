@@ -27,7 +27,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.service import CampaignService
-from ..devices import MeterDriver, create_driver
+from ..devices import MeterDriver, create_driver, is_simulated
 from ..devices.simulator import SimulatedMeter
 from ..l10n import tr
 from ..model import Parameter, Verdict, conductor_of
@@ -55,7 +55,7 @@ class DeviceSession:
     ports: dict[int, str] = field(default_factory=dict)
 
     def new_driver(self, key: str, port: str = "") -> MeterDriver:
-        if key == "simulator":
+        if is_simulated(key):
             return SimulatedMeter(
                 clock_skew_s=random.randint(-300, 300), failure_rate=SIMULATED_FAILURE_RATE
             )
@@ -70,7 +70,7 @@ class DeviceSession:
         known = self.drivers.get(campaign["id"])
         if known is not None:
             return known
-        if campaign["driver"] == "simulator":
+        if is_simulated(campaign["driver"]):
             # After a restart: same clock as before, so stored offsets stay right.
             driver = SimulatedMeter(
                 clock_skew_s=campaign["clock_offset_s"], failure_rate=SIMULATED_FAILURE_RATE

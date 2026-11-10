@@ -15,14 +15,14 @@ from datetime import date, datetime, timedelta
 from ..model import (
     DeviceIdentity,
     MeterMeasurement,
-    Parameter,
     Quantity,
     ResultValue,
     Verdict,
 )
-from ..l10n import tr
+from ..l10n import N_, tr
 from ..vocabulary import function_symbol
 from .base import Capability, DeviceError, LiveReading, MeterDriver, SelectorPosition
+from .driver_info import DriverInfo
 
 _READINGS = {
     "rlo": lambda r: [("rlo", "RLO", f"{r.uniform(0.05, 0.6):.2f}Ω", "", "<1.00Ω")],
@@ -147,7 +147,7 @@ class SimulatedMeter(MeterDriver):
         if function == "u3":
             results.append(
                 ResultValue(
-                    "rotation", "Drehfeld", Quantity(raw="right"), Verdict.PASSED,
+                    "rotation", "Rotating field", Quantity(raw="right"), Verdict.PASSED,
                     setpoint="right",
                 )
             )
@@ -158,7 +158,6 @@ class SimulatedMeter(MeterDriver):
             verdict=Verdict.FAILED if failing else Verdict.PASSED,
             operator="Simulator",
             results=tuple(results),
-            parameters=(Parameter("simuliert", "ja"),),
         )
         # Like the real instrument: a pushed measurement is not kept in its memory.
         if self._on_reading is not None:
@@ -166,3 +165,6 @@ class SimulatedMeter(MeterDriver):
         else:
             self._stored.append(measurement)
         return measurement
+
+
+DRIVER = DriverInfo("simulator", N_("Simulator (no hardware)"), SimulatedMeter, simulated=True)

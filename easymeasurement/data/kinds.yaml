@@ -2,8 +2,6 @@
 # The kinds of structure elements a new database starts with. All of it can be changed
 # under Settings → Structure kinds.
 #
-# device:   what the element is on the PROFITEST PRIME (MACHINE, DISTRIBUTIONCABINET, RCD,
-#           CIRCUIT, ELECTRICALEQUIPMENT, MEASURINGPOINT), empty if it has no counterpart
 # izytron:  object type code in an IZYTRON.IQ database, for the import
 # interval: months until the next inspection is due, 0 for none
 # features: "Label|unit"; features left empty are not shown anywhere
@@ -14,74 +12,74 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 kinds:
-  - {key: installation, label: Installation, icon: installation, device: MACHINE, interval: 48,
+  - {key: installation, label: Installation, icon: installation, interval: 48,
      features: [Operator, Person responsible, Installer, Year of installation, Network operator,
                 Earthing system type, "Supply voltage|V", "Supply frequency|Hz", "Rated current|A",
                 Cable type, "Cross-section|mm²", "Cable length|m"]}
-  - {key: machine, label: Machine, icon: machine, device: MACHINE, izytron: 231, interval: 12,
+  - {key: machine, label: Machine, icon: machine, izytron: 231, interval: 12,
      features: [CE marking, IP rating, Protection class, "Nominal voltage|V", Earthing system type,
                 Supply cable, "Rated current|A", "Rated power|kW", Number of cores, Power factor,
                 Characteristic, "Cross-section|mm²", Ex number, Ex zone,
                 Type of ignition protection, "Cable length|m"]}
-  - {key: device, label: Device, icon: device, device: ELECTRICALEQUIPMENT, interval: 12,
+  - {key: device, label: Device, icon: device, interval: 12,
      features: [Protection class, "Nominal voltage|V", "Rated current|A", "Rated power|kW"]}
   - {key: distribution_board, label: Distribution board, icon: distribution_board,
-     device: DISTRIBUTIONCABINET, izytron: 232, interval: 48,
+     izytron: 232, interval: 48,
      features: [Board type, IP rating, Material, Installation method, Protection class,
                 Earthing system type, "Cable length|m"]}
   - {key: construction_distributor, label: Construction site distribution board,
-     icon: construction_distributor, device: DISTRIBUTIONCABINET, interval: 3,
+     icon: construction_distributor, interval: 3,
      features: [Material number, Insulation class, Year of manufacture, Phases, Number of poles,
                 "Rated current|A", "Rated voltage|V", "Rated power|kW", "Weight|kg"]}
-  - {key: rcd, label: RCD, icon: rcd, device: RCD, izytron: 233, interval: 6,
+  - {key: rcd, label: RCD, icon: rcd, izytron: 233, interval: 6,
      features: [RCD type, Number of poles, "Rated residual current|mA", "Rated current|A",
                 Characteristic, Circuit breaker characteristic, Cable type, Number of cores,
                 "Cross-section|mm²", "Cable length|m"]}
-  - {key: rcm, label: Residual current monitor, icon: rcm, device: RCD, interval: 6,
+  - {key: rcm, label: Residual current monitor, icon: rcm, interval: 6,
      features: [RCM type, Number of poles, "Rated residual current|mA", "Rated current|A",
                 Characteristic, "Alarm threshold|mA"]}
   - {key: imd, label: Insulation monitoring device, icon: imd, interval: 6,
      features: [IMD type, "Nominal system voltage|V", "Measuring voltage|V",
                 "Measuring current|mA", "Warning value|kΩ", "Alarm value|kΩ"]}
-  - {key: circuit, label: Circuit, icon: circuit, device: CIRCUIT, izytron: 236,
+  - {key: circuit, label: Circuit, icon: circuit, izytron: 236,
      features: [Cable type, Characteristic, Number of cores, "Rated current|A",
                 "Cross-section|mm²", Number of poles, "Cable length|m"]}
-  - {key: cable, label: Cable, icon: cable, device: CIRCUIT,
+  - {key: cable, label: Cable, icon: cable,
      features: [Cable type, Number of cores, "Cross-section|mm²", "Cable length|m"]}
   - {key: pa_conductor, label: Equipotential bonding conductor, icon: pa_conductor,
-     device: CIRCUIT, interval: 48,
+     interval: 48,
      features: [Cable type, Conductor material, "Cross-section|mm²", "Cable length|m"]}
   - {key: ground, label: Earthing system, icon: ground, interval: 48,
      features: [Earth electrode type, Material, Composition, Soil condition, Purpose,
                 "Cross-section|mm²", "Cable length|m"]}
-  - {key: equipment, label: Equipment, icon: equipment, device: ELECTRICALEQUIPMENT, izytron: 237,
+  - {key: equipment, label: Equipment, icon: equipment, izytron: 237,
      interval: 12,
      features: [Equipment type, Cable type, Degree of protection, Number of cores,
                 Protection class, "Cross-section|mm²", "Cable length|m"]}
-  - {key: electric_engine, label: Electric motor, icon: electric_engine, device: MACHINE,
+  - {key: electric_engine, label: Electric motor, icon: electric_engine,
      interval: 12,
      features: [IP rating, Insulation class, Year of manufacture, Gearbox, Number of poles, Phases,
                 "Rated voltage|V", "Rated current|A", "Rated power|kW", Duty type, "Speed|1/min",
                 Power factor]}
-  - {key: generator, label: Generator, icon: generator, device: MACHINE, interval: 12,
+  - {key: generator, label: Generator, icon: generator, interval: 12,
      features: [IP rating, Thermal class, Insulation class, Phases, Year of manufacture,
                 "Rated voltage|V", "Rated current|A", "Active power|kW", "Apparent power|kVA",
                 Duty type, "Speed|1/min"]}
-  - {key: wind_power, label: Wind turbine, icon: wind_power, device: MACHINE, interval: 12,
+  - {key: wind_power, label: Wind turbine, icon: wind_power, interval: 12,
      features: [IP rating, Thermal class, Phases, Year of manufacture, "Rated voltage|V",
                 "Rated current|A", "Active power|kW", "Apparent power|kVA", "Speed|1/min"]}
-  - {key: photovoltaic, label: PV system, icon: photovoltaic, device: MACHINE, interval: 48,
+  - {key: photovoltaic, label: PV system, icon: photovoltaic, interval: 48,
      features: [Module type, "Rated power|kWp", "Nominal voltage|V", "Rated current|A",
                 "Open-circuit voltage|V", "Short-circuit current|A", Connector, Cells per module]}
-  - {key: charging_station, label: Charging station, icon: charging_station, device: MACHINE,
+  - {key: charging_station, label: Charging station, icon: charging_station,
      interval: 12,
      features: [Charging equipment, "Total power|kW", Charging mode, Charging type,
                 "Charging current|A", "DC charging voltage|V", Plug type,
                 Three-phase charging points, Single-phase charging points]}
-  - {key: battery, label: Battery, icon: battery, device: ELECTRICALEQUIPMENT, interval: 12,
+  - {key: battery, label: Battery, icon: battery, interval: 12,
      features: [Technology, Protection class, "Nominal voltage|V", Number of cells,
                 "Cell voltage|V", "Rated capacity|Ah", "Final discharge voltage|V", IP rating]}
-  - {key: battery_bank, label: Battery system, icon: battery_bank, device: ELECTRICALEQUIPMENT,
+  - {key: battery_bank, label: Battery system, icon: battery_bank,
      interval: 12,
      features: [Battery type, Number of blocks, "Block voltage|V", "Total voltage|V",
                 "Rated capacity|Ah", "Charging voltage|V", "Float charge voltage|V", Commissioning,
@@ -109,5 +107,5 @@ kinds:
      features: [Opening type, Opening direction, Material, Load class, "Width|m", "Height|m"]}
   - {key: esd, label: ESD workstation, icon: esd, interval: 12,
      features: [Test object, Measurement type, Measuring points]}
-  - {key: measuring_point, label: Measuring point, icon: measuring_point, device: MEASURINGPOINT,
+  - {key: measuring_point, label: Measuring point, icon: measuring_point,
      izytron: 242}

@@ -22,10 +22,11 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 
 from .catalog import SOURCE, Catalog, available, catalog, source_of
-from .formats import day, decimal, moment
+from .formats import day, decimal, moment, qt_moment
 
 __all__ = ["SOURCE", "N_", "available", "current", "day", "decimal", "in_language",
-           "is_translation", "moment", "plural", "set_language", "speaking", "tr"]
+           "is_translation", "moment", "plural", "qt_moment", "set_language", "speaking",
+           "tr"]
 
 _chosen = SOURCE
 _speaking: ContextVar[str | None] = ContextVar("speaking", default=None)

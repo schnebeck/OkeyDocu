@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
 )
 
-from ..l10n import N_, tr
+from ..l10n import N_, qt_moment, tr
 from ..model import Quantity, ResultValue, Verdict
 from ..vocabulary import function_keys, function_label
 from .common import function_short
@@ -70,7 +70,7 @@ class MeasurementOverlay(Overlay):
         self.function.setCurrentIndex(self.function.findData("other"))
         self.function.currentIndexChanged.connect(self._name_first_value)
         self.moment = QDateTimeEdit(QDateTime.currentDateTime())
-        self.moment.setDisplayFormat("dd.MM.yyyy HH:mm:ss")
+        self.moment.setDisplayFormat(qt_moment())
         self.moment.setCalendarPopup(True)
         self.location = QLineEdit(placeholderText=tr("Where it was measured"))
         self.comment = GrowingEdit(tr("Remark on the measurement"))

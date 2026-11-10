@@ -14,7 +14,19 @@ from importlib import resources
 import yaml
 
 from ..devices.registry import instruction_folders
-from ..l10n import tr
+from ..l10n import N_, available, speaking, tr
+
+DRAFT = N_("{title} (draft)")
+
+
+def says_draft(title: str) -> bool:
+    """Whether a title already calls its plan a draft, in any of the program's languages."""
+    for code in available():
+        with speaking(code):
+            marker = tr(DRAFT, title="").strip()
+        if marker in title:
+            return True
+    return False
 
 
 @dataclass(frozen=True)
@@ -123,8 +135,8 @@ class Plan:
     @property
     def label(self) -> str:
         """The name as a campaign states it, which also tells a draft."""
-        draft = not self.released and "Entwurf" not in self.title
-        return tr("{title} (draft)", title=self.title) if draft else self.title
+        draft = not self.released and not says_draft(self.title)
+        return tr(DRAFT, title=self.title) if draft else self.title
 
 
 def _settings(raw: dict) -> list[tuple[str, str]]:

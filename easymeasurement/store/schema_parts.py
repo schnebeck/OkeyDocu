@@ -27,7 +27,6 @@ CREATE TABLE asset_kinds (
     key TEXT PRIMARY KEY,
     label TEXT NOT NULL,
     icon TEXT NOT NULL DEFAULT 'element',
-    device_type TEXT NOT NULL DEFAULT '',
     izytron_type INTEGER,
     interval_months INTEGER NOT NULL DEFAULT 0,
     position INTEGER NOT NULL DEFAULT 0

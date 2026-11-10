@@ -17,7 +17,7 @@ from __future__ import annotations
 import re
 from importlib import resources
 
-from ...l10n import N_, current
+from ...l10n import current
 
 CODE = re.compile(r"^TS\d{4}$")
 
@@ -99,17 +99,6 @@ CONDUCTORS = {
     "TS1443": "L1-L2",
     "TS1444": "L2-L3",
     "TS1445": "L1-L3",
-}
-
-# What a structure element is on the instrument, for a kind of the settings.
-STRUCTURE_TYPES = {
-    "": N_("none"),
-    "MACHINE": N_("Machine"),
-    "DISTRIBUTIONCABINET": N_("Distribution board"),
-    "RCD": N_("RCD"),
-    "CIRCUIT": N_("Circuit"),
-    "ELECTRICALEQUIPMENT": N_("Equipment"),
-    "MEASURINGPOINT": N_("Measuring point"),
 }
 
 # The program's languages onto the instrument's; one it lacks falls back to English.

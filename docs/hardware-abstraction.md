@@ -110,11 +110,20 @@ serial port, such as `LEQ,A,F,78.4,2026-05-04T10:15:02`.
    - `mapping.py` turns `LEQ`/`A` into result `laeq`, `MAX`/`A`/`F` into `lafmax` and the
      weighting letters into the settings `frequency_weighting` and `time_weighting`. Everything
      else passes through. The line as received is kept as the measurement's `raw`.
-3. **Registry.** `devices/registry.py` registers the driver in `_load_builtin()`:
-   `register_driver(key, label, factory, find, words, structure_types, instructions)`. Only
-   key, label and factory are needed; `words` (an `InstrumentWords`) if the instrument names its
-   own codes, `structure_types` if elements of the structure have a counterpart on it,
-   `instructions` for its folder of instructions.
+3. **Description.** `devices/sound_meter/info.py` describes the driver as a `DriverInfo`
+   (`devices/driver_info.py`), and `_load_builtin()` in `devices/registry.py` registers it.
+   Only key, label and factory are needed. The others, where they apply:
+   - `find`: lists the instruments that can be chosen now;
+   - `words`: an `InstrumentWords`, if the instrument names its own codes;
+   - `instructions`: its folder of instructions;
+   - `pairing`: a `Pairing` for a wireless instrument that is paired once (button text,
+     steps on the instrument, default PIN, and the function that pairs and returns the port);
+   - `preparing`: what the operator is told while the program gets the instrument ready;
+   - `simulated`: for a software instrument whose readings may never be signed.
+
+   The application asks the registry (`driver_info`, `available_drivers`, `is_simulated`) and
+   never imports a driver package. Texts in the description are English source texts; their
+   translations go into `data/languages/<code>/<driver>.yaml`.
 4. **Instructions.** How to set up and connect the instrument for a function lives with the
    driver: `devices/sound_meter/instructions/sound_level.yaml`, in the same form as the
    PROFITEST PRIME's (`devices/profitest_prime/instructions/`).
@@ -130,6 +139,9 @@ Nothing in `ui/`, `store/`, `campaign/` or `reporting/` changes for a new instru
 ## Checklist
 
 - Device codes appear only in `devices/<instrument>/mapping.py`.
+- Nothing outside `devices/` imports a driver package; the application asks the registry.
+  Two places know a driver by design: the UI drives the simulator itself (demos, test runs of
+  a plan), and the IZYTRON import reads results a PROFITEST PRIME took, with its mapping.
 - The instrument's record is kept as `raw`; an unknown code stays the key.
 - New keys exist in `data/vocabulary/`, new names in every language catalogue.
 - Only commands from the instrument's documented reference are sent, through an allowlist.

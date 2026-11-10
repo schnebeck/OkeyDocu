@@ -11,20 +11,9 @@ from __future__ import annotations
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import QFormLayout, QLabel, QLineEdit
 
-from ..devices import DeviceError
-from ..devices.profitest_prime import pairing
-from ..l10n import N_, tr
+from ..devices import DeviceError, Pairing
+from ..l10n import tr
 from .overlay import Overlay
-
-INSTRUCTIONS = N_(
-    "<ol>"
-    "<li>Unplug the USB cable.</li>"
-    "<li>Turn the rotary switch to <b>Setup</b>.</li>"
-    "<li>In the Bluetooth menu, set Bluetooth to <b>on</b> and <b>visible</b>.</li>"
-    "<li>Click <b>Set up</b> here and confirm a request on the instrument.</li>"
-    "</ol>"
-    "This is needed only once. After that the instrument is in the list and only gets chosen."
-)
 
 
 class PairingWorker(QThread):
@@ -32,17 +21,17 @@ class PairingWorker(QThread):
     failed = Signal(str)
     paired = Signal(str)
 
-    def __init__(self, pin: str, parent=None):
+    def __init__(self, pairing: Pairing, pin: str, parent=None):
         super().__init__(parent)
-        self.pin = pin
+        self.pairing, self.pin = pairing, pin
 
     def run(self) -> None:
         try:
-            address = pairing.pair_instrument(self.pin, self.progress.emit)
+            port = self.pairing.pair(self.pin, self.progress.emit)
         except DeviceError as err:
             self.failed.emit(str(err))
         else:
-            self.paired.emit(address)
+            self.paired.emit(port)
 
 
 class InstrumentSetupOverlay(Overlay):
@@ -50,14 +39,15 @@ class InstrumentSetupOverlay(Overlay):
 
     paired = Signal()
 
-    def __init__(self, parent=None):
+    def __init__(self, pairing: Pairing, parent=None):
         super().__init__(tr("Set up instrument"), parent)
+        self.pairing = pairing
         self.worker: PairingWorker | None = None
-        self.address = ""  # of the instrument just paired
-        self.pin = QLineEdit(pairing.DEFAULT_PIN)
+        self.port = ""  # of the instrument just paired
+        self.pin = QLineEdit(pairing.default_pin)
         self.status = QLabel()
         self.status.setWordWrap(True)
-        guide = QLabel(tr(INSTRUCTIONS))
+        guide = QLabel(tr(pairing.instructions))
         guide.setWordWrap(True)
         self.start_button = self.ok_button
         self.start_button.setText(tr("Set up"))
@@ -78,7 +68,7 @@ class InstrumentSetupOverlay(Overlay):
         if self.worker is not None and self.worker.isRunning():
             return
         self.start_button.setEnabled(False)
-        self.worker = PairingWorker(self.pin.text().strip(), self)
+        self.worker = PairingWorker(self.pairing, self.pin.text().strip(), self)
         self.worker.progress.connect(self.status.setText)
         self.worker.failed.connect(self._failed)
         self.worker.paired.connect(self._paired)
@@ -88,8 +78,8 @@ class InstrumentSetupOverlay(Overlay):
         self.status.setText(text)
         self.start_button.setEnabled(True)
 
-    def _paired(self, address: str) -> None:
-        self.address = address
+    def _paired(self, port: str) -> None:
+        self.port = port
         self.status.setText(tr("The instrument is paired."))
         self.paired.emit()
         super().accept()

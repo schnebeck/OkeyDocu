@@ -12,6 +12,7 @@ from datetime import datetime
 
 from PySide6.QtWidgets import QListWidgetItem, QTableWidgetItem
 
+from ..devices import is_simulated
 from ..l10n import tr
 from . import step_text
 from .common import ROW_ID, filling, function_short, value_line
@@ -164,7 +165,7 @@ class GuidedSteps:
             self.wiring.complete or self.wiring.step is None
         )
         self.confirm_button.setEnabled(status != "pending" or ready)
-        simulated = bool(campaign and campaign["driver"] == "simulator")
+        simulated = bool(campaign and is_simulated(campaign["driver"]))
         self.simulate_button.setVisible(simulated)
         self.simulate_function.setVisible(simulated)
         self.simulate_button.setEnabled(measuring)

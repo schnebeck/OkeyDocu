@@ -16,6 +16,7 @@ from PySide6.QtWidgets import QPushButton
 from easymeasurement.__main__ import build_context
 from easymeasurement.devices import DeviceError, FoundInstrument
 from easymeasurement.devices.profitest_prime import pairing
+from easymeasurement.devices.profitest_prime.info import DRIVER as PRIME_DRIVER
 from easymeasurement.devices.simulator import SimulatedMeter
 from easymeasurement.ui.campaign_dialog import CampaignDialog
 from easymeasurement.ui.common import run_busy
@@ -114,7 +115,7 @@ def _new_campaign(window, plan_text, monkeypatch):
 def test_campaign_with_a_plan_opens_the_guided_steps(qtbot, app, monkeypatch):
     window = MainWindow(app)
     qtbot.addWidget(window)
-    _new_campaign(window, window.guided.plans[0].title, monkeypatch)
+    _new_campaign(window, window.guided.plans[0].label, monkeypatch)
     assert window.campaign.current_work() is window.guided
     assert window.guided.campaign_id is not None
 
@@ -163,17 +164,17 @@ def test_instrument_appears_right_after_setting_it_up(qtbot, monkeypatch):
     qtbot.addWidget(dialog)
     monkeypatch.setattr(InstrumentSetupOverlay, "exec", lambda self: 1)
     monkeypatch.setattr("easymeasurement.ui.settings_dialog.find_instruments", lambda: [PRIME])
-    dialog.set_up_button.click()
+    dialog.pairing_buttons[PRIME_DRIVER.key].click()
     assert dialog.instruments.count() == 1
 
 
 def test_setup_dialog_reports_success_and_closes(qtbot, monkeypatch):
     monkeypatch.setattr(pairing, "pair_instrument", lambda pin, progress: ADDRESS)
-    dialog = InstrumentSetupOverlay()
+    dialog = InstrumentSetupOverlay(PRIME_DRIVER.pairing)
     qtbot.addWidget(dialog)
     with qtbot.waitSignal(dialog.paired, timeout=3000):
         dialog.start()
-    assert dialog.accepted
+    assert dialog.accepted and dialog.port == f"bt:{ADDRESS}"
 
 
 def test_setup_dialog_shows_a_failure_and_stays_open(qtbot, monkeypatch):
@@ -181,7 +182,7 @@ def test_setup_dialog_shows_a_failure_and_stays_open(qtbot, monkeypatch):
         raise pairing.PairingFailed("nicht gefunden")
 
     monkeypatch.setattr(pairing, "pair_instrument", fail)
-    dialog = InstrumentSetupOverlay()
+    dialog = InstrumentSetupOverlay(PRIME_DRIVER.pairing)
     qtbot.addWidget(dialog)
     dialog.show()
     dialog.start()

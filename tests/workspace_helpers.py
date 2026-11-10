@@ -35,4 +35,4 @@ def start(window, monkeypatch, plan="Ohne Plan", simulated=False):
 
 
 def plan_title(window):
-    return window.guided.plans[0].title
+    return window.guided.plans[0].label  # as the start dialog lists it

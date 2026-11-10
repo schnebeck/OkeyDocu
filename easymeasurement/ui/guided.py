@@ -26,6 +26,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..campaign.plan import says_draft
+from ..devices import is_simulated
 from ..devices.simulator import SIMULATED_FUNCTIONS
 from ..l10n import day, tr
 from .common import AppContext, function_short, make_table
@@ -196,9 +198,9 @@ class GuidedPage(GuidedSteps, GuidedActions, QWidget):
             self.banner.hide()
             return
         notes = []
-        if "Entwurf" in campaign["plan_title"]:
+        if says_draft(campaign["plan_title"]):
             notes.append(tr("The test plan is a draft and not yet approved technically."))
-        if campaign["driver"] == "simulator":
+        if is_simulated(campaign["driver"]):
             notes.append(tr("<b>Simulation:</b> The readings are random values."))
         identity = self.app.service.identity(self.campaign_id)
         if identity.calibration_overdue(datetime.now().date()):

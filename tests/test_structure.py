@@ -126,7 +126,7 @@ def test_a_fresh_database_knows_the_shipped_kinds(app):
     assert labels["machine"] == "Maschine" and labels["extinguisher"] == "Feuerlöscher"
     assert len(labels) >= 28
     machine = app.db.kind("machine")
-    assert machine.izytron_type == 231 and machine.device_type == "MACHINE"
+    assert machine.izytron_type == 231
     assert any(f.label == "Nennstrom" and f.unit == "A" for f in machine.features)
 
 

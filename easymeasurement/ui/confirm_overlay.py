@@ -13,6 +13,7 @@ from html import escape
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QLabel
 
+from ..devices import is_simulated
 from ..l10n import N_, current, plural, tr
 from ..reporting.language import languages
 from ..reporting.sign import SigningError
@@ -72,7 +73,7 @@ class ConfirmOverlay(Overlay):
         super().__init__(tr("Confirm report"), parent, width=580)
         self.ok_button.setText(tr("Confirm and file"))
         self.problems = app.service.blockers(campaign["id"])
-        simulated = campaign["driver"] == "simulator"
+        simulated = is_simulated(campaign["driver"])
         what = QLabel(tr(WHAT_HAPPENS))
         what.setWordWrap(True)
         self.summary = QLabel(_summary(app, campaign["id"]))

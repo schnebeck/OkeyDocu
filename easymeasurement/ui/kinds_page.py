@@ -25,7 +25,6 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ..devices import structure_types
 from ..l10n import plural, tr
 from ..store.kinds import Kind
 from .board import GutterSplitter
@@ -68,10 +67,6 @@ class KindsPage(QWidget):
         for name in sorted(icon_names(), key=lambda n: icon_text(n).casefold()):
             self.icon.addItem(element_icon(name), icon_text(name), name)
         self.icon.activated.connect(lambda _: self._save())
-        self.device = QComboBox()
-        for key, text in structure_types().items():
-            self.device.addItem(tr(text), key)
-        self.device.activated.connect(lambda _: self._save())
         self.izytron = QSpinBox(maximum=9999)
         self.izytron.setSpecialValueText(tr("none", context="type code"))
         self.izytron.editingFinished.connect(self._save)
@@ -85,7 +80,6 @@ class KindsPage(QWidget):
         form = QFormLayout()
         form.addRow(tr("Label"), self.label)
         form.addRow(tr("Icon"), self.icon)
-        form.addRow(tr("On the PROFITEST PRIME"), self.device)
         form.addRow(tr("IZYTRON type code"), self.izytron)
         form.addRow(tr("Inspection interval"), self.interval)
         self.editor = QWidget()
@@ -136,7 +130,6 @@ class KindsPage(QWidget):
             return
         self.label.setText(kind.label)
         self.icon.setCurrentIndex(max(self.icon.findData(kind.icon), 0))
-        self.device.setCurrentIndex(max(self.device.findData(kind.device_type), 0))
         self.izytron.setValue(kind.izytron_type or 0)
         self.interval.setValue(kind.interval_months)
         self.features.show_features(kind.features)
@@ -155,7 +148,7 @@ class KindsPage(QWidget):
             return
         kind = replace(
             stored, label=self.label.text().strip() or stored.label, icon=self.icon.currentData(),
-            device_type=self.device.currentData(), izytron_type=self.izytron.value() or None,
+            izytron_type=self.izytron.value() or None,
             interval_months=self.interval.value(), features=self.features.features(),
         )
         if kind != stored:

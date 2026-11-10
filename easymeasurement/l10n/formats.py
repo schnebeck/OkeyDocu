@@ -36,6 +36,17 @@ def moment(value: datetime | None, seconds: bool = False) -> str:
     return value.strftime(f"{pattern('date')} {clock}")
 
 
+QT_FIELDS = {"%d": "dd", "%m": "MM", "%Y": "yyyy", "%H": "HH", "%M": "mm", "%S": "ss"}
+
+
+def qt_moment() -> str:
+    """Date and time with seconds as a Qt display format, for fields that edit a moment."""
+    text = f"{pattern('date')} {pattern('time')}"
+    for field, qt_field in QT_FIELDS.items():
+        text = text.replace(field, qt_field)
+    return text
+
+
 def decimal(value: float, digits: int = 1) -> str:
     """A number with the decimal sign of the language."""
     return f"{value:.{digits}f}".replace(".", pattern("decimal"))
