@@ -172,7 +172,6 @@ class MainWindow(MainMenus, QMainWindow):
         for section in self.campaign.side.sections:
             memory.keep_section(section)
         memory.keep_toggle("side", self.side_action)
-        memory.keep_toggle("timeline", self.campaign.timeline_action)
 
     def changeEvent(self, event) -> None:
         """Plans, templates and master data change in windows of their own."""

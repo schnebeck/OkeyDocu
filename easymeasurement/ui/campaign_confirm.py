@@ -24,6 +24,7 @@ WEAK_SEAL = (
     "Der Datensatz ist abgeschlossen, aber der Schlüssel aus KWallet war nicht erreichbar.\n\n"
     "Das Siegel erkennt damit nur zufällige Änderungen, keine gezielte Manipulation."
 )
+DRAWING = "Erstelle das Protokoll …"
 LATER = "Das Protokoll lässt sich unter „Protokolle“ erneut erstellen und signieren."
 
 
@@ -38,7 +39,8 @@ class CampaignConfirm:
         self.values.editor.apply()  # the draft shows what was typed, too
         language = settings().value("protocol_language", SOURCE)
         try:
-            path = self.app.archive.draft(campaign["id"], templates[0]["body"], language)
+            path = self.app.archive.draft(campaign["id"], templates[0]["body"], language,
+                                          lambda work: run_busy(self, DRAWING, work))
         except (ReportError, TemplateError) as err:
             show_error(self, str(err))
             return
@@ -94,7 +96,7 @@ class CampaignConfirm:
             overlay.language.remember()
             report = self.app.archive.generate(
                 campaign_id, overlay.template.currentText(), overlay.template.currentData(),
-                overlay.language.code(),
+                overlay.language.code(), lambda work: run_busy(self, DRAWING, work),
             )
             if not overlay.signing():
                 return "Protokoll abgelegt."

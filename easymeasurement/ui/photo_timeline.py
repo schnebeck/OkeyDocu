@@ -11,11 +11,13 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Callable
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QSizePolicy,
+    QStyle,
     QToolButton,
     QVBoxLayout,
     QWidget,
@@ -27,7 +29,8 @@ from .photo_overlays import TimelineAsking
 from .photo_shared import shared_thumbs
 from .photo_timeline_data import TimelineData
 from .photo_timeline_model import default_gap_seconds, shift_text
-from .photo_timeline_view import TrackView
+from .photo_timeline_scroll import TimelineScroll
+from .photo_timeline_view import WIDEST_RATIO, TrackView
 
 NO_TIME = "Dieses Foto hat keine Aufnahmezeit. Bitte auf eine Messung ziehen."
 PICK_A_PHOTO = "Erst ein nicht angeheftetes Foto anklicken: die Lücke entsteht direkt davor."
@@ -39,6 +42,7 @@ class PhotoTimeline(TimelineAsking, QWidget):
 
     changed = Signal()
     measurement_chosen = Signal(int)
+    close_requested = Signal()
 
     def __init__(self, app: AppContext):
         super().__init__()
@@ -56,6 +60,12 @@ class PhotoTimeline(TimelineAsking, QWidget):
         self.start_button = self._button(
             "Start setzen …", "Die genaue Zeit des ersten Fotos eingeben", self._ask_start
         )
+        self.scroll = TimelineScroll(self.view, WIDEST_RATIO)
+        self.close_button = self._button("Schließen", "Die Zeitleiste ausblenden; „Fotos zuordnen“"
+                                         " oben zeigt sie wieder", self.close_requested.emit)
+        closing = self.style().standardIcon(QStyle.StandardPixmap.SP_TitleBarCloseButton)
+        self.close_button.setIcon(QIcon.fromTheme("window-close", closing))
+        self.close_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         self.shift_label = QLabel()
         self.hint_label = QLabel()
         self.hint_label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
@@ -65,11 +75,13 @@ class PhotoTimeline(TimelineAsking, QWidget):
             bar.addWidget(button)
         bar.addStretch(1)
         bar.addWidget(self.shift_label)
+        bar.addWidget(self.close_button)
         column = QVBoxLayout(self)
         column.setContentsMargins(0, 0, 0, 0)
         column.setSpacing(2)
         column.addLayout(bar)
         column.addWidget(self.view, 1)
+        column.addWidget(self.scroll)
         column.addWidget(self.hint_label)
         view = self.view
         view.hint.connect(self.hint_label.setText)

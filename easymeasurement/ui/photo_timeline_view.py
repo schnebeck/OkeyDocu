@@ -41,6 +41,7 @@ class TrackView(ViewEvents, TrackPlacing, QGraphicsView):
     delete_pressed = Signal()
     selection_changed = Signal()
     menu_wanted = Signal(object, float, QPoint)
+    axis_moved = Signal()  # after any zoom, pan, fit or resize
 
     def __init__(self, thumbs: ThumbCache):
         super().__init__()
@@ -134,6 +135,10 @@ class TrackView(ViewEvents, TrackPlacing, QGraphicsView):
     def _thumb_ready(self, path: str) -> None:
         for item in self._by_path.get(path, ()):
             item.set_pixmap(self.thumbs.get(Path(path)))
+
+    def relayout(self) -> None:
+        super().relayout()
+        self.axis_moved.emit()
 
     def fit(self) -> None:
         self.fitted = True

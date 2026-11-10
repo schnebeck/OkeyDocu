@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 
@@ -22,6 +23,22 @@ from .template import parse_template, resolve
 
 class ReportError(Exception):
     pass
+
+
+Runner = Callable[[Callable[[], None]], None]
+
+
+def _at_once(work: Callable[[], None]) -> None:
+    work()
+
+
+def _render(nodes, path: Path, footer: str, language: str) -> Callable[[], None]:
+    """The drawing alone, free of the database, so a runner may move it to another thread;
+    the language is set again there, since a new thread starts without it."""
+    def work() -> None:
+        with speaking(language):
+            render_pdf(nodes, path, footer=footer)
+    return work
 
 
 def _sha256(path: Path) -> str:
@@ -56,7 +73,8 @@ class ReportArchive:
         return path.exists() and _sha256(path) == report["sha256"]
 
     def generate(
-        self, campaign_id: int, template_name: str, template_body: str, language: str = "de"
+        self, campaign_id: int, template_name: str, template_body: str, language: str = "de",
+        run: Runner = _at_once,
     ) -> int:
         """Render a closed campaign to a new archived PDF, keeping template and language."""
         campaign = self.service.campaign(campaign_id)
@@ -69,7 +87,8 @@ class ReportArchive:
         path = folder / f"protokoll-{stamp}-{language}.pdf"
         with speaking(language):
             nodes = resolve(parse_template(template_body), build_context(self.service, campaign_id))
-            render_pdf(nodes, path, footer=f"{tr('Prüfung')} {campaign['uuid']}")
+            footer = f"{tr('Prüfung')} {campaign['uuid']}"
+        run(_render(nodes, path, footer, language))
         return self.db.execute(
             "INSERT INTO reports (campaign_id, template_name, template_body, file_name, sha256,"
             " created_at, language) VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -77,7 +96,8 @@ class ReportArchive:
             datetime.now().isoformat(timespec="seconds"), language,
         )
 
-    def draft(self, campaign_id: int, template_body: str, language: str = "de") -> Path:
+    def draft(self, campaign_id: int, template_body: str, language: str = "de",
+              run: Runner = _at_once) -> Path:
         """A preview of an open campaign. It is overwritten each time and never archived."""
         if self.service.campaign(campaign_id)["status"] != "open":
             raise ReportError("Ein Entwurf entsteht nur aus einer offenen Kampagne.")
@@ -85,7 +105,8 @@ class ReportArchive:
         path.parent.mkdir(parents=True, exist_ok=True)
         with speaking(language):
             nodes = resolve(parse_template(template_body), build_context(self.service, campaign_id))
-            render_pdf(nodes, path, footer=tr("ENTWURF – nicht gültig"))
+            footer = tr("ENTWURF – nicht gültig")
+        run(_render(nodes, path, footer, language))
         return path
 
     def sign(self, report_id: int, signer: PdfSigner) -> int:

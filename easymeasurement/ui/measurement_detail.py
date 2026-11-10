@@ -76,6 +76,7 @@ class MeasurementDetail:
         editable = bool(row) and row_is_open(self.app, row)
         editor.show_row(row, editable, capture_text(row) if row else "")
         self.gallery.setVisible(not self.hide_empty_gallery)
+        self.gallery.removable = editable
         if row is None:
             return
         service, thumbs = self.app.service, shared_thumbs()
@@ -95,6 +96,11 @@ class MeasurementDetail:
         PhotoPreview(item.text(), item.toolTip(), Path(item.data(PHOTO_PATH)), self, self.app,
                      item.data(PHOTO_ID)).exec()
         self._show_detail()  # a role changed shows in the gallery
+
+    def _unpin_photo(self, photo_id: int) -> None:
+        """The photo leaves the measurement and waits among the photos of no measurement."""
+        self.app.service.stack_photo(photo_id)
+        self._after_change()
 
     def _thumb_ready(self, path: str) -> None:
         for index in range(self.gallery.count()):

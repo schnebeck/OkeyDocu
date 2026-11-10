@@ -25,7 +25,7 @@ from ..reporting.archive import ReportError
 from ..reporting.language import languages
 from ..reporting.template import TemplateError
 from ..store.search import search_reports
-from .common import ROW_ID, AppContext, make_table, selected_id, show_error
+from .common import ROW_ID, AppContext, make_table, run_busy, selected_id, show_error
 from .confirm_overlay import LanguageChoice, TemplateChoice
 from .overlay import Overlay
 from .report_signing import open_report, sign_report
@@ -142,6 +142,7 @@ class ReportsPage(QWidget):
             self.app.archive.generate(
                 dialog.campaign.currentData(), dialog.template.currentText(),
                 dialog.template.currentData(), dialog.language.code(),
+                lambda work: run_busy(self, "Erstelle das Protokoll …", work),
             )
         except (ReportError, TemplateError) as err:
             show_error(self, str(err))

@@ -33,7 +33,7 @@ from .nodes import Paragraph as TextNode
 from .pdf_parts import (
     _draw_logos,
     _NumberedCanvas,
-    _photo,
+    _photos,
     _register_fonts,
     _reserved_space,
     _signature_image,
@@ -101,9 +101,8 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
     def photos(node: Photos) -> PdfTable | None:
         width = (usable - 6 * mm) / 2
         images = []
-        for path, caption, *notes in node.items:
-            marks, role = (notes + [(), ""])[:2] if notes else ((), "")
-            image = _photo(path, width, marks)
+        for (path, caption, *notes), image in zip(node.items, _photos(node.items, width)):
+            role = notes[1] if len(notes) > 1 else ""
             if image:
                 lines = "<br/>".join(escape(part) for part in caption.split("\n"))
                 if role:

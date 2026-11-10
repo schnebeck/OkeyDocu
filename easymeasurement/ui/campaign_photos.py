@@ -24,6 +24,7 @@ class CampaignPhotos:
         self.timeline.changed.connect(self._photos_changed)
         self.stack.changed.connect(self._photos_changed)
         self.timeline.measurement_chosen.connect(self._select_measurement)
+        self.timeline.close_requested.connect(lambda: self.timeline_action.setChecked(False))
 
     def _connect_photos(self) -> None:
         table = self.values.table
@@ -91,6 +92,8 @@ class CampaignPhotos:
         placed = any(row["placement"] != "stack" for row in photos)
         self.timeline.setVisible(placed and self.timeline_action.isChecked())
         self.timeline_action.setEnabled(placed)
+        self.header.assign_button.setVisible(placed)
+        self.header.assign_button.setChecked(self.timeline.isVisibleTo(self))
         self.stack_section.setVisible(self.stack.count > 0)
         self.stack_section.set_count(self.stack.count)
 

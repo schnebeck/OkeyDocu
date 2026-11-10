@@ -9,10 +9,13 @@
 from __future__ import annotations
 
 import io
+import os
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from PIL import Image as PilImage
 from PIL import ImageDraw, ImageFont, ImageOps
+from reportlab import rl_config
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
@@ -28,6 +31,10 @@ from .nodes import Logo
 
 _FONT_DIRS = ("/usr/share/fonts/truetype/dejavu", "/usr/share/fonts/dejavu", "/usr/share/fonts/TTF")
 _MAX_PHOTO_PIXELS = 1400
+
+# Pictures and page streams go into the file as compressed bytes, not spelt out in ASCII85,
+# which makes them a quarter larger and is encoded slowly in Python.
+rl_config.useA85 = 0
 _MARK_RGB = (231, 76, 60)  # the red of the marks on screen
 _SIGNATURE_HEIGHT = 15 * mm
 
@@ -131,12 +138,23 @@ def _draw_marks(image: PilImage.Image, marks) -> None:
 def _photo(path: Path, width: float, marks=()) -> Image | None:
     try:
         with PilImage.open(path) as source:
+            # A JPEG decodes straight to a half, quarter or eighth: no full picture in memory.
+            source.draft("RGB", (_MAX_PHOTO_PIXELS, _MAX_PHOTO_PIXELS))
+            source.thumbnail((_MAX_PHOTO_PIXELS, _MAX_PHOTO_PIXELS))
             image = ImageOps.exif_transpose(source).convert("RGB")
     except OSError:
         return None
-    image.thumbnail((_MAX_PHOTO_PIXELS, _MAX_PHOTO_PIXELS))
     _draw_marks(image, marks)
     buffer = io.BytesIO()
     image.save(buffer, "JPEG", quality=82)
     buffer.seek(0)
     return Image(buffer, width=width, height=width * image.height / image.width)
+
+
+def _photos(items: list[tuple], width: float) -> list[Image | None]:
+    """All photos of a block at once: decoding and scaling run beside each other on every core,
+    as the imaging library lets go of the interpreter while it works."""
+    def one(item: tuple) -> Image | None:
+        return _photo(item[0], width, item[2] if len(item) > 2 else ())
+    with ThreadPoolExecutor(max_workers=os.cpu_count() or 2) as pool:
+        return list(pool.map(one, items))

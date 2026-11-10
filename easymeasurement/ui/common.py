@@ -186,7 +186,7 @@ class _Task(QThread):
 
 
 def run_busy(parent, text: str, work: Callable[[], T]) -> T:
-    """Run instrument work off the GUI thread, so the window keeps answering.
+    """Run slow work off the GUI thread, so the window keeps answering.
 
     `work` must not touch the database: its connection belongs to the GUI thread.
     Errors come back here and are raised to the caller.

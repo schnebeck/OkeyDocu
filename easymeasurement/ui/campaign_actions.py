@@ -206,6 +206,8 @@ class CampaignActions:
         )
         self.guided.reload()
         self._data_changed()
+        if result["matched"] or result["open"]:
+            self.timeline_action.setChecked(True)  # the next step is checking where they went
 
     def fetch(self) -> None:
         result = self.instrument.fetch(self.campaign_id)

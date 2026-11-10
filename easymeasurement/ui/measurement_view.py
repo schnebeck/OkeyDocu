@@ -99,6 +99,7 @@ class MeasurementView(MeasurementDetail, QWidget):
         self.gallery = PhotoGallery(THUMB)
         shared_thumbs().ready.connect(self._thumb_ready)
         self.gallery.itemActivated.connect(self._preview_photo)
+        self.gallery.unpinned.connect(self._unpin_photo)
 
         self.actions_row = QHBoxLayout()
         self.edit_action, self.edit_measurement = self._action(

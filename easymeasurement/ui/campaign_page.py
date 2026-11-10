@@ -148,9 +148,9 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.delete_action = self._action("Kampagne löschen …", self.delete_campaign)
         self.report_action = self._action("Protokoll erstellen …", self.make_report)
         self.photos_action = self._action("Fotos importieren …", self.import_photos)
-        self.timeline_action = self._action("Fotozeitleiste", self._fit_photo_panels)
-        self.timeline_action.setCheckable(True)
-        self.timeline_action.setChecked(True)
+        # The timeline is a tool for placing photos: shown on asking, gone once they are placed.
+        self.timeline_action = QAction("Fotos zuordnen", self, checkable=True, shortcut="F7")
+        self.timeline_action.toggled.connect(self._fit_photo_panels)
         self.fetch_action = self._action("Vom Gerät nachholen", self.fetch)
         self.clock_action = self._action("Uhr prüfen", self.check_clock)
         self.offset_action = self._action("Uhrenversatz von Hand …", self.correct_clock)
@@ -172,6 +172,8 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.header.resume_button.clicked.connect(self.resume)
         self.header.pause_button.clicked.connect(self.pause)
         self.header.photos_button.clicked.connect(self.import_photos)
+        self.header.assign_button.clicked.connect(
+            lambda: self.timeline_action.setChecked(self.header.assign_button.isChecked()))
         self.header.finish_button.clicked.connect(self.finish)
         self.header.draft_button.clicked.connect(self.show_draft)
         self.header.report_button.clicked.connect(self.make_report)

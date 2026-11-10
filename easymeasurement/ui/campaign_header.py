@@ -53,6 +53,10 @@ class CampaignHeader(QWidget):
         self.resume_button = QPushButton("Messung fortsetzen")
         self.pause_button = QPushButton("Messung unterbrechen")
         self.photos_button = QPushButton("Fotos …")
+        self.photos_button.setToolTip("Fotos importieren; sie ordnen sich nach Aufnahmezeit zu.")
+        self.assign_button = QPushButton("Fotos zuordnen", checkable=True)
+        self.assign_button.setToolTip("Die Zeitleiste der Fotos unter der Tabelle ein- und"
+                                      " ausblenden (F7).")
         self.draft_button = QPushButton("Entwurf ansehen")
         self.draft_button.setToolTip("Das Protokoll, wie es jetzt aussähe. Es ist noch nicht gültig.")
         self.finish_button = QPushButton(QIcon.fromTheme("object-locked"), "Bestätigen …")
@@ -75,7 +79,8 @@ class CampaignHeader(QWidget):
         buttons = QHBoxLayout()
         buttons.addStretch(1)
         for button in (self.resume_button, self.pause_button, self.photos_button,
-                       self.draft_button, self.finish_button, self.report_button):
+                       self.assign_button, self.draft_button, self.finish_button,
+                       self.report_button):
             buttons.addWidget(button)
             # Shown by the campaign that needs them; hidden pages keep their first layout.
             button.hide()
