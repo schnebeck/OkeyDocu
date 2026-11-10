@@ -25,7 +25,7 @@ from PySide6.QtWidgets import (
 from ..l10n import N_, moment, tr
 from ..model import CONDUCTOR
 from ..vocabulary import function_keys, function_label
-from ..store.device_texts import CODE
+from ..devices import setting_words
 from .common import AppContext, function_short, stored_parameters
 from .attachment_list import AttachmentList
 from .growing_edit import GrowingEdit
@@ -40,11 +40,11 @@ LOCKED_TEXT = N_("The campaign is completed. The measurement can only be read.")
 def _facts(row, capture: str, db) -> str:
     """When, how, and the instrument's settings in words; one still a code is left out."""
     when = datetime.fromisoformat(row["local_time"])
-    words = db.device_words()
+    words = setting_words(db)
     extra = []
     for parameter in stored_parameters(row):
-        name, value = db.setting_words(parameter.key, parameter.value, words)
-        if parameter.key != CONDUCTOR and not CODE.match(name) and not CODE.match(value):
+        name, value, said = words.say(parameter.key, parameter.value)
+        if parameter.key != CONDUCTOR and said:
             extra.append(f"{name}: {value}")
     return " · ".join([moment(when, seconds=True), capture, *extra])
 

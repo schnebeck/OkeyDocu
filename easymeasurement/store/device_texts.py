@@ -6,19 +6,12 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""Measurements keep the codes the instrument sends, as IZYTRON does; words for them are
-looked up when shown, so one measurement reads in any language the instrument knows."""
+"""The texts an instrument hands out for its codes, kept per driver and language. Only the
+driver's mapping knows which texts are codes; see devices/naming.py."""
 
 from __future__ import annotations
 
-import re
 from datetime import datetime
-
-CODE = re.compile(r"^TS\d{4}$")
-GERMAN = "de-DE"
-# The report's languages onto the instrument's; one it lacks falls back to English.
-CULTURES = {"de": "de-DE", "en": "en-GB"}
-FALLBACK = "en-GB"
 
 
 class DeviceTextsMixin:
@@ -42,13 +35,7 @@ class DeviceTextsMixin:
                 " version=excluded.version, read_at=excluded.read_at",
                 (driver, firmware, version, datetime.now().isoformat(timespec="seconds")))
 
-    def device_words(self, culture: str = GERMAN) -> dict[str, str]:
-        """Code to text in one of the instrument's languages, over every instrument known."""
+    def device_texts(self, driver: str, culture: str) -> dict[str, str]:
+        """Code to text in one of the instrument's languages."""
         return {row["code"]: row["text"] for row in self.query(
-            "SELECT code, text FROM device_texts WHERE language=?", culture)}
-
-    def setting_words(self, key: str, value: str, words: dict[str, str]) -> tuple[str, str]:
-        """A setting as words where they are known; a code without a text stays a code."""
-        def say(text: str) -> str:
-            return words.get(text, text) if CODE.match(text or "") else text
-        return say(key), say(value)
+            "SELECT code, text FROM device_texts WHERE driver=? AND language=?", driver, culture)}

@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..devices import structure_types
 from ..l10n import plural, tr
 from ..store.kinds import Kind
 from .board import GutterSplitter
@@ -33,10 +34,6 @@ from .common import ROW_ID, AppContext
 from .kind_catalog import KindCatalog, element_icon, icon_names, icon_text
 from .kind_features import FeatureTable
 from .kind_removal import RemoveKindOverlay
-
-DEVICE_NAMES = {"": "keine", "MACHINE": "Maschine", "DISTRIBUTIONCABINET": "Verteiler",
-                "RCD": "RCD", "CIRCUIT": "Stromkreis", "ELECTRICALEQUIPMENT": "Betriebsmittel",
-                "MEASURINGPOINT": "Messpunkt"}
 
 
 class KindsPage(QWidget):
@@ -72,8 +69,8 @@ class KindsPage(QWidget):
             self.icon.addItem(element_icon(name), icon_text(name), name)
         self.icon.activated.connect(lambda _: self._save())
         self.device = QComboBox()
-        for key, text in DEVICE_NAMES.items():
-            self.device.addItem(text, key)
+        for key, text in structure_types().items():
+            self.device.addItem(tr(text), key)
         self.device.activated.connect(lambda _: self._save())
         self.izytron = QSpinBox(maximum=9999)
         self.izytron.setSpecialValueText(tr("none", context="type code"))

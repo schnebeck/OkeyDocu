@@ -13,7 +13,7 @@ from datetime import datetime
 
 from ..l10n import day, in_language, plural, tr
 from ..model import Quantity
-from ..store.device_texts import CODE
+from ..devices import setting_words
 from .plan import PlanStep
 
 NOTABLE = 2.0  # a value that has halved or doubled since last time is pointed out
@@ -64,13 +64,15 @@ class RepeatCheckMixin:
                                 label=label, now=now, before=_range(lower, upper)))
         row = self.db.one("SELECT parameters_json FROM measurements WHERE id=?", measurement_id)
         # Both sides in words: a push sends codes, an import from IZYTRON brings German text.
-        words = self.db.device_words()
-        now = dict(self.db.setting_words(item["key"], item["value"], words)
-                   for item in json.loads(row["parameters_json"] or "[]"))
+        words = setting_words(self.db)
+        now = {}
+        for item in json.loads(row["parameters_json"] or "[]"):
+            name, shown, said = words.say(item["key"], item["value"])
+            now[name] = (shown, said)
         for key, value in step.parameters:
-            name, before = self.db.setting_words(key, value, words)
-            current = now.get(name)
-            if current is None or CODE.match(current) != CODE.match(before):
+            name, before, said = words.say(key, value)
+            current, current_said = now.get(name, (None, said))
+            if current is None or current_said != said:
                 continue  # not sent, or one side has no words yet: nothing to judge
             if current != before:
                 found.append(tr("{name}: {now} instead of {before}",

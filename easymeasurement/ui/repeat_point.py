@@ -26,6 +26,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..devices import setting_words
 from ..l10n import day, tr
 from .common import AppContext
 from .growing_edit import GrowingEdit
@@ -144,9 +145,8 @@ class RepeatPoint(QWidget):
             self.place.show_asset(step.asset_id, False)
         self.question.setText(step.question if check and step.question != step.title else "")
         self.question.setVisible(bool(self.question.text()))
-        words = self.app.db.device_words()
-        settings = ["{}: {}".format(*self.app.db.setting_words(key, value, words))
-                    for key, value in step.parameters]
+        words = setting_words(self.app.db)
+        settings = ["{}: {}".format(*words.say(key, value)[:2]) for key, value in step.parameters]
         settings += [tr("Limit {label}: {limits}", label=label,
                         limits=" ".join(p for p in (low, up) if p))
                      for _, label, low, up in step.limits]

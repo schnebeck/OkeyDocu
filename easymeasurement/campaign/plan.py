@@ -13,6 +13,7 @@ from importlib import resources
 
 import yaml
 
+from ..devices.registry import instruction_folders
 from ..l10n import tr
 
 
@@ -131,12 +132,13 @@ def _settings(raw: dict) -> list[tuple[str, str]]:
 
 
 def _raw_instructions() -> dict[str, dict]:
-    folder = resources.files("easymeasurement") / "data" / "instructions"
-    found = {}
-    for entry in folder.iterdir():
-        if entry.name.endswith(".yaml"):
-            raw = yaml.safe_load(entry.read_text(encoding="utf-8"))
-            found[raw["function"]] = raw
+    """The instructions of every driver; the first one naming a function is taken."""
+    found: dict[str, dict] = {}
+    for folder in instruction_folders():
+        for entry in sorted(folder.iterdir(), key=lambda e: e.name):
+            if entry.name.endswith(".yaml"):
+                raw = yaml.safe_load(entry.read_text(encoding="utf-8"))
+                found.setdefault(raw["function"], raw)
     return found
 
 

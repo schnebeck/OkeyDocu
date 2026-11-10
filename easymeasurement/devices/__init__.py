@@ -9,7 +9,14 @@
 from .base import Capability, DeviceError, MeterDriver
 from .base import DeviceBlocked, DeviceTexts, FoundInstrument, LinkState, LiveReading
 from .base import SelectorPosition
-from .registry import available_drivers, create_driver, find_instruments, register_driver
+from .registry import (
+    available_drivers,
+    create_driver,
+    find_instruments,
+    register_driver,
+    setting_words,
+    structure_types,
+)
 
 __all__ = [
     "Capability",
@@ -25,4 +32,6 @@ __all__ = [
     "find_instruments",
     "create_driver",
     "register_driver",
+    "setting_words",
+    "structure_types",
 ]

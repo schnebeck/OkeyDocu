@@ -1,6 +1,6 @@
 # EasyMeasurement - measuring plan, draft.
 # Limits and order are proposals. `released: true` marks a plan as approved.
-# A step of kind `measure` takes its instruction from data/instructions by its function.
+# A step of kind `measure` takes its instruction from the instrument driver, by its function.
 key: machine_initial_test
 title: Maschine – elektrische Prüfung (Entwurf)
 released: false

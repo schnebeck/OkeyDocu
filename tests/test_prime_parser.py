@@ -10,7 +10,8 @@ from datetime import datetime
 
 import pytest
 
-from easymeasurement.devices.profitest_prime.parser import FUNCTION_CODES, parse_database
+from easymeasurement.devices.profitest_prime.mapping import FUNCTIONS
+from easymeasurement.devices.profitest_prime.parser import parse_database
 from easymeasurement.model import Quantity, Verdict, conductor_of
 from easymeasurement.vocabulary import function_keys
 
@@ -102,8 +103,8 @@ def test_rotating_field_outcome_is_read_as_a_neutral_word():
 
 
 def test_every_function_of_the_instrument_has_a_neutral_name():
-    assert len(FUNCTION_CODES) == 20
-    assert set(FUNCTION_CODES.values()) <= set(function_keys())
+    assert len(FUNCTIONS) == 20
+    assert set(FUNCTIONS.values()) <= set(function_keys())
 
 
 def test_record_of_the_instrument_is_kept_with_the_measurement():

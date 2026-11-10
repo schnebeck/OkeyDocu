@@ -36,15 +36,30 @@ def test_kept_texts_replace_older_ones_and_name_their_firmware(app):
     app.db.save_device_texts("prime", "01.00.00", "1", {"de-DE": {"TS9999": "alt"}})
     app.db.save_device_texts("prime", "02.00.00", "2", TEXTS)
     assert app.db.device_text_firmware("prime") == "02.00.00"
-    assert app.db.device_words() == TEXTS["de-DE"]
-    assert app.db.device_words("en-GB")["TS9002"] == "Slow"
+    assert app.db.device_texts("prime", "de-DE") == TEXTS["de-DE"]
+    assert app.db.device_texts("prime", "en-GB")["TS9002"] == "Slow"
+    assert app.db.device_texts("another", "de-DE") == {}
+
+
+def _words(app):
+    from easymeasurement.devices.naming import InstrumentWords, SettingWords
+    from easymeasurement.devices.profitest_prime import mapping
+    app.db.save_device_texts("prime", "02.00.00", "2", TEXTS)
+    return SettingWords(app.db, [InstrumentWords("prime", mapping.is_code, mapping.culture)])
 
 
 def test_a_setting_reads_as_words_where_they_are_known(app):
-    words = TEXTS["de-DE"]
-    assert app.db.setting_words("TS9001", "TS9002", words) == ("Prüfmodus", "Langsam")
-    assert app.db.setting_words("TS9001", "500 V", words) == ("Prüfmodus", "500 V")
-    assert app.db.setting_words("TS9003", "TS9002", words) == ("TS9003", "Langsam")
+    words = _words(app)
+    assert words.say("TS9001", "TS9002") == ("Prüfmodus", "Langsam", True)
+    assert words.say("TS9001", "500 V") == ("Prüfmodus", "500 V", True)
+    assert words.say("TS9003", "TS9002") == ("TS9003", "Langsam", False)
+    assert words.say("conductor", "L1-PE") == ("Leiter", "L1-PE", True)  # the vocabulary's
+
+
+def test_the_instrument_speaks_the_language_of_the_program(app):
+    from easymeasurement.l10n import speaking
+    with speaking("en"):
+        assert _words(app).say("TS9001", "TS9002") == ("Test mode", "Slow", True)
 
 
 class _Instrument:
@@ -107,7 +122,8 @@ def test_a_blocked_instrument_asks_for_setup_and_can_be_tried_again(app, qtbot, 
 def test_a_changed_setting_is_judged_in_words_on_both_sides(app):
     """A push sends codes, an import brings German text: they must not look different."""
     from easymeasurement.campaign.plan import PlanStep
-    app.db.save_device_texts("prime", "02.00.00", "2", TEXTS)
+    from easymeasurement.devices.profitest_prime.discovery import DRIVER_KEY
+    app.db.save_device_texts(DRIVER_KEY, "02.00.00", "2", TEXTS)
     asset = app.db.add_asset(app.db.add_customer("Muster AG"), "machine", "Presse")
     campaign = app.service.create(asset, "Prüfung", "Prüfer")
     measured = app.service.add_measurement(

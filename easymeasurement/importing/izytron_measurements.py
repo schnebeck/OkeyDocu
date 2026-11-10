@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from ..devices.profitest_prime.parser import CONDUCTOR_PARAMETERS, RESULT_CODES
+from ..devices.profitest_prime.mapping import is_conductor_setting, result_key
 from ..l10n import N_
 from ..model import (
     CONDUCTOR,
@@ -21,6 +21,7 @@ from ..model import (
     ResultValue,
     Verdict,
 )
+from ..vocabulary import vocabulary
 
 RANGE_MARKS = {1: ">", 2: "<"}  # RangerResult: the reading lies beyond the measuring range
 ROTATION = {"rechts": "right", "links": "left"}
@@ -69,7 +70,9 @@ def _result(entry: dict) -> ResultValue | None:
     if not raw:
         return None
     code = (entry.get("TsKey") or "").removeprefix("PROFITEST_")
-    key, label = RESULT_CODES.get(code, (code, entry.get("Description") or code))
+    key = result_key(code)
+    known = vocabulary().results.get(key)
+    label = (known.symbol or known.name) if known else entry.get("Description") or code
     lower, upper = _limit_text(entry.get("Min"), ">"), _limit_text(entry.get("Max"), "<")
     verdict = Verdict.NOT_EVALUATED
     if lower or upper:
@@ -123,7 +126,7 @@ def _parameter(item: dict) -> Parameter:
     the value as German text, which is shown as it stands."""
     code = (item.get("TsKey") or "").removeprefix("PROFITEST_")
     value = str(item.get("Value", ""))
-    if code in CONDUCTOR_PARAMETERS:
+    if is_conductor_setting(code):
         return Parameter(CONDUCTOR, value)
     return Parameter(code or item.get("Name", ""), value)
 

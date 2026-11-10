@@ -21,89 +21,8 @@ from ...model import (
     ResultValue,
     Verdict,
 )
-
-# The instrument reports text IDs (TSnnnn). These tables follow its translation
-# file. Unknown codes pass through unchanged rather than being guessed.
-FUNCTION_CODES = {
-    "TS1165": "riso",
-    "TS1178": "i_clamp",
-    "TS1285": "rlo",
-    "TS1286": "u",
-    "TS1287": "zln_du",
-    "TS1289": "il",
-    "TS1290": "imd",
-    "TS1291": "ures",
-    "TS1292": "i_ramp",
-    "TS1294": "rcm_touch",
-    "TS1296": "rcd_touch",
-    "TS1297": "rcd_time",
-    "TS1298": "rcd_ramp_touch",
-    "TS1299": "rcd_current",
-    "TS1417": "rlo_25a",
-    "TS1607": "zloop",
-    "TS1608": "zloop_dc",
-    "TS1609": "zloop_rlo",
-    "TS1610": "zloop_half",
-    "TS1611": "riso_ramp",
-}
-
-RESULT_CODES = {
-    "TS1159": ("rotation", "Drehfeld"),
-    "TS1165": ("riso", "RISO"),
-    "TS1170": ("u_iso", "UISO"),
-    "TS1178": ("i_clamp", "I_ZANGE"),
-    "TS1286": ("u", "U"),
-    "TS1289": ("il", "IL"),
-    "TS1348": ("u_idn", "UIΔN"),
-    "TS1349": ("ta", "ta"),
-    "TS1350": ("u_ln", "ULN"),
-    "TS1351": ("f", "f"),
-    "TS1352": ("re", "RE"),
-    "TS1353": ("i_f", "IΔ"),
-    "TS1354": ("zlpe", "ZLPE"),
-    "TS1355": ("ik", "IK"),
-    "TS1356": ("zln", "ZLN"),
-    "TS1357": ("ue", "UE"),
-    "TS1358": ("rlo", "RLO"),
-    "TS1359": ("rlo_delta", "ΔRLO"),
-    "TS1360": ("rlo_plus", "RLO+"),
-    "TS1361": ("rlo_minus", "RLO-"),
-    "TS1362": ("rlo_offset", "RLO-OFFSET"),
-    "TS1363": ("u_lpe", "ULPE"),
-    "TS1364": ("u_npe", "UNPE"),
-    "TS1365": ("i", "I"),
-    "TS1369": ("u_delta", "ΔU"),
-    "TS1371": ("u_l3l1", "UL3L1"),
-    "TS1372": ("u_l1l2", "UL1L2"),
-    "TS1373": ("u_l2l3", "UL2L3"),
-    "TS1632": ("zloop", "Z-AC"),
-    "TS1633": ("z_dc", "Z-DC+"),
-    "TS1634": ("z_rlo", "Z+RLO"),
-    "TS1635": ("z_half", "Z-1/2xIdN"),
-    "TS1655": ("z", "Z"),
-}
-
-# Stored as neutral words, never as text in one language: a report in any
-# language has to be able to print them.
-VERIFICATION_VALUES = {"TS1181": "left", "TS1182": "right", "TS1183": "error"}
-
-# Which conductors a measurement was taken between. Every function has its own list.
-CONDUCTOR_PARAMETERS = {"TS1225", "TS1245", "TS1261", "TS1264", "TS1274", "TS1275"}
-CONDUCTORS = {
-    "TS1326": "L-N",
-    "TS1328": "AUTO",
-    "TS1435": "L1-PE",
-    "TS1436": "L2-PE",
-    "TS1437": "L3-PE",
-    "TS1438": "N-PE",
-    "TS1439": "L+N-PE",
-    "TS1440": "L1-N",
-    "TS1441": "L2-N",
-    "TS1442": "L3-N",
-    "TS1443": "L1-L2",
-    "TS1444": "L2-L3",
-    "TS1445": "L1-L3",
-}
+from ...vocabulary import vocabulary
+from .mapping import conductor, function_key, is_conductor_setting, outcome, result_key
 
 # The instrument has one voltage function. A three-phase reading is what makes
 # it a rotating field measurement.
@@ -147,9 +66,18 @@ def _verdict(passed: str | None) -> Verdict:
     return Verdict.PASSED if passed == "true" else Verdict.FAILED
 
 
+def _label(key: str) -> str:
+    """The vocabulary's symbol of a known result, kept for reading the record by itself;
+    an unknown one keeps the instrument's code."""
+    term = vocabulary().results.get(key)
+    if term is None:
+        return key
+    return term.symbol or term.name
+
+
 def _parse_result(node: ET.Element) -> ResultValue:
-    code = node.get("variable", "")
-    key, label = RESULT_CODES.get(code, (code, code))
+    key = result_key(node.get("variable", ""))
+    label = _label(key)
     lower, upper = node.get("lowerlimit", ""), node.get("upperlimit", "")
     # `passed` only means something next to a limit. Informational values such
     # as mains voltage come with passed="false" in measurements that passed.
@@ -160,27 +88,26 @@ def _parse_result(node: ET.Element) -> ResultValue:
 
 def _parse_verification(node: ET.Element) -> ResultValue:
     """A check against an expected outcome, such as the rotating field direction."""
-    code = node.get("variable", "")
-    key, label = RESULT_CODES.get(code, (code, code))
+    key = result_key(node.get("variable", ""))
     value, setpoint = node.get("value", ""), node.get("setpoint", "")
     return ResultValue(
         key,
-        label,
-        Quantity(raw=VERIFICATION_VALUES.get(value, value)),
+        _label(key),
+        Quantity(raw=outcome(value)),
         _verdict(node.get("passed")),
-        setpoint=VERIFICATION_VALUES.get(setpoint, setpoint),
+        setpoint=outcome(setpoint),
     )
 
 
 def _parameter(node: ET.Element) -> Parameter:
     code, value = node.get("description", ""), node.get("value", "")
-    if code in CONDUCTOR_PARAMETERS:
-        return Parameter(CONDUCTOR, CONDUCTORS.get(value, value))
+    if is_conductor_setting(code):
+        return Parameter(CONDUCTOR, conductor(value))
     return Parameter(code, value)
 
 
 def _function(code: str, results: tuple[ResultValue, ...]) -> str:
-    function = FUNCTION_CODES.get(code, code)
+    function = function_key(code)
     if function == "u" and _LINE_VOLTAGES & {result.key for result in results}:
         return "u3"
     return function

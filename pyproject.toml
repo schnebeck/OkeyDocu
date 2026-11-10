@@ -35,7 +35,7 @@ easymeasurement = "easymeasurement.__main__:main"
 include = ["easymeasurement*"]
 
 [tool.setuptools.package-data]
-easymeasurement = ["data/**/*.yaml", "data/**/*.svg"]
+easymeasurement = ["data/**/*.yaml", "data/**/*.svg", "devices/**/*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

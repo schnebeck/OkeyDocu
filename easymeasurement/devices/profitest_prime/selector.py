@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+from ...l10n import N_, tr
 from ..base import SelectorPosition
 
 SELECTOR_COMMAND = "SYS:GET:ROTATIONWHEEL"
@@ -21,31 +22,32 @@ _POSITIONS = {
     13: ("RLO", ("rlo",)),
     14: ("RLO-25A", ("rlo_25a",)),
     15: ("RISO", ("riso",)),
-    16: ("RISO-Rampe", ("riso_ramp",)),
+    16: (N_("RISO ramp"), ("riso_ramp",)),
     17: ("IF", ("rcd_current", "rcd_ramp_touch")),
     18: ("IΔN", ("rcd_time", "rcd_touch")),
     19: ("I_RAMP", ("i_ramp",)),
     20: ("ZLOOP", _ZLOOP),
     21: ("ZLOOP+DC", _ZLOOP),
     22: ("ZLOOP+RLO", _ZLOOP),
-    23: ("ZLOOP+0,5x", _ZLOOP),
+    23: (N_("ZLOOP+0.5x"), _ZLOOP),
     24: ("URES", ("ures",)),
     25: ("IMD", ("imd",)),
     26: ("RCM", ("rcm_touch",)),
     27: ("IL", ("il",)),
-    28: ("I_ZANGE", ("i_clamp",)),
+    28: (N_("I_CLAMP"), ("i_clamp",)),
     29: ("T%rH", ()),
     30: ("Extra", ()),
     31: ("HV", ()),
     32: ("Auto", ()),  # test sequences: the step decides what is measured
     33: ("Setup", ()),
-    34: ("Batteriezustand", ()),
+    34: (N_("Battery state"), ()),
     35: ("OFF", ()),
 }
 
 
 def selector_position(value: int) -> SelectorPosition:
-    """Named as printed on the dial. Positions without a measuring function, such as
+    """Named as printed on the dial, in the current language where the dial words it.
+    Positions without a measuring function, such as
     Setup, rule nothing out; an unknown value has no name."""
     label, functions = _POSITIONS.get(value, ("", ()))
-    return SelectorPosition(label, frozenset(functions))
+    return SelectorPosition(tr(label) if label else "", frozenset(functions))

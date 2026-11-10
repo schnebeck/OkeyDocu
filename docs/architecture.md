@@ -146,10 +146,16 @@ Platzhaltern und meldet Einträge, die kein Code benutzt.
 
 ## Messgeräte-Abstraktion
 
+Drei Schichten: Treiber, Mapping, Vokabular. Ausführlich und mit dem Beispiel eines
+Schallpegelmessers in [hardware-abstraction.md](hardware-abstraction.md).
+
 `devices/base.py` definiert `MeterDriver`: `identify()`, `read_clock()`, `read_measurements()`
 und optional `subscribe_live()`. Die Schnittstelle liest nur. Sie kann weder eine Messung
 starten noch Geräteeinstellungen ändern, denn das tut der Prüfer am Gerät. Ein neues Messgerät
-ist ein neuer Treiber in `devices/registry.py`; die Anwendung bleibt unverändert.
+ist ein neuer Treiber in `devices/registry.py`; die Anwendung bleibt unverändert. Die Codes des
+Geräts kennt nur sein Mapping (`devices/profitest_prime/mapping.py`); Funktionen, Ergebnisse,
+Größen, Ergebniswörter und Einstellungen heißen in der App nach ihrem Vokabular
+(`easymeasurement/vocabulary/`, `data/vocabulary/*.yaml`).
 
 Beim Start einer Kampagne mit Gerät werden die Geräteidentität, der Uhrenversatz und die schon
 vorhandenen Messungen festgehalten. Abgerufen wird danach nur, was neu ist, mit korrigierter Zeit.
@@ -207,7 +213,7 @@ mitten hineinzugeraten.
 **Push/Print:** `subscribe_live()` schaltet den Modus ein. Je Speichern-Druck kommt ein Event, die
 Messung geht zuerst an den Callback, danach die Quittung. Ein Push bleibt nicht im Gerätespeicher,
 der Empfänger hat also die einzige Kopie. Deshalb wird auch ein unlesbarer Datensatz unverändert
-als Funktion `unlesbar` ausgeliefert. Der Treiber verlässt den Modus beim Schließen, beim
+als Funktion `unreadable` ausgeliefert. Der Treiber verlässt den Modus beim Schließen, beim
 Programmende und nach einem Absturz beim nächsten Verbinden. Reißt die Verbindung ab, meldet er das
 und verbindet sich neu, aber nur mit demselben Gerät. Die Callbacks laufen auf einem eigenen Thread.
 Abmelden kann sich nur die Schnittstelle, die sich angemeldet hat. Gelingt das nicht oder kommt die
@@ -216,8 +222,8 @@ Verbindung über einen anderen Weg zurück, bittet die App, das Gerät aus- und 
 - Gespeicherte Messungen werden auf Anforderung abgerufen, nicht fortlaufend: Das Gerät zeigt
   währenddessen einen eigenen Bildschirm. Es gibt sie nur mit dem Drehschalter auf Setup frei,
   sonst kommt Fehler 402.
-- Die Gerätecodes (`TSnnnn`) in `parser.py` folgen der Übersetzungsdatei des Geräts. Unbekannte
-  Codes bleiben als Code erhalten.
+- Die Gerätecodes (`TSnnnn`) in `mapping.py` folgen der Übersetzungsdatei des Geräts. Unbekannte
+  Codes bleiben als Code erhalten und werden beim Anzeigen aus den Gerätetexten benannt.
 - Das Gerät hat nur eine Spannungsfunktion. Bringt sie Außenleiterspannungen mit, gilt sie als
   Drehfeldmessung `u3`. Das Drehfeld selbst steht in `VERIFICATION` und wird als neutrales Wort
   gespeichert (`right`, `left`), damit Protokolle in jeder Sprache möglich bleiben.
@@ -486,7 +492,8 @@ Ein Messplan ist eine Folge von Punkten: `check` (Frage mit Ja, Nein oder Übers
 Einstellungen → Messpläne bearbeitet (`ui/plan_editor.py`). Änderungen speichern sich selbst. Der Testlauf
 (`ui/plan_test_run.py`) zeigt den Plan im Wizard mit einem simulierten Gerät in einer Wegwerf-Datenbank.
 
-Die Anleitung je Messbereich liegt in `data/instructions/`, eine Datei je Messfunktion: Drehschalter,
+Die Anleitung je Messbereich gehört zum Messgerät und liegt bei seinem Treiber
+(`devices/profitest_prime/instructions/`), eine Datei je Messfunktion: Drehschalter,
 Einstellungen, Warnungen, Anschlussbild, Vorgehen und der Betrieb des Prüflings (`dut`). Ein Messpunkt
 übernimmt sie über seine Funktion. Dieselbe Anleitung zeigt die freie Messung auf Wunsch und folgt dort
 dem Drehschalter und dem letzten Messwert. Für eine Funktion ohne Anleitung sagt die App das, sie zeigt nie etwas Fremdes.
