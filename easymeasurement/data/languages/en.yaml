@@ -41,6 +41,10 @@ texts:
   Antwort: Answer
   Bemerkung: Remark
   Hersteller: Manufacturer
+  "Ansprechpartner: {{ campaign.contact }}": "Contact: {{ campaign.contact }}"
+  "Telefon: {{ campaign.contact_phone }}": "Phone: {{ campaign.contact_phone }}"
+  "Abteilung: {{ campaign.department }}": "Department: {{ campaign.department }}"
+  "Kostenstelle: {{ campaign.cost_center }}": "Cost centre: {{ campaign.cost_center }}"
   Ort, Datum: Place, date
   Unterschrift Prüfer: Signature of inspector
   Keine Messung.: No measurement.

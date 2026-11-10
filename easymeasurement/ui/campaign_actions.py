@@ -175,6 +175,8 @@ class CampaignActions:
         if overlay.exec():
             asset = overlay.asset.currentData()
             self.app.service.update_campaign(campaign["id"], overlay.title.text(), asset)
+            self.app.service.set_contact(campaign["id"], *overlay.contact_values())
+            self.app.service.set_cost_center(campaign["id"], overlay.cost_center.text())
             self.list.update_campaign(campaign["id"])
             self.show_campaign(campaign["id"])
             self.changed.emit()

@@ -15,6 +15,8 @@ from .assignment import ISSUE_TEXT
 from .records import EDITABLE_FIELDS, EDITABLE_VALUE_FIELDS, TEXT_FIELDS, _iso, full_name
 
 
+CONTACT_COLUMNS = ("department", "contact", "contact_phone", "contact_email")
+
 class EditingMixin:
     """Corrections to an open campaign, each leaving the trace it needs."""
 
@@ -75,6 +77,36 @@ class EditingMixin:
             raise ValueError("Messungen oder Dateien liegen an Orten außerhalb dieser Anlage.")
         self.db.execute(
             "UPDATE campaigns SET title=?, asset_id=? WHERE id=?", title, asset_id, campaign_id
+        )
+
+    def set_contact(self, campaign_id: int, *values: str) -> None:
+        """The customer's department and person for this job, in the order of
+        `CONTACT_COLUMNS`; a closed campaign keeps what it had."""
+        if self.campaign(campaign_id)["status"] != "open":
+            raise CampaignClosed("Die Kampagne ist abgeschlossen.")
+        if len(values) != len(CONTACT_COLUMNS):
+            raise ValueError(f"Erwartet: {', '.join(CONTACT_COLUMNS)}")
+        self.db.execute(
+            f"UPDATE campaigns SET {', '.join(f'{c}=?' for c in CONTACT_COLUMNS)} WHERE id=?",
+            *(value.strip() for value in values), campaign_id,
+        )
+
+    def set_cost_center(self, campaign_id: int, cost_center: str) -> None:
+        """Booked to one job, so a new campaign starts without it."""
+        if self.campaign(campaign_id)["status"] != "open":
+            raise CampaignClosed("Die Kampagne ist abgeschlossen.")
+        self.db.execute("UPDATE campaigns SET cost_center=? WHERE id=?", cost_center.strip(),
+                        campaign_id)
+
+    def last_contact(self, asset_id: int, before: int | None = None):
+        """Department and contact of the customer's latest other campaign that had them."""
+        columns = ", ".join(f"c.{column}" for column in CONTACT_COLUMNS)
+        return self.db.one(
+            f"SELECT {columns} FROM campaigns c JOIN assets a ON a.id = c.asset_id"
+            " WHERE a.customer_id = (SELECT customer_id FROM assets WHERE id=?)"
+            " AND c.id IS NOT ? AND (c.department <> '' OR c.contact <> '')"
+            " ORDER BY c.started_at DESC, c.id DESC LIMIT 1",
+            asset_id, before,
         )
 
     # Changing what was recorded ------------------------------------------

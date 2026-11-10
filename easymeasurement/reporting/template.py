@@ -19,6 +19,8 @@ differ; each function in a step is counted and presented on its own.
 """
 from __future__ import annotations
 
+import re
+
 from importlib import resources
 
 import jinja2
@@ -171,9 +173,8 @@ def _resolve_blocks(blocks: list[dict], values: dict, nodes: list[Node]) -> None
             ))
         elif kind == "letterhead":
             nodes.append(Letterhead(
-                _render(block.get("title", ""), values), *(
-                    [line for line in (_render(text, values).strip() for text in block.get(key, []))
-                     if line] for key in ("lines", "client", "contractor")),
+                _render(block.get("title", ""), values),
+                *(_lines(block.get(key, []), values) for key in ("lines", "client", "contractor")),
                 values["campaign"].get("uuid", "") if block.get("qr", True) else "",
                 values.get("company_logo") if block.get("logo", True) else None,
             ))
@@ -189,6 +190,23 @@ def _resolve_blocks(blocks: list[dict], values: dict, nodes: list[Node]) -> None
                     bool(block.get("reserve", True)),
                 )
             )
+
+
+_FIELD = re.compile(r"{{(.*?)}}")
+
+
+def _lines(texts: list[str], values: dict) -> list[str]:
+    """Lines of a letterhead. One whose data fields are all empty is left out, so a label
+    such as "Phone:" never stands alone."""
+    kept = []
+    for text in texts:
+        fields = _FIELD.findall(pick(text))
+        if fields and not any(_render("{{" + field + "}}", values).strip() for field in fields):
+            continue
+        line = _render(text, values).strip()
+        if line:
+            kept.append(line)
+    return kept
 
 
 def _resolve_measurements(block: dict, values: dict) -> list[Node]:

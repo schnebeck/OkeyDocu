@@ -49,6 +49,8 @@ def sample_context(count: int) -> dict:
                   "features": [(feature_name("netzform", "Netzform"), "TN-S"),
                                (feature_name("nennstrom", "Nennstrom"), "63 A")]},
         "campaign": {"title": "Vorschau", "tester": "Max Muster", "plan": "", "uuid": "vorschau",
+                     "department": "Instandhaltung", "contact": "Frau Beispiel", "contact_phone": "0123 4567-89",
+                     "contact_email": "beispiel@kunde.example", "cost_center": "4711",
                      "started": "15.01.2026 09:00", "closed": "15.01.2026 11:00",
                      "clock_offset_s": 0, "clock_summary": "am 01.01.2026 09:00 gestellt", "seal": "0" * 64, "simulated": False},
         "device": {"manufacturer": "Beispiel", "model": "Messgerät", "serial_no": "0001",

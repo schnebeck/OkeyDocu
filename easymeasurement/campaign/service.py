@@ -139,6 +139,9 @@ class CampaignService(
                 )
             if plan:
                 self._insert_steps(self.db.connection, campaign_id, plan)
+        previous = self.last_contact(asset_id, campaign_id)
+        if previous:  # the same person is the likeliest one to ask again
+            self.set_contact(campaign_id, *previous)
         return campaign_id
 
     def start(

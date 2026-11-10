@@ -149,6 +149,11 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
         "campaign": {
             "title": campaign["title"],
             "tester": campaign["tester"],
+            "department": campaign["department"],
+            "contact": campaign["contact"],
+            "contact_phone": campaign["contact_phone"],
+            "contact_email": campaign["contact_email"],
+            "cost_center": campaign["cost_center"],
             "signature": campaign["signature"],
             "plan": campaign["plan_title"],
             "uuid": campaign["uuid"],

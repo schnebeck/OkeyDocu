@@ -41,6 +41,10 @@ texts:
   Antwort: Respuesta
   Bemerkung: Observación
   Hersteller: Fabricante
+  "Ansprechpartner: {{ campaign.contact }}": "Contacto: {{ campaign.contact }}"
+  "Telefon: {{ campaign.contact_phone }}": "Teléfono: {{ campaign.contact_phone }}"
+  "Abteilung: {{ campaign.department }}": "Departamento: {{ campaign.department }}"
+  "Kostenstelle: {{ campaign.cost_center }}": "Centro de coste: {{ campaign.cost_center }}"
   Ort, Datum: Lugar, fecha
   Unterschrift Prüfer: Firma del inspector
   Keine Messung.: Sin medición.

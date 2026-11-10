@@ -68,7 +68,12 @@ CREATE TABLE campaigns (
     user_id INTEGER REFERENCES users(id) ON DELETE RESTRICT,
     signature BLOB,
     photo_shift_s REAL NOT NULL DEFAULT 0,
-    follows_id INTEGER  -- the campaign whose defects this one follows up
+    follows_id INTEGER,  -- the campaign whose defects this one follows up
+    department TEXT NOT NULL DEFAULT '',  -- the customer's side of this job: where, and who
+    contact TEXT NOT NULL DEFAULT '',
+    contact_phone TEXT NOT NULL DEFAULT '',
+    contact_email TEXT NOT NULL DEFAULT '',
+    cost_center TEXT NOT NULL DEFAULT ''  -- the contractor's own account for this job
 );
 
 CREATE TABLE steps (

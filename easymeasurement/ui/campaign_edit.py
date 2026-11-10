@@ -15,6 +15,10 @@ from .common import AppContext
 from .overlay import Overlay
 
 TESTER, PLAN = "tester", "plan"
+CONTACT_FIELDS = (("department", "Abteilung", "z. B. Instandhaltung"),
+                  ("contact", "Ansprechpartner", "z. B. Frau Muster"),
+                  ("contact_phone", "Durchwahl", "z. B. 0511 1234-56"),
+                  ("contact_email", "E-Mail", "name@kunde.example"))
 
 
 class CampaignEditOverlay(Overlay):
@@ -41,6 +45,18 @@ class CampaignEditOverlay(Overlay):
         form.addRow("Prüfer", self._link(campaign["tester"] or "Prüfer fehlt", "Ändern …", TESTER))
         plan = campaign["plan_title"] if campaign["plan_key"] else "Ohne Messplan"
         form.addRow("Messplan", self._link(plan, "Weiteren zuweisen …", PLAN))
+        # Both sides of the job, named as in the report's letterhead.
+        form.addRow(QLabel("<b>Auftraggeber</b>"))
+        self.contact = {}
+        for key, label, hint in CONTACT_FIELDS:
+            field = QLineEdit(campaign[key])
+            field.setPlaceholderText(hint)
+            self.contact[key] = field
+            form.addRow(label, field)
+        form.addRow(QLabel("<b>Auftragnehmer</b>"))
+        self.cost_center = QLineEdit(campaign["cost_center"])
+        self.cost_center.setPlaceholderText("eigene Kostenstelle für diesen Auftrag")
+        form.addRow("Kostenstelle", self.cost_center)
         self.body.addLayout(form)
         self._update()
 
@@ -62,9 +78,14 @@ class CampaignEditOverlay(Overlay):
         else:
             self.reject()
 
+    def contact_values(self) -> tuple[str, ...]:
+        return tuple(self.contact[key].text().strip() for key, _, _ in CONTACT_FIELDS)
+
     def _changed(self) -> bool:
         return (self.title.text().strip() != self.campaign["title"]
-                or self.asset.currentData() != self.campaign["asset_id"])
+                or self.asset.currentData() != self.campaign["asset_id"]
+                or self.contact_values() != tuple(self.campaign[k] for k, _, _ in CONTACT_FIELDS)
+                or self.cost_center.text().strip() != self.campaign["cost_center"])
 
     def first_field(self):
         return self.title

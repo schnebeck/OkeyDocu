@@ -14,10 +14,15 @@ blocks:
       - "{{ customer.name }}"
       - "{{ customer.street }}"
       - "{{ customer.zip }} {{ customer.city }}"
+      - "Abteilung: {{ campaign.department }}"
+      - "Ansprechpartner: {{ campaign.contact }}"
+      - "Telefon: {{ campaign.contact_phone }}"
+      - "{{ campaign.contact_email }}"
     contractor:
       - "{{ company.name }}"
       - "{{ company.street }}"
       - "{{ company.zip }} {{ company.city }}"
+      - "Kostenstelle: {{ campaign.cost_center }}"
       - "Prüfer: {{ campaign.tester }}"
     qr: true
     logo: true

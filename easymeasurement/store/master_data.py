@@ -16,16 +16,22 @@ class MasterDataMixin:
 
     # Master data ---------------------------------------------------------
 
+    CUSTOMER_FIELDS = ("name", "street", "zip", "city", "comment")
+
     def add_customer(self, name: str, street="", zip="", city="", comment="") -> int:
         return self.execute(
             "INSERT INTO customers (name, street, zip, city, comment) VALUES (?, ?, ?, ?, ?)",
             name, street, zip, city, comment,
         )
 
-    def update_customer(self, customer_id: int, name, street, zip, city, comment) -> None:
+    def update_customer(self, customer_id: int, **values: str) -> None:
+        """Only the fields given change; unknown names are refused."""
+        columns = [key for key in values if key in self.CUSTOMER_FIELDS]
+        if len(columns) != len(values):
+            raise ValueError(f"Unbekannte Kundenfelder: {set(values) - set(columns)}")
         self.execute(
-            "UPDATE customers SET name=?, street=?, zip=?, city=?, comment=? WHERE id=?",
-            name, street, zip, city, comment, customer_id,
+            f"UPDATE customers SET {', '.join(f'{key}=?' for key in columns)} WHERE id=?",
+            *(values[key] for key in columns), customer_id,
         )
 
     def add_asset(
