@@ -15,12 +15,18 @@ from PySide6.QtCore import QBuffer, QByteArray, QIODevice
 from PySide6.QtWidgets import QInputDialog, QMessageBox
 
 from ..model import MeterMeasurement, Quantity, ResultValue, Verdict
-from ..reporting.context import ReportMeasurement, ReportStep
+from ..reporting.context import ReportMeasurement, ReportStep, company_context
 from ..reporting.language import feature_name, kind_name, speaking, tr
 from ..reporting.pdf import render_pdf
 from ..reporting.template import TemplateError, parse_template, resolve
 from ..reporting.template_model import dump_template
 from .common import show_error
+
+
+# Shown until the own firm is entered, so the letterhead shows where it will stand.
+SAMPLE_COMPANY = {"name": "Eigene Firma (Einstellungen → Firma)", "street": "Prüferweg 2",
+                  "zip": "12345", "city": "Musterstadt", "phone": "", "email": "", "web": "",
+                  "logo": ""}
 
 
 def sample_context(count: int) -> dict:
@@ -59,6 +65,7 @@ class TemplateDocument:
     # Template handling ---------------------------------------------------
 
     def reload(self) -> None:
+        self.refresh_company()
         self.choice.blockSignals(True)
         self.choice.clear()
         for row in self.app.db.templates():
@@ -131,11 +138,17 @@ class TemplateDocument:
     def current_text(self) -> str:
         return self.editor.toPlainText() if self._in_source_mode() else dump_template(self.template)
 
+    def refresh_company(self) -> None:
+        """Read once, so drawing the preview never needs the database."""
+        company = self.app.db.company()
+        self.company = company if company["name"] else None
+
     def preview(self) -> bool:
         try:
             with speaking(self.preview_language.currentData()):
-                nodes = resolve(parse_template(self.current_text()),
-                                sample_context(self.count.currentData()))
+                company = getattr(self, "company", None) or SAMPLE_COMPANY
+                values = {**sample_context(self.count.currentData()), **company_context(company)}
+                nodes = resolve(parse_template(self.current_text()), values)
                 stream = io.BytesIO()
                 render_pdf(nodes, stream, footer=tr("Vorschau mit Beispieldaten"))
         except TemplateError as err:

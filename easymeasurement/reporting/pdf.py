@@ -31,7 +31,8 @@ from .language import tr
 from .logo import MARGIN_MM
 from .nodes import Fields, Heading, Letterhead, Logo, Node, Notice, Photos, SignatureLine, Table
 from .nodes import Paragraph as TextNode
-from .pdf_frames import ContinuedTable, caption_of, column_widths, letterhead, signature
+from .pdf_frames import letterhead, signature
+from .pdf_tables import ContinuedTable, caption_of, column_widths
 from .pdf_parts import (
     _draw_logos,
     _NumberedCanvas,

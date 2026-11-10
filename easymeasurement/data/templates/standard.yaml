@@ -15,12 +15,20 @@ blocks:
       - "{{ customer.street }}"
       - "{{ customer.zip }} {{ customer.city }}"
     contractor:
+      - "{{ company.name }}"
+      - "{{ company.street }}"
+      - "{{ company.zip }} {{ company.city }}"
       - "Prüfer: {{ campaign.tester }}"
     qr: true
+    logo: true
   - type: fields
     rows:
       - ["{{ asset.kind_text }}", "{{ asset.name }}"]
       - [Kennung, "{{ asset.identifier }}"]
+      - [Hersteller, "{{ asset.manufacturer }}"]
+      - [Typ, "{{ asset.type }}"]
+      - [Seriennummer, "{{ asset.serial_no }}"]
+      - [Bemerkung, "{{ asset.comment }}"]
     features: asset
   - type: fields
     rows:

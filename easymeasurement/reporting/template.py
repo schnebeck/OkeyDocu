@@ -175,6 +175,7 @@ def _resolve_blocks(blocks: list[dict], values: dict, nodes: list[Node]) -> None
                     [line for line in (_render(text, values).strip() for text in block.get(key, []))
                      if line] for key in ("lines", "client", "contractor")),
                 values["campaign"].get("uuid", "") if block.get("qr", True) else "",
+                values.get("company_logo") if block.get("logo", True) else None,
             ))
         elif kind == "logo" and block.get("image"):
             try:

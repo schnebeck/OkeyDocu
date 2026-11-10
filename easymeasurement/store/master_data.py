@@ -126,3 +126,22 @@ class MasterDataMixin:
             " ON CONFLICT(name) DO UPDATE SET body=excluded.body, updated_at=excluded.updated_at",
             name, body,
         )
+
+    # The own firm -----------------------------------------------------------
+
+    COMPANY_FIELDS = ("name", "street", "zip", "city", "phone", "email", "web", "logo")
+
+    def company(self) -> dict[str, str]:
+        """Empty texts until the firm is entered, so templates can always ask for it."""
+        row = self.one("SELECT * FROM company WHERE id=1")
+        return {key: (row[key] if row else "") for key in self.COMPANY_FIELDS}
+
+    def save_company(self, **fields: str) -> None:
+        values = {**self.company(), **fields}
+        columns = ", ".join(self.COMPANY_FIELDS)
+        self.execute(
+            f"INSERT INTO company (id, {columns}) VALUES (1, {', '.join('?' * len(values))})"
+            f" ON CONFLICT(id) DO UPDATE SET "
+            + ", ".join(f"{key}=excluded.{key}" for key in self.COMPANY_FIELDS),
+            *(values[key] for key in self.COMPANY_FIELDS),
+        )

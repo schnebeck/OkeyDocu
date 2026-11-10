@@ -17,7 +17,7 @@ from .kinds import KindsMixin
 from .master_data import MasterDataMixin
 from .schema import _SCHEMA
 
-SCHEMA_VERSION = 17
+SCHEMA_VERSION = 18
 
 
 class SchemaMismatch(Exception):

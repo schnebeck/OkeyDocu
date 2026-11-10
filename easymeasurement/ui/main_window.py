@@ -56,7 +56,7 @@ class MainWindow(MainMenus, QMainWindow):
             self.measurements: self._page_window(self.measurements, "Alle Messwerte", 1200, 720),
             self.master_data: self._page_window(self.master_data, "Stammdaten", 900, 620),
             self.reports: self._page_window(self.reports, "Protokollarchiv", 1100, 620),
-            self.templates: self._page_window(self.templates, "Vorlagen", 1200, 760),
+            self.templates: self._page_window(self.templates, "Protokollvorlagen", 1200, 760),
             self.plan_editor: self._page_window(self.plan_editor, "Messpläne", 1200, 720),
             self.kinds: self._page_window(self.kinds, "Strukturtypen", 900, 640),
         }

@@ -114,7 +114,8 @@ class TemplateForms:
         edits = [self._lines_row(block, key, label, form) for key, label in (
             ("lines", "Zeilen unter dem Titel"), ("client", "Auftraggeber"),
             ("contractor", "Auftragnehmer"))]
-        edits[-1].setPlaceholderText("Eigene Firma und Anschrift, eine Zeile je Eintrag")
+        edits[-1].setPlaceholderText("Eine Zeile je Eintrag; die eigene Firma steht unter"
+                                     " Einstellungen → Firma")
         self.letterhead_target = edits[0]
         for edit in edits:  # a click into a field places its cursor
             edit.cursorPositionChanged.connect(
@@ -125,6 +126,10 @@ class TemplateForms:
         code.setChecked(bool(block.get("qr", True)))
         code.toggled.connect(lambda on: (block.__setitem__("qr", on), self._changed()))
         form.addRow("", code)
+        logo = QCheckBox("Firmenlogo rechts neben dem Titel (Einstellungen → Firma)")
+        logo.setChecked(bool(block.get("logo", True)))
+        logo.toggled.connect(lambda on: (block.__setitem__("logo", on), self._changed()))
+        form.addRow("", logo)
 
     def _lines_row(self, block: dict, key: str, label: str, form: QFormLayout) -> QPlainTextEdit:
         edit = QPlainTextEdit("\n".join(block.get(key, [])))

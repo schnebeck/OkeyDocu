@@ -48,3 +48,18 @@ BEGIN SELECT RAISE(ABORT, 'campaign is closed'); END;
 """
     for action, row in (("INSERT", "NEW"), ("UPDATE", "OLD"), ("DELETE", "OLD"))
 )
+
+# The firm that carries out the tests: one row, read by the report's letterhead.
+_COMPANY = """
+CREATE TABLE company (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    name TEXT NOT NULL DEFAULT '',
+    street TEXT NOT NULL DEFAULT '',
+    zip TEXT NOT NULL DEFAULT '',
+    city TEXT NOT NULL DEFAULT '',
+    phone TEXT NOT NULL DEFAULT '',
+    email TEXT NOT NULL DEFAULT '',
+    web TEXT NOT NULL DEFAULT '',
+    logo TEXT NOT NULL DEFAULT ''  -- base64 of the prepared image, as in templates
+);
+"""

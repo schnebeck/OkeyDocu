@@ -12,6 +12,7 @@ from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import QWidget
 
 from .board import EDGE
+from .company_form import CompanyForm
 from .users import UsersOverlay
 
 
@@ -68,10 +69,6 @@ class MainMenus:
         self.side_action = self._toggle(menu, "Seitenleiste", campaign.side)
         values.edit_requested.connect(lambda: self.side_action.setChecked(True))
         menu.addAction(campaign.timeline_action)
-        menu.addSeparator()
-        self.search_action = menu.addAction("Alle Messwerte durchsuchen …")
-        self.search_action.setShortcut(QKeySequence.StandardKey.Find)
-        self.search_action.triggered.connect(lambda: self.open_page(self.measurements))
 
         menu = bar.addMenu("&Messgerät")
         menu.addAction(campaign.fetch_action)
@@ -82,29 +79,42 @@ class MainMenus:
         self.instrument_action = menu.addAction("Messgerät einrichten …")
         self.instrument_action.triggered.connect(self._open_settings)
 
-        menu = bar.addMenu("&Verwaltung")
-        self.users_action = menu.addAction("Benutzer …")
-        self.users_action.triggered.connect(lambda: UsersOverlay(self.app, self).exec())
+        # What is looked up in daily work, apart from what is set up once.
+        menu = bar.addMenu("&Daten")
         self.master_data_action = menu.addAction("Stammdaten …")
         self.master_data_action.triggered.connect(lambda: self.open_page(self.master_data))
-        self.plans_action = menu.addAction("Messpläne …")
-        self.plans_action.triggered.connect(lambda: self.open_page(self.plan_editor))
-        self.templates_action = menu.addAction("Vorlagen …")
-        self.templates_action.triggered.connect(lambda: self.open_page(self.templates))
         self.archive_action = menu.addAction("Protokollarchiv …")
         self.archive_action.triggered.connect(lambda: self.open_page(self.reports))
+        menu.addSeparator()
+        self.search_action = menu.addAction("Alle Messwerte durchsuchen …")
+        self.search_action.setShortcut(QKeySequence.StandardKey.Find)
+        self.search_action.triggered.connect(lambda: self.open_page(self.measurements))
 
         menu = bar.addMenu("&Einstellungen")
+        self.company_action = menu.addAction("Firma …")
+        self.company_action.triggered.connect(self._edit_company)
+        self.users_action = menu.addAction("Benutzer …")
+        self.users_action.triggered.connect(lambda: UsersOverlay(self.app, self).exec())
+        self.settings_action = menu.addAction("Messgeräte …")
+        self.settings_action.triggered.connect(self._open_settings)
+        self.plans_action = menu.addAction("Messpläne …")
+        self.plans_action.triggered.connect(lambda: self.open_page(self.plan_editor))
+        self.templates_action = menu.addAction("Protokollvorlagen …")
+        self.templates_action.triggered.connect(lambda: self.open_page(self.templates))
         self.kinds_action = menu.addAction("Strukturtypen …")
         self.kinds_action.triggered.connect(lambda: self.open_page(self.kinds))
-        self.settings_action = menu.addAction("EasyMeasurement einrichten …")
-        self.settings_action.triggered.connect(self._open_settings)
 
         menu = bar.addMenu("&Hilfe")
         menu.addAction(campaign.free.instruction_action)
         menu.addSeparator()
         self.about_action = menu.addAction("Über EasyMeasurement")
         self.about_action.triggered.connect(self._about)
+
+    def _edit_company(self) -> None:
+        """The template page shows the firm in its preview, so it draws that again."""
+        if CompanyForm(self.app, self).exec():
+            self.templates.refresh_company()
+            self.templates.preview()
 
     def _toggle(self, menu, text: str, panel: QWidget) -> QAction:
         action = menu.addAction(text)

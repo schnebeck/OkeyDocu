@@ -24,6 +24,7 @@ from ..model import (
 )
 from .attached import Attached, places, sort_attached
 from .language import UNIT_SPACE, day, feature_name, kind_name, moment, tr
+from .logo import LogoError, decode_logo
 
 VERDICT_TEXT = {
     Verdict.PASSED: "bestanden",
@@ -140,6 +141,7 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
         steps.append(ReportStep(function_label(function), function, "done", "", measured))
 
     return {
+        **company_context(service.db.company()),
         "customer": dict(customer),
         "asset": {**dict(asset), "kind_text": kind_name(
                       asset["kind"], service.db.kind_labels().get(asset["kind"], "")),
@@ -173,6 +175,16 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
         "verdict_tone": {tr("Bestanden"): "passed", tr("Nicht bestanden"): "failed"}.get(
             overall_verdict(steps), ""),
     }
+
+
+def company_context(company: dict[str, str]) -> dict:
+    """The firm's texts for placeholders; its logo apart, as image data for the letterhead."""
+    logo = company.get("logo", "")
+    try:
+        data = decode_logo(logo) if logo else None
+    except LogoError:
+        data = None
+    return {"company": {k: v for k, v in company.items() if k != "logo"}, "company_logo": data}
 
 
 def clock_summary(campaign, checks) -> str:

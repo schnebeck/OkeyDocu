@@ -61,6 +61,7 @@ class Letterhead:
     client: list[str]
     contractor: list[str]
     code: str = ""  # shown as a QR code where given
+    logo: bytes | None = None  # the firm's logo, at the right of the title
 
 
 @dataclass
