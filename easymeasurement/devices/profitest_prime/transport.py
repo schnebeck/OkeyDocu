@@ -43,6 +43,7 @@ READ_ONLY_COMMANDS = frozenset(
         "IDNXML:GET:RECALIBDATE",
         "IDNXML:DATETIME:GET",
         "DATABASEXML:GET:DATA",
+        "DATABASEXML:GET:TRANSLATIONFILE",  # its words for the TS codes, in every language
     }
 )
 
@@ -218,7 +219,7 @@ class PrimeTransport:
         if error == BLOCKED_ERROR:
             raise DeviceBlocked(
                 "Das Messgerät gibt die Daten gerade nicht frei (Fehler 402). Bitte den Drehschalter"
-                " auf SETUP stellen und prüfen, ob ein anderes Programm verbunden ist."
+                " auf Setup stellen und prüfen, ob ein anderes Programm verbunden ist."
             )
         if error != 0:
             raise InstrumentRefused(error, f"Das Messgerät meldet Fehler {error} auf {command}.")

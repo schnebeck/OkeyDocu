@@ -40,6 +40,9 @@ class LiveSession(QObject):
         self.driver = driver
         self.campaign_id = campaign_id
         self._stop = threading.Event()
+        # Without a link the operator can only store on the instrument, so readings may lie
+        # there with the clock as it was. Set on any loss, never cleared for this session.
+        self.gap = False
         self._thread: threading.Thread | None = None
         self._reader: threading.Thread | None = None
 
@@ -86,6 +89,7 @@ class LiveSession(QObject):
             except DeviceError as err:
                 log.info("Messgerät nicht erreichbar: %s", err)
                 self.driver.close()
+                self.gap = True
                 self.link.emit(BAD, LOST_TEXT)
             self._stop.wait(RETRY_S)
 
@@ -98,6 +102,8 @@ class LiveSession(QObject):
         self.reading.emit(self.campaign_id, reading)
 
     def _on_state(self, state: LinkState, text: str) -> None:
+        if state is not LinkState.CONNECTED and not self._stop.is_set():
+            self.gap = True  # a stop asked for here is no loss
         if state is LinkState.CONNECTED:
             self.link.emit(GOOD, CONNECTED_TEXT)
         elif state is LinkState.LOST:

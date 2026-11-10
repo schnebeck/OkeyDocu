@@ -63,3 +63,21 @@ CREATE TABLE company (
     logo TEXT NOT NULL DEFAULT ''  -- base64 of the prepared image, as in templates
 );
 """
+
+# What an instrument calls its codes, in each language it knows, read when it is set up.
+_DEVICE_TEXTS = """
+CREATE TABLE device_texts (
+    driver TEXT NOT NULL,
+    language TEXT NOT NULL,  -- as the instrument names it, such as de-DE
+    code TEXT NOT NULL,
+    text TEXT NOT NULL,
+    PRIMARY KEY (driver, language, code)
+);
+
+CREATE TABLE device_text_sets (
+    driver TEXT PRIMARY KEY,
+    firmware TEXT NOT NULL,  -- read from an instrument with this firmware
+    version TEXT NOT NULL,
+    read_at TEXT NOT NULL
+);
+"""

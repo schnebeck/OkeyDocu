@@ -143,7 +143,9 @@ class RepeatPoint(QWidget):
             self.place.show_asset(step.asset_id, False)
         self.question.setText(step.question if check and step.question != step.title else "")
         self.question.setVisible(bool(self.question.text()))
-        settings = [f"{key}: {value}" for key, value in step.parameters]
+        words = self.app.db.device_words()
+        settings = ["{}: {}".format(*self.app.db.setting_words(key, value, words))
+                    for key, value in step.parameters]
         settings += [f"Grenze {label}: {' '.join(p for p in (low, up) if p)}"
                      for _, label, low, up in step.limits]
         self.settings.setText("Wie zuletzt:  " + "  ·  ".join(settings) if settings else "")

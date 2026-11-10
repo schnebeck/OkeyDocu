@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtGui import QColor, QImage
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QInputDialog, QMessageBox
+from PySide6.QtWidgets import QInputDialog
 
 from easymeasurement.campaign.service import ClockState
 from easymeasurement.ui.status_badges import clock_icon
@@ -105,15 +105,9 @@ def _skew_clock(page, seconds):
 
 def test_clock_check_offers_to_set_a_clock_that_is_off(page, monkeypatch):
     meter = _skew_clock(page, 3600)
-    questions = []
-
-    def yes(*args):
-        questions.append(args[2])
-        return QMessageBox.StandardButton.Yes
-
-    monkeypatch.setattr(QMessageBox, "question", yes)
+    questions = _answer_yes(monkeypatch)
     page.window().campaign.check_clock()
-    assert "+3600 s" in questions[0] or "+3599 s" in questions[0]
+    assert round(questions[0]) in (3599, 3600)
     assert abs(meter.read_clock() - datetime.now()) < timedelta(seconds=2)
     assert abs(page._campaign()["clock_offset_s"]) < 2
 
@@ -146,7 +140,7 @@ def test_badge_changes_when_a_check_finds_a_deviation(page):
 
 def test_badge_returns_after_the_clock_was_set(page, monkeypatch):
     _skew_clock(page, 120)
-    monkeypatch.setattr(QMessageBox, "question", lambda *_: QMessageBox.StandardButton.Yes)
+    _answer_yes(monkeypatch)
     page.window().campaign.check_clock()
     assert page.window().campaign.clock.state is ClockState.SYNCED
 
@@ -156,3 +150,48 @@ def test_three_states_look_different_without_colour():
     images = [clock_icon(state, face).toImage().convertToFormat(QImage.Format.Format_Grayscale8)
               for state in ClockState]
     assert images[0] != images[1] != images[2] != images[0]
+
+
+def _answer_yes(monkeypatch):
+    """Choose "Automatisch stellen"; keeps each offset that was asked about."""
+    questions = []
+
+    def automatic(_parent, offset):
+        questions.append(offset)
+        return True
+
+    monkeypatch.setattr("easymeasurement.ui.instrument_control.ask_clock_sync", automatic)
+    return questions
+
+
+def test_an_unbroken_link_sets_the_clock_without_fetching_first(page, monkeypatch):
+    meter = _skew_clock(page, 120)
+    monkeypatch.setattr(meter, "read_measurements", lambda: 1 / 0)  # needs Setup, must not run
+    _answer_yes(monkeypatch)
+    page.window().campaign.check_clock()
+    assert abs(meter.read_clock() - datetime.now()) < timedelta(seconds=2)
+
+
+def test_after_a_pause_stored_readings_are_fetched_first(page, monkeypatch):
+    meter = _skew_clock(page, 120)
+    campaign = page.window().campaign
+    campaign.pause()
+    campaign.resume()
+    fetched = []
+    original = meter.read_measurements
+    monkeypatch.setattr(meter, "read_measurements", lambda: fetched.append(1) or original())
+    _answer_yes(monkeypatch)
+    campaign.check_clock()
+    assert fetched == [1]
+
+
+def test_a_lost_link_counts_as_a_break_but_a_stop_asked_for_does_not(page):
+    from easymeasurement.devices import LinkState
+    session = page.window().campaign.session
+    assert not session.gap
+    session._stop.set()
+    session._on_state(LinkState.LOST, "")
+    assert not session.gap  # leaving on purpose
+    session._stop.clear()
+    session._on_state(LinkState.LOST, "")
+    assert session.gap

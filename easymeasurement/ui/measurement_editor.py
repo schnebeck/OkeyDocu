@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..model import CONDUCTOR, FUNCTION_LABELS
+from ..store.device_texts import CODE
 from .common import AppContext, function_short, stored_parameters
 from .attachment_list import AttachmentList
 from .growing_edit import GrowingEdit
@@ -34,12 +35,15 @@ READ_ONLY_STYLE = "background: transparent; border: none;"
 LOCKED_TEXT = "Die Kampagne ist abgeschlossen. Die Messung lässt sich nur lesen."
 
 
-def _facts(row, capture: str) -> str:
+def _facts(row, capture: str, db) -> str:
+    """When, how, and the instrument's settings in words; one still a code is left out."""
     when = datetime.fromisoformat(row["local_time"])
-    extra = [
-        f"{p.key}: {p.value}" for p in stored_parameters(row)
-        if not p.key.startswith("TS") and not p.value.startswith("TS") and p.key != CONDUCTOR
-    ]
+    words = db.device_words()
+    extra = []
+    for parameter in stored_parameters(row):
+        name, value = db.setting_words(parameter.key, parameter.value, words)
+        if parameter.key != CONDUCTOR and not CODE.match(name) and not CODE.match(value):
+            extra.append(f"{name}: {value}")
     return " · ".join([f"{when:%d.%m.%Y %H:%M:%S}", capture, *extra])
 
 
@@ -165,7 +169,7 @@ class MeasurementEditor(MeasurementEditing, QWidget):
             self.attachments.show_target(None)
         else:
             self.title.setText(function_short(row["function"]))
-            self.facts.setText(_facts(row, capture))
+            self.facts.setText(_facts(row, capture, self.app.db))
             if self.function.findData(row["function"]) < 0:
                 self.function.addItem(row["function"], row["function"])
             self.function.setCurrentIndex(self.function.findData(row["function"]))

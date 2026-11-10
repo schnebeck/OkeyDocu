@@ -1,0 +1,136 @@
+# EasyMeasurement - easymeasurement/ui/instrument_prepare.py
+# Setting an instrument up: what it already has here is checked, what is missing transferred.
+#
+# Producer: thorsten.schnebeck@gmx.net
+# Generator: Claude Opus 5.5
+# SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+from __future__ import annotations
+
+from PySide6.QtCore import QThread, Signal
+from PySide6.QtWidgets import QLabel
+
+from ..devices import Capability, DeviceBlocked, DeviceError
+from .common import AppContext
+from .overlay import Overlay
+
+INTRO = ("Das Messgerät wird für dieses Programm vorbereitet. Beim ersten Mal und nach einem"
+         " Firmware-Update dauert das etwa eine Minute. Bitte das Drehrad auf <b>Setup</b>"
+         " lassen und das Gerät nicht trennen.")
+STEPS = (("identify", "Messgerät erkennen"), ("texts", "Gerätetexte übertragen"))
+MARKS = {"waiting": "○", "running": "…", "done": "✓", "skipped": "–", "failed": "✗"}
+
+
+def texts_needed(app: AppContext, driver_key: str, firmware: str, capabilities) -> bool:
+    """True when this firmware's words for its codes are not here yet."""
+    return (Capability.TEXTS in capabilities
+            and app.db.device_text_firmware(driver_key) != firmware)
+
+
+def prepare_if_needed(app: AppContext, driver_key: str, port: str, identity, capabilities,
+                      parent) -> None:
+    """The first contact after a firmware update, or ever, brings the texts over first."""
+    if texts_needed(app, driver_key, identity.firmware, capabilities):
+        InstrumentPrepareOverlay(app, driver_key, port, parent).exec()
+
+
+class PrepareWorker(QThread):
+    step = Signal(str, str)  # step, state
+    finished_with = Signal(object, object)  # identity, texts or None
+    failed = Signal(str, bool)  # message, whether turning to Setup may help
+
+    def __init__(self, driver, known_firmware: str | None, parent=None):
+        super().__init__(parent)
+        self.driver, self.known_firmware = driver, known_firmware
+
+    def run(self) -> None:
+        try:
+            with self.driver:
+                self.step.emit("identify", "running")
+                identity = self.driver.identify()
+                self.step.emit("identify", "done")
+                texts = None
+                if (Capability.TEXTS in self.driver.capabilities
+                        and identity.firmware != self.known_firmware):
+                    self.step.emit("texts", "running")
+                    texts = self.driver.read_texts()
+                self.step.emit("texts", "done" if texts is not None else "skipped")
+        except DeviceBlocked as err:
+            self.failed.emit(str(err), True)
+        except DeviceError as err:
+            self.failed.emit(str(err), False)
+        else:
+            self.finished_with.emit(identity, texts)
+
+
+class InstrumentPrepareOverlay(Overlay):
+    """Runs by itself on opening. "Später" leaves codes shown as codes until the next try."""
+
+    def __init__(self, app: AppContext, driver_key: str, port: str, parent=None):
+        super().__init__("Messgerät wird vorbereitet", parent)
+        self.app, self.driver_key, self.port = app, driver_key, port
+        self.worker: PrepareWorker | None = None
+        self.done = False
+        intro = QLabel(INTRO)
+        intro.setWordWrap(True)
+        self.body.addWidget(intro)
+        self.lines: dict[str, QLabel] = {}
+        self.states: dict[str, str] = {}
+        for key, text in STEPS:
+            self.lines[key] = QLabel()
+            self.body.addWidget(self.lines[key])
+            self._show_step(key, "waiting", text)
+        self.ok_button.setText("Fertig")
+        self.cancel_button.setText("Später")
+        self.start()
+
+    def _show_step(self, key: str, state: str, text: str | None = None) -> None:
+        self.states[key] = state
+        label = text or dict(STEPS)[key]
+        self.lines[key].setText(f"{MARKS[state]}  {label}")
+
+    def start(self) -> None:
+        self.ok_button.setText("Fertig")
+        self.ok_button.setEnabled(False)
+        self.cancel_button.setEnabled(False)  # a transfer is not cut off halfway
+        self.hint.clear()
+        for key, _ in STEPS:
+            self._show_step(key, "waiting")
+        driver = self.app.devices.new_driver(self.driver_key, self.port)
+        self.worker = PrepareWorker(driver, self.app.db.device_text_firmware(self.driver_key),
+                                    self)
+        self.worker.step.connect(lambda key, state: self._show_step(key, state))
+        self.worker.finished_with.connect(self._finished)
+        self.worker.failed.connect(self._failed)
+        self.worker.start()
+
+    def _finished(self, identity, texts) -> None:
+        if texts is not None:
+            self.app.db.save_device_texts(self.driver_key, identity.firmware, texts.version,
+                                          texts.texts)
+        self.done = True
+        self.hint.setText("Das Messgerät ist bereit.")
+        self.ok_button.setEnabled(True)
+        self.cancel_button.hide()
+
+    def _failed(self, message: str, setup_helps: bool) -> None:
+        for key, state in self.states.items():
+            if state == "running":
+                self._show_step(key, "failed")
+        advice = " Bitte das Drehrad auf Setup stellen." if setup_helps else ""
+        self.hint.setText(f"{message}{advice}")
+        self.ok_button.setText("Erneut versuchen")
+        self.ok_button.setEnabled(True)
+        self.cancel_button.setEnabled(True)
+
+    def accept(self) -> None:
+        if self.done:
+            super().accept()
+        elif self.worker is None or not self.worker.isRunning():
+            self.start()
+
+    def _leave(self) -> None:
+        if self.worker is not None:
+            self.worker.wait()
+        super()._leave()

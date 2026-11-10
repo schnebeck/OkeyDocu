@@ -22,6 +22,9 @@ class InstrumentControl:
         self.app = app
         self.owner = owner
         self.session = None  # the live session holding the instrument, if any
+        # Campaigns connected without a break since they were started in this program run.
+        # Only for them nothing can lie stored on the instrument with the clock as it was.
+        self.unbroken: set[int] = set()
 
     @contextmanager
     def free(self):
@@ -59,10 +62,14 @@ class InstrumentControl:
             with driver:
                 return measure_clock_offset(driver)
 
+        stored_first = not self._unbroken(campaign_id)
+
         def fetch_and_set():
-            # What is still on the instrument carries its old time, so it comes first.
+            # What is still on the instrument carries its old time, so it comes first. A push
+            # stays on the laptop only, so with an unbroken link there is nothing to fetch.
             with driver:
-                return driver.read_measurements(), set_instrument_clock(driver)
+                stored = driver.read_measurements() if stored_first else []
+                return stored, set_instrument_clock(driver)
 
         try:
             with self.free():
@@ -77,6 +84,11 @@ class InstrumentControl:
             show_error(self.owner, str(err))
             return None
         return offset
+
+    def _unbroken(self, campaign_id: int) -> bool:
+        session = self.session
+        return (campaign_id in self.unbroken and session is not None
+                and session.campaign_id == campaign_id and not session.gap)
 
     def correct_clock(self, campaign_id: int) -> bool:
         campaign = self.app.service.campaign(campaign_id)

@@ -18,7 +18,7 @@ from .overlay import Overlay
 INSTRUCTIONS = (
     "<ol>"
     "<li>USB-Kabel abziehen.</li>"
-    "<li>Drehschalter auf <b>SETUP</b> stellen.</li>"
+    "<li>Drehschalter auf <b>Setup</b> stellen.</li>"
     "<li>Im Bluetooth-Menü Bluetooth <b>ein</b> und <b>sichtbar</b> stellen.</li>"
     "<li>Hier auf <b>Einrichten</b> klicken und eine Abfrage am Gerät bestätigen.</li>"
     "</ol>"
@@ -52,6 +52,7 @@ class InstrumentSetupOverlay(Overlay):
     def __init__(self, parent=None):
         super().__init__("Messgerät einrichten", parent)
         self.worker: PairingWorker | None = None
+        self.address = ""  # of the instrument just paired
         self.pin = QLineEdit(pairing.DEFAULT_PIN)
         self.status = QLabel()
         self.status.setWordWrap(True)
@@ -86,8 +87,9 @@ class InstrumentSetupOverlay(Overlay):
         self.status.setText(text)
         self.start_button.setEnabled(True)
 
-    def _paired(self, _address: str) -> None:
-        self.status.setText("Das Messgerät ist eingerichtet.")
+    def _paired(self, address: str) -> None:
+        self.address = address
+        self.status.setText("Das Messgerät ist gekoppelt.")
         self.paired.emit()
         super().accept()
 

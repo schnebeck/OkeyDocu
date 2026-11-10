@@ -12,6 +12,7 @@ import json
 from datetime import datetime
 
 from ..model import Quantity
+from ..store.device_texts import CODE
 from .plan import PlanStep
 
 NOTABLE = 2.0  # a value that has halved or doubled since last time is pointed out
@@ -60,10 +61,17 @@ class RepeatCheckMixin:
                 now = _range(value["lower_limit"], value["upper_limit"])
                 found.append(f"Grenze {label}: {now} statt {_range(lower, upper)}")
         row = self.db.one("SELECT parameters_json FROM measurements WHERE id=?", measurement_id)
-        now = {item["key"]: item["value"] for item in json.loads(row["parameters_json"] or "[]")}
+        # Both sides in words: a push sends codes, an import from IZYTRON brings German text.
+        words = self.db.device_words()
+        now = dict(self.db.setting_words(item["key"], item["value"], words)
+                   for item in json.loads(row["parameters_json"] or "[]"))
         for key, value in step.parameters:
-            if key in now and now[key] != value:
-                found.append(f"{key}: {now[key]} statt {value}")
+            name, before = self.db.setting_words(key, value, words)
+            current = now.get(name)
+            if current is None or CODE.match(current) != CODE.match(before):
+                continue  # not sent, or one side has no words yet: nothing to judge
+            if current != before:
+                found.append(f"{name}: {current} statt {before}")
         return found
 
     def comparison(self, step: PlanStep, measurement_id: int) -> tuple[str, list[str]]:

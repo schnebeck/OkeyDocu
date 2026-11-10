@@ -10,8 +10,9 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from ..devices.profitest_prime.parser import RESULT_CODES
+from ..devices.profitest_prime.parser import CONDUCTOR_PARAMETERS, RESULT_CODES
 from ..model import (
+    CONDUCTOR,
     SIGHT_CHECK_FUNCTION,
     MeterMeasurement,
     Parameter,
@@ -111,12 +112,19 @@ def _device_measurement(step, data: dict, location: tuple[str, ...]) -> MeterMea
         uid=step["ID"].lower(), function=function, taken_at=_time(step["Date"]),
         verdict=_verdict(step), operator=step["Tester_Name"] or "", comment=step["Comment"] or "",
         location=location, results=results,
-        parameters=tuple(
-            Parameter(item.get("Name", ""), str(item.get("Value", "")))
-            for item in data.get("Parameters") or ()
-        ),
+        parameters=tuple(_parameter(item) for item in data.get("Parameters") or ()),
         raw=step["Measurement_Data"],
     )
+
+
+def _parameter(item: dict) -> Parameter:
+    """Keyed by the instrument's code, as a push is, so both read the same; IZYTRON keeps
+    the value as German text, which is shown as it stands."""
+    code = (item.get("TsKey") or "").removeprefix("PROFITEST_")
+    value = str(item.get("Value", ""))
+    if code in CONDUCTOR_PARAMETERS:
+        return Parameter(CONDUCTOR, value)
+    return Parameter(code or item.get("Name", ""), value)
 
 
 def _check_measurement(step, data: dict, location: tuple[str, ...]) -> MeterMeasurement:

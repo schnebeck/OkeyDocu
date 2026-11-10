@@ -8,18 +8,25 @@
 
 from __future__ import annotations
 
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QListWidget, QPushButton
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QPushButton
 
 from ..devices import find_instruments
+from ..devices.profitest_prime.discovery import DRIVER_KEY
+from .instrument_prepare import InstrumentPrepareOverlay
 from .instrument_setup import InstrumentSetupOverlay
 from .overlay import Overlay
 
+FOUND = Qt.ItemDataRole.UserRole
+
 
 class SettingsOverlay(Overlay):
-    """The instruments this computer knows, and pairing a new one."""
+    """The instruments this computer knows. Setting one up checks what it already has here
+    and transfers what is missing; a Bluetooth instrument is paired first."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, app=None):
         super().__init__("Messgeräte", parent)
+        self.app = app
         self.ok_button.setText("Zurück")
         self.cancel_button.hide()
         self.instruments = QListWidget()
@@ -29,9 +36,16 @@ class SettingsOverlay(Overlay):
         self.hint.setWordWrap(True)
         self.set_up_button = QPushButton("Messgerät über Bluetooth einrichten …")
         self.set_up_button.clicked.connect(self._set_up_instrument)
+        self.prepare_button = QPushButton("Einrichten …")
+        self.prepare_button.setToolTip("Prüft, was das Messgerät hier schon hat, und überträgt,"
+                                       " was fehlt. Drehrad dafür auf Setup.")
+        self.prepare_button.clicked.connect(self._prepare_chosen)
+        self.instruments.currentRowChanged.connect(lambda _: self._update())
+        self.instruments.itemDoubleClicked.connect(lambda _: self._prepare_chosen())
         row = QHBoxLayout()
         row.addWidget(self.set_up_button)
         row.addStretch()
+        row.addWidget(self.prepare_button)
         self.body.addWidget(self.instruments)
         self.body.addWidget(self.hint)
         self.body.addLayout(row)
@@ -40,9 +54,30 @@ class SettingsOverlay(Overlay):
     def refresh(self) -> None:
         found = find_instruments()
         self.instruments.clear()
-        self.instruments.addItems([instrument.label for instrument in found])
+        for instrument in found:
+            item = QListWidgetItem(instrument.label)
+            item.setData(FOUND, instrument)
+            item.setToolTip("Doppelklick: einrichten")
+            self.instruments.addItem(item)
         self.hint.setVisible(not found)
+        if found:
+            self.instruments.setCurrentRow(0)
+        self._update()
+
+    def _update(self) -> None:
+        self.prepare_button.setEnabled(self.app is not None and self.instruments.currentRow() >= 0)
 
     def _set_up_instrument(self) -> None:
-        InstrumentSetupOverlay(self).exec()
+        pairing = InstrumentSetupOverlay(self)
+        if pairing.exec() and pairing.address and self.app is not None:
+            self.prepare(DRIVER_KEY, f"bt:{pairing.address}")
         self.refresh()
+
+    def _prepare_chosen(self) -> None:
+        item = self.instruments.currentItem()
+        if item is not None and self.app is not None:
+            found = item.data(FOUND)
+            self.prepare(found.key, found.port)
+
+    def prepare(self, driver_key: str, port: str) -> None:
+        InstrumentPrepareOverlay(self.app, driver_key, port, self).exec()

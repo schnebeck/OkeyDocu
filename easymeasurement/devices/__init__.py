@@ -7,7 +7,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from .base import Capability, DeviceError, MeterDriver
-from .base import DeviceBlocked, FoundInstrument, LinkState, LiveReading, SelectorPosition
+from .base import DeviceBlocked, DeviceTexts, FoundInstrument, LinkState, LiveReading
+from .base import SelectorPosition
 from .registry import available_drivers, create_driver, find_instruments, register_driver
 
 __all__ = [
@@ -15,6 +16,7 @@ __all__ = [
     "DeviceError",
     "MeterDriver",
     "DeviceBlocked",
+    "DeviceTexts",
     "FoundInstrument",
     "SelectorPosition",
     "LinkState",

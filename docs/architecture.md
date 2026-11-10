@@ -136,11 +136,22 @@ Einmalig richtet der Dialog unter „Einstellungen" die Bluetooth-Kopplung ein. 
 `bluetoothctl` mit einem Agenten für die PIN. Die PIN wird nicht gespeichert.
 
 Eine Kampagne startet in jeder Schalterstellung, in der sich die Uhr stellen lässt. Der
-Gerätespeicher wird dabei nicht gelesen, weil das per Bluetooth 15 s dauert und SETUP braucht.
+Gerätespeicher wird dabei nicht gelesen, weil das per Bluetooth 15 s dauert und die Stellung Setup braucht.
 Stattdessen trennt die Zeit Alt und Neu: Neu ist, was ab `stored_since` liegt.
 
 Gerätezugriffe laufen über `run_busy()` außerhalb des GUI-Threads. Die Datenbankverbindung gehört
 dem GUI-Thread, deshalb lesen die Worker nur vom Gerät und das Ablegen folgt danach.
+
+**Gerätetexte:** Messungen behalten die TS-Codes, die das Gerät sendet, für Messgrößen und
+Einstellungen, wie IZYTRON auch (dort mit Vorsatz `PROFITEST_`). Die Wörter dazu stehen in der
+Übersetzungsdatei des Geräts (`DATABASEXML:GET:TRANSLATIONFILE`, 12 Sprachen, etwa eine Minute per
+Bluetooth). Beim Einrichten über „Einstellungen → Messgeräte“, über Bluetooth nach dem Koppeln oder per
+USB mit „Einrichten …“, prüft das Programm den Stand und überträgt, was fehlt
+(`ui/instrument_prepare.py`, Tabellen `device_texts` und `device_text_sets`). Die Texte gelten für die
+Firmware, mit der sie gelesen wurden; findet ein Kampagnenstart eine andere Firmware, kommt derselbe
+Abgleich mit Wartefenster. Angezeigt werden Einstellungen in Worten, etwa „RLO - Polung: Automatische
+Umpolung“; ohne Texte bleibt der Code. Der IZYTRON-Import schlüsselt Einstellungen ebenso nach Code,
+Leiterbezüge neutral als `conductor`. Die Herstellertexte gehören zu den lokalen Daten, nie ins Repo.
 
 `transport.py` führt eine feste Liste erlaubter Befehle: Lesebefehle, die drei Befehle des
 Push-Modus und die Abfrage des Drehschalters. Alles andere wird vor dem Senden abgewiesen, weil Schreibbefehle den Geräteinhalt
@@ -165,7 +176,7 @@ Abmelden kann sich nur die Schnittstelle, die sich angemeldet hat. Gelingt das n
 Verbindung über einen anderen Weg zurück, bittet die App, das Gerät aus- und wieder einzuschalten.
 
 - Gespeicherte Messungen werden auf Anforderung abgerufen, nicht fortlaufend: Das Gerät zeigt
-  währenddessen einen eigenen Bildschirm. Es gibt sie nur mit dem Drehschalter auf SETUP frei,
+  währenddessen einen eigenen Bildschirm. Es gibt sie nur mit dem Drehschalter auf Setup frei,
   sonst kommt Fehler 402.
 - Die Gerätecodes (`TSnnnn`) in `parser.py` folgen der Übersetzungsdatei des Geräts. Unbekannte
   Codes bleiben als Code erhalten.
@@ -200,7 +211,10 @@ Das Stellen wird nachgeprüft: Bleibt eine Abweichung ab 3 s, startet die Kampag
 Im Normalfall gibt es deshalb keinen Versatz, und die Oberfläche zeigt nichts zur Uhr: Die
 Statusanzeige erscheint nur bei ungeprüfter oder abweichender Uhr, die Protokollzeile „Geräteuhr“
 nur, wenn ein Versatz Zeiten tatsächlich korrigiert hat. „Messgerät → Uhr stellen …“ prüft und stellt
-nach Rückfrage. Der Versatz bleibt als Absicherung erhalten. `clock_checks` hält jede Prüfung fest, jede Messung
+nach Rückfrage, in jeder Stellung des Drehrads. Ein Push bleibt nicht im Gerätespeicher; lief die
+Verbindung seit dem Start der Kampagne ohne Unterbrechung, liegt dort nichts mit der alten Zeit, und
+die Uhr wird direkt gestellt. Nach einem Abbruch, einer Pause oder einem Neustart des Programms holt
+sie vorher ab, was im Gerät gespeichert ist; dieser Abruf braucht die Stellung Setup. Der Versatz bleibt als Absicherung erhalten. `clock_checks` hält jede Prüfung fest, jede Messung
 speichert ihren Versatz (`clock_offset_s`) neben `device_time` und `local_time`. Gebraucht wird er
 für Geräte ohne stellbare Uhr, bei einer Abweichung während der Kampagne und für Messungen eines
 früheren Tages, deren Versatz sich von Hand angeben lässt. Wird die Uhr während einer Kampagne

@@ -27,7 +27,10 @@ def measurement(key, description, reading, minimum=None, maximum=None, beside=()
             "Min": minimum, "Max": maximum, "Result": 0, "BesideMeasurements": list(beside),
             **extra,
         }],
-        "Parameters": [{"Name": "RISO - Leiter", "Value": "L1-PE"}],
+        "Parameters": [
+            {"Name": "RISO - Leiter", "Value": "L1-PE", "TsKey": "PROFITEST_TS1245"},
+            {"Name": "RISO - Nennspannung", "Value": "500 V", "TsKey": "PROFITEST_TS1250"},
+        ],
     }
 
 

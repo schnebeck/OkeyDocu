@@ -84,7 +84,7 @@ def _wait_for_instrument(session: _Session, timeout_s: float) -> str:
         if match:
             return match["address"]
     raise PairingFailed(
-        "Das Messgerät wurde nicht gefunden. Bitte Drehschalter auf SETUP stellen und im"
+        "Das Messgerät wurde nicht gefunden. Bitte Drehschalter auf Setup stellen und im"
         " Bluetooth-Menü Bluetooth einschalten und sichtbar stellen."
     )
 

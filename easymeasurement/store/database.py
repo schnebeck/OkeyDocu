@@ -14,10 +14,11 @@ from pathlib import Path
 
 from ..model import check_text
 from .kinds import KindsMixin
+from .device_texts import DeviceTextsMixin
 from .master_data import MasterDataMixin
 from .schema import _SCHEMA
 
-SCHEMA_VERSION = 20
+SCHEMA_VERSION = 21
 
 
 class SchemaMismatch(Exception):
@@ -36,7 +37,7 @@ class DuplicateMeasurement(Exception):
     """A measurement from an instrument is already in the database."""
 
 
-class Database(KindsMixin, MasterDataMixin):
+class Database(KindsMixin, MasterDataMixin, DeviceTextsMixin):
     def __init__(self, path: Path | str):
         self.path = path
         self.connection = sqlite3.connect(str(path))

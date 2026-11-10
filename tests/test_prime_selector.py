@@ -106,9 +106,18 @@ def test_every_function_named_by_a_position_exists():
         assert selector_position(value).functions <= FUNCTION_LABELS.keys()
 
 
-@pytest.mark.parametrize("value", [11, 33, 34, 35])
-def test_a_position_without_a_measuring_function_has_no_label(value):
+@pytest.mark.parametrize("value", [11, 36])
+def test_an_unknown_position_has_no_label(value):
     assert selector_position(value) == SelectorPosition()
+
+
+@pytest.mark.parametrize("value, label", [
+    (32, "Auto"), (33, "Setup"), (34, "Batteriezustand"), (35, "OFF"),
+])
+def test_the_last_positions_are_named_as_printed_and_rule_out_nothing(value, label):
+    position = selector_position(value)
+    assert position.label == label and not position.functions
+    assert not position.rules_out("riso")
 
 
 def test_a_position_rules_out_what_it_cannot_measure():

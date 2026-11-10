@@ -155,7 +155,9 @@ def test_offset_shows_up_in_the_report_data(service, imported):
 
 def test_parameters_are_readable(service, imported):
     _, riso = reading(service, imported.campaign_id, "riso")
-    assert [(p.key, p.value) for p in riso.parameters] == [("RISO - Leiter", "L1-PE")]
+    # Keyed by the instrument's code, as a push is; the conductor by its neutral key.
+    assert [(p.key, p.value) for p in riso.parameters] == [
+        (CONDUCTOR, "L1-PE"), ("TS1250", "500 V")]
 
 
 def test_original_record_is_kept(service, imported):

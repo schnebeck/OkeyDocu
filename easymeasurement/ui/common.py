@@ -211,14 +211,13 @@ def run_busy(parent, text: str, work: Callable[[], T]) -> T:
 
 
 def ask_clock_sync(parent, offset_s: float) -> bool:
-    """Setting the clock during a campaign fetches data first, so a person decides."""
-    answer = QMessageBox.question(
-        parent,
-        "Geräteuhr",
-        f"Die Uhr des Messgeräts weicht um {offset_s:+.0f} s von diesem Rechner ab.\n\n"
-        "Soll sie auf die Zeit dieses Rechners gestellt werden?",
-    )
-    return answer == QMessageBox.StandardButton.Yes
+    """Whether the program sets the clock or the operator does it on the instrument."""
+    box = QMessageBox(QMessageBox.Icon.Question, "Geräteuhr",
+                      f"Die Uhr des Messgeräts weicht um {offset_s:+.0f} s ab.",
+                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, parent)
+    box.button(QMessageBox.StandardButton.Yes).setText("Automatisch stellen")
+    box.button(QMessageBox.StandardButton.No).setText("Von Hand stellen")
+    return box.exec() == QMessageBox.StandardButton.Yes
 
 
 def stored_parameters(row) -> list[Parameter]:

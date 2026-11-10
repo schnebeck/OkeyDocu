@@ -37,11 +37,15 @@ _POSITIONS = {
     29: ("T%rH", ()),
     30: ("Extra", ()),
     31: ("HV", ()),
-    32: ("Prüfsequenz", ()),
+    32: ("Auto", ()),  # test sequences: the step decides what is measured
+    33: ("Setup", ()),
+    34: ("Batteriezustand", ()),
+    35: ("OFF", ()),
 }
 
 
 def selector_position(value: int) -> SelectorPosition:
-    """A position without a measuring function, such as SETUP, has no label."""
+    """Named as printed on the dial. Positions without a measuring function, such as
+    Setup, rule nothing out; an unknown value has no name."""
     label, functions = _POSITIONS.get(value, ("", ()))
     return SelectorPosition(label, frozenset(functions))

@@ -158,7 +158,7 @@ def test_missing_tool_is_reported(tmp_path):
 
 
 class BlockedMeter(SimulatedMeter):
-    """The rotary switch is not on SETUP."""
+    """The rotary switch is not on Setup."""
 
     blocked = True
 

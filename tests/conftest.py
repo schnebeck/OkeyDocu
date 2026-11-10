@@ -47,6 +47,8 @@ def no_real_wallet(monkeypatch):
 def no_open_questions(monkeypatch):
     """A modal question would hang a test. Whoever expects one answers it himself."""
     monkeypatch.setattr(QMessageBox, "question", lambda *_: QMessageBox.StandardButton.No)
+    monkeypatch.setattr("easymeasurement.ui.instrument_control.ask_clock_sync",
+                        lambda *_: False)  # set by hand, unless a test says otherwise
 
 
 @pytest.fixture

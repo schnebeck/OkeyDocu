@@ -16,6 +16,7 @@ from .campaign_dialog import CampaignDialog
 from .campaign_edit import PLAN, TESTER, CampaignEditOverlay
 from .campaign_views import AssignPlanOverlay, TesterOverlay
 from .common import run_busy, show_error
+from .instrument_prepare import prepare_if_needed
 from .live_session import LiveSession
 from .measurement_detail import pick_images
 
@@ -68,10 +69,13 @@ class CampaignActions:
         except DeviceError as err:
             show_error(self, str(err))
             return
+        prepare_if_needed(self.app, instrument.key, instrument.port, start.identity,
+                          driver.capabilities, self)
         campaign = self.app.service.open_with(
             asset, None, title, tester, instrument.key, start, user
         )
         self.app.devices.attach(campaign, driver, instrument.port)
+        self.instrument.unbroken.add(campaign)
         self.enter(campaign)
 
     # Measuring -----------------------------------------------------------
@@ -147,6 +151,8 @@ class CampaignActions:
 
     def _end_session(self) -> None:
         session, self.session = self.session, None
+        if session is not None:
+            self.instrument.unbroken.discard(session.campaign_id)
         self.instrument.session = None
         self.live_id = self.list.live_id = None
         self.link_state = None
@@ -224,7 +230,7 @@ class CampaignActions:
         offset = self.instrument.check_clock(self.campaign_id)
         if offset is not None:
             self.notice.setText("Geräteuhr geht genau" if abs(offset) < CLOCK_SET_ACCURACY_S
-                                else f"Geräteuhr weicht {offset:+.0f} s ab, nicht gestellt")
+                                else f"Geräteuhr weicht {offset:+.0f} s ab: bitte am Gerät stellen")
         self.refresh()
 
     def correct_clock(self) -> None:

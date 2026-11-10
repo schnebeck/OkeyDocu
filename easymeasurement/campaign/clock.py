@@ -61,7 +61,7 @@ def set_instrument_clock(driver: MeterDriver) -> float:
     if abs(after) >= CLOCK_SET_ACCURACY_S:
         raise DeviceError(
             f"Die Uhr des Messgeräts ließ sich nicht stellen, sie weicht weiter um {after:+.0f} s"
-            " ab. Bitte den Drehschalter auf SETUP stellen und es erneut versuchen."
+            " ab. Bitte erneut versuchen."
         )
     return before
 
@@ -81,7 +81,7 @@ def read_instrument(driver: MeterDriver) -> InstrumentStart:
     instrument whose clock cannot be set keeps its measured offset.
 
     The instrument's memory is not read, which would take 15 s over Bluetooth
-    and needs the rotary switch on SETUP. Time tells old from new instead. If the
+    and needs the rotary switch on Setup. Time tells old from new instead. If the
     clock ran ahead, a reading taken just before the start can look new. It then
     shows up as unassigned, which is better than silently dropping real ones.
     """

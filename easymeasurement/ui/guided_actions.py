@@ -15,6 +15,7 @@ from ..campaign.service import NO_INSTRUMENT, read_instrument
 from ..devices import Capability, DeviceError
 from .common import run_busy, selected_id, show_error
 from .guided_pages import ReasonOverlay
+from .instrument_prepare import prepare_if_needed
 
 
 class GuidedActions:
@@ -35,10 +36,12 @@ class GuidedActions:
         except DeviceError as err:
             show_error(self, str(err))
             return None
+        prepare_if_needed(self.app, driver_key, port, start.identity, driver.capabilities, self)
         campaign = self.app.service.open_with(
             asset_id, plan, title, tester, driver_key, start, user_id
         )
         self.app.devices.attach(campaign, driver, port)
+        self.instrument.unbroken.add(campaign)
         self.campaign_id = campaign
         self.reload()
         self.started.emit(campaign)

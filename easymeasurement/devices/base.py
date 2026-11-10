@@ -33,6 +33,15 @@ class Capability(Flag):
     LIVE_RESULTS = auto()  # the instrument reports results as they happen
     SELECTOR = auto()  # the position of the function selector can be read
     SIMULATED_TRIGGER = auto()  # test drivers only: the app may create a reading
+    TEXTS = auto()  # the instrument hands out its words for the codes it sends
+
+
+@dataclass(frozen=True)
+class DeviceTexts:
+    """Code to text for each language, as the instrument names them (`de-DE`)."""
+
+    version: str
+    texts: dict[str, dict[str, str]]
 
 
 @dataclass(frozen=True)
@@ -117,6 +126,10 @@ class MeterDriver(ABC):
 
     def unsubscribe_live(self) -> None:
         pass
+
+    def read_texts(self) -> DeviceTexts:
+        """The instrument's words for its codes. Slow: read when it is set up, not to measure."""
+        raise DeviceError("Dieses Messgerät liefert keine Texte.")
 
     def __enter__(self) -> "MeterDriver":
         self.open()

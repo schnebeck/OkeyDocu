@@ -118,7 +118,7 @@ class MainWindow(MainMenus, QMainWindow):
             self.open_page(pages[key])
 
     def _open_settings(self) -> None:
-        SettingsOverlay(self).exec()
+        SettingsOverlay(self, self.app).exec()
 
     def _about(self) -> None:
         QMessageBox.about(

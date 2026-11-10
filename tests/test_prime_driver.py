@@ -130,7 +130,7 @@ def test_corrupt_reply_is_rejected():
 def test_busy_port_is_reported_in_plain_words():
     port = FakePort({"IDNXML:GET:TYPE": frame("IDNXML:GET:TYPE", b"", error=402)})
     with PrimeTransport(SerialChannel(port)) as transport:
-        with pytest.raises(DeviceError, match="SETUP"):
+        with pytest.raises(DeviceError, match="Setup"):
             transport.query("IDNXML:GET:TYPE")
 
 

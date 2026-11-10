@@ -15,12 +15,14 @@ from datetime import datetime
 from typing import Callable
 
 from ...model import DeviceIdentity, MeterMeasurement
-from ..base import Capability, DeviceError, LinkState, LiveReading, MeterDriver, SelectorPosition
+from ..base import Capability, DeviceError, DeviceTexts, LinkState, LiveReading, MeterDriver
+from ..base import SelectorPosition
 from .channels import Channel, SerialChannel, SerialPort, open_channel
 from .discovery import open_any
 from .parser import parse_database, parse_date
 from .push_print import PUSH_TIMEOUT_S, RECONNECT_DELAY_S, PushPrintMixin
 from .selector import SELECTOR_COMMAND, selector_position
+from .texts import TEXTS_COMMAND, TEXTS_TIMEOUT_S, parse_texts
 from .transport import PrimeTransport
 
 log = logging.getLogger(__name__)
@@ -35,12 +37,12 @@ class ProfitestPrimeDriver(PushPrintMixin, MeterDriver):
     happens to it, and a record that cannot be parsed is delivered unparsed.
 
     Stored measurements are fetched on request, not polled. The instrument only
-    releases them with the rotary switch on SETUP.
+    releases them with the rotary switch on Setup.
     """
 
     capabilities = (
         Capability.READ_STORED | Capability.CLOCK | Capability.SET_CLOCK
-        | Capability.LIVE_RESULTS | Capability.SELECTOR
+        | Capability.LIVE_RESULTS | Capability.SELECTOR | Capability.TEXTS
     )
 
     def __init__(
@@ -138,6 +140,11 @@ class ProfitestPrimeDriver(PushPrintMixin, MeterDriver):
             return selector_position(int(text))
         except ValueError:
             raise DeviceError(f"Unerwartete Schalterstellung: {text!r}") from None
+
+    def read_texts(self) -> DeviceTexts:
+        if self._transport is None:
+            raise DeviceError("Die Verbindung zum Messgerät ist nicht geöffnet.")
+        return parse_texts(self._transport.query(TEXTS_COMMAND, TEXTS_TIMEOUT_S))
 
     def read_measurements(self) -> list[MeterMeasurement]:
         return parse_database(self._query("DATABASEXML:GET:DATA"))[1]
