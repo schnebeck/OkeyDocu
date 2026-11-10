@@ -52,6 +52,7 @@ class UsersOverlay(Overlay):
         self.list.setMinimumHeight(220)
         self.list.currentRowChanged.connect(lambda _: self._update())
         self.list.itemDoubleClicked.connect(lambda _: self.edit())
+        self.list.setToolTip("Doppelklick: Benutzer ändern")
         self.new_button = QPushButton("Neuer Benutzer …")
         self.edit_button = QPushButton("Ändern …")
         self.remove_button = QPushButton("Entfernen …")

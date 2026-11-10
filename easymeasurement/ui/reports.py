@@ -93,6 +93,7 @@ class ReportsPage(QWidget):
         )
         self.table.currentCellChanged.connect(lambda *_: self._update_buttons())
         self.table.doubleClicked.connect(self._open)
+        self.table.setToolTip("Doppelklick öffnet das Protokoll")
         layout = QVBoxLayout(self)
         layout.addLayout(top)
         layout.addLayout(actions)

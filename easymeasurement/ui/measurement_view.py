@@ -85,6 +85,8 @@ class MeasurementView(MeasurementDetail, QWidget):
         self.table.setIconSize(MARK_SIZE)
         self.table.cellClicked.connect(lambda row, column: self._clicked(row, column, False))
         self.table.cellDoubleClicked.connect(lambda row, column: self._clicked(row, column, True))
+        self.table.setToolTip("Doppelklick auf ein Feld bearbeitet es, solange die Kampagne"
+                              " offen ist. Bei einem Prüfablauf klappt er die Schritte auf und zu.")
         # On the table, Enter goes to the field beside it and Delete asks to delete the row.
         for key, slot in ((Qt.Key.Key_Return, self._edit_measurement),
                           (Qt.Key.Key_Enter, self._edit_measurement),

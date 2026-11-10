@@ -38,7 +38,7 @@ class MoveOverlay(Overlay):
         def add(parent, row) -> None:
             item = QTreeWidgetItem([row["name"]])
             item.setIcon(0, catalog.icon(row["kind"]))
-            item.setToolTip(0, catalog.label(row["kind"]))
+            item.setToolTip(0, f"{catalog.label(row['kind'])}\nDoppelklick: hierhin verschieben")
             item.setData(0, ROW_ID, row["id"])
             self.items[row["id"]] = item
             parent.addChild(item) if parent else self.tree.addTopLevelItem(item)

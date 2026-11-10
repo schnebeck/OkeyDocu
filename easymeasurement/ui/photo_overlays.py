@@ -83,7 +83,7 @@ class TimelineAsking:
     def _describe(self, hit: Hit) -> str:
         if hit.kind == "photo":
             photo = self.view.data.photo(hit.id)
-            return f"{photo.name}\n{self._photo_words(photo)}"
+            return f"{photo.name}\n{self._photo_words(photo)}\nDoppelklick: groß zeigen"
         if hit.kind == "mark":
             row = self.rows[hit.id]
             lines = [function_text(row["function"]), row["local_time"].replace("T", "  "),

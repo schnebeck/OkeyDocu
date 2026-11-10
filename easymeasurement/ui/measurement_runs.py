@@ -167,4 +167,4 @@ def write_line(table: QTableWidget, index: int, line: Line) -> None:
     if line.row_id is None and line.run_id is not None:
         first.setData(RUN_ID, line.run_id)
         first.setData(MEMBERS, line.members)
-        first.setToolTip("Klick auf die Zeit klappt die Schritte auf und zu")
+        first.setToolTip("Klick auf die Zeit oder Doppelklick klappt die Schritte auf und zu")

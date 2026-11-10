@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..campaign.records import NO_INSTRUMENT
 from ..campaign.seal import SealState
 from .common import ROW_ID, AppContext
 
@@ -145,7 +146,9 @@ class CampaignList(QWidget):
             is_open = row["status"] == "open"
             item = QTreeWidgetItem([self._text(row, counts.get(row["id"], 0))])
             item.setData(0, ROW_ID, row["id"])
-            item.setToolTip(0, row["title"])
+            resumable = is_open and row["driver"] not in NO_INSTRUMENT
+            item.setToolTip(0, row["title"] + ("\nDoppelklick: mit dem Messgerät weitermessen"
+                                               if resumable else ""))
             (self.running if is_open else self.closed).addChild(item)
             self.items[row["id"]] = item
         self.running.setHidden(self.running.childCount() == 0)

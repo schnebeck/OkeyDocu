@@ -127,7 +127,7 @@ class PhotoStack(QWidget):
         for photo_id, row in self.rows.items():
             item = QListWidgetItem(self._caption(row))
             item.setData(ROW_ID, photo_id)
-            item.setToolTip(row["original_name"])
+            item.setToolTip(f"{row['original_name']}\nDoppelklick: groß zeigen")
             path = service.photo_path(self.campaign_id, row["file_name"])
             self.by_path[str(path)] = item
             self._give_icon(item, path)

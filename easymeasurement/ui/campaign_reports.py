@@ -36,6 +36,7 @@ class CampaignReports(QWidget):
         self.list.setMinimumHeight(60)
         self.list.currentRowChanged.connect(lambda _: self._update_buttons())
         self.list.itemDoubleClicked.connect(lambda _: self._open())
+        self.list.setToolTip("Doppelklick öffnet das Protokoll")
         self.open_button = QPushButton("Öffnen")
         self.sign_button = QPushButton("Signieren …")
         self.open_button.clicked.connect(self._open)
