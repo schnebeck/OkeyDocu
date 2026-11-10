@@ -8,8 +8,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 
+from ..campaign.photo_marks import ROLES
 from ..model import check_text, conductor_of
 from .context import VERDICT_TEXT, ReportMeasurement, ReportStep, function_label
 from .language import moment, tr, value_text
@@ -25,13 +25,23 @@ def _scope(values: dict) -> ReportStep:
     return ReportStep("", "", "done", "", everything)
 
 
-def _step_photos(step: ReportStep) -> list[tuple[Path, str]]:
-    """Each photo names its measurement, so it can be traced like any other value."""
-    return [
-        (path, f"{function_label(m.data.function)} · {_time(m)}")
-        for m in step.measurements
-        for path in m.photos
-    ]
+def _step_photos(step: ReportStep) -> list[tuple]:
+    """Each photo names its measurement, so it can be traced like any other value.
+
+    A defect or a hint says so first; the texts of the marks follow by their numbers.
+    """
+    items = []
+    for m in step.measurements:
+        for path in m.photos:
+            role, marks = m.photo_notes.get(str(path), ("", []))
+            caption = f"{function_label(m.data.function)} · {_time(m)}"
+            if role:
+                caption = f"{tr(ROLES[role])}: {caption}"
+            texts = [f"({mark.number}) {mark.text}" for mark in marks if mark.text]
+            if texts:
+                caption += "".join(f"\n{text}" for text in texts)
+            items.append((path, caption, marks, role))
+    return items
 
 
 def _marks(measurement: ReportMeasurement) -> str:

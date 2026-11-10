@@ -11,17 +11,18 @@ from __future__ import annotations
 from datetime import datetime
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import QTimer
 from PySide6.QtGui import QColor, QIcon, QPixmap
 from PySide6.QtWidgets import QFileDialog, QListWidgetItem, QMessageBox
 
+from ..campaign.photo_marks import ROLES
 from ..campaign.service import MANUAL
 from .common import AppContext, function_short, selected_id
-from .photo_overlays import PhotoPreview
+from .photo_gallery import PHOTO_ID, PHOTO_PATH
+from .photo_preview import PhotoPreview
 from .photo_shared import shared_thumbs
 
 THUMB = 150
-PHOTO_PATH = Qt.ItemDataRole.UserRole + 1
 
 
 def _waiting() -> QPixmap:
@@ -83,12 +84,17 @@ class MeasurementDetail:
             # A picture not read yet arrives through the cache's `ready`, so selecting stays quick.
             item = QListWidgetItem(QIcon(thumbs.get(path) or _waiting()), photo["original_name"])
             item.setData(PHOTO_PATH, path)
+            item.setData(PHOTO_ID, photo["id"])
+            if photo["role"]:
+                item.setText(f"{ROLES[photo['role']]} · {item.text()}")
             item.setToolTip(photo["taken_at"] or "Zeitpunkt unbekannt")
             self.gallery.addItem(item)
         self.gallery.setVisible(self.gallery.count() > 0 or not self.hide_empty_gallery)
 
     def _preview_photo(self, item: QListWidgetItem) -> None:
-        PhotoPreview(item.text(), item.toolTip(), Path(item.data(PHOTO_PATH)), self).exec()
+        PhotoPreview(item.text(), item.toolTip(), Path(item.data(PHOTO_PATH)), self, self.app,
+                     item.data(PHOTO_ID)).exec()
+        self._show_detail()  # a role changed shows in the gallery
 
     def _thumb_ready(self, path: str) -> None:
         for index in range(self.gallery.count()):

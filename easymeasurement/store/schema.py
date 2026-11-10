@@ -24,7 +24,7 @@ from .schema_parts import (
     _USERS_TABLE,
     _VALUES_FROZEN_UPDATE,
 )
-from .schema_runs import _RUNS
+from .schema_runs import _PHOTO_MARKS, _RUNS
 
 _SCHEMA = """
 CREATE TABLE customers (
@@ -162,7 +162,7 @@ CREATE TABLE reports (
     language TEXT NOT NULL DEFAULT 'de'
 );
 
-""" + _RUNS + _PHOTOS + _PLANS_TABLE + """
+""" + _RUNS + _PHOTOS + _PHOTO_MARKS + _PLANS_TABLE + """
 -- A closed campaign is a record: these triggers refuse every change to its data.
 """ + _MEASUREMENTS_FROZEN_UPDATE + _CLOCK_CHECKS_TABLE + "".join(_CLOCK_CHECKS_FROZEN) + "".join(
     _READING_RULES + _MEASUREMENT_LOG

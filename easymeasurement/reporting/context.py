@@ -12,8 +12,16 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
 
+from ..campaign.repeat import REPEAT
 from ..campaign.service import MANUAL, CampaignService
-from ..model import FUNCTION_LABELS, SIGHT_CHECK_FUNCTION, MeterMeasurement, Verdict
+from ..model import (
+    FUNCTION_LABELS,
+    SIGHT_CHECK_FUNCTION,
+    MeterMeasurement,
+    Parameter,
+    Verdict,
+    conductor_of,
+)
 from .attached import Attached, places, sort_attached
 from .language import day, feature_name, kind_name, moment, tr
 
@@ -36,6 +44,7 @@ class ReportMeasurement:
     data: MeterMeasurement
     local_time: datetime
     photos: list[Path] = field(default_factory=list)
+    photo_notes: dict = field(default_factory=dict)  # path text: role and marks
     manual: bool = False  # typed in, not read from an instrument
     edited: bool = False  # something other than the reading was overwritten
     attached: Attached = field(default_factory=Attached)
@@ -72,6 +81,13 @@ def _add_answers(steps: list[ReportStep], title: str, measured: list) -> None:
         steps.append(ReportStep(tr(title), SIGHT_CHECK_FUNCTION, "done", "", measured))
 
 
+def _point_title(service: CampaignService, step, title: str) -> str:
+    """A point left out names where and between which conductors it was to be taken."""
+    where = service.place_path(step.asset_id) if step.asset_id is not None else ""
+    conductor = conductor_of(Parameter(*item) for item in step.parameters)
+    return " · ".join(part for part in (title, where, conductor) if part)
+
+
 def build_context(service: CampaignService, campaign_id: int) -> dict:
     campaign = service.campaign(campaign_id)
     asset = service.db.asset(campaign["asset_id"])
@@ -80,10 +96,16 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
 
     def load(row) -> ReportMeasurement:
         attached = sort_attached(service, service.attachments(campaign_id, measurement_id=row["id"]))
+        notes = {
+            str(service.photo_path(photo["campaign_id"], photo["file_name"])):
+                (photo["role"], service.photo_marks(photo["id"]))
+            for photo in service.photos_of(row["id"])
+        }
         return ReportMeasurement(
             service.load_measurement(row),
             datetime.fromisoformat(row["local_time"]),
             service.photo_paths(row["id"]) + attached.images,
+            notes,
             manual=row["source"] == MANUAL,
             # Who measured is registered, but it says nothing about the result.
             edited=any(c["field"] != "operator" for c in service.measurement_changes(row["id"])),
@@ -91,19 +113,27 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
         )
 
     steps = []
+    loose: dict[str, list[ReportMeasurement]] = {}
+    repeat = campaign["plan_key"] == REPEAT
     for row in service.steps(campaign_id):
         plan_step = service.plan_step(row)
         measured = [load(m) for m in service.measurements(campaign_id, row["id"])]
         if plan_step.kind == "note":
             continue
         if plan_step.kind == "check" and row["status"] == "done":
-            _add_answers(steps, row["plan_title"], measured)
+            _add_answers(steps, plan_step.run or row["plan_title"], measured)
             continue
-        steps.append(ReportStep(tr(plan_step.title), plan_step.function, row["status"], row["note"],
-                                measured))
+        # A repeat inspection reads like any other: its points are grouped by what was
+        # measured; only one left out stands on its own, with its reason.
+        if repeat and row["status"] == "done":
+            loose.setdefault(plan_step.function, []).extend(measured)
+            continue
+        title = tr(plan_step.title)
+        if repeat:
+            title = _point_title(service, plan_step, title)
+        steps.append(ReportStep(title, plan_step.function, row["status"], row["note"], measured))
 
     # Without a plan, measurements are simply grouped by what was measured.
-    loose: dict[str, list[ReportMeasurement]] = {}
     for row in service.open_measurements(campaign_id):
         loose.setdefault(row["function"], []).append(load(row))
     for function, measured in loose.items():

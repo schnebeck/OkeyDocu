@@ -1,5 +1,5 @@
 # EasyMeasurement - easymeasurement/store/schema_runs.py
-# Runs: a named sequence of steps, such as a checklist of questions, measured as one.
+# Runs of steps measured as one, and the numbered marks drawn on photos.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
@@ -24,3 +24,27 @@ CREATE TABLE runs (
 CREATE INDEX runs_campaign ON runs(campaign_id);
 CREATE INDEX measurements_run ON measurements(run_id);
 """ + "".join(_frozen_with_its_campaign("runs"))
+
+# A region of a photo, numbered so a text can refer to it. Coordinates are fractions of the
+# upright picture, so they hold at any size the photo is shown or printed in.
+_PHOTO_MARKS = """
+CREATE TABLE photo_marks (
+    id INTEGER PRIMARY KEY,
+    photo_id INTEGER NOT NULL REFERENCES photos(id) ON DELETE CASCADE,
+    number INTEGER NOT NULL,
+    x REAL NOT NULL,
+    y REAL NOT NULL,
+    w REAL NOT NULL,
+    h REAL NOT NULL,
+    text TEXT NOT NULL DEFAULT '',
+    UNIQUE (photo_id, number)
+);
+""" + "".join(
+    f"""
+CREATE TRIGGER photo_marks_frozen_{action.lower()} BEFORE {action} ON photo_marks
+WHEN (SELECT c.status FROM campaigns c JOIN photos p ON p.campaign_id = c.id
+      WHERE p.id = {row}.photo_id) = 'closed'
+BEGIN SELECT RAISE(ABORT, 'campaign is closed'); END;
+"""
+    for action, row in (("INSERT", "NEW"), ("UPDATE", "OLD"), ("DELETE", "OLD"))
+)

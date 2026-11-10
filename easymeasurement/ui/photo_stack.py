@@ -29,7 +29,7 @@ from PySide6.QtWidgets import (
 
 from ..store import CampaignClosed
 from .common import AppContext, ROW_ID, show_error
-from .photo_overlays import PhotoPreview
+from .photo_preview import PhotoPreview
 from .photo_shared import accept_photo_drops, shared_thumbs, start_photo_drag
 
 ICON = QSize(96, 72)
@@ -213,7 +213,8 @@ class PhotoStack(QWidget):
         row = self.rows[item.data(ROW_ID)]
         path = self.app.service.photo_path(self.campaign_id, row["file_name"])
         taken = row["taken_at"].replace("T", " ") if row["taken_at"] else "ohne Aufnahmezeit"
-        PhotoPreview(row["original_name"], f"Aufgenommen {taken}", path, self).exec()
+        PhotoPreview(row["original_name"], f"Aufgenommen {taken}", path, self, self.app,
+                     item.data(ROW_ID)).exec()
 
     def keyPressEvent(self, event) -> None:
         if event.key() == Qt.Key.Key_Delete:

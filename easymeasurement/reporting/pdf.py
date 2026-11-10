@@ -101,10 +101,19 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
     def photos(node: Photos) -> PdfTable | None:
         width = (usable - 6 * mm) / 2
         images = []
-        for path, caption in node.items:
-            image = _photo(path, width)
+        for path, caption, *notes in node.items:
+            marks, role = (notes + [(), ""])[:2] if notes else ((), "")
+            image = _photo(path, width, marks)
             if image:
-                images.append([image, text(caption, cell)])
+                lines = "<br/>".join(escape(part) for part in caption.split("\n"))
+                if role:
+                    # The role leads the caption: in red for a defect, in bold for a hint.
+                    word, _, rest = lines.partition(": ")
+                    lead = f'<font name="{bold}">{word}:</font>'
+                    if role == "defect":
+                        lead = f'<font color="#{_ALERT.hexval()[2:]}">{lead}</font>'
+                    lines = f"{lead} {rest}"
+                images.append([image, Paragraph(lines, cell)])
         if not images:
             return None
         rows = [images[i : i + 2] for i in range(0, len(images), 2)]

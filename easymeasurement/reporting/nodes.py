@@ -9,7 +9,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from pathlib import Path
 
 
 @dataclass
@@ -42,7 +41,7 @@ class Table:
 
 @dataclass
 class Photos:
-    items: list[tuple[Path, str]]  # file and caption
+    items: list[tuple]  # file and caption; marks drawn on it and its role, where known
 
 
 @dataclass

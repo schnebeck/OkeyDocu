@@ -12,7 +12,7 @@ import io
 from pathlib import Path
 
 from PIL import Image as PilImage
-from PIL import ImageOps
+from PIL import ImageDraw, ImageFont, ImageOps
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
@@ -28,6 +28,7 @@ from .nodes import Logo
 
 _FONT_DIRS = ("/usr/share/fonts/truetype/dejavu", "/usr/share/fonts/dejavu", "/usr/share/fonts/TTF")
 _MAX_PHOTO_PIXELS = 1400
+_MARK_RGB = (231, 76, 60)  # the red of the marks on screen
 _SIGNATURE_HEIGHT = 15 * mm
 
 
@@ -113,13 +114,28 @@ def _signature_image(data: bytes, width: float) -> Image:
     return Image(io.BytesIO(data), width=height * ratio, height=height, hAlign="LEFT")
 
 
-def _photo(path: Path, width: float) -> Image | None:
+def _draw_marks(image: PilImage.Image, marks) -> None:
+    """Numbered frames as on screen, sized to the picture so they read when printed small."""
+    draw = ImageDraw.Draw(image)
+    line = max(2, image.width // 300)
+    radius = max(10, image.width // 50)
+    font = ImageFont.load_default(size=int(radius * 1.3))
+    for mark in marks:
+        left, top = mark.x * image.width, mark.y * image.height
+        right, bottom = left + mark.w * image.width, top + mark.h * image.height
+        draw.rectangle((left, top, right, bottom), outline=_MARK_RGB, width=line)
+        draw.ellipse((left - radius, top - radius, left + radius, top + radius), fill=_MARK_RGB)
+        draw.text((left, top), str(mark.number), fill="white", font=font, anchor="mm")
+
+
+def _photo(path: Path, width: float, marks=()) -> Image | None:
     try:
         with PilImage.open(path) as source:
             image = ImageOps.exif_transpose(source).convert("RGB")
     except OSError:
         return None
     image.thumbnail((_MAX_PHOTO_PIXELS, _MAX_PHOTO_PIXELS))
+    _draw_marks(image, marks)
     buffer = io.BytesIO()
     image.save(buffer, "JPEG", quality=82)
     buffer.seek(0)

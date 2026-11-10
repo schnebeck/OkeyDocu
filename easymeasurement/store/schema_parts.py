@@ -113,6 +113,7 @@ CREATE TABLE photos (
     sha256 TEXT NOT NULL,
     taken_at TEXT,
     time_source TEXT NOT NULL DEFAULT 'unknown',
+    role TEXT NOT NULL DEFAULT '' CHECK (role IN ('', 'hint', 'defect')),
     UNIQUE (campaign_id, sha256)
 );
 

@@ -12,12 +12,11 @@ from datetime import datetime
 from html import escape
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QAction, QKeySequence, QPixmap, QShortcut
+from PySide6.QtGui import QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QHeaderView,
     QLabel,
-    QListWidget,
     QToolButton,
     QWidget,
 )
@@ -46,6 +45,7 @@ from .measurement_cells import (
 from .measurement_detail import THUMB, MeasurementDetail
 from .measurement_editor import MeasurementEditor
 from .measurement_runs import table_lines, write_line
+from .photo_gallery import PhotoGallery
 from .photo_shared import shared_thumbs
 from .report_signing import settings
 from .table_columns import TableColumns
@@ -96,11 +96,7 @@ class MeasurementView(MeasurementDetail, QWidget):
         self.editor.changed.connect(self._after_change)
         self.detail = self.editor
         self.values = self.editor.values
-        self.gallery = QListWidget()
-        self.gallery.setViewMode(QListWidget.ViewMode.IconMode)
-        self.gallery.setIconSize(QPixmap(THUMB, THUMB).size())
-        self.gallery.setResizeMode(QListWidget.ResizeMode.Adjust)
-        self.gallery.setMovement(QListWidget.Movement.Static)
+        self.gallery = PhotoGallery(THUMB)
         shared_thumbs().ready.connect(self._thumb_ready)
         self.gallery.itemActivated.connect(self._preview_photo)
 

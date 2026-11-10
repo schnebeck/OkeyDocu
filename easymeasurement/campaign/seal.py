@@ -98,6 +98,16 @@ def _without(row: dict, *columns: str) -> dict:
     return {key: value for key, value in row.items() if key not in columns}
 
 
+def _photo_notes(db, photo: dict) -> None:
+    """A photo's role and marks count where there are any, so older seals still hold."""
+    if not photo["role"]:
+        del photo["role"]
+    marks = _rows(db, "SELECT number, x, y, w, h, text FROM photo_marks WHERE photo_id=?"
+                      " ORDER BY number", photo["id"])
+    if marks:
+        photo["marks"] = marks
+
+
 def _extras(db, campaign) -> dict:
     """What a campaign may hold beyond its readings. Only what is there enters the digest."""
     linked = (
@@ -115,6 +125,8 @@ def _extras(db, campaign) -> dict:
             db, "SELECT * FROM photo_gaps WHERE campaign_id=? ORDER BY at, id", campaign["id"]
         ),
     }
+    for photo in tables["photos"]:
+        _photo_notes(db, photo)
     extras = {
         name: [_without(row, "id", "campaign_id", "measurement_id") for row in rows]
         for name, rows in tables.items() if rows

@@ -1,5 +1,5 @@
 # EasyMeasurement - easymeasurement/ui/photo_overlays.py
-# What the timeline opens over itself: a photo large, the start time, menu and tooltips.
+# What the timeline opens over itself: the start time, menu and tooltips.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
@@ -9,53 +9,18 @@
 from __future__ import annotations
 
 from datetime import datetime
-from pathlib import Path
 from typing import Callable
 
-from PySide6.QtCore import QDateTime, QSize, Qt
-from PySide6.QtGui import QImageReader, QPixmap
+from PySide6.QtCore import QDateTime
 from PySide6.QtWidgets import QDateTimeEdit, QHBoxLayout, QLabel, QMenu, QPushButton, QWidget
 
 from ..model import Verdict
 from ..reporting.context import VERDICT_TEXT
 from .common import function_text, value_line
 from .overlay import Overlay
+from .photo_preview import PhotoPreview
 from .photo_timeline_events import Hit
 from .photo_timeline_model import duration_text, to_moment
-
-LARGE_MARGIN_PX = 200  # the card's own heading and button row
-
-
-def read_large(path: Path, room: QSize) -> QPixmap:
-    """The picture upright and as large as `room` allows, without enlarging it."""
-    reader = QImageReader(str(path))
-    reader.setAutoTransform(True)
-    image = reader.read()
-    if image.isNull():
-        return QPixmap()
-    if image.width() > room.width() or image.height() > room.height():
-        image = image.scaled(
-            room, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
-        )
-    return QPixmap.fromImage(image)
-
-
-class PhotoPreview(Overlay):
-    def __init__(self, title: str, caption: str, path: Path, parent: QWidget):
-        host = parent.window()
-        room = QSize(max(host.width() - 120, 240), max(host.height() - LARGE_MARGIN_PX, 180))
-        super().__init__(title, parent, width=room.width() + 40)
-        self.cancel_button.hide()
-        self.ok_button.setText("Zurück")
-        picture = QLabel(alignment=Qt.AlignmentFlag.AlignCenter)
-        pixmap = read_large(path, room)
-        if pixmap.isNull():
-            picture.setText("Die Bilddatei lässt sich nicht lesen.")
-        else:
-            picture.setPixmap(pixmap)
-        self.body.addWidget(picture)
-        self.hint.setText(caption)
-
 
 class PhotoStartOverlay(Overlay):
     """Asks when the first photo stands on the timeline. All others keep their distance."""
@@ -105,7 +70,8 @@ class TimelineAsking:
         photo = self.view.data.photo(photo_id)
         if photo is not None:
             path = self.app.service.photo_path(self.campaign_id, photo.file_name)
-            PhotoPreview(photo.name, self._photo_words(photo), path, self).exec()
+            PhotoPreview(photo.name, self._photo_words(photo), path, self, self.app,
+                         photo_id).exec()
 
     def _photo_words(self, photo) -> str:
         taken = f"{photo.taken:%d.%m.%Y %H:%M:%S}" if photo.taken else "ohne Aufnahmezeit"
