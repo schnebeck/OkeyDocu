@@ -21,7 +21,7 @@ def test_status_stays_in_sight_in_the_status_bar(window, app, monkeypatch):
     assert window.campaign.link.parent() is bar
     assert window.campaign.clock.parent() is bar
     assert window.campaign.link.isVisible()
-    assert window.campaign.clock.isVisible()
+    assert not window.campaign.clock.isVisible()  # set at the start, so nothing to report
     window.open_page(window.measurements)
     assert window.campaign.link.isVisible()
 

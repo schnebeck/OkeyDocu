@@ -131,17 +131,17 @@ def test_offset_can_be_stated_by_hand(page, monkeypatch):
     assert page._campaign()["clock_offset_s"] == -600
 
 
-def test_badge_shows_the_synchronised_clock(page):
+def test_a_clock_in_step_says_nothing(page):
     assert page.window().campaign.clock.state is ClockState.SYNCED
-    assert page.window().campaign.clock.isVisible()
-    assert "synchron" in page.window().campaign.clock.text.text()
-    assert not page.window().campaign.clock.icon.pixmap().isNull()
+    assert not page.window().campaign.clock.isVisible()
+    assert "synchron" in page.window().campaign.clock.toolTip()
 
 
 def test_badge_changes_when_a_check_finds_a_deviation(page):
     _skew_clock(page, 120)
     page.window().campaign.check_clock()
     assert page.window().campaign.clock.state is ClockState.OFFSET
+    assert page.window().campaign.clock.isVisible()
 
 
 def test_badge_returns_after_the_clock_was_set(page, monkeypatch):

@@ -122,9 +122,10 @@ class ClockBadge(_Badge):
         self.state: ClockState | None = None
 
     def show_status(self, status: ClockStatus | None) -> None:
-        """Without an instrument there is no clock to report on."""
+        """Shown only when the clock asks for attention: not checked, or off. A clock in step
+        is the normal case and says nothing."""
         self.state = status.state if status else None
-        self.setVisible(status is not None)
+        self.setVisible(status is not None and status.state is not ClockState.SYNCED)
         if status is None:
             return
         self.icon.setPixmap(clock_icon(status.state, self._face(), self.devicePixelRatioF()))

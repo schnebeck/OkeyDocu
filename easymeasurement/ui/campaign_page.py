@@ -152,8 +152,12 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.timeline_action = QAction("Fotos zuordnen", self, checkable=True, shortcut="F7")
         self.timeline_action.toggled.connect(self._fit_photo_panels)
         self.fetch_action = self._action("Vom Gerät nachholen", self.fetch)
-        self.clock_action = self._action("Uhr prüfen", self.check_clock)
+        self.clock_action = self._action("Uhr stellen …", self.check_clock)
+        self.clock_action.setToolTip("Prüft die Geräteuhr und stellt sie nach Rückfrage auf die"
+                                     " Laptopzeit. Messungen mit der alten Zeit kommen vorher.")
         self.offset_action = self._action("Uhrenversatz von Hand …", self.correct_clock)
+        self.offset_action.setToolTip("Nur für Messungen, die mit falsch gehender Uhr im Gerät"
+                                      " lagen, etwa von einem früheren Tag")
 
         self.list.new_button.clicked.connect(self.new_campaign)
         self.list.home_requested.connect(self.show_home)

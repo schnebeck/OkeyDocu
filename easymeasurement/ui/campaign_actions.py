@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 
+from ..campaign.clock import CLOCK_SET_ACCURACY_S
 from ..campaign.service import read_instrument
 from ..devices import DeviceError
 from .campaign_dialog import CampaignDialog
@@ -222,7 +223,8 @@ class CampaignActions:
     def check_clock(self) -> None:
         offset = self.instrument.check_clock(self.campaign_id)
         if offset is not None:
-            self.notice.setText(f"Uhrenversatz {offset:+.0f} s")
+            self.notice.setText("Geräteuhr geht genau" if abs(offset) < CLOCK_SET_ACCURACY_S
+                                else f"Geräteuhr weicht {offset:+.0f} s ab, nicht gestellt")
         self.refresh()
 
     def correct_clock(self) -> None:

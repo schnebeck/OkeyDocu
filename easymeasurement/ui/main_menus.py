@@ -71,13 +71,14 @@ class MainMenus:
         menu.addAction(campaign.timeline_action)
 
         menu = bar.addMenu("&Messgerät")
+        menu.setToolTipsVisible(True)
         menu.addAction(campaign.fetch_action)
-        menu.addSeparator()
         menu.addAction(campaign.clock_action)
-        menu.addAction(campaign.offset_action)
         menu.addSeparator()
         self.instrument_action = menu.addAction("Messgerät einrichten …")
         self.instrument_action.triggered.connect(self._open_settings)
+        menu.addSeparator()
+        menu.addAction(campaign.offset_action)  # a fallback, so it stands last
 
         # What is looked up in daily work, apart from what is set up once.
         menu = bar.addMenu("&Daten")

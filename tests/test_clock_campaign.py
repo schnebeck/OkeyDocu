@@ -137,11 +137,9 @@ def test_offset_by_hand_is_refused_after_setting_during_the_campaign(service, as
 # Report ----------------------------------------------------------------------
 
 
-def test_report_says_the_clock_was_set_and_nothing_about_an_offset(service, asset_id, plan):
+def test_a_clock_set_before_measuring_leaves_nothing_for_the_report(service, asset_id, plan):
     campaign = open_campaign(service, asset_id, plan, SimulatedMeter(clock_skew_s=120))
-    summary = build_context(service, campaign)["campaign"]["clock_summary"]
-    assert "gestellt" in summary
-    assert "korrigiert" not in summary
+    assert build_context(service, campaign)["campaign"]["clock_summary"] == ""
 
 
 def test_report_names_an_offset_that_had_to_stay(service, asset_id, plan):
@@ -153,9 +151,16 @@ def test_report_names_an_offset_that_had_to_stay(service, asset_id, plan):
 
 def test_report_shows_a_second_setting_too(service, asset_id, plan):
     campaign, meter = drifted_campaign(service, asset_id, plan)
+    meter.simulate_measurement("u")  # taken with the drifted clock, so its time is corrected
     service.sync_device_clock(campaign, meter)
     summary = build_context(service, campaign)["campaign"]["clock_summary"]
     assert summary.count("gestellt") == 2
+
+
+def test_a_second_setting_without_a_corrected_time_is_not_worth_a_line(service, asset_id, plan):
+    campaign, meter = drifted_campaign(service, asset_id, plan)
+    service.sync_device_clock(campaign, meter)
+    assert build_context(service, campaign)["campaign"]["clock_summary"] == ""
 
 
 # Status ----------------------------------------------------------------------

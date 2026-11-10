@@ -197,7 +197,10 @@ Das Ziel ist, dass es keinen Versatz gibt. Die Laptopzeit muss dafür stimmen, a
 
 Das Stellen wird nachgeprüft: Bleibt eine Abweichung ab 3 s, startet die Kampagne nicht.
 
-Der Versatz bleibt als Absicherung erhalten. `clock_checks` hält jede Prüfung fest, jede Messung
+Im Normalfall gibt es deshalb keinen Versatz, und die Oberfläche zeigt nichts zur Uhr: Die
+Statusanzeige erscheint nur bei ungeprüfter oder abweichender Uhr, die Protokollzeile „Geräteuhr“
+nur, wenn ein Versatz Zeiten tatsächlich korrigiert hat. „Messgerät → Uhr stellen …“ prüft und stellt
+nach Rückfrage. Der Versatz bleibt als Absicherung erhalten. `clock_checks` hält jede Prüfung fest, jede Messung
 speichert ihren Versatz (`clock_offset_s`) neben `device_time` und `local_time`. Gebraucht wird er
 für Geräte ohne stellbare Uhr, bei einer Abweichung während der Kampagne und für Messungen eines
 früheren Tages, deren Versatz sich von Hand angeben lässt. Wird die Uhr während einer Kampagne

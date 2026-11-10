@@ -160,7 +160,9 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
             "started": _date_text(campaign["started_at"]),
             "closed": _date_text(campaign["closed_at"]),
             "clock_offset_s": round(campaign["clock_offset_s"]),
-            "clock_summary": clock_summary(campaign, service.clock_checks(campaign_id)),
+            "clock_summary": clock_summary(
+                campaign, service.clock_checks(campaign_id),
+                [row["clock_offset_s"] for row in service.measurements(campaign_id)]),
             "seal": campaign["seal"],
             "simulated": campaign["driver"] == "simulator",
             "draft": campaign["status"] == "open",
@@ -192,8 +194,15 @@ def company_context(company: dict[str, str]) -> dict:
     return {"company": {k: v for k, v in company.items() if k != "logo"}, "company_logo": data}
 
 
-def clock_summary(campaign, checks) -> str:
-    """Say which offset the times rest on, including any change along the way."""
+def clock_summary(campaign, checks, offsets) -> str:
+    """Say which offset the times rest on, including any change along the way.
+
+    Empty while no time was corrected: a clock set before measuring leaves nothing to tell.
+    """
+    corrected = any(abs(offset or 0) >= 1 for offset in offsets)
+    if not (corrected or round(campaign["clock_offset_s"])
+            or any(check["kind"] == "manual" for check in checks)):
+        return ""
     notes = []
     for check in checks:
         moment = _date_text(check["checked_at"])
@@ -207,7 +216,7 @@ def clock_summary(campaign, checks) -> str:
     if offset:
         notes.append(tr("Versatz {offset} s, die Zeiten unten sind korrigiert").format(
             offset=f"{offset:+d}"))
-    return "; ".join(notes) or tr("Abweichung 0 s")
+    return "; ".join(notes)
 
 
 def _reference_day(campaign) -> date:
