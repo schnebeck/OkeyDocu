@@ -30,6 +30,10 @@ for_Linux/
 *.sqlite-shm
 *.vor-version-*
 
+# Working papers that evaluate real device data stay local
+docs/freigabe-messplan.md
+docs/umsetzungsplan.md
+
 # Texts and lists read from the instrument belong to its maker
 ts_texts.json
 device_lists.json
