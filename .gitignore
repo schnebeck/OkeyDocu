@@ -1,0 +1,39 @@
+# EasyMeasurement - .gitignore
+#
+# SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# Agent instructions and working notes stay local
+CLAUDE.md
+CLAUDE.mda
+CLAUDE.local.md
+AGENTS.md
+.claude/
+memory/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Real device data and customer data never belong in the repository
+dumps/
+for_Linux/
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.vor-version-*
+
+# Texts and lists read from the instrument belong to its maker
+ts_texts.json
+device_lists.json
+
+# Certificates
+*.p12
+*.pfx
