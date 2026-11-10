@@ -13,6 +13,7 @@ from datetime import date
 from pathlib import Path
 
 from ..campaign.service import CampaignService
+from ..l10n import tr
 from ..model import DeviceIdentity
 
 CUSTOMER_TYPE = 210
@@ -48,7 +49,8 @@ class _Source:
     def customer(self):
         rows = self.db.execute("SELECT * FROM Customer WHERE Deleted=0").fetchall()
         if len(rows) != 1:
-            raise ImportFailed(f"Erwartet wird genau ein Kunde, gefunden: {len(rows)}.")
+            raise ImportFailed(
+                tr("Exactly one customer is expected, found: {count}.", count=len(rows)))
         return rows[0]
 
     def contact(self, customer_id: str):
@@ -115,7 +117,7 @@ def _import_tree(source: _Source, service: CampaignService, customer_id: int) ->
             details = source.device_details(row["Object_ID"])
             assets[row["Object_ID"].lower()] = service.db.add_asset(
                 customer_id, codes.get(row["Object_Type"], fallback),
-                row["Designation"] or row["Designation2"] or "Ohne Namen", parent_asset,
+                row["Designation"] or row["Designation2"] or tr("Unnamed"), parent_asset,
                 identifier=row["Designation2"] or "",
                 manufacturer=(details["Manufacturer"] if details else "") or "",
                 type=(details["Type"] if details else "") or "",
@@ -124,7 +126,7 @@ def _import_tree(source: _Source, service: CampaignService, customer_id: int) ->
                 guid=row["Object_ID"].lower(),
             )
         if len(waiting) == len(pending):
-            raise ImportFailed("Der Anlagenbaum enthält Knoten ohne erreichbaren Elternknoten.")
+            raise ImportFailed(tr("The installation tree holds nodes without a reachable parent."))
         pending = waiting
     return assets
 

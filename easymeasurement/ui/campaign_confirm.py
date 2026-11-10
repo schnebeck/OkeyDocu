@@ -14,18 +14,19 @@ from PySide6.QtGui import QDesktopServices
 from ..reporting.archive import ReportError
 from ..reporting.sign import SigningError
 from ..reporting.template import TemplateError
+from ..l10n import N_, tr
 from .campaign_delete import ask_delete, dispose
 from .common import run_busy, show_error
 from .confirm_overlay import ConfirmOverlay
 from ..reporting.language import SOURCE
 from .report_signing import open_report, settings
 
-WEAK_SEAL = (
-    "Der Datensatz ist abgeschlossen, aber der Schlüssel aus KWallet war nicht erreichbar.\n\n"
-    "Das Siegel erkennt damit nur zufällige Änderungen, keine gezielte Manipulation."
+WEAK_SEAL = N_(
+    "The record is closed, but the key from KWallet could not be reached.\n\n"
+    "So the seal only detects accidental changes, not deliberate tampering."
 )
-DRAWING = "Erstelle das Protokoll …"
-LATER = "Das Protokoll lässt sich unter „Protokolle“ erneut erstellen und signieren."
+DRAWING = N_("Creating the report …")
+LATER = N_("The report can be created and signed again under “Reports”.")
 
 
 class CampaignConfirm:
@@ -40,7 +41,7 @@ class CampaignConfirm:
         language = settings().value("protocol_language", SOURCE)
         try:
             path = self.app.archive.draft(campaign["id"], templates[0]["body"], language,
-                                          lambda work: run_busy(self, DRAWING, work))
+                                          lambda work: run_busy(self, tr(DRAWING), work))
         except (ReportError, TemplateError) as err:
             show_error(self, str(err))
             return
@@ -51,7 +52,7 @@ class CampaignConfirm:
         if campaign is None or not ask_delete(self, self.app, campaign):
             return
         if campaign["status"] == "closed":
-            run_busy(self, "Hole den Siegelschlüssel …", self.app.service.seal_key)
+            run_busy(self, tr("Fetching the seal key …"), self.app.service.seal_key)
         self.values.editor.discard()
         if self.live_id == campaign["id"]:
             self._end_session()
@@ -60,11 +61,10 @@ class CampaignConfirm:
         self.show_home()
         self.changed.emit()
         if dispose(folder):
-            self.notice.setText(f"„{campaign['title']}“ gelöscht.")
+            self.notice.setText(tr("“{title}” deleted.", title=campaign["title"]))
         else:
-            self.notice.setText(
-                f"„{campaign['title']}“ gelöscht. Ihre Dateien liegen noch in {folder}."
-            )
+            self.notice.setText(tr("“{title}” deleted. Its files are still in {folder}.",
+                                   title=campaign["title"], folder=folder))
 
     def finish(self) -> None:
         campaign = self._campaign()
@@ -78,7 +78,7 @@ class CampaignConfirm:
         # Disconnected first: a reading still on its way must not meet a closed record.
         if self.live_id == closing:
             self._end_session()
-        run_busy(self, "Versiegele den Datensatz …", self.app.service.seal_key)
+        run_busy(self, tr("Sealing the record …"), self.app.service.seal_key)
         self.app.service.close(closing)
         (self.app.service.folder(closing) / "drafts" / "entwurf.pdf").unlink(missing_ok=True)
         outcome = self._file_protocol(closing, overlay)
@@ -86,9 +86,9 @@ class CampaignConfirm:
         self.changed.emit()
         self.reports_changed()
         if not self.app.service.campaign(closing)["seal_mac"]:
-            show_error(self, WEAK_SEAL)
+            show_error(self, tr(WEAK_SEAL))
         if outcome:
-            self.notice.setText(f'{outcome} <a href="report">Öffnen</a>')
+            self.notice.setText(f'{outcome} <a href="report">{tr("Open")}</a>')
 
     def _file_protocol(self, campaign_id: int, overlay: ConfirmOverlay) -> str:
         """The record is closed already, so a failure here loses nothing."""
@@ -96,16 +96,17 @@ class CampaignConfirm:
             overlay.language.remember()
             report = self.app.archive.generate(
                 campaign_id, overlay.template.currentText(), overlay.template.currentData(),
-                overlay.language.code(), lambda work: run_busy(self, DRAWING, work),
+                overlay.language.code(), lambda work: run_busy(self, tr(DRAWING), work),
             )
             if not overlay.signing():
-                return "Protokoll abgelegt."
+                return tr("Report filed.")
             self.app.archive.sign(report, overlay.certificate.signer())
         except (ReportError, TemplateError, SigningError) as err:
-            show_error(self, f"Die Kampagne ist abgeschlossen und versiegelt, aber:\n{err}\n\n{LATER}")
+            show_error(self, tr("The campaign is closed and sealed, but:\n{error}\n\n{later}",
+                                error=err, later=tr(LATER)))
             return ""
         overlay.certificate.remember()
-        return "Protokoll abgelegt und signiert."
+        return tr("Report filed and signed.")
 
     def open_newest_report(self) -> None:
         reports = self.app.archive.reports(self.campaign_id) if self.campaign_id else []

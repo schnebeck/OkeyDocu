@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 
+from ...l10n import tr
 from ..base import DeviceError, DeviceTexts
 
 TEXTS_COMMAND = "DATABASEXML:GET:TRANSLATIONFILE"
@@ -26,7 +27,7 @@ def parse_texts(raw: bytes) -> DeviceTexts:
     try:
         root = ET.fromstring(raw[start:] if start >= 0 else raw)
     except ET.ParseError as err:
-        raise DeviceError(f"Die Gerätetexte sind nicht lesbar: {err}") from None
+        raise DeviceError(tr("The instrument texts cannot be read: {error}", error=err)) from None
     texts: dict[str, dict[str, str]] = {}
     version = ""
     for block in root.iter():
@@ -38,5 +39,5 @@ def parse_texts(raw: bytes) -> DeviceTexts:
             for entry in block.iter() if _name(entry.tag) == "TRANSLATION" and entry.get("Key")
         }
     if not texts:
-        raise DeviceError("Das Messgerät hat keine Texte geliefert.")
+        raise DeviceError(tr("The instrument delivered no texts."))
     return DeviceTexts(version, texts)

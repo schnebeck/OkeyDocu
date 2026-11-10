@@ -14,6 +14,7 @@ import time
 from datetime import datetime
 from typing import Callable
 
+from ...l10n import tr
 from ...model import DeviceIdentity, MeterMeasurement
 from ..base import Capability, DeviceError, DeviceTexts, LinkState, LiveReading, MeterDriver
 from ..base import SelectorPosition
@@ -90,7 +91,7 @@ class ProfitestPrimeDriver(PushPrintMixin, MeterDriver):
 
     def _query(self, command: str) -> bytes:
         if self._transport is None:
-            raise DeviceError("Die Verbindung zum Messgerät ist nicht geöffnet.")
+            raise DeviceError(tr("The connection to the instrument is not open."))
         return self._transport.query(command)
 
     def _text(self, command: str) -> str:
@@ -118,9 +119,9 @@ class ProfitestPrimeDriver(PushPrintMixin, MeterDriver):
 
     def sync_clock(self) -> None:
         if self._transport is None:
-            raise DeviceError("Die Verbindung zum Messgerät ist nicht geöffnet.")
+            raise DeviceError(tr("The connection to the instrument is not open."))
         if self._pushing.is_set():
-            raise DeviceError("Die Uhr lässt sich nicht während Push/Print stellen.")
+            raise DeviceError(tr("The clock cannot be set during Push/Print."))
         # The instrument counts whole seconds, so start on one.
         time.sleep(1 - datetime.now().microsecond / 1e6)
         self._transport.set_clock(datetime.now())
@@ -133,17 +134,17 @@ class ProfitestPrimeDriver(PushPrintMixin, MeterDriver):
         """
         transport = self._transport
         if transport is None:
-            raise DeviceError("Die Verbindung zum Messgerät ist nicht geöffnet.")
+            raise DeviceError(tr("The connection to the instrument is not open."))
         text = transport.query_text(SELECTOR_COMMAND)
-        log.info("Drehschalter: Stellung %s", text)
+        log.info("Selector position %s", text)
         try:
             return selector_position(int(text))
         except ValueError:
-            raise DeviceError(f"Unerwartete Schalterstellung: {text!r}") from None
+            raise DeviceError(tr("Unexpected switch position: {text}", text=repr(text))) from None
 
     def read_texts(self) -> DeviceTexts:
         if self._transport is None:
-            raise DeviceError("Die Verbindung zum Messgerät ist nicht geöffnet.")
+            raise DeviceError(tr("The connection to the instrument is not open."))
         return parse_texts(self._transport.query(TEXTS_COMMAND, TEXTS_TIMEOUT_S))
 
     def read_measurements(self) -> list[MeterMeasurement]:

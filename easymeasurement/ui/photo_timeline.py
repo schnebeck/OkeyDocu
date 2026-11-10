@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import N_, tr
 from ..store import CampaignClosed
 from .common import AppContext, function_short, show_error
 from .photo_overlays import TimelineAsking
@@ -32,9 +33,9 @@ from .photo_timeline_model import default_gap_seconds, shift_text
 from .photo_timeline_scroll import TimelineScroll
 from .photo_timeline_view import WIDEST_RATIO, TrackView
 
-NO_TIME = "Dieses Foto hat keine Aufnahmezeit. Bitte auf eine Messung ziehen."
-PICK_A_PHOTO = "Erst ein nicht angeheftetes Foto anklicken: die Lücke entsteht direkt davor."
-CLOSED = "Die Kampagne ist abgeschlossen, Fotos lassen sich nicht mehr ändern."
+NO_TIME = N_("This photo has no time taken. Please drag it onto a measurement.")
+PICK_A_PHOTO = N_("First click a photo that is not pinned: the gap appears right before it.")
+CLOSED = N_("The campaign is completed, photos can no longer be changed.")
 
 
 class PhotoTimeline(TimelineAsking, QWidget):
@@ -53,16 +54,19 @@ class PhotoTimeline(TimelineAsking, QWidget):
         self.rows: dict[int, object] = {}
         self.view = TrackView(shared_thumbs())
         self.view.describe = self._describe
-        self.fit_button = self._button("Einpassen", "Alles in die Breite einpassen", self.view.fit)
+        self.fit_button = self._button(tr("Fit"), tr("Fit everything into the width"),
+                                       self.view.fit)
         self.gap_button = self._button(
-            "Lücke einfügen", "Vor dem gewählten Foto eine Lücke einfügen", self._gap_at_selection
+            tr("Insert gap"), tr("Insert a gap before the chosen photo"), self._gap_at_selection
         )
         self.start_button = self._button(
-            "Start setzen …", "Die genaue Zeit des ersten Fotos eingeben", self._ask_start
+            tr("Set start …"), tr("Enter the exact time of the first photo"), self._ask_start
         )
         self.scroll = TimelineScroll(self.view, WIDEST_RATIO)
-        self.close_button = self._button("Schließen", "Die Zeitleiste ausblenden; „Fotos zuordnen“"
-                                         " oben zeigt sie wieder", self.close_requested.emit)
+        self.close_button = self._button(
+            tr("Close"), tr("Hide the timeline; “Assign photos” above shows it again"),
+            self.close_requested.emit,
+        )
         closing = self.style().standardIcon(QStyle.StandardPixmap.SP_TitleBarCloseButton)
         self.close_button.setIcon(QIcon.fromTheme("window-close", closing))
         self.close_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
@@ -159,7 +163,7 @@ class PhotoTimeline(TimelineAsking, QWidget):
             work(*arguments)
         except CampaignClosed:
             self.refresh()
-            show_error(self, CLOSED)
+            show_error(self, tr(CLOSED))
             return
         self.refresh()
         self.changed.emit()
@@ -174,7 +178,7 @@ class PhotoTimeline(TimelineAsking, QWidget):
         rows = self.app.service.photos(self.campaign_id)
         row = next((known for known in rows if known["id"] == photo_id), None)
         if row is None or not row["taken_at"]:
-            self.hint_label.setText(NO_TIME)
+            self.hint_label.setText(tr(NO_TIME))
         elif row["placement"] != "timeline":
             self._write(self.app.service.return_to_timeline, photo_id)
 
@@ -185,7 +189,7 @@ class PhotoTimeline(TimelineAsking, QWidget):
     def _gap_at_selection(self) -> None:
         photo = self.view.data.photo(self.view.selected) if self.view.selected else None
         if photo is None or not photo.follows_time:
-            self.hint_label.setText(PICK_A_PHOTO)
+            self.hint_label.setText(tr(PICK_A_PHOTO))
         else:
             self._add_gap(photo.taken)
 

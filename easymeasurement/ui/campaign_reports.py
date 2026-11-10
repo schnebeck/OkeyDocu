@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..reporting.language import SOURCE, languages
+from ..l10n import tr
 from .common import ROW_ID, AppContext
 from .report_signing import open_report, sign_report
 
@@ -36,9 +37,9 @@ class CampaignReports(QWidget):
         self.list.setMinimumHeight(60)
         self.list.currentRowChanged.connect(lambda _: self._update_buttons())
         self.list.itemDoubleClicked.connect(lambda _: self._open())
-        self.list.setToolTip("Doppelklick öffnet das Protokoll")
-        self.open_button = QPushButton("Öffnen")
-        self.sign_button = QPushButton("Signieren …")
+        self.list.setToolTip(tr("Double-click opens the report"))
+        self.open_button = QPushButton(tr("Open"))
+        self.sign_button = QPushButton(tr("Sign …"))
         self.open_button.clicked.connect(self._open)
         self.sign_button.clicked.connect(self._sign)
         actions = QHBoxLayout()
@@ -61,8 +62,8 @@ class CampaignReports(QWidget):
         )
         for row in rows:
             made = row["created_at"][:16].replace("T", " ")
-            mark = "  ·  signiert" if row["signed_by"] else ""
-            intact = "" if self.app.archive.is_intact(row) else "  ·  VERÄNDERT ODER FEHLT"
+            mark = "  ·  " + tr("signed") if row["signed_by"] else ""
+            intact = "" if self.app.archive.is_intact(row) else "  ·  " + tr("CHANGED OR MISSING")
             language = f"  ·  {languages()[row['language']]}" if row["language"] != SOURCE else ""
             item = QListWidgetItem(f"{made}  {row['template_name']}{language}{mark}{intact}")
             item.setData(ROW_ID, row["id"])

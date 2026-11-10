@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.photo_marks import ROLES, PhotoMark
+from ..l10n import tr
 from .common import AppContext
 from .growing_edit import GrowingEdit
 from .overlay import Overlay
@@ -63,7 +64,7 @@ def _size_words(path: Path) -> str:
         return ""
     words = f"{size.width()} × {size.height()} px"
     if max(size.width(), size.height()) < SMALL_FOR_PRINT:
-        words += ", klein für das Protokoll"
+        words += tr(", small for the report")
     return words
 
 
@@ -92,7 +93,7 @@ class PhotoPreview(Overlay):
             self._fill()
         self.body.addLayout(row, 1)
         self.hint.setText("  ·  ".join(part for part in (caption, _size_words(path)) if part))
-        self.ok_button.setText("Übernehmen" if self.editable else "Zurück")
+        self.ok_button.setText(tr("Apply") if self.editable else tr("Back"))
         self.cancel_button.setVisible(self.editable)
 
     def _side(self) -> QWidget:
@@ -100,7 +101,7 @@ class PhotoPreview(Overlay):
         side.setFixedWidth(SIDE_PX)
         column = QVBoxLayout(side)
         column.setContentsMargins(0, 0, 0, 0)
-        column.addWidget(QLabel("<b>Im Protokoll als</b>"))
+        column.addWidget(QLabel(tr("<b>In the report as</b>")))
         self.roles = QButtonGroup(side)
         choices = QHBoxLayout()
         role = self.app.service.photo_role(self.photo_id)
@@ -113,14 +114,14 @@ class PhotoPreview(Overlay):
             choices.addWidget(button)
         column.addLayout(choices)
         column.addSpacing(8)
-        column.addWidget(QLabel("<b>Markierungen</b>"))
-        self.show_all = QCheckBox("Alle zeigen, sonst nur die gewählte")
+        column.addWidget(QLabel(tr("<b>Marks</b>")))
+        self.show_all = QCheckBox(tr("Show all, otherwise only the chosen one"))
         self.show_all.setChecked(True)
         self.show_all.toggled.connect(self._show_all)
         column.addWidget(self.show_all)
-        help_text = QLabel("Einen Bereich markieren: ein Rechteck über das Foto ziehen. Die"
-                           " Nummer erklärt der Text daneben." if self.editable else
-                           "Ein Klick auf eine Zeile zeigt ihren Bereich.")
+        help_text = QLabel(tr("Mark an area: drag a rectangle across the photo. The text next"
+                              " to it explains the number.") if self.editable else
+                           tr("A click on a line shows its area."))
         help_text.setWordWrap(True)
         help_text.setEnabled(False)
         column.addWidget(help_text)
@@ -158,7 +159,7 @@ class PhotoPreview(Overlay):
         layout = QHBoxLayout(line)
         layout.setContentsMargins(0, 0, 0, 0)
         badge = QLabel(f"<b>({mark.number})</b>", alignment=Qt.AlignmentFlag.AlignTop)
-        edit = GrowingEdit("Was hier zu sehen ist")
+        edit = GrowingEdit(tr("What can be seen here"))
         edit.setPlainText(mark.text)
         edit.setReadOnly(not self.editable)
         edit.installEventFilter(self)
@@ -171,7 +172,7 @@ class PhotoPreview(Overlay):
             bin_icon = drop.style().standardIcon(QStyle.StandardPixmap.SP_TrashIcon)
             drop.setIcon(QIcon.fromTheme("edit-delete", bin_icon))
             drop.setAutoRaise(True)
-            drop.setToolTip("Markierung entfernen")
+            drop.setToolTip(tr("Remove mark"))
             drop.clicked.connect(lambda _=False, number=mark.number: self._remove(number))
             layout.addWidget(drop, 0, Qt.AlignmentFlag.AlignTop)
         return line

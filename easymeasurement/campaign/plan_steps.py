@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 
+from ..l10n import tr
 from ..model import SIGHT_CHECK_FUNCTION, Quantity, ResultValue, Verdict
 from ..store import CampaignClosed
 from .plan import Plan, builtin_plan_texts, parse_plan
@@ -47,7 +48,7 @@ class PlanStepMixin:
         """Add a plan's steps behind those the campaign already has."""
         campaign = self.campaign(campaign_id)
         if campaign["status"] != "open":
-            raise CampaignClosed("Die Kampagne ist abgeschlossen.")
+            raise CampaignClosed(tr("The campaign is closed."))
         titles = [campaign["plan_title"]] if campaign["plan_title"] else []
         with self.db.transaction() as connection:
             self._insert_steps(connection, campaign_id, plan)

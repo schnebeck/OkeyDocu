@@ -14,6 +14,7 @@ from datetime import datetime
 from typing import Callable
 
 from ..campaign.photos import timeline_time
+from ..l10n import tr
 from .photo_timeline_model import to_moment, to_seconds
 
 TIMELINE, PINNED = "timeline", "pinned"
@@ -184,8 +185,8 @@ class TimelineData:
 
     def empty_texts(self) -> tuple[str, str]:
         """What to say in a track with nothing in it, so that no box stays blank."""
-        marks = "" if self.marks else "Noch keine Messungen. Sie erscheinen hier von selbst."
+        marks = "" if self.marks else tr("No measurements yet. They appear here by themselves.")
         photos = "" if self.photos else (
-            "Noch keine Fotos hier: Fotos importieren oder vom Stapel hierher ziehen."
+            tr("No photos here yet: import photos or drag them here from the stack.")
         )
         return marks, photos

@@ -14,6 +14,7 @@ from datetime import datetime
 from enum import Enum, Flag, auto
 from typing import Callable
 
+from ..l10n import tr
 from ..model import DeviceIdentity, MeterMeasurement
 
 
@@ -112,24 +113,24 @@ class MeterDriver(ABC):
 
     def sync_clock(self) -> None:
         """Set the instrument's clock to the laptop's local time."""
-        raise DeviceError("Die Uhr dieses Messgeräts lässt sich nicht stellen.")
+        raise DeviceError(tr("The clock of this instrument cannot be set."))
 
     def read_selector(self) -> SelectorPosition:
         """Where the function selector stands. Raises DeviceError if that cannot be told."""
-        raise DeviceError("Dieses Messgerät meldet seinen Drehschalter nicht.")
+        raise DeviceError(tr("This instrument does not report its rotary switch."))
 
     def subscribe_live(
         self, on_reading: Callable[[LiveReading], None],
         on_state: Callable[[LinkState, str], None] | None = None,
     ) -> None:
-        raise DeviceError("Dieses Messgerät liefert keine Live-Ergebnisse.")
+        raise DeviceError(tr("This instrument delivers no live results."))
 
     def unsubscribe_live(self) -> None:
         pass
 
     def read_texts(self) -> DeviceTexts:
         """The instrument's words for its codes. Slow: read when it is set up, not to measure."""
-        raise DeviceError("Dieses Messgerät liefert keine Texte.")
+        raise DeviceError(tr("This instrument delivers no texts."))
 
     def __enter__(self) -> "MeterDriver":
         self.open()

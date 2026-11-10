@@ -14,14 +14,16 @@ from PySide6.QtWidgets import QAbstractItemView, QHeaderView, QTreeWidget, QTree
 
 from ..campaign.service import StructureError
 from ..store import CampaignClosed
-from .common import ROW_ID, AppContext, selected_ids, show_error
+from ..l10n import plural, tr
+from .common import ROW_ID, AppContext, show_error
 from .dashboard_card import TODO
 from .kind_catalog import UNPLACED_ICON, KindCatalog, element_icon
+from .structure_drop import UNPLACED, StructureDrop
 
-UNPLACED = -1  # the item for measurements booked onto no element
+__all__ = ["UNPLACED", "StructureTree"]
 
 
-class StructureTree(QTreeWidget):
+class StructureTree(StructureDrop, QTreeWidget):
     """Dropping elements moves them; dropping rows of the measurement table books them here."""
 
     chosen = Signal(object)  # an element, None for the whole installation, or UNPLACED
@@ -39,7 +41,7 @@ class StructureTree(QTreeWidget):
         self.collapsed: set[int] = set()
         self._filling = False
         self.setColumnCount(2)
-        self.setHeaderLabels(["Struktur", "Anzahl"])
+        self.setHeaderLabels([tr("Structure"), tr("Count")])
         self.header().setStretchLastSection(False)
         self.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.header().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
@@ -105,11 +107,11 @@ class StructureTree(QTreeWidget):
             self._add(top, row["id"], below, catalog, counts, before)
             self._dim(top, counts)
         if counts.get(None):
-            loose = QTreeWidgetItem(["Ohne Ort", str(counts[None])])
+            loose = QTreeWidgetItem([tr("No location"), str(counts[None])])
             loose.setIcon(0, element_icon(UNPLACED_ICON))
             loose.setData(0, ROW_ID, UNPLACED)
-            loose.setToolTip(0, "Messungen, die noch keinem Element zugeordnet sind."
-                                " Auf ein Element ziehen, um sie zuzuordnen.")
+            loose.setToolTip(0, tr("Measurements not yet assigned to an element."
+                                   " Drag them onto an element to assign them."))
             loose.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
             self.addTopLevelItem(loose)
         for asset_id, item in self.items.items():
@@ -130,9 +132,10 @@ class StructureTree(QTreeWidget):
         item.setTextAlignment(1, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         tip = [f"{catalog.label(row['kind'])}: {row['name']}"]
         if row["identifier"]:
-            tip.append(f"Kennung: {row['identifier']}")
+            tip.append(tr("Identifier: {identifier}", identifier=row["identifier"]))
         if then:
-            tip.append(f"Letzte Prüfung: {then} Messungen hier, diese Prüfung: {now}")
+            tip.append(tr("Last inspection: {before} measurements here, this inspection: {now}",
+                          before=then, now=now))
         if now < then:  # measured last time, not yet this time: still to do
             item.setForeground(1, QBrush(QColor(TODO)))
         item.setToolTip(0, "\n".join(tip))
@@ -151,7 +154,8 @@ class StructureTree(QTreeWidget):
                                                QPalette.ColorRole.Text))
             item.setForeground(0, grey)
         if item.data(0, ROW_ID) in self.items and total and not counts.get(item.data(0, ROW_ID)):
-            item.setToolTip(1, f"{total} Messungen darunter")
+            item.setToolTip(1, plural(total, "{count} measurement below",
+                                      "{count} measurements below"))
         return total
 
     # Reading -------------------------------------------------------------
@@ -206,36 +210,3 @@ class StructureTree(QTreeWidget):
             item.setText(0, row["name"])
             item.setIcon(0, KindCatalog(self.app.db).icon(row["kind"]))
             self._filling = False
-
-    def dragEnterEvent(self, event) -> None:
-        if event.source() is self or (self.bookable and event.source() is self.measurement_source):
-            event.acceptProposedAction()
-        else:
-            event.ignore()
-
-    def dragMoveEvent(self, event) -> None:
-        super().dragMoveEvent(event)
-        target = self.itemAt(event.position().toPoint())
-        valid = target is not None and target.data(0, ROW_ID) != UNPLACED
-        if target is None and event.source() is self and self.customer_id is not None:
-            valid = True  # onto the empty area: to the top of the customer
-        elif valid and event.source() is self:
-            valid = target.data(0, ROW_ID) not in self.selected_ids()
-        event.setAccepted(valid)
-
-    def dropEvent(self, event) -> None:
-        target = self.itemAt(event.position().toPoint())
-        to_top = target is None and event.source() is self and self.customer_id is not None
-        if not to_top and (target is None or target.data(0, ROW_ID) == UNPLACED):
-            event.ignore()
-            return
-        target_id = None if to_top else target.data(0, ROW_ID)
-        if event.source() is self:
-            moving = [i for i in self.selected_ids() if i != self.root_id]
-            self._apply(lambda: [self.app.service.move_element(i, target_id) for i in moving])
-        else:
-            ids = selected_ids(self.measurement_source)
-            self._apply(lambda: self.app.service.move_measurements(ids, target_id))
-        # Copy, not move: the views rebuild from the database, nothing is to be removed.
-        event.setDropAction(Qt.DropAction.CopyAction)
-        event.accept()

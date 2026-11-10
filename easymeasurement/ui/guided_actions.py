@@ -13,6 +13,7 @@ from PySide6.QtWidgets import QMessageBox
 from ..campaign.plan import Plan
 from ..campaign.service import NO_INSTRUMENT, read_instrument
 from ..devices import Capability, DeviceError
+from ..l10n import tr
 from .common import run_busy, selected_id, show_error
 from .guided_pages import ReasonOverlay
 from .instrument_prepare import prepare_if_needed
@@ -32,7 +33,8 @@ class GuidedActions:
                 return read_instrument(driver)
 
         try:
-            start = run_busy(self, "Verbinde mit dem Messgerät und stelle die Uhr …", connect)
+            text = tr("Connecting to the instrument and setting the clock …")
+            start = run_busy(self, text, connect)
         except DeviceError as err:
             show_error(self, str(err))
             return None
@@ -55,7 +57,8 @@ class GuidedActions:
         if row is None:
             return
         self.app.service.confirm_setup(row["id"])
-        self.status.setText("Aufbau bestätigt. Jetzt beliebig oft messen und am Gerät speichern.")
+        self.status.setText(tr("Setup confirmed. Now measure as often as needed and save on the"
+                                " instrument."))
         self._fill_steps()
 
     def simulate(self) -> None:
@@ -66,15 +69,16 @@ class GuidedActions:
         reading = driver.simulate_measurement(self.simulate_function.currentData())
         if self.instrument.session is None:
             text = "   ".join(f"{r.label} {r.quantity.raw}" for r in reading.results[:2])
-            self.status.setText(f"Am Gerät gespeichert: {text}. Noch nicht abgerufen.")
+            self.status.setText(tr("Saved on the instrument: {values}. Not fetched yet.",
+                                   values=text))
 
     def fetch(self) -> bool:
         result = self.instrument.fetch(self.campaign_id)
         if result is None:
             return False
-        self.status.setText(
-            f"{result['added']} neu, {result['assigned']} zugeordnet, {result['open']} offen."
-        )
+        self.status.setText(tr("{added} new, {assigned} assigned, {open} open.",
+                               added=result["added"], assigned=result["assigned"],
+                               open=result["open"]))
         self._fill_steps()
         self.changed.emit()
         return True
@@ -143,9 +147,9 @@ class GuidedActions:
         count = len(self.app.service.measurements(self.campaign_id, row["id"]))
         if count == 0:
             answer = QMessageBox.question(
-                self, "Keine Messung",
-                "Dieser Schritt hat keine Messung. Trotzdem abschließen? Das Protokoll weist ihn"
-                " dann als nicht gemessen aus.",
+                self, tr("No measurement"),
+                tr("This step has no measurement. Complete it anyway? The report then shows it"
+                   " as not measured."),
             )
             if answer != QMessageBox.StandardButton.Yes:
                 return
@@ -167,7 +171,7 @@ class GuidedActions:
         measurement = selected_id(self.open_table)
         row = self._step()
         if measurement is None or row is None:
-            show_error(self, "Bitte eine Messung und links den Schritt wählen.")
+            show_error(self, tr("Please choose a measurement and, on the left, the step."))
             return
         self.app.service.assign_manually(measurement, row["id"])
         self._fill_steps()

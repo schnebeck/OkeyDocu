@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Callable
 
+from ..l10n import day, tr
 from ..model import DeviceIdentity
 from .base import Capability, DeviceError, MeterDriver
 
@@ -53,10 +54,11 @@ def run_checks(driver: MeterDriver, today: date,
     try:
         driver.open()
     except DeviceError as err:
-        report("connect", "Verbindung", FAILED, str(err))
+        report("connect", tr("Connection"), FAILED, str(err))
         return run
     try:
-        report("connect", "Verbindung", OK, f"steht nach {time.monotonic() - started:.1f} s")
+        seconds = f"{time.monotonic() - started:.1f}"
+        report("connect", tr("Connection"), OK, tr("up after {seconds} s", seconds=seconds))
         _identity(driver, run, report, today)
         if Capability.CLOCK in driver.capabilities:
             _clock(driver, run, report)
@@ -73,39 +75,42 @@ def _identity(driver, run: TestRun, report, today: date) -> None:
     try:
         who = run.identity = driver.identify()
     except DeviceError as err:
-        report("identity", "Gerätekennung", FAILED, str(err))
+        report("identity", tr("Identity"), FAILED, str(err))
         return
-    report("identity", "Gerätekennung", OK,
-           f"{who.model}, Seriennummer {who.serial_no}, Firmware {who.firmware}")
+    report("identity", tr("Identity"), OK,
+           tr("{model}, serial number {serial}, firmware {firmware}",
+              model=who.model, serial=who.serial_no, firmware=who.firmware))
     due = who.recalibration_due
     if due is None:
-        report("calibration", "Kalibrierung", NOTE, "Fälligkeit unbekannt")
+        report("calibration", tr("Calibration"), NOTE, tr("due date unknown"))
     elif who.calibration_overdue(today):
-        report("calibration", "Kalibrierung", NOTE, f"seit {due:%d.%m.%Y} überfällig")
+        report("calibration", tr("Calibration"), NOTE, tr("overdue since {day}", day=day(due)))
     else:
-        report("calibration", "Kalibrierung", OK, f"fällig am {due:%d.%m.%Y}")
+        report("calibration", tr("Calibration"), OK, tr("due on {day}", day=day(due)))
 
 
 def _clock(driver, run: TestRun, report) -> None:
     try:
         offset = (driver.read_clock() - datetime.now()).total_seconds()
     except DeviceError as err:
-        report("clock", "Uhr", FAILED, str(err))
+        report("clock", tr("Clock"), FAILED, str(err))
         return
     run.clock_offset_s = offset
     if abs(offset) < CLOCK_NOTE_S:
-        report("clock", "Uhr", OK, "geht genau")
+        report("clock", tr("Clock"), OK, tr("is exact"))
     else:
-        report("clock", "Uhr", NOTE, f"weicht {offset:+.0f} s ab, wird beim Messstart gestellt")
+        report("clock", tr("Clock"), NOTE,
+               tr("is {offset} s off, set when a measurement starts", offset=f"{offset:+.0f}"))
 
 
 def _selector(driver, report) -> None:
     try:
         position = driver.read_selector()
     except DeviceError as err:
-        report("selector", "Drehrad", FAILED, str(err))
+        report("selector", tr("Rotary switch"), FAILED, str(err))
         return
-    report("selector", "Drehrad", OK, f"steht auf {position.label or 'unbekannter Stellung'}")
+    where = position.label or tr("an unknown position")
+    report("selector", tr("Rotary switch"), OK, tr("set to {position}", position=where))
 
 
 def _push(driver, report) -> None:
@@ -114,6 +119,6 @@ def _push(driver, report) -> None:
         driver.subscribe_live(lambda reading: None)
         driver.unsubscribe_live()
     except DeviceError as err:
-        report("push", "Push & Print", FAILED, str(err))
+        report("push", tr("Push & Print"), FAILED, str(err))
         return
-    report("push", "Push & Print", OK, "an- und abgemeldet")
+    report("push", tr("Push & Print"), OK, tr("switched on and off"))

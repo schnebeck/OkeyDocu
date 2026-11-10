@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import tr
 from ..model import FUNCTION_LABELS, Quantity
 from ..store.search import MeasurementFilter
 from .board import GutterSplitter
@@ -39,20 +40,22 @@ class MeasurementsPage(MeasurementView):
         self._debounce = QTimer(self, singleShot=True, interval=200)
         self._debounce.timeout.connect(self.refresh)
 
-        self.text = QLineEdit(placeholderText="Suchen: Kunde, Anlage, Kommentar, Messwert …")
+        self.text = QLineEdit(
+            placeholderText=tr("Search: customer, installation, comment, reading …")
+        )
         self.text.setClearButtonEnabled(True)
         self.customer = QComboBox()
         self.asset = QComboBox()
         self.campaign = QComboBox()
         self.function = QComboBox()
         self.verdict = QComboBox()
-        self.photos_only = QCheckBox("nur mit Foto")
-        self.use_from, self.use_to = QCheckBox("von"), QCheckBox("bis")
+        self.photos_only = QCheckBox(tr("only with photo"))
+        self.use_from, self.use_to = QCheckBox(tr("from")), QCheckBox(tr("to"))
         self.date_from = QDateEdit(QDate.currentDate().addMonths(-1), calendarPopup=True)
         self.date_to = QDateEdit(QDate.currentDate(), calendarPopup=True)
         self.value_key = QComboBox()
-        self.value_min = QLineEdit(placeholderText="min, z. B. 1MΩ")
-        self.value_max = QLineEdit(placeholderText="max, z. B. 500mΩ")
+        self.value_min = QLineEdit(placeholderText=tr("min, e.g. {example}", example="1MΩ"))
+        self.value_max = QLineEdit(placeholderText=tr("max, e.g. {example}", example="500mΩ"))
         # Long names of customers and campaigns must not widen the window.
         for combo in (self.customer, self.asset, self.campaign, self.function, self.value_key):
             combo.setSizeAdjustPolicy(
@@ -60,13 +63,13 @@ class MeasurementsPage(MeasurementView):
             )
             combo.setMinimumContentsLength(14)
 
-        self.function.addItem("Alle Messungen und Prüfungen", _ANY)
+        self.function.addItem(tr("All measurements and inspections"), _ANY)
         for key, label in FUNCTION_LABELS.items():
             self.function.addItem(label, key)
-        self.verdict.addItem("Jede Bewertung", _ANY)
-        self.verdict.addItem("bestanden", "passed")
-        self.verdict.addItem("nicht bestanden", "failed")
-        self.verdict.addItem("nicht bewertet", "not_evaluated")
+        self.verdict.addItem(tr("Any verdict"), _ANY)
+        self.verdict.addItem(tr("passed"), "passed")
+        self.verdict.addItem(tr("failed"), "failed")
+        self.verdict.addItem(tr("not evaluated"), "not_evaluated")
 
         filters = QGridLayout()
         filters.addWidget(self.text, 0, 0, 1, 4)
@@ -133,22 +136,23 @@ class MeasurementsPage(MeasurementView):
 
     def reload_choices(self) -> None:
         db = self.app.db
-        self._refill(self.customer, "Alle Kunden", [(c["name"], c["id"]) for c in db.customers()])
+        customers = [(c["name"], c["id"]) for c in db.customers()]
+        self._refill(self.customer, tr("All customers"), customers)
         self._customer_changed()
         self._refill(
-            self.campaign, "Alle Kampagnen",
+            self.campaign, tr("All campaigns"),
             [(f"{c['title']} ({c['started_at'][:10]})", c["id"]) for c in self.app.service.campaigns()],
         )
         keys = db.query(
             "SELECT key, min(label) AS label FROM measured_values WHERE base_value IS NOT NULL"
             " GROUP BY key ORDER BY label"
         )
-        self._refill(self.value_key, "Beliebiger Messwert", [(k["label"], k["key"]) for k in keys])
+        self._refill(self.value_key, tr("Any reading"), [(k["label"], k["key"]) for k in keys])
 
     def _customer_changed(self) -> None:
         customer = self.customer.currentData()
         assets = self.app.db.assets(customer) if customer else self.app.db.assets()
-        self._refill(self.asset, "Alle Anlagen", [(a["name"], a["id"]) for a in assets])
+        self._refill(self.asset, tr("All installations"), [(a["name"], a["id"]) for a in assets])
 
     # Results -------------------------------------------------------------
 

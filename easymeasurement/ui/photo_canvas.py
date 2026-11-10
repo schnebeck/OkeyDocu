@@ -13,6 +13,7 @@ from PySide6.QtGui import QColor, QFont, QPainter, QPen, QPixmap
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
 from ..campaign.photo_marks import PhotoMark
+from ..l10n import tr
 
 MARK = QColor("#e74c3c")
 CHOSEN = QColor("#f1c40f")
@@ -79,7 +80,7 @@ class MarkCanvas(QWidget):
         frame = self.picture_rect()
         if self.pixmap.isNull():
             painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter,
-                             "Die Bilddatei lässt sich nicht lesen.")
+                             tr("The image file cannot be read."))
             return
         painter.drawPixmap(frame.toRect(), self.pixmap)
         font = QFont(self.font())

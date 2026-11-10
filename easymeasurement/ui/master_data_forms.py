@@ -11,11 +11,12 @@ from __future__ import annotations
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QFormLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
 
+from ..l10n import N_, tr
 from .common import AppContext, show_error
 
-CUSTOMER_LABELS = {"name": "Name", "street": "Straße", "zip": "PLZ", "city": "Ort",
-                   "comment": "Kommentar"}
-SAVED_HINT = "Änderungen gelten beim Verlassen des Felds."
+CUSTOMER_LABELS = {"name": N_("Name"), "street": N_("Street"), "zip": N_("Postcode"),
+                   "city": N_("City"), "comment": N_("Comment")}
+SAVED_HINT = N_("Changes apply when leaving the field.")
 
 
 class CustomerForm(QWidget):
@@ -30,9 +31,9 @@ class CustomerForm(QWidget):
         self.fields = {key: QLineEdit() for key in CUSTOMER_LABELS}
         form = QFormLayout()
         for key, label in CUSTOMER_LABELS.items():
-            form.addRow(label, self.fields[key])
+            form.addRow(tr(label), self.fields[key])
             self.fields[key].editingFinished.connect(self.save)
-        hint = QLabel(SAVED_HINT)
+        hint = QLabel(tr(SAVED_HINT))
         hint.setEnabled(False)
         form.addRow("", hint)
         layout = QVBoxLayout(self)
@@ -54,7 +55,7 @@ class CustomerForm(QWidget):
         stored = self.app.db.customer(self.customer_id)
         if not values["name"]:
             self.fields["name"].setText(stored["name"])
-            show_error(self, "Der Kunde braucht einen Namen.")
+            show_error(self, tr("The customer needs a name."))
             return
         if any(values[key] != stored[key] for key in values):
             self.app.db.update_customer(self.customer_id, **values)

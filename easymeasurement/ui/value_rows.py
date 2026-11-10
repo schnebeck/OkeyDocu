@@ -11,16 +11,17 @@ from __future__ import annotations
 from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtWidgets import QAbstractItemView, QComboBox, QHeaderView, QTableWidgetItem
 
+from ..l10n import N_, tr
 from ..model import Verdict, check_text
 from ..reporting.context import VERDICT_TEXT
 from .common import make_table, verdict_item
 
-HEADERS = ["Messwert", "Wert", "Unten", "Oben", "Bew."]
+HEADERS = (N_("Reading"), N_("Value"), N_("Low"), N_("High"), N_("Verd."))
 LABEL, VALUE, LOWER, UPPER, VERDICT = range(len(HEADERS))
 _TEXT_COLUMNS = {LABEL: "label", LOWER: "lower_limit", UPPER: "upper_limit"}
 _FAILED_STYLE = "QComboBox { color: #c0392b; font-weight: bold; }"
 SHOWN_ROWS = 8
-FINAL_TIP = "Messwert, Einheit und Zeitpunkt stehen fest."
+FINAL_TIP = N_("Reading, unit and time are fixed.")
 
 
 class QuietCombo(QComboBox):
@@ -41,7 +42,7 @@ class QuietCombo(QComboBox):
 
 
 # The usual marks of a test record, so a verdict fits a narrow column.
-SHORT_VERDICT = {Verdict.NOT_EVALUATED: "–", Verdict.PASSED: "i. O.", Verdict.FAILED: "n. i. O."}
+SHORT_VERDICT = {Verdict.NOT_EVALUATED: "–", Verdict.PASSED: N_("pass"), Verdict.FAILED: N_("fail")}
 
 
 def verdict_combo(current: str, short: bool = False) -> QuietCombo:
@@ -49,7 +50,7 @@ def verdict_combo(current: str, short: bool = False) -> QuietCombo:
     if short:
         box.setMinimumContentsLength(5)
     for verdict in (Verdict.NOT_EVALUATED, Verdict.PASSED, Verdict.FAILED):
-        box.addItem(SHORT_VERDICT[verdict] if short else VERDICT_TEXT[verdict], verdict.value)
+        box.addItem(tr(SHORT_VERDICT[verdict]) if short else VERDICT_TEXT[verdict], verdict.value)
         box.setItemData(box.count() - 1, VERDICT_TEXT[verdict], Qt.ItemDataRole.ToolTipRole)
     box.setCurrentIndex(max(0, box.findData(current)))
     mark_failed(box)
@@ -63,7 +64,9 @@ def mark_failed(box: QComboBox) -> None:
 
 def _value_text(value) -> str:
     text = check_text(value["raw"])
-    return f"{text} (Soll {check_text(value['setpoint'])})" if value["setpoint"] else text
+    if not value["setpoint"]:
+        return text
+    return tr("{value} (target {setpoint})", value=text, setpoint=check_text(value["setpoint"]))
 
 
 class ValueRows(QObject):
@@ -73,7 +76,7 @@ class ValueRows(QObject):
 
     def __init__(self):
         super().__init__()
-        self.table = make_table(HEADERS, stretch=LABEL)
+        self.table = make_table([tr(header) for header in HEADERS], stretch=LABEL)
         # Narrow as the panel is, the columns share its width instead of scrolling sideways.
         self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.table.horizontalHeader().setMinimumSectionSize(30)
@@ -104,7 +107,7 @@ class ValueRows(QObject):
                 table.setItem(index, column, item)
             final = QTableWidgetItem(_value_text(value))
             final.setFlags(final.flags() & ~Qt.ItemFlag.ItemIsEditable)
-            final.setToolTip(FINAL_TIP)
+            final.setToolTip(tr(FINAL_TIP))
             table.setItem(index, VALUE, final)
             self._drop_box(index)
             if open_here:
@@ -115,7 +118,7 @@ class ValueRows(QObject):
             else:
                 item = verdict_item(value["verdict"])
                 item.setToolTip(item.text())
-                item.setText(SHORT_VERDICT[Verdict(value["verdict"])])
+                item.setText(tr(SHORT_VERDICT[Verdict(value["verdict"])]))
                 table.setItem(index, VERDICT, item)
         self._filling = False
         self._size_verdicts()

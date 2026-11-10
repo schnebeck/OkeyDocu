@@ -13,6 +13,7 @@ import re
 import socket
 from typing import Protocol
 
+from ...l10n import tr
 from ..base import DeviceError
 
 log = logging.getLogger(__name__)
@@ -65,9 +66,9 @@ class RfcommChannel:
             self._socket.connect((address, channel))
         except OSError as err:
             self._socket.close()
-            log.info("Bluetooth-Verbindung zu %s fehlgeschlagen: %s", address, err)
+            log.info("Bluetooth connection to %s failed: %s", address, err)
             raise DeviceError(
-                "Das Messgerät antwortet nicht. Bitte einschalten und Bluetooth aktivieren."
+                tr("The instrument does not answer. Please switch it on and enable Bluetooth.")
             ) from err
         self._socket.settimeout(0.05)
 
@@ -82,7 +83,7 @@ class RfcommChannel:
                 return b""
             raise
         if not data:
-            raise ConnectionError("Die Gegenstelle hat die Verbindung geschlossen.")
+            raise ConnectionError(tr("The other side closed the connection."))
         return data
 
     def write(self, data: bytes) -> None:
@@ -105,10 +106,9 @@ def open_serial(port: str) -> SerialPort:
     try:
         device.open()
     except serial.SerialException as err:
-        log.info("Port %s nicht zu öffnen: %s", port, err)
+        log.info("Cannot open port %s: %s", port, err)
         raise DeviceError(
-            "Das Messgerät lässt sich über USB nicht öffnen. Vielleicht ist ein anderes Programm"
-            " damit verbunden."
+            tr("The instrument cannot be opened via USB. Another program may be connected to it.")
         ) from err
     return device
 
@@ -118,6 +118,6 @@ def open_channel(port: str) -> Channel:
     if port.startswith("bt:"):
         match = _BLUETOOTH_RE.match(port)
         if not match:
-            raise DeviceError(f"Keine gültige Bluetooth-Adresse: {port}")  # a programming error
+            raise DeviceError(f"Not a Bluetooth address: {port}")  # a programming error
         return RfcommChannel(match["address"], int(match["channel"] or BLUETOOTH_CHANNEL))
     return SerialChannel(open_serial(port))

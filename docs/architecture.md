@@ -115,6 +115,26 @@ Messungen stehen bei ihnen, solche an Orten im Block `attachments`.
 Das Gesamtergebnis übertreibt nicht: Ein ausgelassener oder leerer Schritt ergibt „Nicht
 vollständig geprüft“, nie „Bestanden“.
 
+## Sprachen
+
+Alle Texte stehen englisch im Code und werden beim Anzeigen nachgeschlagen: `tr("Serial number
+{serial}", serial=…)`, gezählt mit `plural()`, Modulkonstanten mit `N_()` markiert und dort übersetzt,
+wo sie erscheinen (`easymeasurement/l10n/`). Jede Sprache hat einen Ordner unter `data/languages/<code>/`:
+`language.yaml` mit Namen und Formaten für Datum, Zeit und Dezimalzeichen, daneben Katalogdateien je
+Bereich mit `texts` (Englisch → Sprache) und `contexts` für ein englisches Wort, das zwei Übersetzungen
+braucht. Ein Text darf in mehreren Dateien stehen, aber nur mit derselben Übersetzung.
+
+Die Programmsprache wird unter „Einstellungen → Sprache“ gewählt und gilt ab dem nächsten Start; ohne
+Wahl gilt die des Systems. Angeboten werden nur Sprachen mit `program: true`; die übrigen dienen
+Protokollen. `speaking()` setzt für einen Thread eine andere Sprache, etwa für ein Protokoll.
+
+Gespeicherte Wörter (Schritttitel, Vorlagenzeilen, Ergebnisnamen) können in jeder Katalogsprache
+geschrieben sein. `in_language()` erkennt sie über die Kataloge wieder und gibt sie in der aktuellen
+Sprache aus; Unbekanntes bleibt, wie es ist. Diese Wörter stehen in `stored.yaml`.
+
+`tests/test_l10n.py` verlangt für jeden markierten Text einen deutschen Eintrag mit denselben
+Platzhaltern und meldet Einträge, die kein Code benutzt.
+
 ## Messgeräte-Abstraktion
 
 `devices/base.py` definiert `MeterDriver`: `identify()`, `read_clock()`, `read_measurements()`

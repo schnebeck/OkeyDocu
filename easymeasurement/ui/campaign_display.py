@@ -14,6 +14,7 @@ from PySide6.QtWidgets import QMenu, QWidget
 
 from ..campaign.repeat import REPEAT
 from ..campaign.service import NO_INSTRUMENT
+from ..l10n import tr
 from .campaign_list import count_text
 from .dashboard_card import MAKE_REPORT, OPEN_REPORT, RESUME
 from .report_signing import open_report
@@ -40,8 +41,8 @@ class CampaignDisplay:
         self.campaign_id = campaign_id
         self.list.select(campaign_id)
         self.header.title.setText(campaign["title"])
-        plan = campaign["plan_title"] or "Ohne Plan"
-        tester = escape(campaign["tester"]) or "Prüfer fehlt"
+        plan = campaign["plan_title"] or tr("Without plan")
+        tester = escape(campaign["tester"]) or tr("Inspector missing")
         if campaign["status"] == "open":
             tester = f'<a href="tester">{tester}</a>'
         self.header.details.setText(
@@ -184,7 +185,7 @@ class CampaignDisplay:
             self.summary.setText("")
             return
         count = self.app.service.measurement_counts().get(campaign["id"], 0)
-        state = "offen" if campaign["status"] == "open" else "abgeschlossen"
+        state = tr("open") if campaign["status"] == "open" else tr("completed")
         self.summary.setText(f"{count_text(count)}  ·  {state}")
 
     def current_work(self) -> QWidget | None:

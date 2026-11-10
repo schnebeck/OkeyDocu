@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -15,6 +16,7 @@ from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QTableWidget
 
 from ..campaign.service import LOCATION_SEPARATOR
+from ..l10n import plural, tr
 from ..model import Parameter, Verdict, conductor_of
 from ..reporting.context import VERDICT_TEXT
 from .common import MEMBERS, POINT_ID, ROW_ID, RUN_ID, function_short
@@ -45,9 +47,9 @@ def _place(path: list[str], area: list[str]) -> str:
     return LOCATION_SEPARATOR.join(path[len(area):])
 
 
-def _measurement(row, moment: datetime, time_format: str, place: str) -> Line:
+def _measurement(row, when: datetime, show_time: Callable[[datetime], str], place: str) -> Line:
     texts = [
-        moment.strftime(time_format), row["customer_name"], row["asset_name"],
+        show_time(when), row["customer_name"], row["asset_name"],
         row["campaign_title"], place, function_short(row["function"]), values_text(row),
         str(row["photo_count"] or ""), VERDICT_TEXT[Verdict(row["verdict"])], capture_text(row),
     ]
@@ -71,11 +73,11 @@ def _head(run_id: int, steps: list[Line], rows: list, opened: bool) -> Line:
                 [row["id"] for row in rows], opened=opened)
     places = {step.texts[PLACE] for step in steps}
     failed = sum(row["verdict"] == Verdict.FAILED.value for row in rows)
-    summary = f"{first['run_name']}  ·  {len(rows)} {'Schritt' if len(rows) == 1 else 'Schritte'}"
+    summary = f"{first['run_name']}  ·  " + plural(len(rows), "{count} step", "{count} steps")
     if failed:
-        summary += f"  ·  {failed} {'Mangel' if failed == 1 else 'Mängel'}"
+        summary += "  ·  " + plural(failed, "{count} defect", "{count} defects")
     photos = sum(row["photo_count"] or 0 for row in rows)
-    line.texts[PLACE] = places.pop() if len(places) == 1 else "mehrere Orte"
+    line.texts[PLACE] = places.pop() if len(places) == 1 else tr("several locations")
     line.texts[5] = first["run_kind"] or line.texts[5]
     line.texts[VALUES] = summary
     line.texts[7] = str(photos or "")
@@ -84,12 +86,16 @@ def _head(run_id: int, steps: list[Line], rows: list, opened: bool) -> Line:
     return line
 
 
-def table_lines(rows, opened: set[int], time_format: str, area: list[str], paths) -> list[Line]:
-    """Rows as the search gave them; each run becomes a head, its steps follow if opened."""
+def table_lines(rows, opened: set[int], show_time: Callable[[datetime], str], area: list[str],
+                paths) -> list[Line]:
+    """Rows as the search gave them; each run becomes a head, its steps follow if opened.
+
+    `show_time` writes the time of a row.
+    """
     lines: list[Line | int] = []  # a run's number keeps the place of its head
     runs: dict[int, list[tuple[Line, object]]] = {}
     for row, path in zip(rows, paths):
-        line = _measurement(row, datetime.fromisoformat(row["local_time"]), time_format,
+        line = _measurement(row, datetime.fromisoformat(row["local_time"]), show_time,
                             _place(path, area))
         run_id = row["run_id"]
         if run_id is None:
@@ -127,13 +133,15 @@ def point_line(row, step, place: str) -> Line:
     skipped = row["status"] == "skipped"
     parameters = [Parameter(key, value) for key, value in step.parameters]
     conductor = conductor_of(parameters)
-    parts = [f"ausgelassen: {row['note']}" if skipped else "fehlt"]
+    parts = [tr("skipped: {note}", note=row["note"]) if skipped else tr("missing")]
     if step.kind == "check" and step.question and step.question != step.title:
         parts[0] += f" – {step.question}"
     parts += [p.value for p in parameters if p.value != conductor]
-    parts += [f"Grenze {' '.join(x for x in (low, up) if x)}" for _, _, low, up in step.limits]
+    parts += [tr("Limit {limits}", limits=" ".join(x for x in (low, up) if x))
+              for _, _, low, up in step.limits]
     detail = "  ·  ".join(parts)
-    texts = ["ausgelassen" if skipped else "offen", "", "", "", place, step.title,
+    state = tr("skipped") if skipped else tr("open", context="state")
+    texts = [state, "", "", "", place, step.title,
              f"{conductor}:  {detail}" if conductor else detail, "", "", ""]
     keys = [("~", row["position"]), None, None, None, None, None, None, None, None, None]
     line = Line(texts, keys, Verdict.NOT_EVALUATED.value)
@@ -167,4 +175,4 @@ def write_line(table: QTableWidget, index: int, line: Line) -> None:
     if line.row_id is None and line.run_id is not None:
         first.setData(RUN_ID, line.run_id)
         first.setData(MEMBERS, line.members)
-        first.setToolTip("Klick auf die Zeit oder Doppelklick klappt die Schritte auf und zu")
+        first.setToolTip(tr("Click on the time or double-click to fold the steps open and shut"))

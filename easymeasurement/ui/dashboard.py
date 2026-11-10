@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.seal import SealState
+from ..l10n import N_, tr
 from .campaign_list import heading
 from .common import AppContext
 from .dashboard_card import CARD_WIDTH, SHOW, CampaignCard
@@ -34,7 +35,7 @@ OPEN_SHOWN = 5
 CLOSED_SHOWN = 3
 FOUND = 9
 SPACING = 12
-SEAL_WARNINGS = {SealState.TAMPERED: "⚠ Verändert", SealState.NOT_SEALED: "Nicht versiegelt"}
+SEAL_WARNINGS = {SealState.TAMPERED: N_("⚠ Modified"), SealState.NOT_SEALED: N_("Not sealed")}
 # An empty place among the cards: the dashed outline of the next open campaign.
 NEW_CARD_STYLE = """
 QPushButton#new-card {
@@ -47,7 +48,7 @@ QPushButton#new-card:hover {
 
 
 def new_card() -> QPushButton:
-    button = QPushButton("＋\nNeue Kampagne", objectName="new-card")
+    button = QPushButton("＋\n" + tr("New campaign"), objectName="new-card")
     button.setStyleSheet(NEW_CARD_STYLE)
     button.setCursor(Qt.CursorShape.PointingHandCursor)
     button.setMinimumSize(CARD_WIDTH, 120)
@@ -77,8 +78,9 @@ class CardSection(QWidget):
 
     def show_cards(self, cards: list[CampaignCard], total: int, columns: int) -> None:
         self.cards = cards
-        more = (f'<span style="font-weight: normal">  ·  {len(cards)} von {total},'
-                ' alle stehen links in der Liste</span>')
+        shown = tr("{shown} of {total}, all are listed on the left", shown=len(cards),
+                   total=total)
+        more = f'<span style="font-weight: normal">  ·  {shown}</span>'
         self.heading.setText(self.title + (more if total > len(cards) else ""))
         self.setVisible(bool(cards) or self._with_last())
         self.place(columns)
@@ -118,28 +120,30 @@ class Dashboard(QScrollArea):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         self.start_button = new_card()
-        self.start_button.setToolTip("Kunde und Anlage wählen und die nächste Messung beginnen")
+        self.start_button.setToolTip(
+            tr("Choose customer and installation and start the next measurement"))
         self.start_button.clicked.connect(self.start_requested)
         top = QVBoxLayout()
-        top.addWidget(heading("Messkampagnen", 22))
-        top.addWidget(QLabel("Kunde und Anlage wählen, messen, Protokoll bestätigen."))
+        top.addWidget(heading(tr("Measurement campaigns"), 22))
+        top.addWidget(QLabel(tr("Choose customer and installation, measure, confirm the report.")))
 
-        self.no_asset = QLabel("Für eine Kampagne braucht es zuerst einen Kunden und eine Anlage.")
+        self.no_asset = QLabel(tr("A campaign needs a customer and an installation first."))
         self.no_asset.setWordWrap(True)
-        self.master_data_button = QPushButton("Zu den Stammdaten")
+        self.master_data_button = QPushButton(tr("Go to master data"))
         self.master_data_button.clicked.connect(self.master_data_requested)
         missing = QHBoxLayout()
         missing.addWidget(self.no_asset, 1)
         missing.addWidget(self.master_data_button)
 
-        self.search = QLineEdit(placeholderText="Kampagne, Kunde, Ort, Anlage oder Prüfer suchen …")
+        self.search = QLineEdit(
+            placeholderText=tr("Search campaign, customer, location, installation or inspector …"))
         self.search.setClearButtonEnabled(True)
         self.search.textChanged.connect(lambda _: self._fill())
         self.search.returnPressed.connect(self._open_first)
         self.due = DueSection(app)
         self.due.start_requested.connect(self.due_requested)
-        self.open_section = CardSection("Offene Messungen", self.start_button)
-        self.closed_section = CardSection("Abgeschlossene Messungen")
+        self.open_section = CardSection(tr("Open measurements"), self.start_button)
+        self.closed_section = CardSection(tr("Completed measurements"))
         self.empty = QLabel()
         self.empty.setEnabled(False)
         self.tiles = AdminTiles(app)
@@ -157,7 +161,7 @@ class Dashboard(QScrollArea):
         column.addWidget(self.closed_section)
         column.addWidget(self.empty)
         column.addSpacing(SPACING)
-        column.addWidget(heading("Einrichten und verwalten", 13))
+        column.addWidget(heading(tr("Set up and manage"), 13))
         column.addWidget(self.tiles)
         column.addStretch(1)
         self.setWidget(content)
@@ -198,14 +202,15 @@ class Dashboard(QScrollArea):
                                       (self.closed_section, closed, closed_limit)):
             cards = [self._card(summary) for summary in group[:limit]]
             section.show_cards(cards, len(group), self.columns)
-        self.empty.setText(f"Keine Kampagne passt zu „{self.search.text().strip()}“.")
+        self.empty.setText(tr("No campaign matches “{search}”.", search=self.search.text().strip()))
         self.empty.setVisible(bool(words) and not found)
 
     def _card(self, summary) -> CampaignCard:
         warning = ""
         if not summary.is_open:
             state = self.app.service.check_seal(summary.id, thorough=False).state
-            warning = SEAL_WARNINGS.get(state, "")
+            text = SEAL_WARNINGS.get(state)
+            warning = tr(text) if text else ""
         card = CampaignCard(summary, summary.id == self.live_id, warning,
                             self.catalog.icon(summary.kind))
         card.requested.connect(self.campaign_requested)

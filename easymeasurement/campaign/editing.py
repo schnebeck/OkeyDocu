@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from ..l10n import tr
 from ..store import CampaignClosed, ReadingIsFinal
 from .assignment import ISSUE_TEXT
 from .records import EDITABLE_FIELDS, EDITABLE_VALUE_FIELDS, TEXT_FIELDS, _iso, full_name
@@ -36,7 +37,7 @@ class EditingMixin:
     def assign_tester(self, campaign_id: int, user_id: int, measurements: bool = False) -> None:
         """Change who answers for an open campaign and, with `measurements`, for its readings."""
         if self.campaign(campaign_id)["status"] != "open":
-            raise CampaignClosed("Die Kampagne ist abgeschlossen.")
+            raise CampaignClosed(tr("The campaign is closed."))
         name = full_name(self.db.user(user_id))
         rows = self.measurements(campaign_id) if measurements else []
         with self.db.transaction() as connection:
@@ -69,12 +70,12 @@ class EditingMixin:
         """Title and installation. Nothing recorded may end up outside the installation."""
         campaign = self.campaign(campaign_id)
         if campaign["status"] != "open":
-            raise CampaignClosed("Die Kampagne ist abgeschlossen.")
+            raise CampaignClosed(tr("The campaign is closed."))
         title = title.strip()
         if not title:
-            raise ValueError("Der Titel fehlt.")
+            raise ValueError(tr("The title is missing."))
         if asset_id != campaign["asset_id"] and self.misplaced(campaign_id, asset_id):
-            raise ValueError("Messungen oder Dateien liegen an Orten außerhalb dieser Anlage.")
+            raise ValueError(tr("Measurements or files are at places outside this installation."))
         self.db.execute(
             "UPDATE campaigns SET title=?, asset_id=? WHERE id=?", title, asset_id, campaign_id
         )
@@ -83,9 +84,9 @@ class EditingMixin:
         """The customer's department and person for this job, in the order of
         `CONTACT_COLUMNS`; a closed campaign keeps what it had."""
         if self.campaign(campaign_id)["status"] != "open":
-            raise CampaignClosed("Die Kampagne ist abgeschlossen.")
+            raise CampaignClosed(tr("The campaign is closed."))
         if len(values) != len(CONTACT_COLUMNS):
-            raise ValueError(f"Erwartet: {', '.join(CONTACT_COLUMNS)}")
+            raise ValueError(tr("Expected: {columns}", columns=", ".join(CONTACT_COLUMNS)))
         self.db.execute(
             f"UPDATE campaigns SET {', '.join(f'{c}=?' for c in CONTACT_COLUMNS)} WHERE id=?",
             *(value.strip() for value in values), campaign_id,
@@ -94,7 +95,7 @@ class EditingMixin:
     def set_cost_center(self, campaign_id: int, cost_center: str) -> None:
         """Booked to one job, so a new campaign starts without it."""
         if self.campaign(campaign_id)["status"] != "open":
-            raise CampaignClosed("Die Kampagne ist abgeschlossen.")
+            raise CampaignClosed(tr("The campaign is closed."))
         self.db.execute("UPDATE campaigns SET cost_center=? WHERE id=?", cost_center.strip(),
                         campaign_id)
 
@@ -129,11 +130,11 @@ class EditingMixin:
         changes, value_changes = changes or {}, value_changes or {}
         for field in changes:
             if field not in EDITABLE_FIELDS:
-                raise ReadingIsFinal(f"{field} lässt sich nicht ändern.")
+                raise ReadingIsFinal(tr("{field} cannot be changed.", field=field))
         for fields in value_changes.values():
             for field in fields:
                 if field not in EDITABLE_VALUE_FIELDS:
-                    raise ReadingIsFinal(f"{field} lässt sich nicht ändern.")
+                    raise ReadingIsFinal(tr("{field} cannot be changed.", field=field))
         row = self.db.one("SELECT * FROM measurements WHERE id=?", measurement_id)
         changed = 0
         with self.db.transaction() as connection:
@@ -197,4 +198,5 @@ class EditingMixin:
         )
 
     def issue_text(self, row) -> str:
-        return ISSUE_TEXT.get(row["issue"], "")
+        text = ISSUE_TEXT.get(row["issue"])
+        return tr(text) if text else ""

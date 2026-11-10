@@ -11,6 +11,7 @@ from __future__ import annotations
 from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtWidgets import QMenu, QTableWidget, QTableWidgetItem
 
+from ..l10n import N_, tr
 from .report_signing import settings
 
 SORT_KEY = Qt.ItemDataRole.UserRole + 20
@@ -83,7 +84,7 @@ class TableColumns(QObject):
         header.sectionMoved.connect(lambda *_: self._store())
         header.sortIndicatorChanged.connect(lambda *_: self._store())
         header.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        header.setToolTip("Klick sortiert, Ziehen verschiebt, Rechtsklick wählt Spalten")
+        header.setToolTip(tr("Click sorts, dragging moves, right-click chooses columns"))
         header.customContextMenuRequested.connect(self._context_menu)
 
     def apply(self, same: set[int]) -> set[int]:
@@ -100,15 +101,15 @@ class TableColumns(QObject):
         header = self.table.horizontalHeader()
         if clicked >= 0:
             name = self.table.horizontalHeaderItem(clicked).text()
-            for text, order in (("aufsteigend", Qt.SortOrder.AscendingOrder),
-                                ("absteigend", Qt.SortOrder.DescendingOrder)):
-                action = menu.addAction(f"Nach „{name}“ {text} sortieren")
+            for text, order in ((N_("Sort by “{name}” ascending"), Qt.SortOrder.AscendingOrder),
+                                (N_("Sort by “{name}” descending"), Qt.SortOrder.DescendingOrder)):
+                action = menu.addAction(tr(text, name=name))
                 action.setCheckable(True)
                 action.setChecked(header.sortIndicatorSection() == clicked
                                   and header.sortIndicatorOrder() == order)
                 action.triggered.connect(
                     lambda _, order=order: header.setSortIndicator(clicked, order))
-        menu.addSection("Spalten")
+        menu.addSection(tr("Columns"))
         offered = [header.logicalIndex(visual) for visual in range(header.count())]
         offered = [column for column in offered if column not in self.never]
         shown = [column for column in offered if column not in self.off]
@@ -120,11 +121,11 @@ class TableColumns(QObject):
             action.setEnabled(shown != [column])
             action.toggled.connect(lambda on, column=column: self._switch(column, on))
         menu.addSeparator()
-        gather = menu.addAction("Gleiche Werte über der Tabelle nennen")
+        gather = menu.addAction(tr("Name equal values above the table"))
         gather.setCheckable(True)
         gather.setChecked(self.gather)
         gather.toggled.connect(self._gather)
-        menu.addAction("Spalten zurücksetzen", self.reset)
+        menu.addAction(tr("Reset columns"), self.reset)
         return menu
 
     def _context_menu(self, point) -> None:

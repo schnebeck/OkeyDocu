@@ -9,9 +9,9 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QLabel, QPushButton, QStackedWidget, QVBoxLayout, QWidget
 
+from ..l10n import tr
 from .board import EDGE, GUTTER, Board, GutterSplitter
 from .campaign_actions import CampaignActions
 from .campaign_checks import CampaignChecks
@@ -76,21 +76,21 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.side = SidePanel()
         self.place = PlacePanel(app)
         self.place_files = self.place.files
-        self.asset_section = self.side.add("Ort", self.place, grows=False)
-        self.plan_add_button = QPushButton("Messplan zuweisen …")
+        self.asset_section = self.side.add(tr("Location"), self.place, grows=False)
+        self.plan_add_button = QPushButton(tr("Assign test plan …"))
         self.plan_add_button.clicked.connect(self.assign_plan)
         plan_box = QWidget()
         plan_layout = QVBoxLayout(plan_box)
         plan_layout.setContentsMargins(0, 0, 0, 0)
         plan_layout.addWidget(self.guided.steps, 1)
         plan_layout.addWidget(self.plan_add_button)
-        self.plan_section = self.side.add("Messplan", plan_box)
-        self.loose_section = self.side.add("Nicht zugeordnet", self.guided.open_box)
-        self.detail_section = self.side.add("Messung", self.values.detail, grows=False)
+        self.plan_section = self.side.add(tr("Test plan"), plan_box)
+        self.loose_section = self.side.add(tr("Not assigned"), self.guided.open_box)
+        self.detail_section = self.side.add(tr("Measurement"), self.values.detail, grows=False)
         self._build_photos()
         self.photo_tabs = PhotoTabs(self.values.gallery, self.stack)
-        self.photo_section = self.side.add("Fotos", self.photo_tabs)
-        self.report_section = self.side.add("Protokolle", self.reports)
+        self.photo_section = self.side.add(tr("Photos"), self.photo_tabs)
+        self.report_section = self.side.add(tr("Reports"), self.reports)
         # Until a campaign needs them. Shown, they would count towards the minimum window size.
         for section in (self.plan_section, self.loose_section, self.report_section):
             section.hide()
@@ -136,28 +136,7 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.drawer = EdgeDrawer(self)
         self.pin_list(False)
 
-        self.home_action = self._action("Übersicht", self.show_home)
-        self.new_action = self._action("Neue Kampagne …", self.new_campaign)
-        self.resume_action = self._action("Messung fortsetzen", self.resume)
-        self.pause_action = self._action("Messung unterbrechen", self.pause)
-        self.edit_action = self._action("Kampagne bearbeiten …", self.edit_campaign)
-        self.tester_action = self._action("Prüfer ändern …", self.change_tester)
-        self.assign_action = self._action("Messplan zuweisen …", self.assign_plan)
-        self.draft_action = self._action("Protokoll-Entwurf ansehen", self.show_draft)
-        self.finish_action = self._action("Protokoll bestätigen …", self.finish)
-        self.delete_action = self._action("Kampagne löschen …", self.delete_campaign)
-        self.report_action = self._action("Protokoll erstellen …", self.make_report)
-        self.photos_action = self._action("Fotos importieren …", self.import_photos)
-        # The timeline is a tool for placing photos: shown on asking, gone once they are placed.
-        self.timeline_action = QAction("Fotos zuordnen", self, checkable=True, shortcut="F7")
-        self.timeline_action.toggled.connect(self._fit_photo_panels)
-        self.fetch_action = self._action("Vom Gerät nachholen", self.fetch)
-        self.clock_action = self._action("Uhr stellen …", self.check_clock)
-        self.clock_action.setToolTip("Prüft die Geräteuhr und stellt sie nach Rückfrage auf die"
-                                     " Laptopzeit. Messungen mit der alten Zeit kommen vorher.")
-        self.offset_action = self._action("Uhrenversatz von Hand …", self.correct_clock)
-        self.offset_action.setToolTip("Nur für Messungen, die mit falsch gehender Uhr im Gerät"
-                                      " lagen, etwa von einem früheren Tag")
+        self._build_actions()
 
         self.list.new_button.clicked.connect(self.new_campaign)
         self.list.home_requested.connect(self.show_home)
@@ -205,11 +184,6 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
             self.drawer.hold(self.list)
             self.drawer.set_active(True)
         self.list.show()
-
-    def _action(self, text: str, slot) -> QAction:
-        action = QAction(text, self)
-        action.triggered.connect(lambda: slot())
-        return action
 
     def refresh(self) -> None:
         """Something outside changed, such as the master data or a measurement."""

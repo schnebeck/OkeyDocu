@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
 from ..campaign.service import IMPORTED
 from ..devices import Capability
 from ..devices.simulator import SIMULATED_FUNCTIONS
+from ..l10n import N_, tr
 from .campaign_list import count_text
 from .common import AppContext, function_short
 from .instruction_panel import InstructionPanel
@@ -32,20 +33,20 @@ from .status_badges import BAD, GOOD
 from .users import UserChoice
 
 GUIDANCE = {
-    GOOD: "<b>Jetzt am Messgerät messen und den Teilen-Knopf drücken.</b>"
-          " Jeder Wert erscheint sofort hier und ist gespeichert.",
-    BAD: "<b>Das Messgerät ist nicht verbunden.</b>"
-         " Ohne Verbindung zeigt es statt Teilen den Speichermanager. Dort speichern oder warten,"
-         " die App verbindet sich von selbst.",
+    GOOD: N_("<b>Now measure on the instrument and press the share key.</b>"
+             " Each value appears here at once and is saved."),
+    BAD: N_("<b>The instrument is not connected.</b>"
+            " Without a connection it shows the memory manager instead of sharing. Save there"
+            " or wait, the app connects by itself."),
 }
-WAITING_GUIDANCE = "<b>Verbinde mit dem Messgerät …</b>"
-MANUAL_GUIDANCE = (
-    "<b>Messwerte von Hand eingeben oder Fotos hinzufügen.</b>"
-    " Diese Kampagne läuft ohne Messgerät."
+WAITING_GUIDANCE = N_("<b>Connecting to the instrument …</b>")
+MANUAL_GUIDANCE = N_(
+    "<b>Enter readings by hand or add photos.</b>"
+    " This campaign runs without an instrument."
 )
-IMPORT_GUIDANCE = (
-    "<b>Importierte Daten prüfen und überarbeiten.</b>"
-    " Mit dem Abschluss wird der Datensatz versiegelt, erst dann entsteht das Protokoll."
+IMPORT_GUIDANCE = N_(
+    "<b>Check and revise the imported data.</b>"
+    " Completing seals the record, only then is the report created."
 )
 
 
@@ -53,17 +54,18 @@ class TesterOverlay(Overlay):
     """The wrong person was chosen, or someone else takes over."""
 
     def __init__(self, app: AppContext, campaign, count: int, parent=None):
-        super().__init__("Prüfer ändern", parent)
-        self.ok_button.setText("Übernehmen")
+        super().__init__(tr("Change inspector"), parent)
+        self.ok_button.setText(tr("Apply"))
         self.tester = UserChoice(app, campaign["user_id"])
         if campaign["user_id"] is None:  # no linked person: found by the name on record
             self.tester.combo.setCurrentIndex(max(self.tester.combo.findText(campaign["tester"]), 0))
         self.tester.changed.connect(self._update)
-        self.measurements = QCheckBox(f"Auch für die bisherigen {count_text(count)}")
+        self.measurements = QCheckBox(tr("Also for the previous {measurements}",
+                                         measurements=count_text(count)))
         self.measurements.setChecked(count > 0)
         self.measurements.setVisible(count > 0)
         form = QFormLayout()
-        form.addRow("Prüfer", self.tester)
+        form.addRow(tr("Inspector"), self.tester)
         self.body.addLayout(form)
         self.body.addWidget(self.measurements)
         self._update()
@@ -73,22 +75,24 @@ class TesterOverlay(Overlay):
 
     def _update(self) -> None:
         self.ok_button.setEnabled(self.tester.current_id() is not None)
-        self.hint.setText("" if self.ok_button.isEnabled() else "Es fehlt noch ein Prüfer.")
+        missing = not self.ok_button.isEnabled()
+        self.hint.setText(tr("An inspector is still missing.") if missing else "")
 
 
 class AssignPlanOverlay(Overlay):
     """Another plan to work through. Its points come after those already there."""
 
     def __init__(self, plans: list, parent=None):
-        super().__init__("Messplan zuweisen", parent)
-        self.ok_button.setText("Zuweisen")
+        super().__init__(tr("Assign test plan"), parent)
+        self.ok_button.setText(tr("Assign"))
         self.plan = QComboBox()
         for plan in plans:
-            self.plan.addItem(f"{plan.label} ({len(plan.steps)} Punkte)", plan)
+            text = tr("{plan} ({count} points)", plan=plan.label, count=len(plan.steps))
+            self.plan.addItem(text, plan)
         self.ok_button.setEnabled(bool(plans))
-        self.hint.setText("" if plans else "Es gibt noch keinen Messplan.")
+        self.hint.setText("" if plans else tr("There is no test plan yet."))
         form = QFormLayout()
-        form.addRow("Messplan", self.plan)
+        form.addRow(tr("Test plan"), self.plan)
         self.body.addLayout(form)
 
     def first_field(self):
@@ -109,10 +113,10 @@ class FreeRunView(QWidget):
         self.simulate_function = QComboBox()
         for key in SIMULATED_FUNCTIONS:
             self.simulate_function.addItem(function_short(key), key)
-        self.simulate_button = QPushButton("Messung simulieren")
+        self.simulate_button = QPushButton(tr("Simulate measurement"))
         self.simulate_button.clicked.connect(self.simulate)
         # Help lives in the help menu; the action is there and works while this view shows.
-        self.instruction_action = QAction("Anleitung zur Messung", self)
+        self.instruction_action = QAction(tr("Measurement instructions"), self)
         self.instruction_action.setCheckable(True)
         self.instruction_action.setShortcut(QKeySequence.StandardKey.HelpContents)
         self.instruction_action.setEnabled(False)
@@ -144,7 +148,7 @@ class FreeRunView(QWidget):
 
     def _say(self, text: str) -> None:
         """The bold first sentence stays in view, what explains it waits under the mouse."""
-        head, end, rest = text.partition("</b>")
+        head, end, rest = tr(text).partition("</b>")
         self.guidance.setText(head + end)
         self.guidance.setToolTip(rest.strip())
 

@@ -12,6 +12,8 @@ from concurrent.futures import Future
 
 from PySide6.QtCore import QObject, QTimer, Signal
 
+from ..l10n import tr
+
 POLL_MS = 250
 
 
@@ -42,7 +44,9 @@ class ProxyProgress(QObject):
 
     def text(self) -> str:
         done, total = self.counts()
-        return f"Bereite Fotos für das Protokoll vor: {done} von {total}" if done < total else ""
+        if done >= total:
+            return ""
+        return tr("Preparing photos for the report: {done} of {total}", done=done, total=total)
 
     def _poll(self) -> None:
         for campaign_id in [key for key in self.pending if self.ready(key)]:

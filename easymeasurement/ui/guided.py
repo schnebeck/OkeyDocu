@@ -27,6 +27,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..devices.simulator import SIMULATED_FUNCTIONS
+from ..l10n import day, tr
 from .common import AppContext, function_short, make_table
 from .guided_actions import GuidedActions
 from .guided_pages import CheckPage, NotePage
@@ -78,11 +79,11 @@ class GuidedPage(GuidedSteps, GuidedActions, QWidget):
         self.warnings_text = _label()
         self.instructions_text = _label()
         self.source_text = _label()
-        self.device_set = QCheckBox("Drehschalter und Einstellungen stehen wie angegeben")
+        self.device_set = QCheckBox(tr("Rotary switch and settings are set as given"))
         self.device_set.toggled.connect(self._update_actions)
         self.device_set.clicked.connect(lambda ticked: ticked and self._read_selector())
         self.selector_hint = _label()
-        self.confirm_button = QPushButton("Aufbau bestätigen")
+        self.confirm_button = QPushButton(tr("Confirm setup"))
         self.confirm_button.clicked.connect(self.confirm)
         inner = QWidget()
         side = QVBoxLayout(inner)
@@ -106,9 +107,9 @@ class GuidedPage(GuidedSteps, GuidedActions, QWidget):
         self.simulate_function = QComboBox()
         for key in SIMULATED_FUNCTIONS:
             self.simulate_function.addItem(function_short(key), key)
-        self.simulate_button = QPushButton("Messung simulieren")
-        self.fetch_button = QPushButton("Vom Gerät nachholen")
-        self.skip_button = QPushButton("Schritt auslassen …")
+        self.simulate_button = QPushButton(tr("Simulate measurement"))
+        self.fetch_button = QPushButton(tr("Fetch from the instrument"))
+        self.skip_button = QPushButton(tr("Skip step …"))
         self.simulate_button.clicked.connect(self.simulate)
         self.fetch_button.clicked.connect(self.fetch)
         self.skip_button.clicked.connect(self._skip)
@@ -138,8 +139,8 @@ class GuidedPage(GuidedSteps, GuidedActions, QWidget):
         self.progress = QProgressBar()
         self.progress.setTextVisible(False)
         self.progress.setMaximumHeight(6)
-        self.back_button = QPushButton("← Zurück")
-        self.next_button = QPushButton("Weiter →")
+        self.back_button = QPushButton(tr("← Back"))
+        self.next_button = QPushButton(tr("Next →"))
         self.next_button.setDefault(True)
         self.back_button.clicked.connect(self.previous)
         self.next_button.clicked.connect(self.next_point)
@@ -148,8 +149,9 @@ class GuidedPage(GuidedSteps, GuidedActions, QWidget):
         navigation.addWidget(self.back_button)
         navigation.addWidget(self.next_button)
 
-        self.open_table = make_table(["Zeitpunkt", "Bezeichnung", "Messwerte", "Grund"], 2)
-        self.assign_button = QPushButton("Dem gewählten Schritt zuordnen")
+        columns = [tr("Time"), tr("Designation"), tr("Readings"), tr("Reason")]
+        self.open_table = make_table(columns, 2)
+        self.assign_button = QPushButton(tr("Assign to the chosen step"))
         self.assign_button.clicked.connect(self._assign_open)
         self.open_box = QWidget()
         open_layout = QVBoxLayout(self.open_box)
@@ -182,7 +184,7 @@ class GuidedPage(GuidedSteps, GuidedActions, QWidget):
     def show_received(self, reading) -> None:
         results = reading.measurement.results[:2]
         text = "   ".join(f"{r.label} {r.quantity.raw}" for r in results)
-        self.status.setText(f"Empfangen: {text}")
+        self.status.setText(tr("Received: {values}", values=text))
         self._fill_steps()
 
     def _campaign(self):
@@ -195,13 +197,12 @@ class GuidedPage(GuidedSteps, GuidedActions, QWidget):
             return
         notes = []
         if "Entwurf" in campaign["plan_title"]:
-            notes.append("Messplan ist ein Entwurf und fachlich noch nicht freigegeben.")
+            notes.append(tr("The test plan is a draft and not yet approved technically."))
         if campaign["driver"] == "simulator":
-            notes.append("<b>Simulation:</b> Die Messwerte sind Zufallswerte.")
+            notes.append(tr("<b>Simulation:</b> The readings are random values."))
         identity = self.app.service.identity(self.campaign_id)
         if identity.calibration_overdue(datetime.now().date()):
-            notes.append(
-                f"<b>Rekalibrierung überfällig seit {identity.recalibration_due:%d.%m.%Y}.</b>"
-            )
+            notes.append(tr("<b>Recalibration overdue since {day}.</b>",
+                            day=day(identity.recalibration_due)))
         self.banner.setText(" · ".join(notes))
         self.banner.setVisible(bool(notes))

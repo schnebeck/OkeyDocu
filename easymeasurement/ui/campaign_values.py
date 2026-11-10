@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from ..l10n import tr
 from ..model import Verdict
 from ..store.search import MeasurementFilter
 from .board import Strip
@@ -46,9 +47,9 @@ class CampaignValues(CampaignPoints, MeasurementView):
         self.unplaced = False  # only what is booked onto no element
         self.step_id: int | None = None
         self.manual_action, self.manual_button = self._action(
-            "Messwert von Hand …", "Von Hand …", self._enter_by_hand
+            tr("Reading by hand …"), tr("By hand …"), self._enter_by_hand
         )
-        self.only_step = QCheckBox("Nur dieser Schritt")
+        self.only_step = QCheckBox(tr("Only this step"))
         self.only_step.toggled.connect(lambda: self.refresh())
         # Made after the others, the button came last; it belongs first, always in one place.
         self.actions_row.removeWidget(self.manual_button)
@@ -70,7 +71,7 @@ class CampaignValues(CampaignPoints, MeasurementView):
         # by hand and a filter, so nothing in it stands grey most of the time.
         for button in (self.edit_measurement, self.delete_measurement, self.add_photo):
             button.hide()
-        self.move_action = QAction("Verschieben nach …", self)
+        self.move_action = QAction(tr("Move to …"), self)
         self.move_action.triggered.connect(self._move_to)
         self.table.itemSelectionChanged.connect(self._update_move)
         self.editor.movable = True
@@ -78,7 +79,7 @@ class CampaignValues(CampaignPoints, MeasurementView):
         self.editor.place.chosen.connect(self.place_requested)
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self._row_menu)
-        self.find = QLineEdit(placeholderText="Messwerte filtern …")
+        self.find = QLineEdit(placeholderText=tr("Filter readings …"))
         self.find.setClearButtonEnabled(True)
         self.find.setFixedWidth(260)
         self._typing = QTimer(self, singleShot=True, interval=250)

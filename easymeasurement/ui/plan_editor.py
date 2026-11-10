@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.plan import load_instructions, parse_plan
+from ..l10n import tr
 from .board import GutterSplitter
 from .common import ROW_ID, AppContext
 from .plan_editor_points import PlanEditorPoints, new_key
@@ -49,9 +50,9 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
         self.plans.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.plans.setTextElideMode(Qt.TextElideMode.ElideRight)
         self.plans.currentRowChanged.connect(lambda _: self._plan_chosen())
-        self.new_button = QPushButton("Neu")
-        self.copy_button = QPushButton("Kopieren")
-        self.delete_button = QPushButton("Löschen …")
+        self.new_button = QPushButton(tr("New"))
+        self.copy_button = QPushButton(tr("Copy"))
+        self.delete_button = QPushButton(tr("Delete …"))
         self.new_button.clicked.connect(self.new_plan)
         self.copy_button.clicked.connect(self.copy_plan)
         self.delete_button.clicked.connect(self.delete_plan)
@@ -64,9 +65,9 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
         left_layout.addLayout(plan_buttons)
 
         self.title = QLineEdit()
-        self.title.setPlaceholderText("Name des Messplans")
+        self.title.setPlaceholderText(tr("Name of the test plan"))
         self.title.textEdited.connect(self._edited)
-        self.released = QCheckBox("Freigegeben")
+        self.released = QCheckBox(tr("Released"))
         self.released.toggled.connect(self._edited)
         head = QHBoxLayout()
         head.addWidget(self.title, 1)
@@ -74,13 +75,15 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
         self.steps = QListWidget()
         self.steps.currentRowChanged.connect(lambda _: self._step_chosen())
         adders = QHBoxLayout()
-        for text, kind in (("+ Prüffrage", "check"), ("+ Messung", "measure"), ("+ Hinweis", "note")):
+        adding = ((tr("+ Check question"), "check"), (tr("+ Measurement"), "measure"),
+                  (tr("+ Hint"), "note"))
+        for text, kind in adding:
             button = QPushButton(text)
             button.clicked.connect(lambda _, chosen=kind: self.add_step(chosen))
             adders.addWidget(button)
         self.up_button = QPushButton("↑")
         self.down_button = QPushButton("↓")
-        self.remove_button = QPushButton("Entfernen")
+        self.remove_button = QPushButton(tr("Remove"))
         self.up_button.clicked.connect(lambda: self.move_step(-1))
         self.down_button.clicked.connect(lambda: self.move_step(1))
         self.remove_button.clicked.connect(self.remove_step)
@@ -94,7 +97,7 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
 
         self.form = PlanStepForm()
         self.form.changed.connect(self._step_edited)
-        self.run_button = QPushButton("Testlauf …")
+        self.run_button = QPushButton(tr("Test run …"))
         self.run_button.clicked.connect(self.test_run)
         self.state = QLabel()
         bottom = QHBoxLayout()
@@ -157,7 +160,8 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
 
     def new_plan(self) -> None:
         self.save()
-        data = {"key": new_key("plan"), "title": "Neuer Messplan", "released": False, "steps": []}
+        data = {"key": new_key("plan"), "title": tr("New test plan"), "released": False,
+                "steps": []}
         self._write(data)
         self.refresh(data["key"])
         self.title.setFocus()
@@ -165,17 +169,16 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
 
     def copy_plan(self) -> None:
         self.save()
-        data = {
-            **self.data, "key": new_key("plan"), "title": f"{self.data['title']} (Kopie)",
-            "released": False,
-        }
+        title = tr("{title} (copy)", title=self.data["title"])
+        data = {**self.data, "key": new_key("plan"), "title": title, "released": False}
         self._write(data)
         self.refresh(data["key"])
 
     def delete_plan(self) -> None:
         answer = QMessageBox.question(
-            self, "Messplan löschen",
-            f"„{self.data['title']}“ löschen? Kampagnen behalten ihre Kopie der Punkte.",
+            self, tr("Delete test plan"),
+            tr("Delete “{title}”? Campaigns keep their copy of the points.",
+               title=self.data["title"]),
         )
         if answer == QMessageBox.StandardButton.Yes:
             self._saving.stop()
@@ -187,16 +190,16 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
 
     def _edited(self) -> None:
         if self.data is not None:
-            self.data["title"] = self.title.text().strip() or "Ohne Namen"
+            self.data["title"] = self.title.text().strip() or tr("Untitled")
             self.data["released"] = self.released.isChecked()
-            self.state.setText("Wird gespeichert …")
+            self.state.setText(tr("Saving …"))
             self._saving.start()
 
     def save(self) -> None:
         if self.data is not None and self._saving.isActive():
             self._saving.stop()
             self._write(self.data)
-            self.state.setText("Gespeichert")
+            self.state.setText(tr("Saved"))
             item = self.plans.currentItem()
             if item is not None and item.data(ROW_ID) == self.data["key"]:
                 item.setText(self.data["title"])

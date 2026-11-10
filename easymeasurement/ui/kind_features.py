@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import tr
 from ..store.kinds import Feature, slug
 
 KEY = Qt.ItemDataRole.UserRole
@@ -33,7 +34,7 @@ class FeatureTable(QWidget):
     def __init__(self):
         super().__init__()
         self.table = QTableWidget(0, 2)
-        self.table.setHorizontalHeaderLabels(["Merkmal", "Einheit"])
+        self.table.setHorizontalHeaderLabels([tr("Feature"), tr("Unit")])
         self.table.verticalHeader().hide()
         self.table.verticalHeader().setDefaultSectionSize(self.table.fontMetrics().height() + 10)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
@@ -42,15 +43,15 @@ class FeatureTable(QWidget):
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         self.table.itemChanged.connect(lambda _: self._changed())
-        self.add_button = QPushButton("Merkmal hinzufügen")
+        self.add_button = QPushButton(tr("Add feature"))
         self.add_button.clicked.connect(self.add)
-        self.remove_button = QPushButton("Entfernen")
+        self.remove_button = QPushButton(tr("Remove"))
         self.remove_button.clicked.connect(self.remove)
         self.up_button = QPushButton("▲")
-        self.up_button.setToolTip("Weiter nach oben")
+        self.up_button.setToolTip(tr("Move up"))
         self.up_button.clicked.connect(lambda: self._move(-1))
         self.down_button = QPushButton("▼")
-        self.down_button.setToolTip("Weiter nach unten")
+        self.down_button.setToolTip(tr("Move down"))
         self.down_button.clicked.connect(lambda: self._move(1))
         for button in (self.up_button, self.down_button):
             button.setFixedWidth(button.fontMetrics().horizontalAdvance("▲") + 24)
@@ -102,7 +103,7 @@ class FeatureTable(QWidget):
 
     def add(self) -> None:
         self._filling = True
-        row = self._append(Feature("", "Neues Merkmal"))
+        row = self._append(Feature("", tr("New feature")))
         self._filling = False
         self.table.setCurrentCell(row, 0)
         self.table.editItem(self.table.item(row, 0))

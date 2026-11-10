@@ -27,12 +27,14 @@ from PySide6.QtWidgets import (
 
 from ..campaign.records import NO_INSTRUMENT
 from ..campaign.seal import SealState
+from ..l10n import N_, moment, plural, tr
 from .common import ROW_ID, AppContext
 
 LIVE_MARK = "● "
+SEPARATOR = "  ·  "
 SEAL_MARKS = {
-    SealState.TAMPERED: "⚠ VERÄNDERT  ·  ",
-    SealState.NOT_SEALED: "nicht versiegelt  ·  ",
+    SealState.TAMPERED: N_("⚠ CHANGED"),
+    SealState.NOT_SEALED: N_("not sealed"),
 }
 
 
@@ -46,7 +48,7 @@ def heading(text: str, size: int = 18) -> QLabel:
 
 
 def count_text(count: int) -> str:
-    return "1 Messung" if count == 1 else f"{count} Messungen"
+    return plural(count, "{count} measurement", "{count} measurements")
 
 
 class CampaignDelegate(QStyledItemDelegate):
@@ -101,16 +103,16 @@ class CampaignList(QWidget):
         super().__init__()
         self.app = app
         self.live_id: int | None = None
-        self.home_button = QPushButton(QIcon.fromTheme("go-home"), "Übersicht")
-        self.home_button.setToolTip("Zurück zur Übersicht mit den zuletzt bearbeiteten Kampagnen")
+        self.home_button = QPushButton(QIcon.fromTheme("go-home"), tr("Overview"))
+        self.home_button.setToolTip(tr("Back to the overview with the campaigns worked on last"))
         self.home_button.clicked.connect(self.home_requested)
-        self.new_button = QPushButton("Neue Kampagne …")
+        self.new_button = QPushButton(tr("New campaign …"))
         self.tree = QTreeWidget()
         self.tree.setHeaderHidden(True)
         self.tree.setIndentation(10)
         self.tree.setItemDelegate(CampaignDelegate(self.tree))
-        self.running = self._group("Offene Messungen")
-        self.closed = self._group("Abgeschlossene Messungen")
+        self.running = self._group(tr("Open measurements"))
+        self.closed = self._group(tr("Completed measurements"))
         self.items: dict[int, QTreeWidgetItem] = {}
         self.tree.itemSelectionChanged.connect(self._chosen)
         # Not itemActivated: with the single click setting of Plasma, that fires on
@@ -147,8 +149,8 @@ class CampaignList(QWidget):
             item = QTreeWidgetItem([self._text(row, counts.get(row["id"], 0))])
             item.setData(0, ROW_ID, row["id"])
             resumable = is_open and row["driver"] not in NO_INSTRUMENT
-            item.setToolTip(0, row["title"] + ("\nDoppelklick: mit dem Messgerät weitermessen"
-                                               if resumable else ""))
+            hint = tr("Double-click: continue measuring with the instrument")
+            item.setToolTip(0, row["title"] + ("\n" + hint if resumable else ""))
             (self.running if is_open else self.closed).addChild(item)
             self.items[row["id"]] = item
         self.running.setHidden(self.running.childCount() == 0)
@@ -172,13 +174,15 @@ class CampaignList(QWidget):
         mark = LIVE_MARK if row["id"] == self.live_id else ""
         if row["status"] != "open":
             mark = self._seal_mark(row)
-        return f"{mark}{row['title']}\n{asset['name']}\n{since:%d.%m.%y %H:%M}  ·  {count_text(count)}"
+        details = f"{moment(since)}{SEPARATOR}{count_text(count)}"
+        return f"{mark}{row['title']}\n{asset['name']}\n{details}"
 
     def _seal_mark(self, row) -> str:
         state = self.app.service.check_seal(row["id"], thorough=False).state
         if state is SealState.UNVERIFIED and not row["seal_mac"]:
-            return "Siegel ohne Schlüssel  ·  "
-        return SEAL_MARKS.get(state, "")
+            return tr("Seal without key") + SEPARATOR
+        mark = SEAL_MARKS.get(state)
+        return tr(mark) + SEPARATOR if mark else ""
 
     def current(self) -> int | None:
         item = self.tree.currentItem()

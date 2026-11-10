@@ -110,7 +110,8 @@ def test_the_log_opens_without_an_instrument_and_shows_the_runs(app, qtbot):
 
 
 def test_an_empty_log_says_why(app, qtbot):
+    from easymeasurement.l10n import tr
     from easymeasurement.ui.instrument_log import EMPTY, InstrumentLogOverlay
     log = InstrumentLogOverlay(app)
     qtbot.addWidget(log)
-    assert log.hint.text() == EMPTY and not log.copy_button.isEnabled()
+    assert log.hint.text() == tr(EMPTY) and not log.copy_button.isEnabled()

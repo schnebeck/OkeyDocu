@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import N_, plural, tr
 from .common import AppContext
 from .dashboard_card import dim
 
@@ -31,23 +32,20 @@ MASTER_DATA, PLANS, TEMPLATES, ARCHIVE, USERS, INSTRUMENT = (
 )
 # Key, title, theme icon, fallback icon, what it is for.
 _TILES = (
-    (MASTER_DATA, "Stammdaten", "x-office-address-book", QStyle.StandardPixmap.SP_DirHomeIcon,
-     "Kunden, Anlagen und ihre Teile"),
-    (PLANS, "Messpläne", "view-list-details", QStyle.StandardPixmap.SP_FileDialogListView,
-     "Welche Messungen in welcher Reihenfolge"),
-    (TEMPLATES, "Protokollvorlagen", "document-edit",
-     QStyle.StandardPixmap.SP_FileDialogDetailedView, "Aufbau, Logos und Texte der Protokolle"),
-    (ARCHIVE, "Protokollarchiv", "folder-documents", QStyle.StandardPixmap.SP_DirIcon,
-     "Erzeugte und signierte Protokolle"),
-    (USERS, "Benutzer", "system-users", QStyle.StandardPixmap.SP_DialogYesButton,
-     "Prüfer mit Unterschrift und Zertifikat"),
-    (INSTRUMENT, "Messgerät", "network-bluetooth", QStyle.StandardPixmap.SP_DriveNetIcon,
-     "Bluetooth koppeln, USB erkennen"),
+    (MASTER_DATA, N_("Master data"), "x-office-address-book",
+     QStyle.StandardPixmap.SP_DirHomeIcon, N_("Customers, installations and their parts")),
+    (PLANS, N_("Test plans"), "view-list-details", QStyle.StandardPixmap.SP_FileDialogListView,
+     N_("Which measurements in which order")),
+    (TEMPLATES, N_("Report templates"), "document-edit",
+     QStyle.StandardPixmap.SP_FileDialogDetailedView,
+     N_("Layout, logos and texts of the reports")),
+    (ARCHIVE, N_("Report archive"), "folder-documents", QStyle.StandardPixmap.SP_DirIcon,
+     N_("Generated and signed reports")),
+    (USERS, N_("Users"), "system-users", QStyle.StandardPixmap.SP_DialogYesButton,
+     N_("Inspectors with signature and certificate")),
+    (INSTRUMENT, N_("Instrument"), "network-bluetooth", QStyle.StandardPixmap.SP_DriveNetIcon,
+     N_("Pair Bluetooth, detect USB")),
 )
-
-
-def _plural(count: int, one: str, many: str) -> str:
-    return f"1 {one}" if count == 1 else f"{count} {many}"
 
 
 class Tile(QPushButton):
@@ -95,6 +93,8 @@ class AdminTiles(QWidget):
         self.grid.setSpacing(12)
         for number, (key, title, theme, fallback, purpose) in enumerate(_TILES):
             icon = QIcon.fromTheme(theme, self.style().standardIcon(fallback))
+            title = tr(title)
+            purpose = tr(purpose)
             tile = Tile(title, icon, purpose)
             tile.setAccessibleName(f"{title}: {purpose}")
             tile.clicked.connect(lambda _=False, key=key: self.requested.emit(key))
@@ -123,12 +123,12 @@ class AdminTiles(QWidget):
     def refresh(self) -> None:
         db = self.app.db
         figures = {
-            MASTER_DATA: _plural(len(db.customers()), "Kunde", "Kunden") + ", "
-            + _plural(len(db.assets()), "Element", "Elemente"),
-            PLANS: _plural(len(db.plans()), "Plan", "Pläne"),
-            TEMPLATES: _plural(len(db.templates()), "Vorlage", "Vorlagen"),
-            ARCHIVE: _plural(len(self.app.archive.reports()), "Protokoll", "Protokolle"),
-            USERS: _plural(len(db.users()), "Prüfer", "Prüfer"),
+            MASTER_DATA: plural(len(db.customers()), "{count} customer", "{count} customers")
+            + ", " + plural(len(db.assets()), "{count} element", "{count} elements"),
+            PLANS: plural(len(db.plans()), "{count} plan", "{count} plans"),
+            TEMPLATES: plural(len(db.templates()), "{count} template", "{count} templates"),
+            ARCHIVE: plural(len(self.app.archive.reports()), "{count} report", "{count} reports"),
+            USERS: plural(len(db.users()), "{count} inspector", "{count} inspectors"),
         }
         for key, tile in self.buttons.items():
             tile.figure.setText(figures.get(key, self.purposes[key]))

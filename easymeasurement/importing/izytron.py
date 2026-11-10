@@ -23,6 +23,7 @@ from datetime import timedelta
 from pathlib import Path
 
 from ..campaign.service import IMPORTED, CampaignService
+from ..l10n import day, tr
 from .izytron_measurements import _check_measurement, _device_measurement, _time
 from .izytron_source import ImportFailed, _import_tree, _is_structure, _location, _Source
 
@@ -45,15 +46,15 @@ def import_day(
     source = _Source(path)
     steps = source.steps()
     if not steps:
-        raise ImportFailed("Die Datenbank enthält keine Prüfungen.")
+        raise ImportFailed(tr("The database holds no inspections."))
     known = service.db.one(
         "SELECT 1 FROM measurements WHERE source=? AND device_uid=?", SOURCE, steps[0]["ID"].lower()
     )
     if known:
-        raise ImportFailed("Diese Prüfungen wurden schon importiert.")
+        raise ImportFailed(tr("These inspections have already been imported."))
 
     customer = source.customer()
-    name = customer["Designation"] or "Ohne Namen"
+    name = customer["Designation"] or tr("Unnamed")
     same = [row["id"] for row in service.db.customers() if row["name"].casefold() == name.casefold()]
     customer_id = same[0] if same else service.db.add_customer(
         name, customer["Street"] or "", customer["Postal_Code"] or "", customer["City"] or "",
@@ -71,10 +72,10 @@ def import_day(
     identity = source.instrument(information)
     testers = Counter(step["Tester_Name"] for step in steps if step["Tester_Name"])
     tester = max(testers, key=len) if testers else ""
-    day = _time(steps[0]["Date"]).date()
+    tested = day(_time(steps[0]["Date"]).date())
     campaign_id = service.create(
-        root, title or f"Prüfung vom {day:%d.%m.%Y} (aus IZYTRON)", tester, None, IMPORTED,
-        identity, clock_offset_s,
+        root, title or tr("Inspection of {day} (from IZYTRON)", day=tested), tester, None,
+        IMPORTED, identity, clock_offset_s,
     )
     service.db.execute(
         "UPDATE clock_checks SET kind='manual' WHERE campaign_id=?", campaign_id
@@ -151,8 +152,8 @@ def main() -> None:
         CampaignService(database, root), arguments.database, arguments.offset, arguments.title
     )
     print(
-        f"Kampagne {result.campaign_id}: {result.measurements} Messungen,"
-        f" {result.checks} Prüfpunkte, {result.assets} Anlagenteile"
+        f"Campaign {result.campaign_id}: {result.measurements} measurements,"
+        f" {result.checks} check points, {result.assets} installation parts"
     )
 
 

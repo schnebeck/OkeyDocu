@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.service import LOCATION_SEPARATOR
+from ..l10n import tr
 from .common import AppContext
 from .kind_catalog import KindCatalog
 
@@ -69,14 +70,14 @@ class PlaceLine(QWidget):
         self.way = _WayLabel()
         self.name = QLabel()
         self.name.setTextFormat(Qt.TextFormat.RichText)
-        self.name.setToolTip("Im Strukturbaum zeigen")
+        self.name.setToolTip(tr("Show in the structure tree"))
         self.name.linkActivated.connect(lambda _: self.chosen.emit(self.asset_id))
         self.button = QToolButton()
         fallback = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogDetailedView)
         self.button.setIcon(QIcon.fromTheme("document-edit", fallback))
         self.button.setAutoRaise(True)
-        self.button.setToolTip("Anderem Element zuordnen …")
-        self.button.setAccessibleName("Messort ändern")
+        self.button.setToolTip(tr("Assign to another element …"))
+        self.button.setAccessibleName(tr("Change measuring location"))
         self.button.clicked.connect(self.move_requested)
         names = QVBoxLayout()
         names.setSpacing(0)

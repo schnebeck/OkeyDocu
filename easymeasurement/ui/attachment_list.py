@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.attachments import ATTACHMENT_KINDS, AttachmentError
+from ..l10n import N_, tr
 from .common import ROW_ID, AppContext, show_error
 from .growing_edit import GrowingEdit
 from .overlay import Overlay
@@ -36,14 +37,15 @@ _ICONS = {
     "pdf": QStyle.StandardPixmap.SP_FileIcon,
 }
 _THEME_ICONS = {"comment": "view-pim-notes", "image": "image-x-generic", "pdf": "application-pdf"}
-FILE_FILTER = "Bilder und PDF (*.pdf *.jpg *.jpeg *.png *.heic *.PDF *.JPG *.JPEG *.PNG)"
+FILE_FILTER = N_("Images and PDF ({patterns})")
+FILE_PATTERNS = "*.pdf *.jpg *.jpeg *.png *.heic *.PDF *.JPG *.JPEG *.PNG"
 
 
 class NoteOverlay(Overlay):
-    def __init__(self, target: str, parent=None):
-        super().__init__(f"Notiz zu {target}", parent)
-        self.ok_button.setText("Hinzufügen")
-        self.text = GrowingEdit("Was festgehalten werden soll, es erscheint im Protokoll")
+    def __init__(self, title: str, parent=None):
+        super().__init__(title, parent)
+        self.ok_button.setText(tr("Add"))
+        self.text = GrowingEdit(tr("What is to be recorded; it appears in the report"))
         self.text.textChanged.connect(
             lambda: self.ok_button.setEnabled(bool(self.text.toPlainText().strip()))
         )
@@ -55,15 +57,18 @@ class NoteOverlay(Overlay):
 
 
 class AttachmentList(QWidget):
-    """What lies on one target. `image_handler`, if given, takes images instead of the list."""
+    """What lies on one target. `image_handler`, if given, takes images instead of the list.
+
+    `note_title` heads the overlay a note is written in.
+    """
 
     changed = Signal()
 
-    def __init__(self, app: AppContext, target_name: str, image_handler=None, notes=True):
+    def __init__(self, app: AppContext, note_title: str, image_handler=None, notes=True):
         super().__init__()
         self.notes = notes
         self.app = app
-        self.target_name = target_name
+        self.note_title = note_title
         self.image_handler = image_handler
         self.campaign_id: int | None = None
         self.target: dict = {}
@@ -72,14 +77,14 @@ class AttachmentList(QWidget):
         self.list = QListWidget()
         self.list.itemActivated.connect(self._open)
         self.list.currentRowChanged.connect(lambda _: self._update())
-        self.empty = QLabel("Dateien hierher ziehen oder anhängen.")
+        self.empty = QLabel(tr("Drag files here or attach them."))
         self.empty.setWordWrap(True)
         self.empty.setEnabled(False)
-        self.note_button = QPushButton("Notiz …")
+        self.note_button = QPushButton(tr("Note …"))
         self.note_button.clicked.connect(self.add_note)
-        self.file_button = QPushButton("Datei …")
+        self.file_button = QPushButton(tr("File …"))
         self.file_button.clicked.connect(self._pick_files)
-        self.remove_button = QPushButton("Entfernen")
+        self.remove_button = QPushButton(tr("Remove"))
         self.remove_button.clicked.connect(self._remove)
         buttons = QHBoxLayout()
         buttons.addStretch(1)
@@ -104,7 +109,7 @@ class AttachmentList(QWidget):
             )
             item = QListWidgetItem(icon, text)
             item.setToolTip((row["text"] or row["original_name"])
-                            + ("\nDoppelklick: öffnen" if row["file_name"] else ""))
+                            + ("\n" + tr("Double-click: open") if row["file_name"] else ""))
             item.setData(ROW_ID, row["id"])
             self.list.addItem(item)
         rows_shown = min(max(len(rows), 1), SHOWN_ROWS)
@@ -122,7 +127,7 @@ class AttachmentList(QWidget):
     # Adding --------------------------------------------------------------
 
     def add_note(self) -> None:
-        overlay = NoteOverlay(self.target_name, self)
+        overlay = NoteOverlay(self.note_title, self)
         if overlay.exec():
             self.app.service.add_comment(
                 self.campaign_id, overlay.text.toPlainText().strip(), **self.target
@@ -130,7 +135,9 @@ class AttachmentList(QWidget):
             self._after_change()
 
     def _pick_files(self) -> None:
-        files, _ = QFileDialog.getOpenFileNames(self, "Datei anhängen", "", FILE_FILTER)
+        files, _ = QFileDialog.getOpenFileNames(
+            self, tr("Attach file"), "", tr(FILE_FILTER, patterns=FILE_PATTERNS)
+        )
         self.add_files([Path(f) for f in files])
 
     def add_files(self, paths: list[Path]) -> None:

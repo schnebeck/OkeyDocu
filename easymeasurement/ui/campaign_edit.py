@@ -10,15 +10,16 @@ from __future__ import annotations
 
 from PySide6.QtWidgets import QComboBox, QFormLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton
 
+from ..l10n import N_, tr
 from .campaign_dialog import fill_assets
 from .common import AppContext
 from .overlay import Overlay
 
 TESTER, PLAN = "tester", "plan"
-CONTACT_FIELDS = (("department", "Abteilung", "z. B. Instandhaltung"),
-                  ("contact", "Ansprechpartner", "z. B. Frau Muster"),
-                  ("contact_phone", "Durchwahl", "z. B. 0511 1234-56"),
-                  ("contact_email", "E-Mail", "name@kunde.example"))
+CONTACT_FIELDS = (("department", N_("Department"), N_("e.g. maintenance")),
+                  ("contact", N_("Contact person"), N_("e.g. Ms Sample")),
+                  ("contact_phone", N_("Extension"), N_("e.g. 0511 1234-56")),
+                  ("contact_email", N_("Email"), N_("name@customer.example")))
 
 
 class CampaignEditOverlay(Overlay):
@@ -28,11 +29,11 @@ class CampaignEditOverlay(Overlay):
     """
 
     def __init__(self, app: AppContext, campaign, parent=None):
-        super().__init__("Kampagne bearbeiten", parent)
+        super().__init__(tr("Edit campaign"), parent)
         self.app = app
         self.campaign = campaign
         self.follow_up = ""
-        self.ok_button.setText("Übernehmen")
+        self.ok_button.setText(tr("Apply"))
         self.title = QLineEdit(campaign["title"])
         self.title.textChanged.connect(lambda _: self._update())
         self.asset = QComboBox()
@@ -40,23 +41,24 @@ class CampaignEditOverlay(Overlay):
         self.asset.setCurrentIndex(max(self.asset.findData(campaign["asset_id"]), 0))
         self.asset.currentIndexChanged.connect(lambda _: self._update())
         form = QFormLayout()
-        form.addRow("Titel", self.title)
-        form.addRow("Anlage", self.asset)
-        form.addRow("Prüfer", self._link(campaign["tester"] or "Prüfer fehlt", "Ändern …", TESTER))
-        plan = campaign["plan_title"] if campaign["plan_key"] else "Ohne Messplan"
-        form.addRow("Messplan", self._link(plan, "Weiteren zuweisen …", PLAN))
+        form.addRow(tr("Title"), self.title)
+        form.addRow(tr("Installation"), self.asset)
+        tester = campaign["tester"] or tr("Inspector missing")
+        form.addRow(tr("Inspector"), self._link(tester, tr("Change …"), TESTER))
+        plan = campaign["plan_title"] if campaign["plan_key"] else tr("Without test plan")
+        form.addRow(tr("Test plan"), self._link(plan, tr("Assign another …"), PLAN))
         # Both sides of the job, named as in the report's letterhead.
-        form.addRow(QLabel("<b>Auftraggeber</b>"))
+        form.addRow(QLabel(tr("<b>Client</b>")))
         self.contact = {}
         for key, label, hint in CONTACT_FIELDS:
             field = QLineEdit(campaign[key])
-            field.setPlaceholderText(hint)
+            field.setPlaceholderText(tr(hint))
             self.contact[key] = field
-            form.addRow(label, field)
-        form.addRow(QLabel("<b>Auftragnehmer</b>"))
+            form.addRow(tr(label), field)
+        form.addRow(QLabel(tr("<b>Contractor</b>")))
         self.cost_center = QLineEdit(campaign["cost_center"])
-        self.cost_center.setPlaceholderText("eigene Kostenstelle für diesen Auftrag")
-        form.addRow("Kostenstelle", self.cost_center)
+        self.cost_center.setPlaceholderText(tr("own cost centre for this job"))
+        form.addRow(tr("Cost centre"), self.cost_center)
         self.body.addLayout(form)
         self._update()
 
@@ -93,12 +95,12 @@ class CampaignEditOverlay(Overlay):
     def _update(self) -> None:
         problem = ""
         if not self.title.text().strip():
-            problem = "Der Titel fehlt."
+            problem = tr("The title is missing.")
         elif self.asset.currentData() != self.campaign["asset_id"]:
             count = self.app.service.misplaced(self.campaign["id"], self.asset.currentData())
             if count:
-                problem = (f"{count} Messungen oder Dateien hängen an Teilen der bisherigen Anlage,"
-                           " die nicht zu dieser gehören.")
+                problem = tr("{count} measurements or files belong to parts of the previous"
+                             " installation that are not part of this one.", count=count)
         self.hint.setText(problem)
         self.ok_button.setEnabled(not problem)
 

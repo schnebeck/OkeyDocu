@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import N_, tr
 from .place_files import PlaceFiles
 from .board import Strip, menu_button
 from .common import AppContext
@@ -30,8 +31,8 @@ from .kind_catalog import KindCatalog
 from .structure_menu import StructureActions, kind_menu
 from .structure_tree import StructureTree
 
-DROP_HINT = ("Messungen aus der Tabelle auf ein Element ziehen, um sie dort zu buchen."
-            " Neue Messungen landen beim gewählten Element.")
+DROP_HINT = N_("Drag measurements from the table onto an element to book them there."
+               " New measurements go to the chosen element.")
 
 
 class StructurePanel(QWidget):
@@ -42,14 +43,14 @@ class StructurePanel(QWidget):
         self.app = app
         self.tree = StructureTree(app)
         self.actions = StructureActions(self.tree)
-        self.new_button = menu_button("+ Element",
-                                      "Ein Element unter dem gewählten anlegen (Einfg)")
+        self.new_button = menu_button(tr("+ Element"),
+                                      tr("Create an element below the chosen one (Ins)"))
         self.new_button.menu().aboutToShow.connect(self._fill_new_menu)
-        self.search = QLineEdit(placeholderText="Element suchen …")
+        self.search = QLineEdit(placeholderText=tr("Search elements …"))
         self.search.setClearButtonEnabled(True)
         self.search.textChanged.connect(self.filter)
         self.tree.changed.connect(lambda: self.filter(self.search.text()))
-        self.set_hint(DROP_HINT)
+        self.set_hint(tr(DROP_HINT))
         self.bar = Strip()
         self.bar.row.addWidget(self.search, 1)
         self.bar.row.addWidget(self.new_button)
@@ -106,9 +107,9 @@ class PlacePanel(QWidget):
         self.details.setTextFormat(Qt.TextFormat.RichText)
         self.details.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.muted = self.kind.palette().color(self.kind.foregroundRole()).name()
-        self.edit_button = QPushButton("Eigenschaften …")
+        self.edit_button = QPushButton(tr("Properties …"))
         self.edit_button.clicked.connect(lambda: self.properties_requested.emit(self.asset_id))
-        self.files = PlaceFiles(app, "diesem Ort")
+        self.files = PlaceFiles(app, tr("this location"))
         names = QVBoxLayout()
         names.setSpacing(0)
         names.addWidget(self.name)
@@ -143,7 +144,7 @@ class PlacePanel(QWidget):
         self.files.show_target(campaign_id, editable, asset_id=asset_id)
 
     def _details(self, row, kind) -> str:
-        lines = [(TEXTS[key], row[key]) for key in ("identifier", "manufacturer", "type",
+        lines = [(tr(TEXTS[key]), row[key]) for key in ("identifier", "manufacturer", "type",
                                                      "serial_no", "comment") if row[key]]
         values = self.app.db.asset_features(row["id"])
         for feature in kind.features if kind else ():
@@ -153,7 +154,7 @@ class PlacePanel(QWidget):
         if months is None and kind is not None:
             months = kind.interval_months
         if months:
-            lines.append(("Prüfintervall", interval_text(months)))
+            lines.append((tr("Inspection interval"), interval_text(months)))
         rows = "".join(f"<tr><td style='padding-right:10px; color:{self.muted}'>{escape(k)}</td>"
                        f"<td>{escape(v)}</td></tr>" for k, v in lines)
         return f"<table>{rows}</table>" if rows else ""

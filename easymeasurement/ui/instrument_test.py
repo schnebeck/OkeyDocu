@@ -16,18 +16,20 @@ from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton
 
 from ..devices import Capability
 from ..devices.instrument_check import FAILED, NOTE, OK, Check, run_checks
+from ..l10n import N_, tr
 from .common import AppContext
 from .overlay import Overlay
 
-INTRO = ("Das Messgerät wird kurz verbunden und geprüft. Es wird nichts gestellt und nichts"
-         " gemessen. Das Ergebnis kommt ins Geräteprotokoll.")
+INTRO = N_("The instrument is connected briefly and checked. Nothing is set and nothing is"
+           " measured. The result goes into the instrument log.")
 MARKS = {OK: "✓", NOTE: "!", FAILED: "✗"}
 
 
 def run_text(checks: list[Check] | tuple, ready: bool) -> str:
     """The run as plain text, to paste somewhere else."""
     lines = [f"{MARKS[c.state]}  {c.title}: {c.detail}" for c in checks]
-    return "\n".join(lines + ["", "Bereit für Messungen" if ready else "Nicht bereit"])
+    verdict = tr("Ready for measurements") if ready else tr("Not ready")
+    return "\n".join(lines + ["", verdict])
 
 
 class TestWorker(QThread):
@@ -46,24 +48,24 @@ class InstrumentTestOverlay(Overlay):
     """Starts by itself; closes once the run is in."""
 
     def __init__(self, app: AppContext, driver_key: str, port: str, label: str, parent=None):
-        super().__init__("Messgerät testen", parent)
+        super().__init__(tr("Test the instrument"), parent)
         self.app, self.driver_key = app, driver_key
         self.connection = "Bluetooth" if port.startswith("bt:") else "USB"
         self.run = None
-        intro = QLabel(f"<b>{label}</b><br>{INTRO}")
+        intro = QLabel(f"<b>{label}</b><br>{tr(INTRO)}")
         intro.setWordWrap(True)
         self.body.addWidget(intro)
-        self.lines = QLabel("Verbinde …")
+        self.lines = QLabel(tr("Connecting …"))
         self.lines.setWordWrap(True)
         self.body.addWidget(self.lines)
-        self.copy_button = QPushButton("Als Text kopieren")
+        self.copy_button = QPushButton(tr("Copy as text"))
         self.copy_button.clicked.connect(self._copy)
         self.copy_button.setEnabled(False)
         row = QHBoxLayout()
         row.addStretch(1)
         row.addWidget(self.copy_button)
         self.body.addLayout(row)
-        self.ok_button.setText("Schließen")
+        self.ok_button.setText(tr("Close"))
         self.ok_button.setEnabled(False)
         self.cancel_button.hide()
         self.checks: list[Check] = []
@@ -82,14 +84,14 @@ class InstrumentTestOverlay(Overlay):
     def _finished(self, run) -> None:
         if run.identity is not None and Capability.TEXTS in self.capabilities:
             have = self.app.db.device_text_firmware(self.driver_key) == run.identity.firmware
-            check = Check("texts", "Gerätetexte", OK if have else NOTE,
-                          "liegen vor" if have else "fehlen: „Einrichten …“ überträgt sie")
+            detail = tr("present") if have else tr("missing: “Set up …” transfers them")
+            check = Check("texts", tr("Instrument texts"), OK if have else NOTE, detail)
             run.checks.append(check)
             self._checked(check)
         self.run = run
         self.app.service.save_instrument_test(self.driver_key, self.connection, run)
-        self.hint.setText("Bereit für Messungen." if run.ready else
-                          "Nicht bereit für Messungen, siehe ✗.")
+        self.hint.setText(tr("Ready for measurements.") if run.ready else
+                          tr("Not ready for measurements, see ✗."))
         self.ok_button.setEnabled(True)
         self.copy_button.setEnabled(True)
 

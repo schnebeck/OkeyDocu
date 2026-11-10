@@ -11,10 +11,11 @@ from __future__ import annotations
 from PySide6.QtGui import QColor, QPalette
 from PySide6.QtWidgets import QLabel, QTabWidget, QVBoxLayout, QWidget
 
+from ..l10n import N_, tr
 from .side_panel import SECTION_ALERT
 
 MEASUREMENT, LOOSE = 0, 1
-LOOSE_TITLE = "Nicht zugeordnet"
+LOOSE_TITLE = N_("Unassigned")
 
 
 class PhotoTabs(QTabWidget):
@@ -32,16 +33,17 @@ class PhotoTabs(QTabWidget):
         column.addWidget(gallery, 1)
         column.addWidget(self.note)
         column.addStretch(0)
-        self.addTab(page, "Messung")
-        self.addTab(stack, LOOSE_TITLE)
+        self.addTab(page, tr("Measurement"))
+        self.addTab(stack, tr(LOOSE_TITLE))
         self.setDocumentMode(True)
         bar = self.tabBar()
         bar.setChangeCurrentOnDrag(True)
         bar.setAcceptDrops(True)
-        self.setTabToolTip(MEASUREMENT, "Die Fotos der gewählten Messung. Ein Foto hierher"
-                                         " gezogen gehört dann zu ihr.")
-        self.setTabToolTip(LOOSE, "Fotos, die keiner Messung gehören. Sie fehlen im Protokoll,"
-                                  " bis sie auf eine Messung gezogen werden.")
+        self.setTabToolTip(MEASUREMENT, tr("The photos of the chosen measurement. A photo"
+                                            " dragged here then belongs to it."))
+        self.setTabToolTip(LOOSE, tr("Photos that belong to no measurement. They are missing"
+                                     " from the report until they are dragged onto a"
+                                     " measurement."))
         self.loose = 0
 
     def show_note(self, text: str | None) -> None:
@@ -53,7 +55,8 @@ class PhotoTabs(QTabWidget):
     def set_loose(self, count: int) -> None:
         """The second tab counts its photos and stands out while there are any."""
         self.loose = count
-        self.setTabText(LOOSE, f"{LOOSE_TITLE} ({count})" if count else LOOSE_TITLE)
+        title = tr(LOOSE_TITLE)
+        self.setTabText(LOOSE, f"{title} ({count})" if count else title)
         colour = QColor(SECTION_ALERT) if count else self.palette().color(
             QPalette.ColorRole.WindowText)
         self.tabBar().setTabTextColor(LOOSE, colour)

@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from functools import partial
 from html import escape
 
 from PySide6.QtCore import Qt, Signal
@@ -22,6 +23,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.service import LOCATION_SEPARATOR
+from ..l10n import day, moment, plural, tr
 from ..store.search import MeasurementFilter, search_measurements
 from .common import (
     POINT_ID,
@@ -51,6 +53,11 @@ from .report_signing import settings
 from .table_columns import TableColumns
 from .verdict_marks import MARK_SIZE
 
+
+def _clock(when: datetime) -> str:
+    return f"{when:%H:%M:%S}"
+
+
 class MeasurementView(MeasurementDetail, QWidget):
     """The table, what the selected row holds, and what may be done to it."""
 
@@ -63,8 +70,9 @@ class MeasurementView(MeasurementDetail, QWidget):
         self.app = app
         self.count = QLabel()
         self.table = make_table(
-            ["Zeitpunkt", "Kunde", "Anlage", "Kampagne", "Messort", "Bezeichnung", "Messwerte",
-             "Fotos", "Bewertung", "Erfassung"],
+            [tr("Time"), tr("Customer"), tr("Installation"), tr("Campaign"),
+             tr("Measuring location"), tr("Designation"), tr("Readings"), tr("Photos"),
+             tr("Verdict"), tr("Capture")],
             stretch=VALUES,
         )
         # The values are what this table is for, so names give way and can be widened.
@@ -85,8 +93,8 @@ class MeasurementView(MeasurementDetail, QWidget):
         self.table.setIconSize(MARK_SIZE)
         self.table.cellClicked.connect(lambda row, column: self._clicked(row, column, False))
         self.table.cellDoubleClicked.connect(lambda row, column: self._clicked(row, column, True))
-        self.table.setToolTip("Doppelklick auf ein Feld bearbeitet es, solange die Kampagne"
-                              " offen ist. Bei einem Prüfablauf klappt er die Schritte auf und zu.")
+        self.table.setToolTip(tr("Double-click on a field edits it while the campaign is open."
+                                 " On a test run it folds the steps open and shut."))
         # On the table, Enter goes to the field beside it and Delete asks to delete the row.
         for key, slot in ((Qt.Key.Key_Return, self._edit_measurement),
                           (Qt.Key.Key_Enter, self._edit_measurement),
@@ -105,14 +113,14 @@ class MeasurementView(MeasurementDetail, QWidget):
 
         self.actions_row = QHBoxLayout()
         self.edit_action, self.edit_measurement = self._action(
-            "Messung bearbeiten", "Bearbeiten", self._edit_measurement
+            tr("Edit measurement"), tr("Edit"), self._edit_measurement
         )
         self.edit_action.setShortcut("F2")
         self.delete_action, self.delete_measurement = self._action(
-            "Messung löschen …", "Löschen …", self._delete_measurement
+            tr("Delete measurement …"), tr("Delete …"), self._delete_measurement
         )
         self.photo_action, self.add_photo = self._action(
-            "Foto zur Messung …", "Foto …", self._add_photo
+            tr("Photo for the measurement …"), tr("Photo …"), self._add_photo
         )
         self.actions_row.addStretch()
         self.actions_row.addWidget(self.count)
@@ -170,11 +178,12 @@ class MeasurementView(MeasurementDetail, QWidget):
         query = self.current_filter()
         rows = list(reversed(search_measurements(self.app.db, query))) if query else []
         moments = [datetime.fromisoformat(row["local_time"]) for row in rows]
-        one_day = len(rows) > 1 and len({moment.date() for moment in moments}) == 1
+        one_day = len(rows) > 1 and len({when.date() for when in moments}) == 1
         paths = [path_of(row) for row in rows]
         area = shared_start(paths) if len(rows) > 1 else []
-        time_format = "%H:%M:%S" if one_day else "%d.%m.%Y %H:%M:%S"
-        lines = table_lines(rows, self.open_runs, time_format, area, paths)
+        # On a single day the date stands above the table, so a row tells only the time.
+        show_time = _clock if one_day else partial(moment, seconds=True)
+        lines = table_lines(rows, self.open_runs, show_time, area, paths)
         points = self.point_lines(area)
         lines += points
         with filling(self.table):
@@ -182,24 +191,26 @@ class MeasurementView(MeasurementDetail, QWidget):
             for index, line in enumerate(lines):
                 write_line(self.table, index, line)
         self._move_common_to_head(
-            f"{moments[0]:%d.%m.%Y}" if one_day else "", LOCATION_SEPARATOR.join(area)
+            day(moments[0]) if one_day else "", LOCATION_SEPARATOR.join(area)
         )
-        self.count.setText(("1 Messung" if len(rows) == 1 else f"{len(rows)} Messungen")
-                           + (f"  ·  {len(points)} offen" if points else ""))
+        count = plural(len(rows), "{count} measurement", "{count} measurements")
+        if points:
+            count += "  ·  " + tr("{count} open", count=len(points))
+        self.count.setText(count)
         restore = row_of(self.table, selected) if selected is not None else self._run_row(run)
         if restore >= 0:
             self.table.setCurrentCell(restore, 0)
         self._show_detail()
 
-    def _move_common_to_head(self, day: str, area: str) -> None:
+    def _move_common_to_head(self, date: str, area: str) -> None:
         """What every row shares is said once above the table, not in each line."""
         # Points still to be taken have no values yet, only a place and a name to tell.
         rows = [row for row in range(self.table.rowCount())
                 if self.table.item(row, 0).data(POINT_ID) is None]
         points = [row for row in range(self.table.rowCount()) if row not in rows]
-        shared = [("Datum", day)] if day else []
+        shared = [(tr("Date"), date)] if date else []
         if area:
-            shared.append(("Bereich", area))
+            shared.append((tr("Area"), area))
         alike = {}
         for column in SHARED_COLUMNS:
             told = rows + (points if column in (PLACE, 5) else [])
@@ -207,7 +218,7 @@ class MeasurementView(MeasurementDetail, QWidget):
             if len(told) > 1 and len(texts) == 1:
                 alike[column] = texts.pop()
         gathered = self.columns.apply(set(alike))
-        shared += [(label, alike[column]) for column, label in SHARED_COLUMNS.items()
+        shared += [(tr(label), alike[column]) for column, label in SHARED_COLUMNS.items()
                    if column in gathered and alike[column]]
         self.common.setText(
             " &nbsp;·&nbsp; ".join(f"{label}: <b>{escape(text)}</b>" for label, text in shared)

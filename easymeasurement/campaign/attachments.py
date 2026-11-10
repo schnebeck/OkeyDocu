@@ -13,6 +13,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 
+from ..l10n import tr
 from .records import _iso
 
 ATTACHMENT_KINDS = {
@@ -67,7 +68,8 @@ class AttachmentMixin:
         """`name` is the file's name as shown; by default the name of `source`."""
         kind = ATTACHMENT_KINDS.get(source.suffix.lower())
         if kind is None:
-            raise AttachmentError(f"{source.name}: Nur Bilder und PDF lassen sich anhängen.")
+            raise AttachmentError(
+                tr("{name}: only pictures and PDF files can be attached.", name=source.name))
         digest = hashlib.sha256(source.read_bytes()).hexdigest()
         file_name = f"{digest[:12]}{source.suffix.lower()}"
         attachment = self.db.execute(

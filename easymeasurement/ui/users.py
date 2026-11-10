@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.service import full_name
+from ..l10n import day, tr
 from .campaign_list import CampaignDelegate
 from .common import ROW_ID, AppContext
 from .overlay import Overlay
@@ -29,33 +30,36 @@ from .user_form import UserForm
 
 
 def _summary(user) -> str:
-    parts = ["Unterschrift hinterlegt" if user["signature"] else "keine Unterschrift"]
+    parts = [tr("signature stored") if user["signature"] else tr("no signature")]
     if not user["certificate_path"]:
-        parts.append("kein Zertifikat")
+        parts.append(tr("no certificate"))
     elif user["certificate_until"]:
         moment = datetime.fromisoformat(user["certificate_until"]).date()
         expired = moment < date.today()
-        parts.append(f"Zertifikat {'abgelaufen' if expired else 'bis'} {moment:%d.%m.%Y}")
+        if expired:
+            parts.append(tr("certificate expired {day}", day=day(moment)))
+        else:
+            parts.append(tr("certificate until {day}", day=day(moment)))
     else:
-        parts.append("Zertifikat ungeprüft")
+        parts.append(tr("certificate unchecked"))
     return "  ·  ".join(parts)
 
 
 class UsersOverlay(Overlay):
     def __init__(self, app: AppContext, parent=None):
-        super().__init__("Benutzer", parent, 520)
+        super().__init__(tr("Users"), parent, 520)
         self.app = app
-        self.ok_button.setText("Zurück")
+        self.ok_button.setText(tr("Back"))
         self.cancel_button.hide()
         self.list = QListWidget()
         self.list.setItemDelegate(CampaignDelegate(self.list))
         self.list.setMinimumHeight(220)
         self.list.currentRowChanged.connect(lambda _: self._update())
         self.list.itemDoubleClicked.connect(lambda _: self.edit())
-        self.list.setToolTip("Doppelklick: Benutzer ändern")
-        self.new_button = QPushButton("Neuer Benutzer …")
-        self.edit_button = QPushButton("Ändern …")
-        self.remove_button = QPushButton("Entfernen …")
+        self.list.setToolTip(tr("Double-click: edit user"))
+        self.new_button = QPushButton(tr("New user …"))
+        self.edit_button = QPushButton(tr("Edit …"))
+        self.remove_button = QPushButton(tr("Remove …"))
         self.new_button.clicked.connect(self.add)
         self.edit_button.clicked.connect(self.edit)
         self.remove_button.clicked.connect(self.remove)
@@ -109,8 +113,9 @@ class UsersOverlay(Overlay):
         if user is None:
             return
         answer = QMessageBox.question(
-            self, "Benutzer entfernen",
-            f"{full_name(user)} entfernen? Bestehende Kampagnen und Protokolle behalten den Namen.",
+            self, tr("Remove user"),
+            tr("Remove {name}? Existing campaigns and reports keep the name.",
+               name=full_name(user)),
         )
         if answer == QMessageBox.StandardButton.Yes:
             self.app.db.remove_user(user["id"])
@@ -126,9 +131,9 @@ class UserChoice(QWidget):
         super().__init__()
         self.app = app
         self.combo = QComboBox()
-        self.combo.setPlaceholderText("Noch kein Benutzer angelegt")
+        self.combo.setPlaceholderText(tr("No user created yet"))
         self.combo.currentIndexChanged.connect(lambda _: self.changed.emit())
-        self.new_button = QPushButton("Neu …")
+        self.new_button = QPushButton(tr("New …"))
         self.new_button.clicked.connect(self._add)
         row = QHBoxLayout(self)
         row.setContentsMargins(0, 0, 0, 0)

@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 from datetime import datetime
 
+from ..l10n import day, plural, tr
 from ..model import Quantity
 from ..store.device_texts import CODE
 from .plan import PlanStep
@@ -30,7 +31,7 @@ def _limit(text: str) -> tuple:
 
 
 def _range(lower: str, upper: str) -> str:
-    return " ".join(part for part in (lower, upper) if part) or "keine"
+    return " ".join(part for part in (lower, upper) if part) or tr("none", context="limit")
 
 
 class RepeatCheckMixin:
@@ -59,7 +60,8 @@ class RepeatCheckMixin:
             if (_limit(value["lower_limit"]), _limit(value["upper_limit"])) != (
                     _limit(lower), _limit(upper)):
                 now = _range(value["lower_limit"], value["upper_limit"])
-                found.append(f"Grenze {label}: {now} statt {_range(lower, upper)}")
+                found.append(tr("Limit {label}: {now} instead of {before}",
+                                label=label, now=now, before=_range(lower, upper)))
         row = self.db.one("SELECT parameters_json FROM measurements WHERE id=?", measurement_id)
         # Both sides in words: a push sends codes, an import from IZYTRON brings German text.
         words = self.db.device_words()
@@ -71,7 +73,8 @@ class RepeatCheckMixin:
             if current is None or CODE.match(current) != CODE.match(before):
                 continue  # not sent, or one side has no words yet: nothing to judge
             if current != before:
-                found.append(f"{name}: {current} statt {before}")
+                found.append(tr("{name}: {now} instead of {before}",
+                                name=name, now=current, before=before))
         return found
 
     def comparison(self, step: PlanStep, measurement_id: int) -> tuple[str, list[str]]:
@@ -89,11 +92,16 @@ class RepeatCheckMixin:
             new, then = value["base_value"], old["base_value"]
             if new is not None and then is not None and new > 0 and then > 0:
                 ratio = new / then
-                if ratio >= NOTABLE or ratio <= 1 / NOTABLE:
-                    change = "deutlich höher" if ratio > 1 else "deutlich niedriger"
-                    notable.append(f"{value['label']} {change} als zuletzt")
-        day = datetime.fromisoformat(origin["closed_at"])
-        return (f"Zuletzt am {day:%d.%m.%Y}: " + "  ·  ".join(parts)) if parts else "", notable
+                if ratio >= NOTABLE:
+                    notable.append(tr("{label} notably higher than last time",
+                                      label=value["label"]))
+                elif ratio <= 1 / NOTABLE:
+                    notable.append(tr("{label} notably lower than last time",
+                                      label=value["label"]))
+        if not parts:
+            return "", notable
+        closed = day(datetime.fromisoformat(origin["closed_at"]))
+        return tr("Last time on {day}: {values}", day=closed, values="  ·  ".join(parts)), notable
 
     def repeat_blockers(self, campaign_id: int) -> list[str]:
         """Open points, and settings that differ from last time without a reason given."""
@@ -101,10 +109,12 @@ class RepeatCheckMixin:
         missing = sum(row["status"] in ("pending", "active") for row, _ in points)
         problems = []
         if missing:
-            problems.append(f"{missing} {'Punkt' if missing == 1 else 'Punkte'} der Wiederholung"
-                            " offen: messen oder mit Begründung auslassen")
+            problems.append(plural(
+                missing, "{count} point of the repeat open: measure it or skip it with a reason",
+                "{count} points of the repeat open: measure them or skip them with a reason"))
         for row, step in points:
             taken = self.point_measurement(row["id"]) if row["status"] == "done" else None
             if taken is not None and not row["note"] and self.deviations(step, taken["id"]):
-                problems.append(f"Abweichende Einstellung bei „{step.title}“ ohne Begründung")
+                problems.append(
+                    tr("Different setting at “{title}” without a reason", title=step.title))
         return problems

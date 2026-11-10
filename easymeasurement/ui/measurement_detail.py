@@ -17,6 +17,7 @@ from PySide6.QtWidgets import QFileDialog, QListWidgetItem, QMessageBox
 
 from ..campaign.photo_marks import ROLES
 from ..campaign.service import MANUAL
+from ..l10n import moment, tr
 from .common import AppContext, function_short, selected_id
 from .photo_gallery import PHOTO_ID, PHOTO_PATH
 from .photo_preview import PhotoPreview
@@ -39,15 +40,16 @@ def row_is_open(app: AppContext, row) -> bool:
 
 def pick_images(parent) -> list[Path]:
     files, _ = QFileDialog.getOpenFileNames(
-        parent, "Fotos wählen", "", "Bilder (*.jpg *.jpeg *.png *.heic *.JPG *.JPEG *.PNG)"
+        parent, tr("Choose photos"), "",
+        tr("Images ({patterns})", patterns="*.jpg *.jpeg *.png *.heic *.JPG *.JPEG *.PNG"),
     )
     return [Path(f) for f in files]
 
 
 def capture_text(row) -> str:
     if row["source"] == MANUAL:
-        return "manuell"
-    return "Import" if row["source"].startswith("import:") else "Messgerät"
+        return tr("manual")
+    return tr("import") if row["source"].startswith("import:") else tr("Instrument")
 
 
 class MeasurementDetail:
@@ -88,7 +90,7 @@ class MeasurementDetail:
             item.setData(PHOTO_ID, photo["id"])
             if photo["role"]:
                 item.setText(f"{ROLES[photo['role']]} · {item.text()}")
-            item.setToolTip(photo["taken_at"] or "Zeitpunkt unbekannt")
+            item.setToolTip(photo["taken_at"] or tr("Time unknown"))
             self.gallery.addItem(item)
         self.gallery.setVisible(self.gallery.count() > 0 or not self.hide_empty_gallery)
 
@@ -135,8 +137,9 @@ class MeasurementDetail:
         row = self._selected_row()
         when = datetime.fromisoformat(row["local_time"])
         answer = QMessageBox.question(
-            self, "Messung löschen",
-            f"Messung {function_short(row['function'])} vom {when:%d.%m.%Y %H:%M:%S} löschen?",
+            self, tr("Delete measurement"),
+            tr("Delete measurement {function} of {moment}?",
+               function=function_short(row["function"]), moment=moment(when, seconds=True)),
         )
         if answer == QMessageBox.StandardButton.Yes:
             self.editor.show_row(None, False)

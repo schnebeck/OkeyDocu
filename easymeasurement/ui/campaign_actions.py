@@ -8,19 +8,18 @@
 
 from __future__ import annotations
 
-
-from ..campaign.clock import CLOCK_SET_ACCURACY_S
 from ..campaign.service import read_instrument
 from ..devices import DeviceError
+from ..l10n import tr
 from .campaign_dialog import CampaignDialog
-from .campaign_edit import PLAN, TESTER, CampaignEditOverlay
-from .campaign_views import AssignPlanOverlay, TesterOverlay
+from .campaign_tasks import CampaignTasks
 from .common import run_busy, show_error
 from .instrument_prepare import prepare_if_needed
 from .live_session import LiveSession
 from .measurement_detail import pick_images
 
-class CampaignActions:
+
+class CampaignActions(CampaignTasks):
     """Starting a campaign, the live session it measures in, and all that follows."""
 
     # Starting ------------------------------------------------------------
@@ -65,7 +64,8 @@ class CampaignActions:
                 return read_instrument(driver)
 
         try:
-            start = run_busy(self, "Verbinde mit dem Messgerät und stelle die Uhr …", connect)
+            text = tr("Connecting to the instrument and setting the clock …")
+            start = run_busy(self, text, connect)
         except DeviceError as err:
             show_error(self, str(err))
             return
@@ -126,7 +126,7 @@ class CampaignActions:
             self.free.show_link(kind)
         else:
             title = self.app.service.campaign(self.live_id)["title"]
-            text = f"{text}, misst für „{title}“"
+            text = tr("{state}, measuring for “{title}”", state=text, title=title)
         self.link.show_link(kind, text)
 
     def _received(self, campaign_id: int, reading) -> None:
@@ -158,84 +158,25 @@ class CampaignActions:
         self.link_state = None
         self.link.show_link(None)
         if session is not None:
-            run_busy(self, "Trenne vom Messgerät …", session.stop)
+            run_busy(self, tr("Disconnecting from the instrument …"), session.stop)
             session.deleteLater()
             warning, session.driver.stop_warning = session.driver.stop_warning, ""
             if warning:
                 show_error(self, warning)
-
-    # Actions on the campaign ---------------------------------------------
-
-    def assign_plan(self) -> None:
-        overlay = AssignPlanOverlay(self.app.service.plans(), self)
-        if overlay.exec():
-            self.app.service.assign_plan(self.campaign_id, overlay.plan.currentData())
-            self.show_campaign(self.campaign_id)
-            self.list.update_campaign(self.campaign_id)
-            self.changed.emit()
-
-    def edit_campaign(self) -> None:
-        campaign = self._campaign()
-        if campaign is None or campaign["status"] != "open":
-            return
-        overlay = CampaignEditOverlay(self.app, campaign, self)
-        if overlay.exec():
-            asset = overlay.asset.currentData()
-            self.app.service.update_campaign(campaign["id"], overlay.title.text(), asset)
-            self.app.service.set_contact(campaign["id"], *overlay.contact_values())
-            self.app.service.set_cost_center(campaign["id"], overlay.cost_center.text())
-            self.list.update_campaign(campaign["id"])
-            self.show_campaign(campaign["id"])
-            self.changed.emit()
-        follow = {TESTER: self.change_tester, PLAN: self.assign_plan}.get(overlay.follow_up)
-        if follow is not None:
-            follow()
-
-    def change_tester(self) -> None:
-        campaign = self._campaign()
-        if campaign is None or campaign["status"] != "open":
-            return
-        count = self.app.service.measurement_counts().get(campaign["id"], 0)
-        overlay = TesterOverlay(self.app, campaign, count, self)
-        if overlay.exec():
-            self.app.service.assign_tester(
-                campaign["id"], overlay.tester.current_id(), overlay.measurements.isChecked()
-            )
-            self.show_campaign(campaign["id"])
-            self.changed.emit()
 
     def import_photos(self) -> None:
         files = pick_images(self)
         if not files:
             return
         result = self.app.service.import_photos(self.campaign_id, files)
-        self.notice.setText(
-            f"{result['matched']} Fotos zugeordnet, {result['open']} offen,"
-            f" {result['duplicates']} schon vorhanden."
-        )
+        self.notice.setText(tr("{matched} photos assigned, {open} open, {duplicates} already"
+                               " there.", matched=result["matched"], open=result["open"],
+                               duplicates=result["duplicates"]))
         self.guided.reload()
         self._data_changed()
         self.warm_proxies(self.campaign_id)
         if result["matched"] or result["open"]:
             self.timeline_action.setChecked(True)  # the next step is checking where they went
-
-    def fetch(self) -> None:
-        result = self.instrument.fetch(self.campaign_id)
-        if result is not None:
-            self.notice.setText(f"{result['added']} neue Messungen vom Gerät.")
-            self.guided.reload()
-            self._data_changed()
-
-    def check_clock(self) -> None:
-        offset = self.instrument.check_clock(self.campaign_id)
-        if offset is not None:
-            self.notice.setText("Geräteuhr geht genau" if abs(offset) < CLOCK_SET_ACCURACY_S
-                                else f"Geräteuhr weicht {offset:+.0f} s ab: bitte am Gerät stellen")
-        self.refresh()
-
-    def correct_clock(self) -> None:
-        if self.instrument.correct_clock(self.campaign_id):
-            self.refresh()
 
     def shut_down(self) -> None:
         self._end_session()

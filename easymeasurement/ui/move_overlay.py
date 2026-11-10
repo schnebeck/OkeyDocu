@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from PySide6.QtWidgets import QLabel, QLineEdit, QTreeWidget, QTreeWidgetItem
 
+from ..l10n import plural, tr
 from .common import ROW_ID, AppContext
 from .kind_catalog import KindCatalog
 from .overlay import Overlay
@@ -20,9 +21,9 @@ class MoveOverlay(Overlay):
 
     def __init__(self, app: AppContext, root_id: int, count: int, current: int | None,
                  parent=None):
-        super().__init__("Verschieben nach", parent, width=520)
-        self.ok_button.setText("Verschieben")
-        self.search = QLineEdit(placeholderText="Element suchen …")
+        super().__init__(tr("Move to"), parent, width=520)
+        self.ok_button.setText(tr("Move"))
+        self.search = QLineEdit(placeholderText=tr("Search elements …"))
         self.search.setClearButtonEnabled(True)
         self.search.textChanged.connect(self._filter)
         self.tree = QTreeWidget()
@@ -38,7 +39,7 @@ class MoveOverlay(Overlay):
         def add(parent, row) -> None:
             item = QTreeWidgetItem([row["name"]])
             item.setIcon(0, catalog.icon(row["kind"]))
-            item.setToolTip(0, f"{catalog.label(row['kind'])}\nDoppelklick: hierhin verschieben")
+            item.setToolTip(0, catalog.label(row["kind"]) + "\n" + tr("Double-click: move here"))
             item.setData(0, ROW_ID, row["id"])
             self.items[row["id"]] = item
             parent.addChild(item) if parent else self.tree.addTopLevelItem(item)
@@ -51,8 +52,10 @@ class MoveOverlay(Overlay):
         self.tree.itemDoubleClicked.connect(lambda *_: self.accept())
         if current in self.items:
             self.tree.setCurrentItem(self.items[current])
-        what = "Die gewählte Messung" if count == 1 else f"Die {count} gewählten Messungen"
-        self.body.addWidget(QLabel(f"{what} auf dieses Element buchen:"))
+        self.body.addWidget(QLabel(plural(count,
+                                          "Book the chosen measurement onto this element:",
+                                          "Book the {count} chosen measurements onto this"
+                                          " element:")))
         self.body.addWidget(self.search)
         self.body.addWidget(self.tree)
         self._update()

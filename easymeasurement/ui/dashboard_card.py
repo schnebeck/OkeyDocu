@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
 
 from ..campaign.records import NO_INSTRUMENT
 from ..campaign.service import CampaignSummary
+from ..l10n import N_, day, tr
 from .campaign_list import count_text
 
 CARD_STYLE = """
@@ -34,7 +35,7 @@ QFrame#card:hover { border: 1px solid palette(highlight); }
 CHIP_STYLE = "color: white; background: %s; border-radius: 3px; padding: 1px 6px;"
 LIVE, ALERT = "#2e7d32", "#c62828"
 TODO, READY = "#b26a00", "#2e7d32"
-READY_TEXT = "Bereit zum Bestätigen"
+READY_TEXT = N_("Ready to confirm")
 CARD_WIDTH = 280
 
 # What the button on a card does, sent with the campaign it belongs to.
@@ -44,20 +45,20 @@ SHOW, RESUME, OPEN_REPORT, MAKE_REPORT = "show", "resume", "open_report", "make_
 def when_text(moment: datetime, today: date | None = None) -> str:
     today = today or date.today()
     if moment.date() == today:
-        return f"heute {moment:%H:%M}"
+        return tr("today {time}", time=f"{moment:%H:%M}")
     if moment.date() == today - timedelta(days=1):
-        return f"gestern {moment:%H:%M}"
-    return f"{moment:%d.%m.%Y}"
+        return tr("yesterday {time}", time=f"{moment:%H:%M}")
+    return day(moment.date())
 
 
 def attention(summary: CampaignSummary) -> list[str]:
     """What still has to happen before the campaign is done with."""
     if not summary.is_open:
-        return [] if summary.reports else ["Noch kein Protokoll erstellt"]
+        return [] if summary.reports else [tr("No report made yet")]
     if summary.loose:
-        return [f"{summary.loose} nicht zugeordnet"]
+        return [tr("{count} unassigned", count=summary.loose)]
     # Open steps show in the progress bar.
-    return [READY_TEXT] if summary.steps and summary.steps_done == summary.steps else []
+    return [tr(READY_TEXT)] if summary.steps and summary.steps_done == summary.steps else []
 
 
 def dim(label: QLabel) -> QLabel:
@@ -92,7 +93,7 @@ class CampaignCard(QFrame):
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setMinimumWidth(CARD_WIDTH)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        self.setToolTip("Klicken, um die Kampagne anzusehen")
+        self.setToolTip(tr("Click to view the campaign"))
         state, colour = self._state(live, seal_warning)
         # A state worth a mark takes the place of the time.
         self.chip = QLabel(state)
@@ -118,9 +119,13 @@ class CampaignCard(QFrame):
         where.setSpacing(6)
         where.addWidget(self.picture, 0, Qt.AlignmentFlag.AlignTop)
         where.addWidget(self.place, 1)
-        plan = f"Messplan: {summary.plan_title}" if summary.plan_title else "Ohne Messplan"
+        if summary.plan_title:
+            plan = tr("Test plan: {plan}", plan=summary.plan_title)
+        else:
+            plan = tr("No test plan")
         if summary.steps:
-            plan += f"  ·  {summary.steps_done} von {summary.steps} Schritten"
+            steps = tr("{done} of {total} steps", done=summary.steps_done, total=summary.steps)
+            plan += f"  ·  {steps}"
         self.plan = _label(plan, secondary=True)
         self.progress = QProgressBar()
         self.progress.setRange(0, max(summary.steps, 1))
@@ -130,8 +135,11 @@ class CampaignCard(QFrame):
         self.progress.setVisible(bool(summary.steps))
         self.figures = QLabel(self._figures())
         self.figures.setWordWrap(True)
-        self.tester = _label(f"Prüfer: {summary.tester}" if summary.tester else "Prüfer fehlt",
-                             secondary=True)
+        if summary.tester:
+            tester = tr("Inspector: {tester}", tester=summary.tester)
+        else:
+            tester = tr("No inspector")
+        self.tester = _label(tester, secondary=True)
         self.button = QPushButton()
         self.button.clicked.connect(self._act)
         self.action = self._next_step()
@@ -154,35 +162,36 @@ class CampaignCard(QFrame):
         if seal_warning:
             return seal_warning, ALERT
         if live:
-            return "● Misst gerade", LIVE
+            return tr("● Measuring now"), LIVE
         return "", ""
 
     def _figures(self) -> str:
         """Counts, failures in red, and what is still to do in amber."""
         parts = [count_text(self.summary.measured)]
         if self.summary.failed:
-            parts.append(f'<span style="color:{ALERT}">{self.summary.failed} n. i. O.</span>')
+            failed = tr("{count} not OK", count=self.summary.failed)
+            parts.append(f'<span style="color:{ALERT}">{failed}</span>')
         for point in attention(self.summary):
-            colour = READY if point == READY_TEXT else TODO
+            colour = READY if point == tr(READY_TEXT) else TODO
             parts.append(f'<span style="color:{colour}">{escape(point)}</span>')
         return "  ·  ".join(parts)
 
     def _next_step(self) -> str:
         summary = self.summary
         if self.live:
-            self.button.setText("Zur Messung")
-            self.button.setToolTip("Die Kampagne zeigen, für die das Messgerät gerade misst")
+            self.button.setText(tr("Go to measurement"))
+            self.button.setToolTip(tr("Show the campaign the instrument is measuring for"))
             return SHOW
         if summary.is_open:
             measures = summary.driver not in NO_INSTRUMENT
-            self.button.setText("Weitermessen" if measures else "Öffnen")
-            self.button.setToolTip("Mit dem Messgerät verbinden und weitermachen" if measures
-                                   else "Die Kampagne öffnen")
+            self.button.setText(tr("Continue measuring") if measures else tr("Open"))
+            self.button.setToolTip(tr("Connect the instrument and carry on") if measures
+                                   else tr("Open the campaign"))
             return RESUME if measures else SHOW
         if summary.reports:
-            self.button.setText("Protokoll öffnen")
+            self.button.setText(tr("Open report"))
             return OPEN_REPORT
-        self.button.setText("Protokoll erstellen …")
+        self.button.setText(tr("Make report …"))
         return MAKE_REPORT
 
     def _act(self) -> None:

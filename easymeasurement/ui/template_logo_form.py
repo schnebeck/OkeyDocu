@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
     QPushButton,
 )
 
+from ..l10n import decimal, tr
 from ..reporting.logo import (
     MIN_WIDTH_MM,
     PAGE_HEIGHT_MM,
@@ -47,7 +48,7 @@ def read_image_file(path: Path) -> bytes:
         return path.read_bytes()
     renderer = QSvgRenderer(str(path))
     if not renderer.isValid():
-        raise LogoError("Die SVG-Datei ist nicht lesbar.")
+        raise LogoError(tr("The SVG file cannot be read."))
     size = renderer.defaultSize()
     size.scale(QSize(_SVG_PIXELS, _SVG_PIXELS), Qt.AspectRatioMode.KeepAspectRatio)
     image = QImage(size, QImage.Format.Format_ARGB32)
@@ -84,17 +85,18 @@ class TemplateLogoForm:
 
     def _choose_logo(self) -> None:
         name, _ = QFileDialog.getOpenFileName(
-            self, "Logo wählen", "", "Bilder (*.png *.jpg *.jpeg *.webp *.bmp *.svg)"
+            self, tr("Choose logo"), "",
+            tr("Images ({patterns})", patterns="*.png *.jpg *.jpeg *.webp *.bmp *.svg")
         )
         if name:
             self.import_logo(Path(name))
 
     def _form_logo(self, block: dict, form: QFormLayout) -> None:
-        choose = QPushButton("Bild ersetzen …" if block.get("image") else "Bild wählen …")
+        choose = QPushButton(tr("Replace image …") if block.get("image") else tr("Choose image …"))
         choose.clicked.connect(self._choose_logo)
         form.addRow(choose)
         if not block.get("image"):
-            form.addRow(QLabel("PNG, JPEG, WebP oder SVG. Transparenz bleibt erhalten."))
+            form.addRow(QLabel(tr("PNG, JPEG, WebP or SVG. Transparency is kept.")))
             return
         data = decode_logo(self.template["images"][block["image"]])
         ratio = logo_ratio(data)
@@ -109,7 +111,7 @@ class TemplateLogoForm:
         width = QDoubleSpinBox(suffix=" mm", decimals=1, minimum=MIN_WIDTH_MM, maximum=PAGE_WIDTH_MM)
         height = QLabel()
         preset = QComboBox()
-        preset.addItem("Schnellposition …", None)
+        preset.addItem(tr("Quick position …"), None)
         for index, (label, _) in enumerate(PRESETS):
             preset.addItem(label, index)
 
@@ -118,8 +120,8 @@ class TemplateLogoForm:
                 box.blockSignals(True)
                 box.setValue(value)
                 box.blockSignals(False)
-            shown = f"{pw * ratio:.1f}".replace(".", ",")
-            height.setText(f"{shown} mm (Seitenverhältnis bleibt erhalten)")
+            shown = decimal(pw * ratio, 1)
+            height.setText(tr("{height} mm (aspect ratio is kept)", height=shown))
 
         def apply(px: float, py: float, pw: float) -> None:
             px, py, pw = clamp_placement(px, py, pw, ratio)
@@ -146,13 +148,13 @@ class TemplateLogoForm:
         show(block["x_mm"], block["y_mm"], block["width_mm"])
 
         pages = QComboBox()
-        pages.addItem("Nur erste Seite", "first")
-        pages.addItem("Jede Seite", "all")
+        pages.addItem(tr("First page only"), "first")
+        pages.addItem(tr("Every page"), "all")
         pages.setCurrentIndex(max(pages.findData(block.get("pages", "first")), 0))
         pages.currentIndexChanged.connect(
             lambda: (block.__setitem__("pages", pages.currentData()), self._changed())
         )
-        reserve = QCheckBox("Text weicht dem Logo aus")
+        reserve = QCheckBox(tr("Text makes way for the logo"))
         reserve.setChecked(block.get("reserve", True))
         reserve.toggled.connect(lambda v: (block.__setitem__("reserve", v), self._changed()))
 
@@ -160,12 +162,12 @@ class TemplateLogoForm:
         self.logo_x, self.logo_y, self.logo_width = x, y, width
         self.logo_pages, self.logo_reserve = pages, reserve
         side = QFormLayout()
-        side.addRow("Position", preset)
-        side.addRow("Von links", x)
-        side.addRow("Von oben", y)
-        side.addRow("Breite", width)
-        side.addRow("Höhe", height)
-        side.addRow("Seiten", pages)
+        side.addRow(tr("Position"), preset)
+        side.addRow(tr("From left"), x)
+        side.addRow(tr("From top"), y)
+        side.addRow(tr("Width"), width)
+        side.addRow(tr("Height"), height)
+        side.addRow(tr("Pages"), pages)
         side.addRow(reserve)
         line = QHBoxLayout()
         line.addWidget(placer, 0, Qt.AlignmentFlag.AlignTop)

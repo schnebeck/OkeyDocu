@@ -14,6 +14,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QPalette
 from PySide6.QtWidgets import QListWidgetItem, QPushButton
 
+from ..l10n import day, tr
 from .attachment_list import SHOWN_ROWS, AttachmentList
 from .common import ROW_ID, AppContext
 
@@ -25,9 +26,9 @@ class PlaceFiles(AttachmentList):
 
     def __init__(self, app: AppContext, target_name: str):
         super().__init__(app, target_name)
-        self.take_button = QPushButton("Übernehmen")
-        self.take_button.setToolTip("Den gewählten Eintrag der letzten Prüfung in diese Kampagne"
-                                    " holen. Die abgeschlossene Prüfung bleibt unverändert.")
+        self.take_button = QPushButton(tr("Take over"))
+        self.take_button.setToolTip(tr("Fetch the chosen entry of the last inspection into this"
+                                       " campaign. The completed inspection stays unchanged."))
         self.take_button.clicked.connect(self._take_over)
         self.layout().itemAt(self.layout().count() - 1).layout().insertWidget(1, self.take_button)
         self._update()
@@ -41,17 +42,17 @@ class PlaceFiles(AttachmentList):
         previous = self.app.service.earlier_campaign(campaign_id)
         earlier = self.app.service.earlier_attachments(campaign_id, asset_id)
         if earlier:
-            day = datetime.fromisoformat(previous["closed_at"])
+            closed = day(datetime.fromisoformat(previous["closed_at"]))
             colour = self.palette().color(QPalette.ColorRole.PlaceholderText)
             font = QFont(self.list.font())
             font.setItalic(True)
             for row in earlier:
                 name = row["text"] if row["kind"] == "comment" else row["original_name"]
-                item = QListWidgetItem(f"{name}  ·  {day:%d.%m.%Y}")
+                item = QListWidgetItem(f"{name}  ·  {closed}")
                 item.setForeground(colour)
                 item.setFont(font)
-                item.setToolTip(f"Aus der Prüfung vom {day:%d.%m.%Y}. „Übernehmen“ holt ihn"
-                                " in diese Kampagne, ein Doppelklick zeigt ihn.")
+                item.setToolTip(tr("From the inspection of {day}. “Take over” fetches it into"
+                                   " this campaign, a double-click shows it.", day=closed))
                 item.setData(ROW_ID, row["id"])
                 item.setData(EARLIER, True)
                 self.list.addItem(item)

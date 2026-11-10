@@ -19,6 +19,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import tr
+
 MARGIN = 24
 SCRIM = QColor(0, 0, 0, 120)
 
@@ -54,10 +56,10 @@ class Overlay(QWidget):
         self.body = QVBoxLayout()
         self.hint = QLabel()  # says what is still missing, so a grey button explains itself
         self.hint.setWordWrap(True)
-        self.ok_button = QPushButton("Speichern")
+        self.ok_button = QPushButton(tr("Save"))
         self.ok_button.setDefault(True)
         self.ok_button.clicked.connect(self.accept)
-        self.cancel_button = QPushButton("Abbrechen")
+        self.cancel_button = QPushButton(tr("Cancel"))
         self.cancel_button.clicked.connect(self.reject)
         buttons = QHBoxLayout()
         buttons.addWidget(self.hint, 1)

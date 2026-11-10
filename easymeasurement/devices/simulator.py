@@ -21,6 +21,7 @@ from ..model import (
     ResultValue,
     Verdict,
 )
+from ..l10n import tr
 from .base import Capability, DeviceError, LiveReading, MeterDriver, SelectorPosition
 
 _READINGS = {
@@ -105,7 +106,7 @@ class SimulatedMeter(MeterDriver):
         due = date(2020, 1, 1) if self._overdue else date.today() + timedelta(days=200)
         return DeviceIdentity(
             manufacturer="Simulator",
-            model="Virtuelles Messgerät",
+            model=tr("Virtual instrument"),
             serial_no="SIM-0001",
             firmware="1.0",
             calibrated_on=due - timedelta(days=365),
@@ -123,7 +124,7 @@ class SimulatedMeter(MeterDriver):
 
     def read_selector(self) -> SelectorPosition:
         if not self.selector:
-            raise DeviceError("Der Drehschalter wurde noch nicht bewegt.")
+            raise DeviceError(tr("The rotary switch has not been moved yet."))
         label = FUNCTION_LABELS.get(self.selector, self.selector).split(" – ")[0]
         return SelectorPosition(label, frozenset({self.selector}))
 

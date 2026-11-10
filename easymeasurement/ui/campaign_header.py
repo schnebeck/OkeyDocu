@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import tr
 from .campaign_list import heading
 
 
@@ -36,37 +37,37 @@ class CampaignHeader(QWidget):
         self.home_button = QToolButton()
         self.home_button.setIcon(QIcon.fromTheme(
             "go-home", self.style().standardIcon(QStyle.StandardPixmap.SP_DirHomeIcon)))
-        self.home_button.setToolTip("Zur Übersicht (Alt+Pos1)")
+        self.home_button.setToolTip(tr("To the overview (Alt+Home)"))
         self.home_button.setAutoRaise(True)
         self.home_button.clicked.connect(self.home_requested)
         self.title = heading("", 15)
         self.edit_button = QToolButton()
         fallback = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogDetailedView)
         self.edit_button.setIcon(QIcon.fromTheme("document-edit", fallback))
-        self.edit_button.setAccessibleName("Kampagne bearbeiten")
-        self.edit_button.setToolTip("Titel und Anlage ändern")
+        self.edit_button.setAccessibleName(tr("Edit campaign"))
+        self.edit_button.setToolTip(tr("Change title and installation"))
         self.edit_button.setAutoRaise(True)
         self.edit_button.clicked.connect(self.edit_requested)
         self.details = QLabel()
         self.details.setTextFormat(Qt.TextFormat.RichText)
         self.details.linkActivated.connect(lambda _: self.tester_requested.emit())
-        self.resume_button = QPushButton("Messung fortsetzen")
-        self.pause_button = QPushButton("Messung unterbrechen")
-        self.photos_button = QPushButton("Fotos …")
-        self.photos_button.setToolTip("Fotos importieren; sie ordnen sich nach Aufnahmezeit zu.")
-        self.assign_button = QPushButton("Fotos zuordnen", checkable=True)
-        self.assign_button.setToolTip("Die Zeitleiste der Fotos unter der Tabelle ein- und"
-                                      " ausblenden (F7).")
-        self.draft_button = QPushButton("Entwurf ansehen")
-        self.draft_button.setToolTip("Das Protokoll, wie es jetzt aussähe. Es ist noch nicht gültig.")
-        self.finish_button = QPushButton(QIcon.fromTheme("object-locked"), "Bestätigen …")
-        self.finish_button.setToolTip("Abschließen, versiegeln, Protokoll ablegen und signieren."
-                                      " Danach lässt sich nichts mehr ändern.")
+        self.resume_button = QPushButton(tr("Resume measuring"))
+        self.pause_button = QPushButton(tr("Pause measuring"))
+        self.photos_button = QPushButton(tr("Photos …"))
+        self.photos_button.setToolTip(tr("Import photos; they are assigned by the time they"
+                                         " were taken."))
+        self.assign_button = QPushButton(tr("Assign photos"), checkable=True)
+        self.assign_button.setToolTip(tr("Show or hide the photo timeline below the table (F7)."))
+        self.draft_button = QPushButton(tr("View draft"))
+        self.draft_button.setToolTip(tr("The report as it would look now. It is not valid yet."))
+        self.finish_button = QPushButton(QIcon.fromTheme("object-locked"), tr("Confirm …"))
+        self.finish_button.setToolTip(tr("Complete, seal, file and sign the report."
+                                         " Nothing can be changed afterwards."))
         # What is left before confirming, with links to the rows concerned.
         self.checks = QLabel()
         self.checks.setTextFormat(Qt.TextFormat.RichText)
         self.checks.linkActivated.connect(self.check_requested)
-        self.report_button = QPushButton("Protokoll erstellen …")
+        self.report_button = QPushButton(tr("Create report …"))
         text = QVBoxLayout()
         text.setSpacing(0)
         title = QHBoxLayout()

@@ -20,11 +20,12 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.plan import load_instructions
+from ..l10n import N_, tr
 from . import step_text
 from .common import function_short
 from .wiring_view import WiringView
 
-NO_INSTRUCTION = "Für diese Messung gibt es noch keine Anleitung."
+NO_INSTRUCTION = N_("There are no instructions for this measurement yet.")
 
 
 class InstructionPanel(QWidget):
@@ -39,8 +40,8 @@ class InstructionPanel(QWidget):
         for function in sorted(self.instructions, key=function_short):
             self.choice.addItem(function_short(function), function)
         self.choice.currentIndexChanged.connect(lambda _: self._show())
-        self.read_button = QPushButton("Vom Drehschalter")
-        self.read_button.setToolTip("Zeigt die Anleitung zur Stellung des Drehschalters")
+        self.read_button = QPushButton(tr("From the rotary switch"))
+        self.read_button.setToolTip(tr("Shows the instructions for the rotary switch position"))
         self.read_button.clicked.connect(self.read_requested)
         self.read_button.hide()
         self.wiring = WiringView()
@@ -72,7 +73,7 @@ class InstructionPanel(QWidget):
             self._show()
         else:
             self.wiring.show_step(None)
-            self.text.setText(NO_INSTRUCTION)
+            self.text.setText(tr(NO_INSTRUCTION))
 
     def show_selector(self, position) -> None:
         """A position that names no function leaves the instruction where it is."""
@@ -85,7 +86,7 @@ class InstructionPanel(QWidget):
         step = self.instructions.get(self.choice.currentData())
         if step is None:
             self.wiring.show_step(None)
-            self.text.setText(NO_INSTRUCTION)
+            self.text.setText(tr(NO_INSTRUCTION))
             return
         self.wiring.show_step(step if step.wiring else None, connected=True, locked=True)
         parts = (

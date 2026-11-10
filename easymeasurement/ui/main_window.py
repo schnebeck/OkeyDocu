@@ -18,6 +18,7 @@ from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QVBoxLayout
 
 from .. import __version__
 from ..importing.izytron import ImportFailed, import_day
+from ..l10n import tr
 from .campaign_page import CampaignPage
 from .common import AppContext, show_error
 from .dashboard_tiles import ARCHIVE, INSTRUMENT, MASTER_DATA, PLANS, TEMPLATES, USERS
@@ -53,12 +54,12 @@ class MainWindow(MainMenus, QMainWindow):
         # Windows of their own, so they can stand beside a running campaign. No parent:
         # the window manager would otherwise keep them on top of the main window.
         self.page_windows = {
-            self.measurements: self._page_window(self.measurements, "Alle Messwerte", 1200, 720),
-            self.master_data: self._page_window(self.master_data, "Stammdaten", 900, 620),
-            self.reports: self._page_window(self.reports, "Protokollarchiv", 1100, 620),
-            self.templates: self._page_window(self.templates, "Protokollvorlagen", 1200, 760),
-            self.plan_editor: self._page_window(self.plan_editor, "Messpläne", 1200, 720),
-            self.kinds: self._page_window(self.kinds, "Strukturtypen", 900, 640),
+            self.measurements: self._page_window(self.measurements, tr("All readings"), 1200, 720),
+            self.master_data: self._page_window(self.master_data, tr("Master data"), 900, 620),
+            self.reports: self._page_window(self.reports, tr("Report archive"), 1100, 620),
+            self.templates: self._page_window(self.templates, tr("Report templates"), 1200, 760),
+            self.plan_editor: self._page_window(self.plan_editor, tr("Test plans"), 1200, 720),
+            self.kinds: self._page_window(self.kinds, tr("Structure kinds"), 900, 640),
         }
         self._build_menus()
         self._build_status_bar()
@@ -122,9 +123,10 @@ class MainWindow(MainMenus, QMainWindow):
 
     def _about(self) -> None:
         QMessageBox.about(
-            self, "Über EasyMeasurement",
-            f"<b>EasyMeasurement {__version__}</b><br>Geführte Messungen, Prüfprotokolle und"
-            " Archiv.<br><br>© 2026 Thorsten Schnebeck<br>GPL-3.0-or-later",
+            self, tr("About EasyMeasurement"),
+            f"<b>EasyMeasurement {__version__}</b><br>"
+            + tr("Guided measurements, test reports and archive.")
+            + "<br><br>© 2026 Thorsten Schnebeck<br>GPL-3.0-or-later",
         )
 
     # Actions -------------------------------------------------------------
@@ -135,7 +137,8 @@ class MainWindow(MainMenus, QMainWindow):
 
     def _import_izytron(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
-            self, "Kopie der IZYTRON-Datenbank wählen", "", "SQLite-Datenbank (*.sqlite *.db);;Alle (*)"
+            self, tr("Choose a copy of the IZYTRON database"), "",
+            tr("SQLite database (*.sqlite *.db);;All (*)")
         )
         if not path:
             return
@@ -151,12 +154,13 @@ class MainWindow(MainMenus, QMainWindow):
             show_error(self, str(err))
             return
         except (OSError, sqlite3.Error):
-            show_error(self, "Diese Datei ist keine lesbare IZYTRON-Datenbank.")
+            show_error(self, tr("This file is not a readable IZYTRON database."))
             return
         self.master_data.refresh()
         self.campaign.refresh()
         self.campaign.show_campaign(result.campaign_id)
-        self.campaign.notice.setText(f"{result.measurements} Messungen importiert.")
+        imported = tr("{count} measurements imported.", count=result.measurements)
+        self.campaign.notice.setText(imported)
 
     # Window --------------------------------------------------------------
 

@@ -26,6 +26,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import day, tr
 from .common import AppContext
 from .growing_edit import GrowingEdit
 from .guided_pages import ReasonOverlay
@@ -53,9 +54,9 @@ def _tool(theme: str, fallback: QStyle.StandardPixmap, tip: str) -> QToolButton:
 
 class HintOverlay(Overlay):
     def __init__(self, text: str, parent=None):
-        super().__init__("Hinweis bearbeiten", parent)
-        self.ok_button.setText("Übernehmen")
-        self.text = GrowingEdit("Wie hier zu messen ist")
+        super().__init__(tr("Edit hint"), parent)
+        self.ok_button.setText(tr("Apply"))
+        self.text = GrowingEdit(tr("How to measure here"))
         self.text.setPlainText(text)
         self.body.addWidget(self.text)
 
@@ -87,9 +88,9 @@ class RepeatPoint(QWidget):
         self.hint = _label()
         self.remark = _label(dim=True)
         edit = _tool("document-edit", QStyle.StandardPixmap.SP_FileDialogDetailedView,
-                     "Hinweis bearbeiten")
+                     tr("Edit hint"))
         drop = _tool("edit-delete", QStyle.StandardPixmap.SP_TrashIcon,
-                     "Hinweis nicht übernehmen; er erscheint dann auch künftig nicht mehr")
+                     tr("Do not carry the hint over; it will not appear in future either"))
         edit.clicked.connect(self._edit_hint)
         drop.clicked.connect(lambda: self._set_hint(""))
         head = QHBoxLayout()
@@ -104,16 +105,16 @@ class RepeatPoint(QWidget):
         self.photos.setViewMode(QListWidget.ViewMode.IconMode)
         self.photos.setIconSize(QSize(96, 72))
         self.photos.setFixedHeight(96)
-        self.photos.setToolTip("Fotos der letzten Messung, zur Orientierung")
-        self.answer_note = QLineEdit(placeholderText="Bemerkung zur Antwort")
-        self.yes_button, self.no_button = QPushButton("Ja"), QPushButton("Nein")
+        self.photos.setToolTip(tr("Photos of the last measurement, for orientation"))
+        self.answer_note = QLineEdit(placeholderText=tr("Remark on the answer"))
+        self.yes_button, self.no_button = QPushButton(tr("Yes")), QPushButton(tr("No"))
         self.yes_button.clicked.connect(lambda: self._answer("yes"))
         self.no_button.clicked.connect(lambda: self._answer("no"))
-        self.hand_button = QPushButton("Von Hand eintragen …")
+        self.hand_button = QPushButton(tr("Enter by hand …"))
         self.hand_button.clicked.connect(lambda: self.by_hand.emit(self.step))
-        self.skip_button = QPushButton("Auslassen …")
+        self.skip_button = QPushButton(tr("Skip …"))
         self.skip_button.clicked.connect(self._skip)
-        self.reopen_button = QPushButton("Wieder öffnen")
+        self.reopen_button = QPushButton(tr("Reopen"))
         self.reopen_button.clicked.connect(self._reopen)
         buttons = QHBoxLayout()
         for button in (self.yes_button, self.no_button, self.hand_button):
@@ -134,10 +135,10 @@ class RepeatPoint(QWidget):
         skipped = self.row["status"] == "skipped"
         check = step.kind == "check"
         self.title.setText(step.title)
-        self.state.setText(f"Ausgelassen: {self.row['note']}" if skipped else
-                           "Noch zu beantworten" if check else
-                           "Noch zu messen: am Gerät messen und senden, solange dieser Punkt"
-                           " gewählt ist, oder von Hand eintragen.")
+        self.state.setText(tr("Skipped: {note}", note=self.row["note"]) if skipped else
+                           tr("Still to be answered") if check else
+                           tr("Still to be measured: measure on the instrument and send while"
+                              " this point is selected, or enter it by hand."))
         self.place.setVisible(step.asset_id is not None)
         if step.asset_id is not None:
             self.place.show_asset(step.asset_id, False)
@@ -146,16 +147,20 @@ class RepeatPoint(QWidget):
         words = self.app.db.device_words()
         settings = ["{}: {}".format(*self.app.db.setting_words(key, value, words))
                     for key, value in step.parameters]
-        settings += [f"Grenze {label}: {' '.join(p for p in (low, up) if p)}"
+        settings += [tr("Limit {label}: {limits}", label=label,
+                        limits=" ".join(p for p in (low, up) if p))
                      for _, label, low, up in step.limits]
-        self.settings.setText("Wie zuletzt:  " + "  ·  ".join(settings) if settings else "")
+        self.settings.setText(tr("As last time:  {settings}", settings="  ·  ".join(settings))
+                              if settings else "")
         self.settings.setVisible(bool(settings))
         origin = self.app.service.origin_measurement(step)
-        day = datetime.fromisoformat(origin["closed_at"]) if origin else None
-        self.hint_from.setText(f"Hinweis aus der Prüfung vom {day:%d.%m.%Y}" if day else "Hinweis")
+        closed = datetime.fromisoformat(origin["closed_at"]) if origin else None
+        self.hint_from.setText(tr("Hint from the inspection of {day}", day=day(closed))
+                               if closed else tr("Hint"))
         self.hint.setText(step.hint)
         self.hint_box.setVisible(bool(step.hint))
-        self.remark.setText(f"Bemerkung damals: {step.remark}" if step.remark else "")
+        self.remark.setText(tr("Remark back then: {remark}", remark=step.remark)
+                            if step.remark else "")
         self.remark.setVisible(bool(step.remark))
         self._show_photos(origin)
         for widget in (self.yes_button, self.no_button, self.answer_note):
@@ -187,7 +192,7 @@ class RepeatPoint(QWidget):
         self.changed.emit()
 
     def _skip(self) -> None:
-        overlay = ReasonOverlay(self, "Punkt auslassen")
+        overlay = ReasonOverlay(self, tr("Skip point"))
         if overlay.exec():
             self.app.service.skip_step(self.row["id"], overlay.reason.toPlainText().strip())
             self.changed.emit()

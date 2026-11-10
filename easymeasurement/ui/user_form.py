@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import day, tr
 from ..reporting.sign import SigningError, inspect_certificate
 from .common import AppContext
 from .overlay import Overlay
@@ -32,7 +33,7 @@ class UserForm(Overlay):
     """One person. A password is only used to look into the certificate, never kept."""
 
     def __init__(self, app: AppContext, parent=None, user=None):
-        super().__init__("Benutzer ändern" if user else "Neuer Benutzer", parent, 560)
+        super().__init__(tr("Edit user") if user else tr("New user"), parent, 560)
         self.app = app
         self.user = user
         self.saved_id: int | None = None
@@ -40,18 +41,18 @@ class UserForm(Overlay):
         self.certificate_until = user["certificate_until"] if user else ""
 
         self.title_field = QLineEdit(user["title"] if user else "")
-        self.title_field.setPlaceholderText("z. B. Dipl.-Ing.")
+        self.title_field.setPlaceholderText(tr("e.g. Dipl.-Ing."))
         self.name = QLineEdit(user["name"] if user else "")
-        self.name.setPlaceholderText("Vor- und Nachname")
+        self.name.setPlaceholderText(tr("First and last name"))
         self.name.textChanged.connect(self._update)
 
         self.pad = SignaturePad()
         self.pad.changed.connect(self._update)
         if user:
             self.pad.load(user["signature"])
-        self.clear_button = QPushButton("Löschen")
+        self.clear_button = QPushButton(tr("Clear"))
         self.clear_button.clicked.connect(self.pad.clear)
-        self.file_button = QPushButton("Aus Datei …")
+        self.file_button = QPushButton(tr("From file …"))
         self.file_button.clicked.connect(self._load_signature)
         pad_buttons = QHBoxLayout()
         pad_buttons.addWidget(self.file_button)
@@ -64,18 +65,18 @@ class UserForm(Overlay):
 
         self.certificate = QLineEdit(user["certificate_path"] if user else "")
         self.certificate.setReadOnly(True)
-        self.certificate.setPlaceholderText("Zum Signieren der Protokolle, kann später folgen")
-        self.choose_button = QPushButton("Wählen …")
+        self.certificate.setPlaceholderText(tr("For signing the reports, can follow later"))
+        self.choose_button = QPushButton(tr("Choose …"))
         self.choose_button.clicked.connect(self._choose_certificate)
-        self.remove_button = QPushButton("Entfernen")
+        self.remove_button = QPushButton(tr("Remove"))
         self.remove_button.clicked.connect(self._remove_certificate)
         chooser = QHBoxLayout()
         chooser.addWidget(self.certificate, 1)
         chooser.addWidget(self.choose_button)
         chooser.addWidget(self.remove_button)
         self.passphrase = QLineEdit(echoMode=QLineEdit.EchoMode.Password)
-        self.passphrase.setPlaceholderText("Passwort des Zertifikats, wird nicht gespeichert")
-        self.check_button = QPushButton("Prüfen")
+        self.passphrase.setPlaceholderText(tr("Certificate password, not stored"))
+        self.check_button = QPushButton(tr("Check"))
         self.check_button.clicked.connect(self._check_certificate)
         self.passphrase.returnPressed.connect(self.check_button.click)
         self.unlock = QWidget()
@@ -93,10 +94,10 @@ class UserForm(Overlay):
         certificate.addWidget(self.certificate_state)
 
         form = QFormLayout()
-        form.addRow("Titel", self.title_field)
-        form.addRow("Name", self.name)
-        form.addRow("Unterschrift", signature)
-        form.addRow("Zertifikat", certificate)
+        form.addRow(tr("Title"), self.title_field)
+        form.addRow(tr("Name"), self.name)
+        form.addRow(tr("Signature"), signature)
+        form.addRow(tr("Certificate"), certificate)
         self.body.addLayout(form)
         self._show_certificate()
         self._update()
@@ -107,19 +108,20 @@ class UserForm(Overlay):
     def _update(self) -> None:
         missing = not self.name.text().strip()
         self.ok_button.setEnabled(not missing)
-        self.hint.setText("Der Name fehlt noch." if missing else "")
+        self.hint.setText(tr("The name is still missing.") if missing else "")
         self.clear_button.setEnabled(not self.pad.empty)
 
     def _load_signature(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
-            self, "Unterschrift wählen", "", "Bilder (*.png *.jpg *.jpeg *.PNG *.JPG *.JPEG)"
+            self, tr("Choose signature"), "",
+            tr("Images ({patterns})", patterns="*.png *.jpg *.jpeg *.PNG *.JPG *.JPEG")
         )
         if path and not self.pad.load(Path(path).read_bytes()):
-            self.hint.setText("Diese Datei ist kein lesbares Bild.")
+            self.hint.setText(tr("This file is not a readable image."))
 
     def _choose_certificate(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
-            self, "Zertifikat wählen", self.certificate.text(), "PKCS#12 (*.p12 *.pfx)"
+            self, tr("Choose certificate"), self.certificate.text(), "PKCS#12 (*.p12 *.pfx)"
         )
         if path:
             self.certificate.setText(path)
@@ -173,8 +175,8 @@ class UserForm(Overlay):
 
 def certificate_text(name: str, until: str) -> str:
     if not until:
-        return "Noch nicht geprüft. Das Passwort wird erst beim Signieren gebraucht."
+        return tr("Not checked yet. The password is only needed when signing.")
     moment = datetime.fromisoformat(until).date()
     if moment < date.today():
-        return f"{name}: abgelaufen am {moment:%d.%m.%Y}"
-    return f"{name}, gültig bis {moment:%d.%m.%Y}"
+        return tr("{name}: expired on {day}", name=name, day=day(moment))
+    return tr("{name}, valid until {day}", name=name, day=day(moment))

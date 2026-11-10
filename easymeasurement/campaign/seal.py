@@ -75,7 +75,7 @@ class KWalletKeyStore:
                 check=False,
             )
         except (OSError, subprocess.TimeoutExpired) as err:
-            log.info("KWallet nicht erreichbar: %s", err)
+            log.info("KWallet not reachable: %s", err)
             return None
         return result.stdout.strip() if result.returncode == 0 else None
 

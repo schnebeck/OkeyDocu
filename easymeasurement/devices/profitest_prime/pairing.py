@@ -16,6 +16,7 @@ import subprocess
 import time
 from typing import Callable
 
+from ...l10n import tr
 from ..base import DeviceError
 from .discovery import BLUETOOTH_NAME
 
@@ -61,7 +62,7 @@ class _Session:
             try:
                 self.seen += _ANSI_RE.sub("", os.read(self.fd, 4096).decode("utf-8", "replace"))
             except OSError:
-                raise PairingFailed("Die Bluetooth-Werkzeuge wurden unerwartet beendet.") from None
+                raise PairingFailed(tr("The Bluetooth tools ended unexpectedly.")) from None
         new, self.position = self.seen[self.position:], len(self.seen)
         return new
 
@@ -83,10 +84,9 @@ def _wait_for_instrument(session: _Session, timeout_s: float) -> str:
         match = _FOUND_RE.search(session.seen)
         if match:
             return match["address"]
-    raise PairingFailed(
-        "Das Messgerät wurde nicht gefunden. Bitte Drehschalter auf Setup stellen und im"
-        " Bluetooth-Menü Bluetooth einschalten und sichtbar stellen."
-    )
+    raise PairingFailed(tr(
+        "The instrument was not found. Please turn the rotary switch to Setup and, in the"
+        " Bluetooth menu, switch Bluetooth on and make it visible."))
 
 
 def _pair(session: _Session, address: str, pin: str, timeout_s: float) -> None:
@@ -101,11 +101,10 @@ def _pair(session: _Session, address: str, pin: str, timeout_s: float) -> None:
         if "Pairing successful" in session.seen or "AlreadyExists" in session.seen:
             return
         if "Failed to pair" in session.seen:
-            raise PairingFailed(
-                "Die Kopplung ist fehlgeschlagen. Bitte die PIN prüfen und am Messgerät unter"
-                " „Vertraute Geräte“ eine alte Kopplung löschen."
-            )
-    raise PairingFailed("Die Kopplung hat nicht rechtzeitig geantwortet.")
+            raise PairingFailed(tr(
+                "Pairing failed. Please check the PIN and delete an old pairing on the"
+                " instrument under “Trusted devices”."))
+    raise PairingFailed(tr("Pairing did not answer in time."))
 
 
 def pair_instrument(
@@ -117,16 +116,16 @@ def pair_instrument(
     try:
         session = _Session(list(command))
     except OSError as err:
-        raise PairingFailed(f"Bluetooth ist nicht verfügbar: {err}") from err
+        raise PairingFailed(tr("Bluetooth is not available: {error}", error=err)) from err
     try:
         for line in ("power on", "pairable on", "agent KeyboardDisplay", "default-agent", "scan on"):
             session.send(line)
             time.sleep(0.2)
-        on_progress("Suche das Messgerät …")
+        on_progress(tr("Searching for the instrument …"))
         address = _wait_for_instrument(session, scan_timeout_s)
         session.send("scan off")
         time.sleep(0.5)
-        on_progress("Messgerät gefunden, kopple …")
+        on_progress(tr("Instrument found, pairing …"))
         _pair(session, address, pin, pair_timeout_s)
         session.send(f"trust {address}")
         time.sleep(0.5)

@@ -19,12 +19,13 @@ from PySide6.QtWidgets import (
     QToolTip,
 )
 
+from ..l10n import N_, tr
 from .photo_shared import start_photo_drag
 
 PHOTO_PATH = Qt.ItemDataRole.UserRole + 1
 PHOTO_ID = Qt.ItemDataRole.UserRole + 2
 CROSS_PX = 22
-CROSS_TIP = "Von dieser Messung lösen: Das Foto kommt zu den nicht zugeordneten Fotos."
+CROSS_TIP = N_("Detach from this measurement: the photo goes to the unassigned photos.")
 HOVER = QColor("#e74c3c")
 
 
@@ -69,8 +70,8 @@ class PhotoGallery(QListWidget):
         self.setDragDropMode(QAbstractItemView.DragDropMode.DragOnly)
         self.setItemDelegate(_CrossDelegate(self))
         self.setMouseTracking(True)
-        self.setToolTip("Doppelklick zeigt das Foto groß; auf eine andere Zeile der Tabelle"
-                        " gezogen, gehört es zu jener Messung.")
+        self.setToolTip(tr("Double-click shows the photo large; dragged onto another row of"
+                           " the table, it belongs to that measurement."))
 
     def cross_rect(self, index: QModelIndex) -> QRect:
         """The picture's own corner: a landscape photo leaves the icon square partly empty."""
@@ -113,7 +114,7 @@ class PhotoGallery(QListWidget):
 
     def viewportEvent(self, event) -> bool:
         if event.type() == QEvent.Type.ToolTip and self.cross_at(event.pos()).isValid():
-            QToolTip.showText(event.globalPos(), CROSS_TIP, self)
+            QToolTip.showText(event.globalPos(), tr(CROSS_TIP), self)
             return True
         if event.type() == QEvent.Type.Leave and self.hovered.isValid():
             self.hovered = QModelIndex()

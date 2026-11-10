@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 from ..campaign.service import LOCATION_SEPARATOR
+from ..l10n import N_, tr
 from ..model import conductor_of
 from .common import stored_parameters
 
@@ -18,8 +19,9 @@ CUSTOMER, ASSET, CAMPAIGN = 1, 2, 3
 PLACE, VALUES, VERDICT = 4, 6, 8
 CAPTURE = 9
 SHARED_COLUMNS = {
-    CUSTOMER: "Kunde", ASSET: "Anlage", CAMPAIGN: "Kampagne", PLACE: "Messort", 5: "Bezeichnung",
-    7: "Fotos", VERDICT: "Bewertung", CAPTURE: "Erfassung",
+    CUSTOMER: N_("Customer"), ASSET: N_("Installation"), CAMPAIGN: N_("Campaign"),
+    PLACE: N_("Measuring location"), 5: N_("Designation"), 7: N_("Photos"),
+    VERDICT: N_("Verdict"), CAPTURE: N_("Capture"),
 }
 
 
@@ -77,5 +79,5 @@ def _checks(text: str | None) -> str:
             lines.append(f"{value} – {question}" if question else value)
             question = ""
         else:
-            lines.append(f"Bemerkung: {value}")
+            lines.append(tr("Remark: {value}", value=value))
     return "   ".join(lines)

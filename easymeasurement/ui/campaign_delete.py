@@ -13,21 +13,17 @@ from pathlib import Path
 from PySide6.QtCore import QFile
 from PySide6.QtWidgets import QMessageBox
 
+from ..l10n import N_, plural, tr
 from .campaign_list import count_text
 from .common import AppContext
 
 
-OPEN = ("Fotos und Dateien kommen in den Papierkorb, Messwerte lassen sich nicht"
-        " wiederherstellen.")
-SEALED = (
-    "Die Kampagne ist abgeschlossen und versiegelt. Mit ihr verschwinden der Datensatz und die"
-    " Protokolle im Archiv; die Dateien kommen in den Papierkorb. Weitergegebene Protokolle bleiben,"
-    " wo sie sind. Ein Löschvermerk hält die Siegelkette der übrigen Kampagnen intakt."
+OPEN = N_("Photos and files go to the trash, readings cannot be restored.")
+SEALED = N_(
+    "The campaign is closed and sealed. The record and the reports in the archive disappear"
+    " with it; the files go to the trash. Reports passed on stay where they are. A deletion"
+    " note keeps the seal chain of the other campaigns intact."
 )
-
-
-def _amount(count: int, one: str, many: str) -> str:
-    return f"1 {one}" if count == 1 else f"{count} {many}"
 
 
 def loss_text(app: AppContext, campaign) -> str:
@@ -38,29 +34,31 @@ def loss_text(app: AppContext, campaign) -> str:
     reports = len(app.archive.reports(campaign["id"]))
     present = [(count, text) for count, text in (
         (measured, count_text(measured)),
-        (photos, _amount(photos, "Foto", "Fotos")),
-        (attached, _amount(attached, "Notiz oder Datei", "Notizen und Dateien")),
-        (reports, _amount(reports, "Protokoll", "Protokolle")),
+        (photos, plural(photos, "{count} photo", "{count} photos")),
+        (attached, plural(attached, "{count} note or file", "{count} notes and files")),
+        (reports, plural(reports, "{count} report", "{count} reports")),
     ) if count]
     if not present:
-        return "Die Kampagne enthält noch nichts."
+        return tr("The campaign contains nothing yet.")
     parts = [text for _, text in present]
-    listed = parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " und " + parts[-1]
-    verb = "geht" if len(present) == 1 and present[0][0] == 1 else "gehen"
-    return f"{listed} {verb} mit verloren."
+    if len(parts) > 1:
+        parts = [tr("{items} and {last}", items=", ".join(parts[:-1]), last=parts[-1])]
+    if len(present) == 1 and present[0][0] == 1:
+        return tr("{items} is lost with it.", items=parts[0])
+    return tr("{items} are lost with it.", items=parts[0])
 
 
 def ask_delete(parent, app: AppContext, campaign) -> bool:
     """Cancel is the default: Enter alone must not delete anything."""
     box = QMessageBox(parent)
     box.setIcon(QMessageBox.Icon.Warning)
-    box.setWindowTitle("Kampagne löschen")
+    box.setWindowTitle(tr("Delete campaign"))
     sealed = campaign["status"] == "closed"
-    box.setText(f"„{campaign['title']}“ löschen?")
-    box.setInformativeText(loss_text(app, campaign) + "\n\n" + (SEALED if sealed else OPEN))
-    delete = box.addButton("Endgültig löschen" if sealed else "Löschen",
+    box.setText(tr("Delete “{title}”?", title=campaign["title"]))
+    box.setInformativeText(loss_text(app, campaign) + "\n\n" + tr(SEALED if sealed else OPEN))
+    delete = box.addButton(tr("Delete permanently") if sealed else tr("Delete"),
                            QMessageBox.ButtonRole.DestructiveRole)
-    cancel = box.addButton("Abbrechen", QMessageBox.ButtonRole.RejectRole)
+    cancel = box.addButton(tr("Cancel"), QMessageBox.ButtonRole.RejectRole)
     box.setDefaultButton(cancel)
     box.exec()
     return box.clickedButton() is delete

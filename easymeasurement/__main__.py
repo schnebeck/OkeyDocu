@@ -12,6 +12,7 @@ import signal
 import sys
 
 from .campaign.seal import KWalletKeyStore
+from .l10n import tr
 from .campaign.service import CampaignService
 from .paths import data_dir
 from .reporting.archive import ReportArchive
@@ -25,19 +26,26 @@ def build_context():
     root = data_dir()
     db = Database(root / "easymeasurement.sqlite")
     if not db.templates():
-        db.save_template("Standardprotokoll", default_template_text())
+        db.save_template(tr("Standard report"), default_template_text())
     service = CampaignService(db, root, KWalletKeyStore())
     service.seed_plans()
     return AppContext(db, service, ReportArchive(service))
 
 
-def speak_german(application) -> None:
-    """The program speaks German, so Qt's own words do too: buttons, menus of text fields."""
-    from PySide6.QtCore import QLibraryInfo, QTranslator
+def choose_language(application) -> None:
+    """The language stored in the settings, or the system's. Qt's own words, such as the
+    context menu of a text field, follow it, and so do numbers in spin boxes."""
+    from PySide6.QtCore import QLibraryInfo, QLocale, QTranslator
 
+    from .l10n import current, set_language
+    from .ui.language_choice import KEY
+    from .ui.report_signing import settings
+
+    set_language(settings().value(KEY, QLocale.system().name().split("_")[0]))
+    QLocale.setDefault(QLocale(current()))
     translator = QTranslator(application)
     folder = QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)
-    if translator.load("qtbase_de", folder):
+    if translator.load(f"qtbase_{current()}", folder):
         application.installTranslator(translator)
 
 
@@ -50,7 +58,7 @@ def main() -> int:
     application = QApplication(sys.argv)
     application.setApplicationName("EasyMeasurement")
     application.setDesktopFileName("easymeasurement")
-    speak_german(application)
+    choose_language(application)
     try:
         context = build_context()
     except SchemaMismatch as err:

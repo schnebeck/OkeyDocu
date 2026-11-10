@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
 )
 
+from ..l10n import N_, tr
 from ..model import FUNCTION_LABELS, Quantity, ResultValue, Verdict
 from .common import function_short
 from .growing_edit import GrowingEdit
@@ -34,18 +35,18 @@ class ImportOverlay(Overlay):
     """IZYTRON stored the instrument's time. Only the operator knows how far off it was."""
 
     def __init__(self, parent=None):
-        super().__init__("Aus IZYTRON importieren", parent, width=460)
-        self.ok_button.setText("Importieren")
+        super().__init__(tr("Import from IZYTRON"), parent, width=460)
+        self.ok_button.setText(tr("Import"))
         self.offset = QSpinBox()
         self.offset.setRange(-86400, 86400)
         self.offset.setSuffix(" s")
-        note = QLabel(
-            "Wenn die Uhr des Messgeräts damals falsch ging: um wie viele Sekunden vor (+)"
-            " oder nach (−)? Bei richtiger Uhr bleibt hier 0."
-        )
+        note = QLabel(tr(
+            "If the instrument's clock was wrong back then: by how many seconds ahead (+)"
+            " or behind (−)? With a correct clock this stays 0."
+        ))
         note.setWordWrap(True)
         form = QFormLayout()
-        form.addRow("Uhrenversatz", self.offset)
+        form.addRow(tr("Clock offset"), self.offset)
         self.body.addWidget(note)
         self.body.addLayout(form)
 
@@ -56,11 +57,11 @@ class ImportOverlay(Overlay):
 class MeasurementOverlay(Overlay):
     """A measurement typed in. It may hold any number of values, even none."""
 
-    HEADERS = ["Bezeichnung", "Wert", "Untergrenze", "Obergrenze"]
+    HEADERS = (N_("Designation"), N_("Value"), N_("Lower limit"), N_("Upper limit"))
 
     def __init__(self, parent=None):
-        super().__init__("Messung von Hand", parent, width=640)
-        self.ok_button.setText("Hinzufügen")
+        super().__init__(tr("Measurement by hand"), parent, width=640)
+        self.ok_button.setText(tr("Add"))
         self._named = ""
         self.function = QuietCombo()
         for key, label in FUNCTION_LABELS.items():
@@ -70,24 +71,24 @@ class MeasurementOverlay(Overlay):
         self.moment = QDateTimeEdit(QDateTime.currentDateTime())
         self.moment.setDisplayFormat("dd.MM.yyyy HH:mm:ss")
         self.moment.setCalendarPopup(True)
-        self.location = QLineEdit(placeholderText="Wo gemessen wurde")
-        self.comment = GrowingEdit("Bemerkung zur Messung")
+        self.location = QLineEdit(placeholderText=tr("Where it was measured"))
+        self.comment = GrowingEdit(tr("Remark on the measurement"))
         self.verdict = verdict_combo(Verdict.NOT_EVALUATED.value)
         self.table = QTableWidget(1, len(self.HEADERS))
-        self.table.setHorizontalHeaderLabels(self.HEADERS)
+        self.table.setHorizontalHeaderLabels([tr(header) for header in self.HEADERS])
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.verticalHeader().hide()
         self.table.setMinimumHeight(140)
-        add = QPushButton("Messwert hinzufügen")
-        remove = QPushButton("Messwert entfernen")
+        add = QPushButton(tr("Add reading"))
+        remove = QPushButton(tr("Remove reading"))
         add.clicked.connect(self._add_row)
         remove.clicked.connect(lambda: self.table.removeRow(self.table.currentRow()))
         form = QFormLayout()
-        form.addRow("Bezeichnung", self.function)
-        form.addRow("Zeitpunkt", self.moment)
-        form.addRow("Messort", self.location)
-        form.addRow("Bewertung", self.verdict)
-        form.addRow("Bemerkung", self.comment)
+        form.addRow(tr("Designation"), self.function)
+        form.addRow(tr("Time"), self.moment)
+        form.addRow(tr("Measuring location"), self.location)
+        form.addRow(tr("Verdict"), self.verdict)
+        form.addRow(tr("Remark"), self.comment)
         row = QHBoxLayout()
         row.addWidget(add)
         row.addWidget(remove)
@@ -121,7 +122,7 @@ class MeasurementOverlay(Overlay):
             label, raw = self._cell(row, 0), self._cell(row, 1)
             if not raw:
                 continue
-            label = label or f"Wert {row + 1}"
+            label = label or tr("Value {number}", number=row + 1)
             values.append(ResultValue(
                 key=label.casefold(), label=label, quantity=Quantity.parse(raw),
                 verdict=Verdict.NOT_EVALUATED,

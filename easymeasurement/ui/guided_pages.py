@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.plan import PlanStep
+from ..l10n import tr
 from .growing_edit import GrowingEdit
 from .overlay import Overlay
 
@@ -53,8 +54,8 @@ class CheckPage(QWidget):
         self.text = QLabel()
         self.text.setWordWrap(True)
         self.buttons = {
-            "yes": QPushButton("&Ja"), "no": QPushButton("&Nein"),
-            "skip": QPushButton("Über&springen"),
+            "yes": QPushButton(tr("&Yes")), "no": QPushButton(tr("&No")),
+            "skip": QPushButton(tr("&Skip")),
         }
         self.group = QButtonGroup(self)
         row = QHBoxLayout()
@@ -69,7 +70,7 @@ class CheckPage(QWidget):
             row.addWidget(button)
         row.addStretch()
         self.expected = "yes"
-        self.comment = GrowingEdit("Kommentar, beim Überspringen als Begründung nötig")
+        self.comment = GrowingEdit(tr("Comment, needed as the reason when skipping"))
         self.comment.textChanged.connect(self.edited)
         self.hint = QLabel()
         layout = QVBoxLayout(self)
@@ -113,10 +114,10 @@ class CheckPage(QWidget):
     def show_hint(self) -> None:
         """Says before moving on what the answer means for the record."""
         if self.choice == "skip":
-            text = "" if self.comment_text else "Bitte begründen, warum dieser Punkt entfällt."
+            text = "" if self.comment_text else tr("Please give the reason this point is dropped.")
         elif self.choice:
-            text = ("Gilt als bestanden." if self.choice == self.expected
-                    else "Gilt als nicht bestanden. Ein Kommentar sagt später, was auffiel.")
+            text = (tr("Counts as passed.") if self.choice == self.expected
+                    else tr("Counts as failed. A comment tells later what was noticed."))
         else:
             text = ""
         self.hint.setText(text)
@@ -157,10 +158,10 @@ class NotePage(QWidget):
 class ReasonOverlay(Overlay):
     """Why a measurement is left out. The reason goes into the report."""
 
-    def __init__(self, parent=None, title: str = "Schritt auslassen"):
-        super().__init__(title, parent)
-        self.ok_button.setText("Auslassen")
-        self.reason = GrowingEdit("Begründung, sie erscheint im Protokoll")
+    def __init__(self, parent=None, title: str = ""):
+        super().__init__(title or tr("Skip step"), parent)
+        self.ok_button.setText(tr("Skip"))
+        self.reason = GrowingEdit(tr("Reason, it appears in the report"))
         self.reason.textChanged.connect(self._update)
         self.body.addWidget(self.reason)
         self._update()

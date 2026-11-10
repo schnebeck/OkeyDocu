@@ -9,13 +9,16 @@
 from __future__ import annotations
 
 from ..campaign.service import TEXT_FIELDS
+from ..l10n import N_, tr
 from ..store import CampaignClosed
 from .common import show_error
 
-FIELD_NAMES = {"function": "Bezeichnung", "operator": "Prüfer", "verdict": "Bewertung",
-               "lower_limit": "Grenzwert", "upper_limit": "Grenzwert"}
-CLOSED_MEANWHILE = (
-    "Die Kampagne wurde inzwischen abgeschlossen. Die Änderung an der Messung ist nicht gespeichert."
+FIELD_NAMES = {
+    "function": N_("Designation"), "operator": N_("Inspector"), "verdict": N_("Verdict"),
+    "lower_limit": N_("Limit"), "upper_limit": N_("Limit"),
+}
+CLOSED_MEANWHILE = N_(
+    "The campaign has been completed in the meantime. The change to the measurement is not saved."
 )
 
 
@@ -44,7 +47,7 @@ class MeasurementEditing:
         fields = list(self.changes())
         for value_fields in self.rows.changes().values():
             fields += value_fields
-        names = [FIELD_NAMES[f] for f in fields if f not in TEXT_FIELDS and f in FIELD_NAMES]
+        names = [tr(FIELD_NAMES[f]) for f in fields if f not in TEXT_FIELDS and f in FIELD_NAMES]
         return list(dict.fromkeys(names))
 
     def _edited(self) -> None:
@@ -53,8 +56,8 @@ class MeasurementEditing:
         self.pending.setVisible(self.dirty)
         marked = self.marked_fields()
         self.pending_hint.setText(
-            f"Im Protokoll als „geändert“ vermerkt: {', '.join(marked)}." if marked
-            else "Textkorrektur, ohne Vermerk im Protokoll."
+            tr("Marked as “changed” in the report: {fields}.", fields=", ".join(marked)) if marked
+            else tr("Text correction, not marked in the report.")
         )
 
     def apply(self) -> bool:
@@ -64,7 +67,7 @@ class MeasurementEditing:
         try:
             self.app.service.edit_measurement(self.row["id"], self.changes(), self.rows.changes())
         except CampaignClosed:
-            show_error(self, CLOSED_MEANWHILE)
+            show_error(self, tr(CLOSED_MEANWHILE))
             self.discard()
             return False
         self.row = self.app.db.one("SELECT * FROM measurements WHERE id=?", self.row["id"])

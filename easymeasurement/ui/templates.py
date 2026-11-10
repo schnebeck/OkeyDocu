@@ -29,6 +29,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import plural, tr
 from ..reporting.language import languages
 from ..reporting.template_model import BLOCK_LABELS
 from .board import GutterSplitter
@@ -57,22 +58,22 @@ class TemplatesPage(
         self.choice = QComboBox()
         self.choice.currentIndexChanged.connect(self._chosen)
         self._shown_index = -1
-        save = QPushButton("Speichern")
-        copy_button = QPushButton("Als neue Vorlage")
-        self.delete_button = QPushButton("Vorlage löschen")
+        save = QPushButton(tr("Save"))
+        copy_button = QPushButton(tr("As new template"))
+        self.delete_button = QPushButton(tr("Delete template"))
         save.clicked.connect(self._save)
         copy_button.clicked.connect(self._save_as)
         self.delete_button.clicked.connect(self._delete)
         self.count = QComboBox()
-        self.count.addItem("Vorschau: 0 Messungen", 0)
-        self.count.addItem("Vorschau: 1 Messung", 1)
-        self.count.addItem("Vorschau: 4 Messungen", 4)
+        for shown in (0, 1, 4):
+            self.count.addItem(plural(shown, "Preview: {count} measurement",
+                                      "Preview: {count} measurements"), shown)
         self.count.setCurrentIndex(2)
         self.count.currentIndexChanged.connect(self.preview)
         self.preview_language = QComboBox()
         for code, name in languages().items():
             self.preview_language.addItem(name, code)
-        self.preview_language.setToolTip("In dieser Sprache zeigt die Vorschau das Protokoll")
+        self.preview_language.setToolTip(tr("The preview shows the report in this language"))
         self.preview_language.currentIndexChanged.connect(self.preview)
         self.state = QLabel()
         bar = QHBoxLayout()
@@ -94,16 +95,16 @@ class TemplatesPage(
         for kind, label in BLOCK_LABELS.items():
             menu.addAction(label, lambda kind=kind: self.add_block(kind))
         self.add_button = QToolButton()
-        self.add_button.setText("Block hinzufügen")
+        self.add_button.setText(tr("Add block"))
         self.add_button.setMenu(menu)
         self.add_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         self.up_button = QPushButton("↑")
         self.down_button = QPushButton("↓")
-        self.into_button = QPushButton("→ in Wiederholung")
-        self.out_button = QPushButton("← heraus")
-        self.remove_button = QPushButton("Entfernen")
-        self.up_button.setToolTip("Nach oben (Alt+↑)")
-        self.down_button.setToolTip("Nach unten (Alt+↓)")
+        self.into_button = QPushButton(tr("→ into repeat"))
+        self.out_button = QPushButton(tr("← out"))
+        self.remove_button = QPushButton(tr("Remove"))
+        self.up_button.setToolTip(tr("Up (Alt+↑)"))
+        self.down_button.setToolTip(tr("Down (Alt+↓)"))
         self.up_button.clicked.connect(lambda: self.move_block(-1))
         self.down_button.clicked.connect(lambda: self.move_block(1))
         self.into_button.clicked.connect(self.move_into)
@@ -137,8 +138,8 @@ class TemplatesPage(
         self.editor.setFont(QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont))
         self.editor.textChanged.connect(self._source_edited)
         self.modes = QTabWidget()
-        self.modes.addTab(visual, "Aufbau")
-        self.modes.addTab(self.editor, "Quelltext")
+        self.modes.addTab(visual, tr("Layout"))
+        self.modes.addTab(self.editor, tr("Source"))
         self.modes.currentChanged.connect(self._mode_changed)
         self.visual = visual
 

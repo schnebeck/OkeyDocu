@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+from ..l10n import tr
 from ..store import CampaignClosed
 from .records import LOCATION_SEPARATOR
 
@@ -61,7 +62,7 @@ class StructureMixin:
         rows = [self.db.one("SELECT * FROM measurements WHERE id=?", i) for i in measurement_ids]
         for row in rows:
             if self.campaign(row["campaign_id"])["status"] != "open":
-                raise CampaignClosed("Messungen abgeschlossener Kampagnen bleiben, wo sie sind.")
+                raise CampaignClosed(tr("Measurements of closed campaigns stay where they are."))
         with self.db.transaction() as connection:
             for row in rows:
                 root = self.campaign(row["campaign_id"])["asset_id"]
@@ -94,7 +95,7 @@ class StructureMixin:
 
     def rename_element(self, asset_id: int, name: str) -> None:
         if not name.strip():
-            raise StructureError("Ein Element braucht einen Namen.")
+            raise StructureError(tr("An element needs a name."))
         self.db.execute("UPDATE assets SET name=? WHERE id=?", name.strip(), asset_id)
         self._relocate(asset_id)
 
@@ -103,9 +104,9 @@ class StructureMixin:
         asset = self.db.asset(asset_id)
         if parent_id is not None:
             if parent_id in self.subtree(asset_id):
-                raise StructureError("Ein Element lässt sich nicht unter sich selbst schieben.")
+                raise StructureError(tr("An element cannot be moved below itself."))
             if self.db.asset(parent_id)["customer_id"] != asset["customer_id"]:
-                raise StructureError("Elemente bleiben bei ihrem Kunden.")
+                raise StructureError(tr("Elements stay with their customer."))
         self.db.execute("UPDATE assets SET parent_id=? WHERE id=?", parent_id, asset_id)
         self._relocate(asset_id)
 
@@ -121,11 +122,11 @@ class StructureMixin:
         """Why the element cannot go, or an empty text."""
         below = _BELOW + " SELECT count(*) AS n FROM {} WHERE {} IN (SELECT id FROM below){}"
         if self.db.one(below.format("campaigns", "asset_id", ""), asset_id)["n"]:
-            return "An diesem Element oder darunter hängt eine ganze Kampagne."
+            return tr("A whole campaign hangs on this element or below it.")
         sealed = " AND campaign_id IN (SELECT id FROM campaigns WHERE status='closed')"
         for table in ("measurements", "attachments"):
             if self.db.one(below.format(table, "asset_id", sealed), asset_id)["n"]:
-                return "Abgeschlossene Kampagnen haben hier gemessen und brauchen den Ort."
+                return tr("Closed campaigns measured here and need the place.")
         return ""
 
     def delete_element(self, asset_id: int) -> None:

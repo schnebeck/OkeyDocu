@@ -11,6 +11,7 @@ from __future__ import annotations
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QListWidget, QListWidgetItem
 
+from ..l10n import tr
 from .common import ROW_ID, AppContext
 from .kind_catalog import KindCatalog
 from .overlay import Overlay
@@ -20,13 +21,13 @@ class CleanupOverlay(Overlay):
     """Each line is a whole branch: an element and everything below it, all of it empty."""
 
     def __init__(self, app: AppContext, root_id: int, empty: list[int], parent=None):
-        super().__init__("Leere Elemente entfernen", parent, width=560)
-        self.ok_button.setText("Entfernen")
+        super().__init__(tr("Remove empty elements"), parent, width=560)
+        self.ok_button.setText(tr("Remove"))
         catalog = KindCatalog(app.db)
         intro = QLabel(
-            "An diesen Elementen und allem darunter hängt keine Messung, keine Notiz und keine"
-            " Datei, in keiner Kampagne." if empty else
-            "Hier gibt es keine leeren Elemente. Alles hat Messungen, Notizen oder Dateien."
+            tr("These elements and everything below them hold no measurement, no note and no"
+               " file, in no campaign.") if empty else
+            tr("There are no empty elements here. Everything has measurements, notes or files.")
         )
         intro.setWordWrap(True)
         self.list = QListWidget()
@@ -37,7 +38,7 @@ class CleanupOverlay(Overlay):
             below = len(app.service.subtree(asset_id)) - 1
             text = app.service.place_path(asset_id, root_id)
             if below:
-                text += f"  (mit {below} darunter)"
+                text += "  " + tr("(with {count} below)", count=below)
             item = QListWidgetItem(catalog.icon(asset["kind"]), text)
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
             item.setCheckState(Qt.CheckState.Checked)
@@ -48,7 +49,7 @@ class CleanupOverlay(Overlay):
         self.body.addWidget(self.list)
         if not empty:
             self.ok_button.hide()
-            self.cancel_button.setText("Zurück")
+            self.cancel_button.setText(tr("Back"))
         self._update()
 
     def chosen(self) -> list[int]:
@@ -58,7 +59,7 @@ class CleanupOverlay(Overlay):
     def _update(self) -> None:
         count = len(self.chosen())
         self.ok_button.setEnabled(count > 0)
-        self.ok_button.setText(f"{count} entfernen" if count else "Entfernen")
+        self.ok_button.setText(tr("Remove {count}", count=count) if count else tr("Remove"))
 
     def first_field(self):
         return self.list

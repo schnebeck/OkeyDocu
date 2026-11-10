@@ -15,6 +15,7 @@ import threading
 import time
 from datetime import datetime
 
+from ...l10n import tr
 from ..base import DeviceBlocked, DeviceError
 from .channels import (  # noqa: F401
     BLUETOOTH_CHANNEL,
@@ -148,7 +149,8 @@ class PrimeTransport:
     def query(self, command: str, timeout_s: float | None = None) -> bytes:
         """Send one allowed command and return the verified `data` payload."""
         if command not in ALLOWED_COMMANDS:
-            raise ForbiddenCommand(f"Nicht auf der Liste erlaubter Befehle: {command!r}")
+            raise ForbiddenCommand(tr("Not on the list of allowed commands: {command}",
+                                       command=repr(command)))
         return self._exchange(command, command, timeout_s)
 
     def query_text(self, command: str, timeout_s: float = TEXT_TIMEOUT_S) -> str:
@@ -157,7 +159,8 @@ class PrimeTransport:
         A line has no echo, so one left over from a timed-out command is thrown away first.
         """
         if command not in TEXT_COMMANDS:
-            raise ForbiddenCommand(f"Nicht auf der Liste erlaubter Befehle: {command!r}")
+            raise ForbiddenCommand(tr("Not on the list of allowed commands: {command}",
+                                       command=repr(command)))
         with self._command_lock:
             while not self._lines.empty():
                 self._lines.get_nowait()
@@ -165,10 +168,12 @@ class PrimeTransport:
             try:
                 line = self._lines.get(timeout=timeout_s)
             except queue.Empty:
-                raise DeviceError(f"Keine Antwort auf {command}.") from None
+                raise DeviceError(tr("No answer to {command}.", command=command)) from None
         code, _, data = line.decode("utf-8", "replace").partition(";")
         if code != "0":
-            raise InstrumentRefused(int(code), f"Das Messgerät meldet Fehler {code} auf {command}.")
+            raise InstrumentRefused(
+                int(code),
+                tr("The instrument reports error {code} on {command}.", code=code, command=command))
         return data
 
     def set_clock(self, moment: datetime) -> None:
@@ -187,11 +192,11 @@ class PrimeTransport:
         try:
             self._channel.write(command.encode("ascii") + b"\n")
         except OSError as err:
-            raise LinkLost("Die Verbindung zum Messgerät ist abgerissen.") from err
+            raise LinkLost(tr("The connection to the instrument broke off.")) from err
 
     def _check_link(self) -> None:
         if self.failure is not None:
-            raise LinkLost("Die Verbindung zum Messgerät ist abgerissen.")
+            raise LinkLost(tr("The connection to the instrument broke off."))
 
     def _await_reply(self, echo_start: str, timeout_s: float | None) -> bytes:
         deadline = time.monotonic() + (self._timeout_s if timeout_s is None else timeout_s)
@@ -199,9 +204,8 @@ class PrimeTransport:
             try:
                 frame = self._replies.get(timeout=max(deadline - time.monotonic(), 0))
             except queue.Empty:
-                raise DeviceError(
-                    f"Keine Antwort auf {echo_start}. Ist das Messgerät eingeschaltet?"
-                ) from None
+                raise DeviceError(tr("No answer to {command}. Is the instrument switched on?",
+                                     command=echo_start)) from None
             if frame is None:
                 self._replies.put(None)
                 self._check_link()
@@ -214,17 +218,19 @@ class PrimeTransport:
     def _decode(command: str, raw: bytes) -> bytes:
         match = _REPLY_RE.search(raw)
         if not match:
-            raise DeviceError(f"Unvollständige Antwort auf {command} ({len(raw)} Byte).")
+            raise DeviceError(tr("Incomplete answer to {command} ({size} bytes).",
+                                    command=command, size=len(raw)))
         error = int(match["error"])
         if error == BLOCKED_ERROR:
-            raise DeviceBlocked(
-                "Das Messgerät gibt die Daten gerade nicht frei (Fehler 402). Bitte den Drehschalter"
-                " auf Setup stellen und prüfen, ob ein anderes Programm verbunden ist."
-            )
+            raise DeviceBlocked(tr(
+                "The instrument does not release its data right now (error 402). Please turn the"
+                " rotary switch to Setup and check whether another program is connected."))
         if error != 0:
-            raise InstrumentRefused(error, f"Das Messgerät meldet Fehler {error} auf {command}.")
+            raise InstrumentRefused(error, tr("The instrument reports error {code} on {command}.",
+                                              code=error, command=command))
         data = match["cdata"] if match["cdata"] is not None else match["plain"] or b""
         digest = match["md5"]
         if digest and hashlib.md5(data).hexdigest() != digest.decode().lower():
-            raise DeviceError(f"Prüfsumme der Antwort auf {command} stimmt nicht.")
+            raise DeviceError(tr("The checksum of the answer to {command} does not match.",
+                                command=command))
         return data

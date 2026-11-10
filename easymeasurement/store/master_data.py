@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import sqlite3
 
+from ..l10n import tr
+
 
 class MasterDataMixin:
     """What campaigns refer to: who, what and how it is reported."""
@@ -28,7 +30,8 @@ class MasterDataMixin:
         """Only the fields given change; unknown names are refused."""
         columns = [key for key in values if key in self.CUSTOMER_FIELDS]
         if len(columns) != len(values):
-            raise ValueError(f"Unbekannte Kundenfelder: {set(values) - set(columns)}")
+            raise ValueError(
+                tr("Unknown customer fields: {fields}", fields=set(values) - set(columns)))
         self.execute(
             f"UPDATE customers SET {', '.join(f'{key}=?' for key in columns)} WHERE id=?",
             *(values[key] for key in columns), customer_id,

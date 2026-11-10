@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import plural, tr
 from ..store.kinds import Kind
 from .board import GutterSplitter
 from .campaign_list import heading
@@ -49,9 +50,9 @@ class KindsPage(QWidget):
         self.kinds = QListWidget()
         self.kinds.setIconSize(QSize(24, 24))
         self.kinds.currentItemChanged.connect(lambda item, _: self._show(item))
-        add = QPushButton("Neuer Typ")
+        add = QPushButton(tr("New kind"))
         add.clicked.connect(self._add)
-        self.remove_button = QPushButton("Löschen …")
+        self.remove_button = QPushButton(tr("Delete …"))
         self.remove_button.clicked.connect(self._remove)
         buttons = QHBoxLayout()
         buttons.addWidget(add)
@@ -59,7 +60,7 @@ class KindsPage(QWidget):
         left = QWidget()
         left_layout = QVBoxLayout(left)
         left_layout.setContentsMargins(0, 0, 0, 0)
-        left_layout.addWidget(heading("Strukturtypen", 11))
+        left_layout.addWidget(heading(tr("Structure kinds"), 11))
         left_layout.addWidget(self.kinds, 1)
         left_layout.addLayout(buttons)
 
@@ -75,26 +76,26 @@ class KindsPage(QWidget):
             self.device.addItem(text, key)
         self.device.activated.connect(lambda _: self._save())
         self.izytron = QSpinBox(maximum=9999)
-        self.izytron.setSpecialValueText("keiner")
+        self.izytron.setSpecialValueText(tr("none", context="type code"))
         self.izytron.editingFinished.connect(self._save)
-        self.interval = QSpinBox(maximum=240, suffix=" Monate")
-        self.interval.setSpecialValueText("keine Wiederholung")
+        self.interval = QSpinBox(maximum=240, suffix=" " + tr("months"))
+        self.interval.setSpecialValueText(tr("no repetition"))
         self.interval.editingFinished.connect(self._save)
         self.features = FeatureTable()
         self.features.edited.connect(self._save)
         self.usage = QLabel()
         self.usage.setEnabled(False)
         form = QFormLayout()
-        form.addRow("Bezeichnung", self.label)
-        form.addRow("Symbol", self.icon)
-        form.addRow("Am PROFITEST PRIME", self.device)
-        form.addRow("IZYTRON-Typcode", self.izytron)
-        form.addRow("Prüfintervall", self.interval)
+        form.addRow(tr("Label"), self.label)
+        form.addRow(tr("Icon"), self.icon)
+        form.addRow(tr("On the PROFITEST PRIME"), self.device)
+        form.addRow(tr("IZYTRON type code"), self.izytron)
+        form.addRow(tr("Inspection interval"), self.interval)
         self.editor = QWidget()
         right = QVBoxLayout(self.editor)
         right.setContentsMargins(0, 0, 0, 0)
         right.addLayout(form)
-        right.addWidget(heading("Merkmale", 11))
+        right.addWidget(heading(tr("Features"), 11))
         right.addWidget(self.features, 1)
         right.addWidget(self.usage)
 
@@ -114,7 +115,8 @@ class KindsPage(QWidget):
         self.kinds.clear()
         for kind in sorted(catalog.all, key=lambda k: k.label.casefold()):
             used = self.app.db.kind_usage(kind.key)
-            text = kind.label + (f"\n{used} in Gebrauch" if used else "\nunbenutzt")
+            usage = tr("{count} in use", count=used) if used else tr("unused")
+            text = f"{kind.label}\n{usage}"
             item = QListWidgetItem(catalog.icon(kind.key), text)
             item.setData(ROW_ID, kind.key)
             self.kinds.addItem(item)
@@ -142,8 +144,12 @@ class KindsPage(QWidget):
         self.interval.setValue(kind.interval_months)
         self.features.show_features(kind.features)
         used = self.app.db.kind_usage(kind.key)
-        self.usage.setText(f"{used} Elemente sind von diesem Typ." if used else
-                           "Kein Element ist von diesem Typ.")
+        if used:
+            usage = plural(used, "{count} element is of this kind.",
+                           "{count} elements are of this kind.")
+        else:
+            usage = tr("No element is of this kind.")
+        self.usage.setText(usage)
 
     def _save(self) -> None:
         key = self.current_key()
@@ -163,8 +169,9 @@ class KindsPage(QWidget):
             self.changed.emit()
 
     def _add(self) -> None:
-        key = self.app.db.new_kind_key("Neuer Typ")
-        self.app.db.save_kind(Kind(key, "Neuer Typ"))
+        label = tr("New kind")
+        key = self.app.db.new_kind_key(label)
+        self.app.db.save_kind(Kind(key, label))
         self.refresh(select=key)
         self.label.setFocus()
         self.label.selectAll()

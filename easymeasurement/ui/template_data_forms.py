@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
 )
 
+from ..l10n import tr
 from ..model import FUNCTION_LABELS
 
 
@@ -31,7 +32,7 @@ class TemplateDataForms:
     def _form_fields(self, block: dict, form: QFormLayout) -> None:
         rows = block.setdefault("rows", [])
         table = QTableWidget(len(rows), 2)
-        table.setHorizontalHeaderLabels(["Bezeichnung", "Inhalt"])
+        table.setHorizontalHeaderLabels([tr("Label"), tr("Content")])
         table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         table.verticalHeader().hide()
         table.setMinimumHeight(150)
@@ -65,8 +66,8 @@ class TemplateDataForms:
             else:
                 table.setItem(row, 1, QTableWidgetItem((rows[row][1] + " " + code).strip()))
 
-        add = QPushButton("Zeile hinzufügen")
-        remove = QPushButton("Zeile entfernen")
+        add = QPushButton(tr("Add row"))
+        remove = QPushButton(tr("Remove row"))
         add.clicked.connect(add_row)
         remove.clicked.connect(remove_row)
         line = QHBoxLayout()
@@ -76,7 +77,8 @@ class TemplateDataForms:
         self.rows_table = table
         form.addRow(table)
         form.addRow(line)
-        features = QCheckBox("Merkmale der geprüften Anlage anhängen (nur die ausgefüllten)")
+        features = QCheckBox(
+            tr("Append features of the inspected installation (only the filled-in ones)"))
         features.setChecked(block.get("features") == "asset")
 
         def toggled(on: bool) -> None:
@@ -92,7 +94,7 @@ class TemplateDataForms:
 
     def _form_measurements(self, block: dict, form: QFormLayout) -> None:
         function = QComboBox()
-        function.addItem("Alle Messungen und Prüfungen", "*")
+        function.addItem(tr("All measurements and checks"), "*")
         for key, label in FUNCTION_LABELS.items():
             function.addItem(label, key)
         function.setCurrentIndex(max(function.findData(block.get("function", "*")), 0))
@@ -105,11 +107,11 @@ class TemplateDataForms:
             self._changed()
 
         function.currentIndexChanged.connect(function_changed)
-        form.addRow("Zeigt", function)
+        form.addRow(tr("Shows"), function)
 
         none = block.setdefault("none", {})
-        show_text = QRadioButton("Satz anzeigen")
-        hide = QRadioButton("Block ausblenden")
+        show_text = QRadioButton(tr("Show sentence"))
+        hide = QRadioButton(tr("Hide block"))
         (hide if none.get("hide") else show_text).setChecked(True)
         text = QLineEdit(str(none.get("text", "Nicht gemessen.")))
         text.setEnabled(not none.get("hide"))
@@ -130,13 +132,13 @@ class TemplateDataForms:
         choice.addWidget(hide)
         choice.addStretch()
         self.none_hide, self.none_text = hide, text
-        form.addRow(QLabel("<b>Bei 0 Messungen</b>"))
+        form.addRow(QLabel(tr("<b>With 0 measurements</b>")))
         form.addRow(choice)
-        form.addRow("Text", text)
+        form.addRow(tr("Text"), text)
         form.addRow("", self._placeholder_box(text.insert))
 
         one = block.setdefault("one", {})
-        location = QCheckBox("Messort anzeigen")
+        location = QCheckBox(tr("Show measuring location"))
         location.setChecked(one.get("location", True))
 
         def location_changed(checked: bool) -> None:
@@ -146,13 +148,13 @@ class TemplateDataForms:
             self._changed()
 
         location.toggled.connect(location_changed)
-        form.addRow(QLabel("<b>Bei 1 Messung</b> (Formular)"))
+        form.addRow(QLabel(tr("<b>With 1 measurement</b> (form)")))
         form.addRow(location)
 
         many = block.setdefault("many", {})
-        summary = QCheckBox("Min- und Max-Zeile anzeigen")
+        summary = QCheckBox(tr("Show min and max row"))
         summary.setChecked(many.get("summary", True))
         summary.toggled.connect(lambda v: (many.__setitem__("summary", v), self._changed()))
         self.many_summary = summary
-        form.addRow(QLabel("<b>Bei mehreren Messungen</b> (Tabelle)"))
+        form.addRow(QLabel(tr("<b>With several measurements</b> (table)")))
         form.addRow(summary)

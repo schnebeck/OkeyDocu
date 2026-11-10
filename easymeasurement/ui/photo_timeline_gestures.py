@@ -13,6 +13,7 @@ from typing import Callable
 from PySide6.QtCore import QPoint
 from PySide6.QtWidgets import QApplication
 
+from ..l10n import plural, tr
 from .photo_timeline_data import TrackGap, TrackPhoto
 from .photo_timeline_model import (
     Zone,
@@ -110,12 +111,17 @@ class PhotoGesture(Gesture):
     def _words(self) -> str:
         if self.zone is Zone.SHIFT:
             changes = self.view.data.changed_owners()
-            moved = f" · {changes} Fotos wechseln die Messung" if changes else ""
-            return f"Alle Fotos verschieben: {shift_text(self.view.data.shift)}{moved}"
+            words = tr("Move all photos: {shift}", shift=shift_text(self.view.data.shift))
+            if not changes:
+                return words
+            return words + " · " + plural(changes, "{count} photo changes its measurement",
+                                          "{count} photos change their measurement")
         if self.zone is Zone.PIN and self.target:
             moment = to_moment(self.target.at).strftime("%H:%M:%S")
-            return f"Loslassen: nur dieses Foto an {self.target.label} {moment} heften"
-        return "Dieses Foto bleibt an seiner Messung. Zum Ändern nach oben auf eine Messung ziehen."
+            return tr("Let go: pin only this photo to {mark} {moment}", mark=self.target.label,
+                      moment=moment)
+        return tr("This photo stays at its measurement. To change, drag it up onto a"
+                  " measurement.")
 
     def release(self) -> None:
         view = self.view
@@ -153,7 +159,8 @@ class GapGesture(Gesture):
             self.start_seconds, pos.x() - self.origin.x(), view.axis.px_per_s
         )
         view.place_photos()
-        view.hint.emit(f"Lücke {duration_text(self.gap.seconds)}: die Fotos danach rücken mit")
+        view.hint.emit(tr("Gap {duration}: the photos after it move along",
+                          duration=duration_text(self.gap.seconds)))
 
     def release(self) -> None:
         seconds = self.gap.seconds

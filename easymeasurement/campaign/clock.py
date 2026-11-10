@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 
 from ..devices.base import Capability, DeviceError, MeterDriver
+from ..l10n import N_, tr
 from ..model import DeviceIdentity
 from .assignment import assign
 from .records import NO_INSTRUMENT, _iso
@@ -23,6 +24,12 @@ from .records import NO_INSTRUMENT, _iso
 CLOCK_TOLERANCE_S = 30.0
 # Reading the clock takes a moment and it counts whole seconds.
 CLOCK_SET_ACCURACY_S = 3.0
+# How the clock got right, by the kind of the last clock check.
+SYNCED_TEXTS = {
+    "set": N_("Instrument clock in sync, set at {time}"),
+    "measured": N_("Instrument clock in sync, checked at {time}"),
+    "manual": N_("Instrument clock in sync, stated by hand at {time}"),
+}
 
 
 class ClockState(Enum):
@@ -59,10 +66,9 @@ def set_instrument_clock(driver: MeterDriver) -> float:
     driver.sync_clock()
     after = measure_clock_offset(driver)
     if abs(after) >= CLOCK_SET_ACCURACY_S:
-        raise DeviceError(
-            f"Die Uhr des Messgeräts ließ sich nicht stellen, sie weicht weiter um {after:+.0f} s"
-            " ab. Bitte erneut versuchen."
-        )
+        raise DeviceError(tr(
+            "The instrument's clock could not be set, it is still {offset} s off."
+            " Please try again.", offset=f"{after:+.0f}"))
     return before
 
 
@@ -108,19 +114,17 @@ class ClockMixin:
             return None
         checks = self.clock_checks(campaign_id)
         if not checks:
-            return ClockStatus(ClockState.UNKNOWN, "Geräteuhr nicht geprüft")
+            return ClockStatus(ClockState.UNKNOWN, tr("Instrument clock not checked"))
         last = checks[-1]
         moment = datetime.fromisoformat(last["checked_at"])
         if abs(last["offset_s"]) >= CLOCK_SET_ACCURACY_S:
             return ClockStatus(
                 ClockState.OFFSET,
-                f"Geräteuhr weicht {last['offset_s']:+.0f} s ab, Zeiten werden korrigiert",
+                tr("Instrument clock is {offset} s off, times are corrected",
+                   offset=f"{last['offset_s']:+.0f}"),
             )
-        action = {"set": "gestellt", "measured": "geprüft", "manual": "von Hand festgelegt"}
-        return ClockStatus(
-            ClockState.SYNCED,
-            f"Geräteuhr synchron, {action[last['kind']]} um {moment:%H:%M:%S}",
-        )
+        text = tr(SYNCED_TEXTS[last["kind"]], time=f"{moment:%H:%M:%S}")
+        return ClockStatus(ClockState.SYNCED, text)
 
     def _record_clock(
         self, campaign_id: int, kind: str, offset_s: float, offset_before_s: float | None = None
@@ -169,10 +173,9 @@ class ClockMixin:
         # Set at the start is the normal case. Set later, the measurements of this
         # campaign rest on two different offsets.
         if any(check["kind"] == "set" for check in self.clock_checks(campaign_id)[1:]):
-            raise DeviceError(
-                "In dieser Kampagne wurde die Geräteuhr gestellt. Ein einzelner Versatz"
-                " würde nicht für alle Messungen gelten."
-            )
+            raise DeviceError(tr(
+                "The instrument clock was set in this campaign. A single offset"
+                " would not apply to all measurements."))
         rows = self.db.query(
             "SELECT * FROM measurements WHERE campaign_id=?"
             " AND device_time IS NOT NULL AND source LIKE 'device:%'",

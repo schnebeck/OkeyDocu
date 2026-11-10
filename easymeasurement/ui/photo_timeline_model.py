@@ -13,6 +13,8 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 
+from ..l10n import plural, tr
+
 EPOCH = datetime(2000, 1, 1)  # a midnight, so whole hours fall on round numbers
 MIN_GAP_S = 5
 GUTTER_PX = 74  # the track names stand left of the time axis
@@ -93,7 +95,7 @@ def tick_step(px_per_s: float) -> int:
 def tick_text(seconds: float, step: int) -> str:
     moment = to_moment(seconds)
     if moment.hour == moment.minute == moment.second == 0:
-        return moment.strftime("%d.%m.")
+        return tr("{month}-{day}", month=f"{moment.month:02d}", day=f"{moment.day:02d}")
     return moment.strftime("%H:%M:%S" if step < 60 else "%H:%M")
 
 
@@ -110,13 +112,13 @@ def ticks(axis: TimeAxis) -> list[tuple[float, str]]:
 
 
 def duration_text(seconds: float) -> str:
-    """A span in plain words: 45 s, 2 min 30 s, 1 h 5 min, 2 Tage 3 h."""
+    """A span in plain words: 45 s, 2 min 30 s, 1 h 5 min, 2 days 3 h."""
     total = round(abs(seconds))
     days, rest = divmod(total, 86400)
     hours, rest = divmod(rest, 3600)
     minutes, secs = divmod(rest, 60)
     if days:
-        parts = [f"{days} Tag" if days == 1 else f"{days} Tage", f"{hours} h" if hours else ""]
+        parts = [plural(days, "{count} day", "{count} days"), f"{hours} h" if hours else ""]
     elif hours:
         parts = [f"{hours} h", f"{minutes} min" if minutes else ""]
     elif minutes:
@@ -128,8 +130,10 @@ def duration_text(seconds: float) -> str:
 
 def shift_text(seconds: float) -> str:
     if round(seconds) == 0:
-        return "Fotos zur Aufnahmezeit"
-    return f"Fotos {duration_text(seconds)} {'später' if seconds > 0 else 'früher'}"
+        return tr("Photos at their time taken")
+    if seconds > 0:
+        return tr("Photos {duration} later", duration=duration_text(seconds))
+    return tr("Photos {duration} earlier", duration=duration_text(seconds))
 
 
 def default_gap_seconds(px_per_s: float) -> int:

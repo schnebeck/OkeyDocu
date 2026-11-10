@@ -11,6 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
 
+from ..l10n import N_
 from .base import FoundInstrument, MeterDriver
 
 
@@ -52,4 +53,4 @@ def _load_builtin() -> None:
     from .simulator import SimulatedMeter
 
     register_driver(DRIVER_KEY, LABEL, ProfitestPrimeDriver, find_primes)
-    register_driver("simulator", "Simulator (ohne Hardware)", SimulatedMeter)
+    register_driver("simulator", N_("Simulator (no hardware)"), SimulatedMeter)

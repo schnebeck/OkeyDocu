@@ -12,6 +12,7 @@ from importlib import resources
 
 from PySide6.QtGui import QIcon
 
+from ..l10n import tr
 from ..store.kinds import FALLBACK_ICON, Kind, shipped_kinds
 
 CUSTOMER_ICON, UNPLACED_ICON = "customer", "unplaced"
@@ -34,7 +35,7 @@ def icon_text(name: str) -> str:
     """A German name for a picture: the shipped kind that uses it, or a description."""
     if not _ICON_TEXT:
         _ICON_TEXT.update({kind.icon: kind.label for kind in shipped_kinds()})
-        _ICON_TEXT.update(building="Gebäude", room="Raum", element="Allgemein")
+        _ICON_TEXT.update(building=tr("Building"), room=tr("Room"), element=tr("General"))
     return _ICON_TEXT.get(name, name.replace("_", " "))
 
 

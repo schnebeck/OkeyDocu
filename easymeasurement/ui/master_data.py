@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import N_, tr
 from .board import Board, GutterSplitter
 from .campaign_list import heading
 from .common import ROW_ID, AppContext, show_error
@@ -32,9 +33,8 @@ from .kind_catalog import CUSTOMER_ICON, element_icon
 from .master_data_forms import CustomerForm
 from .structure_panel import StructurePanel
 
-ARRANGE_HINT = ("Ziehen ordnet um, auch ganz nach oben. Mehrere markieren und"
-                " „Zusammenfassen“ hängt sie unter ein neues Element, etwa Maschinen unter"
-                " eine Anlage.")
+ARRANGE_HINT = N_("Dragging reorders, even to the very top. Marking several and “Combine” puts"
+                  " them under a new element, such as machines under an installation.")
 
 
 class MasterDataPage(QWidget):
@@ -48,9 +48,9 @@ class MasterDataPage(QWidget):
         self.app = app
         self.customers = QListWidget()
         self.customers.currentItemChanged.connect(lambda item, _: self._customer_chosen(item))
-        add_customer = QPushButton("Neuer Kunde")
+        add_customer = QPushButton(tr("New customer"))
         add_customer.clicked.connect(self._add_customer)
-        self.delete_button = QPushButton("Löschen …")
+        self.delete_button = QPushButton(tr("Delete …"))
         self.delete_button.clicked.connect(self._delete)
         buttons = QHBoxLayout()
         buttons.addWidget(add_customer)
@@ -58,14 +58,14 @@ class MasterDataPage(QWidget):
         left = QWidget()
         left_layout = QVBoxLayout(left)
         left_layout.setContentsMargins(0, 0, 0, 0)
-        left_layout.addWidget(heading("Kunden", 11))
+        left_layout.addWidget(heading(tr("Customers"), 11))
         left_layout.addWidget(self.customers, 1)
         left_layout.addLayout(buttons)
 
         self.structure = StructurePanel(app)
-        self.structure.set_hint(ARRANGE_HINT)
-        kinds = QToolButton(text="Typen …")
-        kinds.setToolTip("Strukturtypen und ihre Merkmale bearbeiten")
+        self.structure.set_hint(tr(ARRANGE_HINT))
+        kinds = QToolButton(text=tr("Kinds …"))
+        kinds.setToolTip(tr("Edit structure kinds and their features"))
         kinds.clicked.connect(self.kinds_requested)
         self.structure.bar.row.addWidget(kinds)
         self.structure.bar.even_out()
@@ -79,7 +79,7 @@ class MasterDataPage(QWidget):
         self.element_form = ElementForm(app)
         self.element_form.changed.connect(self._element_changed)
         self.forms = QStackedWidget()
-        self.forms.addWidget(QLabel("Links einen Kunden wählen oder anlegen."))
+        self.forms.addWidget(QLabel(tr("Choose or create a customer on the left.")))
         self.forms.addWidget(self.customer_form)
         self.forms.addWidget(self.element_form)
         self.form_title = heading("", 11)
@@ -141,11 +141,11 @@ class MasterDataPage(QWidget):
         if asset_id is not None and self.app.db.asset(asset_id) is not None:
             self.element_form.load(asset_id)
             self.forms.setCurrentWidget(self.element_form)
-            self.form_title.setText("Element")
+            self.form_title.setText(tr("Element"))
         elif self.customer_id() is not None:
             self.customer_form.load(self.customer_id())
             self.forms.setCurrentWidget(self.customer_form)
-            self.form_title.setText("Kunde")
+            self.form_title.setText(tr("Customer"))
         else:
             self.forms.setCurrentIndex(0)
             self.form_title.setText("")
@@ -161,7 +161,7 @@ class MasterDataPage(QWidget):
         self.changed.emit()
 
     def _add_customer(self) -> None:
-        customer = self.app.db.add_customer("Neuer Kunde")
+        customer = self.app.db.add_customer(tr("New customer"))
         self.refresh()
         self.select_customer(customer)
         self.customer_form.fields["name"].setFocus()
@@ -174,13 +174,15 @@ class MasterDataPage(QWidget):
         if customer is None:
             return
         name = self.app.db.customer(customer)["name"]
-        answer = QMessageBox.question(self, "Löschen", f"Den Kunden „{name}“ löschen?")
+        answer = QMessageBox.question(self, tr("Delete"),
+                                      tr("Delete the customer “{name}”?", name=name))
         if answer != QMessageBox.StandardButton.Yes:
             return
         try:
             self.app.db.execute("DELETE FROM customers WHERE id=?", customer)
         except sqlite3.IntegrityError:
-            show_error(self, "Das geht nicht: Der Kunde hat noch Anlagen. Erst diese löschen.")
+            show_error(self, tr("Not possible: the customer still has installations. Delete them"
+                                  " first."))
             return
         self.refresh()
         self.changed.emit()

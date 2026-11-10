@@ -12,6 +12,7 @@ import json
 from dataclasses import replace
 from datetime import datetime
 
+from ..l10n import day, tr
 from ..model import FUNCTION_LABELS, SIGHT_CHECK_FUNCTION, Parameter, conductor_of
 from .plan import Plan, PlanStep
 
@@ -61,8 +62,8 @@ class RepeatMixin:
                 question=question, run=row["run_name"] or "", run_kind=row["run_kind"] or "",
             ))
         moment = datetime.fromisoformat(previous["closed_at"])
-        return Plan(REPEAT, f"Wiederholung der Prüfung vom {moment:%d.%m.%Y}", True,
-                    tuple(steps))
+        title = tr("Repeat of the inspection of {day}", day=day(moment))
+        return Plan(REPEAT, title, True, tuple(steps))
 
     def make_repeat(self, campaign_id: int, previous_id: int) -> None:
         self.assign_plan(campaign_id, self.repeat_plan(previous_id))

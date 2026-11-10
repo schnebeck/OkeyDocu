@@ -12,6 +12,7 @@ from PySide6.QtCore import QPointF, QRectF, QSize, Qt, Signal
 from PySide6.QtGui import QColor, QPainter, QPen, QPixmap
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
+from ..l10n import tr
 from ..reporting.logo import MARGIN_MM, PAGE_HEIGHT_MM, PAGE_WIDTH_MM, clamp_placement
 
 _HANDLE_PX = 12
@@ -32,7 +33,7 @@ class LogoPlacer(QWidget):
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        self.setToolTip("Logo ziehen zum Verschieben, Ecke ziehen zum Skalieren")
+        self.setToolTip(tr("Drag the logo to move it, drag the corner to scale it"))
 
     @property
     def scale(self) -> float:

@@ -13,6 +13,7 @@ from PySide6.QtWidgets import QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
 
 from ..devices import find_instruments
 from ..devices.profitest_prime.discovery import DRIVER_KEY
+from ..l10n import tr
 from .instrument_log import InstrumentLogOverlay
 from .instrument_prepare import InstrumentPrepareOverlay
 from .instrument_setup import InstrumentSetupOverlay
@@ -27,27 +28,28 @@ class SettingsOverlay(Overlay):
     and transfers what is missing; a Bluetooth instrument is paired first."""
 
     def __init__(self, parent=None, app=None):
-        super().__init__("Messgeräte", parent)
+        super().__init__(tr("Instruments"), parent)
         self.app = app
-        self.ok_button.setText("Zurück")
+        self.ok_button.setText(tr("Back"))
         self.cancel_button.hide()
         self.instruments = QListWidget()
         self.instruments.setMinimumHeight(110)
-        self.hint = QLabel("Noch kein Messgerät eingerichtet. Per USB angeschlossene Geräte"
-                           " erscheinen von selbst.")
+        self.hint = QLabel(tr("No instrument set up yet. Instruments connected by USB"
+                              " appear by themselves."))
         self.hint.setWordWrap(True)
-        self.set_up_button = QPushButton("Messgerät über Bluetooth einrichten …")
+        self.set_up_button = QPushButton(tr("Set up instrument via Bluetooth …"))
         self.set_up_button.clicked.connect(self._set_up_instrument)
-        self.prepare_button = QPushButton("Einrichten …")
-        self.prepare_button.setToolTip("Prüft, was das Messgerät hier schon hat, und überträgt,"
-                                       " was fehlt. Drehrad dafür auf Setup.")
+        self.prepare_button = QPushButton(tr("Set up …"))
+        self.prepare_button.setToolTip(tr("Checks what the instrument already has here and"
+                                          " transfers what is missing. Rotary switch to Setup."))
         self.prepare_button.clicked.connect(self._prepare_chosen)
-        self.test_button = QPushButton("Testen …")
-        self.test_button.setToolTip("Verbindet kurz und prüft das Messgerät, ohne etwas zu stellen"
-                                    " oder zu messen. Das Ergebnis kommt ins Geräteprotokoll.")
+        self.test_button = QPushButton(tr("Test …"))
+        self.test_button.setToolTip(tr("Connects briefly and checks the instrument without setting"
+                                       " or measuring anything. The result goes into the"
+                                       " instrument log."))
         self.test_button.clicked.connect(self._test_chosen)
-        self.log_button = QPushButton("Geräteprotokoll …")
-        self.log_button.setToolTip("Tests und Kampagnen je Messgerät, ohne Verbindung")
+        self.log_button = QPushButton(tr("Instrument log …"))
+        self.log_button.setToolTip(tr("Tests and campaigns per instrument, without a connection"))
         self.log_button.clicked.connect(
             lambda: InstrumentLogOverlay(self.app, self).exec() if self.app else None)
         self.instruments.currentRowChanged.connect(lambda _: self._update())
@@ -72,7 +74,7 @@ class SettingsOverlay(Overlay):
         for instrument in found:
             item = QListWidgetItem(instrument.label)
             item.setData(FOUND, instrument)
-            item.setToolTip("Doppelklick: einrichten")
+            item.setToolTip(tr("Double-click: set up"))
             self.instruments.addItem(item)
         self.hint.setVisible(not found)
         if found:

@@ -14,6 +14,7 @@ from typing import Callable
 from PySide6.QtCore import QDateTime
 from PySide6.QtWidgets import QDateTimeEdit, QHBoxLayout, QLabel, QMenu, QPushButton, QWidget
 
+from ..l10n import moment, tr
 from ..model import Verdict
 from ..reporting.context import VERDICT_TEXT
 from .common import function_text, value_line
@@ -26,17 +27,17 @@ class PhotoStartOverlay(Overlay):
     """Asks when the first photo stands on the timeline. All others keep their distance."""
 
     def __init__(self, place: datetime, taken: datetime, parent: QWidget):
-        super().__init__("Start der Fotos setzen", parent, width=440)
+        super().__init__(tr("Set the start of the photos"), parent, width=440)
         self.taken = taken
-        self.ok_button.setText("Übernehmen")
+        self.ok_button.setText(tr("Apply"))
         self.body.addWidget(QLabel(
-            "Wann soll das erste Foto stehen? Alle anderen Fotos rücken mit."
+            tr("Where should the first photo stand? All other photos move along.")
         ))
         self.edit = QDateTimeEdit(QDateTime(place))
         self.edit.setDisplayFormat("dd.MM.yyyy HH:mm:ss")
         self.edit.setCalendarPopup(True)
-        reset = QPushButton("Aufnahmezeit")
-        reset.setToolTip(f"Die Zeit der Kamera: {taken:%d.%m.%Y %H:%M:%S}")
+        reset = QPushButton(tr("Time taken"))
+        reset.setToolTip(tr("The camera's time: {moment}", moment=moment(taken, seconds=True)))
         reset.clicked.connect(lambda: self.edit.setDateTime(QDateTime(taken)))
         row = QHBoxLayout()
         row.addWidget(self.edit, 1)
@@ -58,7 +59,7 @@ class TimelineAsking:
         data = self.view.data
         first = data.first_taken()
         if first is None:
-            self.hint_label.setText("Es steht noch kein Foto auf der Zeitleiste.")
+            self.hint_label.setText(tr("There is no photo on the timeline yet."))
             return
         overlay = PhotoStartOverlay(data.first_place(), first, self)
         if overlay.exec():
@@ -74,44 +75,45 @@ class TimelineAsking:
                          photo_id).exec()
 
     def _photo_words(self, photo) -> str:
-        taken = f"{photo.taken:%d.%m.%Y %H:%M:%S}" if photo.taken else "ohne Aufnahmezeit"
+        taken = moment(photo.taken, seconds=True) if photo.taken else tr("without time taken")
         mark = self.view.data.marks_by_id.get(photo.owner)
-        where = f"{mark.label} {to_moment(mark.at):%H:%M:%S}" if mark else "keine Messung"
-        how = "angeheftet" if not photo.follows_time else "folgt der Zeit"
-        return f"Aufgenommen {taken} · {where} · {how}"
+        where = f"{mark.label} {to_moment(mark.at):%H:%M:%S}" if mark else tr("no measurement")
+        how = tr("pinned") if not photo.follows_time else tr("follows the time")
+        return tr("Taken {taken} · {where} · {how}", taken=taken, where=where, how=how)
 
     def _describe(self, hit: Hit) -> str:
         if hit.kind == "photo":
             photo = self.view.data.photo(hit.id)
-            return f"{photo.name}\n{self._photo_words(photo)}\nDoppelklick: groß zeigen"
+            return tr("{name}\n{words}\nDouble-click: show large", name=photo.name,
+                      words=self._photo_words(photo))
         if hit.kind == "mark":
             row = self.rows[hit.id]
             lines = [function_text(row["function"]), row["local_time"].replace("T", "  "),
                      value_line(self.app.service, row), VERDICT_TEXT[Verdict(row["verdict"])]]
             return "\n".join(line for line in lines if line)
         gap = self.view.data.gap(hit.id) if hit.kind.startswith("gap") else None
-        return f"Lücke {duration_text(gap.seconds)}" if gap else ""
+        return tr("Gap {duration}", duration=duration_text(gap.seconds)) if gap else ""
 
     def menu_entries(self, hit: Hit, seconds: float) -> list[tuple[str, Callable[[], None]]]:
         service = self.app.service
         entries = []
         if hit.kind == "photo":
             photo = self.view.data.photo(hit.id)
-            entries.append(("Groß anzeigen", lambda: self.open_photo(hit.id)))
+            entries.append((tr("Show large"), lambda: self.open_photo(hit.id)))
             if not self.read_only:
-                entries.append(("Vom Messwert lösen",
+                entries.append((tr("Detach from the reading"),
                                 lambda: self._write(service.stack_photo, hit.id)))
                 if not photo.follows_time and photo.taken:
-                    entries.append(("Wieder der Zeit folgen",
+                    entries.append((tr("Follow the time again"),
                                     lambda: self._write(service.return_to_timeline, hit.id)))
                 if photo.follows_time:
-                    entries.append(("Lücke davor einfügen", lambda: self._add_gap(photo.taken)))
+                    entries.append((tr("Insert gap before"), lambda: self._add_gap(photo.taken)))
         elif hit.kind.startswith("gap") and not self.read_only:
-            entries.append(("Lücke entfernen",
+            entries.append((tr("Remove gap"),
                             lambda: self._write(service.remove_photo_gap, hit.id)))
         elif hit.kind == "strip" and not self.read_only:
             at = self.view.data.original_time(round(seconds))
-            entries.append(("Lücke hier einfügen", lambda: self._add_gap(at)))
+            entries.append((tr("Insert gap here"), lambda: self._add_gap(at)))
         return entries
 
     def _open_menu(self, hit: Hit, seconds: float, where) -> None:

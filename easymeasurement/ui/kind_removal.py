@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from PySide6.QtWidgets import QComboBox, QFormLayout, QLabel
 
+from ..l10n import plural, tr
 from .common import AppContext
 from .kind_catalog import KindCatalog
 from .overlay import Overlay
@@ -22,8 +23,8 @@ class RemoveKindOverlay(Overlay):
 
     def __init__(self, app: AppContext, key: str, parent=None):
         catalog = KindCatalog(app.db)
-        super().__init__(f"Typ „{catalog.label(key)}“ löschen", parent)
-        self.ok_button.setText("Löschen")
+        super().__init__(tr("Delete kind “{kind}”", kind=catalog.label(key)), parent)
+        self.ok_button.setText(tr("Delete"))
         used = app.db.kind_usage(key)
         self.instead = QComboBox()
         for kind in sorted(catalog.all, key=lambda k: k.label.casefold()):
@@ -31,15 +32,17 @@ class RemoveKindOverlay(Overlay):
                 self.instead.addItem(catalog.icon(kind.key), kind.label, kind.key)
         self.instead.setCurrentIndex(max(self.instead.findData(FALLBACK_KIND), 0))
         if used:
-            text = (f"{used} Elemente sind von diesem Typ. Sie bekommen stattdessen den hier"
-                    " gewählten. Ihre Namen, Messungen und Merkmalswerte bleiben erhalten.")
+            text = plural(used, "{count} element is of this kind. It gets the one chosen here"
+                                " instead. Its name, measurements and feature values are kept.",
+                          "{count} elements are of this kind. They get the one chosen here"
+                          " instead. Their names, measurements and feature values are kept.")
         else:
-            text = "Kein Element ist von diesem Typ. Er verschwindet einfach aus der Auswahl."
+            text = tr("No element is of this kind. It simply disappears from the choice.")
         intro = QLabel(text)
         intro.setWordWrap(True)
         self.body.addWidget(intro)
         form = QFormLayout()
-        form.addRow("Stattdessen", self.instead)
+        form.addRow(tr("Instead"), self.instead)
         self.body.addLayout(form)
         self.instead.setVisible(bool(used))
         form.labelForField(self.instead).setVisible(bool(used))

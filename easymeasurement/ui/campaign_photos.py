@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from PySide6.QtWidgets import QLabel
 
+from ..l10n import N_, tr
 from .common import ROW_ID, selected_id
 from .photo_shared import accept_photo_drops
 from .photo_stack import PhotoStack
@@ -17,8 +18,8 @@ from .photo_tabs import LOOSE
 from .photo_timeline import PhotoTimeline
 from .proxy_progress import ProxyProgress
 
-WAIT_FOR_PROXIES = "Erst wenn die Fotos für das Protokoll vorbereitet sind (siehe Statuszeile)."
-DRAFT_TIP = "Das Protokoll, wie es jetzt aussähe. Es ist noch nicht gültig."
+WAIT_FOR_PROXIES = N_("Only once the photos are prepared for the report (see status bar).")
+DRAFT_TIP = N_("The report as it would look now. It is not valid yet.")
 
 
 class CampaignPhotos:
@@ -63,18 +64,18 @@ class CampaignPhotos:
     def _show_detail_room(self, chosen: bool, photos: int, run: str) -> None:
         """Sections without anything to show shrink to a line that says why."""
         if run:
-            self.detail_section.set_empty(f"„{run}“ hat mehrere Schritte. Ein Klick auf die"
-                                          " Zeit klappt sie auf, dann lässt sich jeder einzeln"
-                                          " bearbeiten.")
+            self.detail_section.set_empty(tr("“{run}” has several steps. A click on the time"
+                                             " unfolds them, then each can be edited on its own.",
+                                             run=run))
         else:
-            self.detail_section.set_empty(None if chosen else "Eine Zeile der Tabelle wählen.")
+            self.detail_section.set_empty(None if chosen else tr("Choose a row of the table."))
         if photos:
             self.photo_tabs.show_note(None)
         elif chosen:
-            self.photo_tabs.show_note("Keine Fotos zu dieser Messung. Fotos auf die Zeile"
-                                      " ziehen oder per Rechtsklick anhängen.")
+            self.photo_tabs.show_note(tr("No photos for this measurement. Drag photos onto the"
+                                         " row or attach them with a right-click."))
         else:
-            self.photo_tabs.show_note("Zeigt die Fotos der gewählten Messung.")
+            self.photo_tabs.show_note(tr("Shows the photos of the chosen measurement."))
         self._quiet_photos()
 
     def _row_takes_photo(self, position) -> bool:
@@ -163,4 +164,4 @@ class CampaignPhotos:
         usable = self.draft_open and ready
         self.draft_action.setEnabled(usable)
         self.header.draft_button.setEnabled(usable)
-        self.header.draft_button.setToolTip(DRAFT_TIP if ready else WAIT_FOR_PROXIES)
+        self.header.draft_button.setToolTip(tr(DRAFT_TIP if ready else WAIT_FOR_PROXIES))

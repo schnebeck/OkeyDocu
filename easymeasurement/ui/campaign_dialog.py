@@ -14,6 +14,7 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QLineEdit
 
 from ..devices import FoundInstrument, find_instruments
+from ..l10n import day, tr
 from .common import AppContext
 from .kind_catalog import KindCatalog
 from .overlay import Overlay
@@ -52,17 +53,17 @@ class CampaignDialog(Overlay):
     """
 
     def __init__(self, app: AppContext, parent=None, plans: list | None = None):
-        super().__init__("Neue Kampagne", parent)
+        super().__init__(tr("New campaign"), parent)
         self.app = app
-        self.ok_button.setText("Kampagne starten")
+        self.ok_button.setText(tr("Start campaign"))
         self.plan = QComboBox()
         for plan in plans or ():
             self.plan.addItem(plan.label, plan)
-        self.plan.addItem("Ohne Plan", None)
+        self.plan.addItem(tr("Without plan"), None)
         self.asset = QComboBox()
         fill_assets(self.asset, app)
         self.tester = UserChoice(app, app.service.last_user_id())
-        self.title = QLineEdit(f"Prüfung vom {date.today():%d.%m.%Y}")
+        self.title = QLineEdit(tr("Inspection of {day}", day=day(date.today())))
         # The usual case: what was recorded last time is the list to take again.
         self.repeat = QCheckBox()
         self.previous = None
@@ -78,12 +79,12 @@ class CampaignDialog(Overlay):
         self._watch.timeout.connect(self._fill_sources)
         self._watch.start()
         form = QFormLayout()
-        form.addRow("Anlage", self.asset)
-        form.addRow("Prüfer", self.tester)
+        form.addRow(tr("Installation"), self.asset)
+        form.addRow(tr("Inspector"), self.tester)
         form.addRow("", self.repeat)
-        form.addRow("Messplan", self.plan)
-        form.addRow("Titel", self.title)
-        form.addRow("Messgerät", self.source)
+        form.addRow(tr("Test plan"), self.plan)
+        form.addRow(tr("Title"), self.title)
+        form.addRow(tr("Instrument"), self.source)
         self.body.addLayout(form)
         self._offer_repeat()
         self._update()
@@ -94,9 +95,9 @@ class CampaignDialog(Overlay):
         if self.previous is not None:
             count = self.app.db.one("SELECT count(*) FROM measurements WHERE campaign_id=?",
                                     self.previous["id"])[0]
-            day = datetime.fromisoformat(self.previous["closed_at"])
-            self.repeat.setText(f"Wie die Prüfung vom {day:%d.%m.%Y} wiederholen"
-                                f" ({count} Punkte)")
+            closed = datetime.fromisoformat(self.previous["closed_at"])
+            self.repeat.setText(tr("Repeat like the inspection of {day} ({count} points)",
+                                   day=day(closed), count=count))
         self.repeat.setVisible(self.previous is not None)
         self.repeat.setChecked(self.previous is not None)
 
@@ -119,7 +120,7 @@ class CampaignDialog(Overlay):
         if self.plan.currentData() is None:
             sources.append(None)
         else:
-            sources.append(FoundInstrument("simulator", "Simulator (Zufallswerte)"))
+            sources.append(FoundInstrument("simulator", tr("Simulator (random values)")))
         return sources
 
     def _fill_sources(self) -> None:
@@ -130,7 +131,7 @@ class CampaignDialog(Overlay):
         self.source.blockSignals(True)
         self.source.clear()
         for source in sources:
-            self.source.addItem(source.label if source else "Manuelle Eingabe", source)
+            self.source.addItem(source.label if source else tr("Manual entry"), source)
         kept = chosen is not None and chosen in sources
         self.source.setCurrentIndex(sources.index(chosen) if kept else 0)
         self.source.blockSignals(False)
@@ -138,13 +139,16 @@ class CampaignDialog(Overlay):
     def _update(self) -> None:
         missing = []
         if self.asset.currentData() is None:
-            missing.append("eine Anlage")
+            missing.append(tr("an installation"))
         if self.tester.current_id() is None:
-            missing.append("ein Prüfer")
+            missing.append(tr("an inspector"))
         if not self.title.text().strip():
-            missing.append("ein Titel")
+            missing.append(tr("a title"))
         self.ok_button.setEnabled(not missing)
-        self.hint.setText(f"Es fehlt noch {' und '.join(missing)}." if missing else "")
+        listed = missing[0] if missing else ""
+        for item in missing[1:]:
+            listed = tr("{items} and {last}", items=listed, last=item)
+        self.hint.setText(tr("Still missing: {items}.", items=listed) if missing else "")
 
     def _leave(self) -> None:
         self._watch.stop()

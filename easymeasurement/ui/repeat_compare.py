@@ -11,6 +11,7 @@ from __future__ import annotations
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
 
+from ..l10n import tr
 from .common import AppContext
 from .guided_pages import ReasonOverlay
 
@@ -37,7 +38,7 @@ class RepeatCompare(QWidget):
         self.deviation = _label()
         self.deviation.setStyleSheet("color: #c0392b;")
         self.reason = _label(True)
-        self.reason_button = QPushButton("Abweichung begründen …")
+        self.reason_button = QPushButton(tr("Justify deviation …"))
         self.reason_button.clicked.connect(self._give_reason)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 4, 0, 0)
@@ -60,9 +61,11 @@ class RepeatCompare(QWidget):
         deviations = self.app.service.deviations(step, row["id"])
         self.before.setText(line)
         self.notable.setText("  ·  ".join(notable))
-        self.deviation.setText("Anders als zuletzt:  " + "  ·  ".join(deviations)
-                               if deviations else "")
-        self.reason.setText(f"Begründung: {step_row['note']}" if step_row["note"] else "")
+        self.deviation.setText(
+            tr("Unlike last time:  {deviations}", deviations="  ·  ".join(deviations))
+            if deviations else ""
+        )
+        self.reason.setText(tr("Reason: {note}", note=step_row["note"]) if step_row["note"] else "")
         open_campaign = self.app.service.campaign(row["campaign_id"])["status"] == "open"
         for widget, text in ((self.before, line), (self.notable, notable),
                              (self.deviation, deviations), (self.reason, step_row["note"])):
@@ -70,8 +73,8 @@ class RepeatCompare(QWidget):
         self.reason_button.setVisible(bool(deviations) and not step_row["note"] and open_campaign)
 
     def _give_reason(self) -> None:
-        overlay = ReasonOverlay(self, "Abweichung begründen")
-        overlay.ok_button.setText("Begründen")
+        overlay = ReasonOverlay(self, tr("Justify deviation"))
+        overlay.ok_button.setText(tr("Justify"))
         if overlay.exec():
             self.app.service.accept_deviation(self.step_row["id"],
                                               overlay.reason.toPlainText().strip())

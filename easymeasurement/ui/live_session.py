@@ -14,14 +14,15 @@ import threading
 from PySide6.QtCore import QObject, Signal
 
 from ..devices import Capability, DeviceError, LinkState, MeterDriver
+from ..l10n import N_, tr
 from .status_badges import BAD, GOOD, WAITING
 
 log = logging.getLogger(__name__)
 
 RETRY_S = 5.0
-CONNECTED_TEXT = "Messgerät verbunden"
-CONNECTING_TEXT = "Verbinde mit dem Messgerät …"
-LOST_TEXT = "Messgerät nicht verbunden"
+CONNECTED_TEXT = N_("Instrument connected")
+CONNECTING_TEXT = N_("Connecting to the instrument …")
+LOST_TEXT = N_("Instrument not connected")
 
 
 class LiveSession(QObject):
@@ -48,7 +49,7 @@ class LiveSession(QObject):
 
     def start(self) -> None:
         self._stop.clear()
-        self.link.emit(WAITING, CONNECTING_TEXT)
+        self.link.emit(WAITING, tr(CONNECTING_TEXT))
         if Capability.SIMULATED_TRIGGER in self.driver.capabilities:
             self._connect()
         else:
@@ -79,7 +80,7 @@ class LiveSession(QObject):
         try:
             self.selector.emit(self.driver.read_selector())
         except DeviceError as err:
-            log.info("Drehschalter nicht lesbar: %s", err)
+            log.info("Selector not readable: %s", err)
 
     def _keep_trying(self) -> None:
         while not self._stop.is_set():
@@ -87,16 +88,16 @@ class LiveSession(QObject):
                 self._connect()
                 return
             except DeviceError as err:
-                log.info("Messgerät nicht erreichbar: %s", err)
+                log.info("Instrument not reachable: %s", err)
                 self.driver.close()
                 self.gap = True
-                self.link.emit(BAD, LOST_TEXT)
+                self.link.emit(BAD, tr(LOST_TEXT))
             self._stop.wait(RETRY_S)
 
     def _connect(self) -> None:
         self.driver.open()
         self.driver.subscribe_live(self._on_reading, self._on_state)
-        self.link.emit(GOOD, CONNECTED_TEXT)
+        self.link.emit(GOOD, tr(CONNECTED_TEXT))
 
     def _on_reading(self, reading) -> None:
         self.reading.emit(self.campaign_id, reading)
@@ -105,8 +106,8 @@ class LiveSession(QObject):
         if state is not LinkState.CONNECTED and not self._stop.is_set():
             self.gap = True  # a stop asked for here is no loss
         if state is LinkState.CONNECTED:
-            self.link.emit(GOOD, CONNECTED_TEXT)
+            self.link.emit(GOOD, tr(CONNECTED_TEXT))
         elif state is LinkState.LOST:
-            self.link.emit(BAD, LOST_TEXT)
+            self.link.emit(BAD, tr(LOST_TEXT))
         else:
             self.link.emit(BAD, text)

@@ -12,6 +12,7 @@ from PySide6.QtCore import QLineF, QPointF, QRectF, Qt
 from PySide6.QtGui import QBrush, QColor, QPainterPath, QPalette, QPen
 from PySide6.QtWidgets import QGraphicsItem
 
+from ..l10n import day, tr
 from .photo_timeline_items import PIN_COLOUR, palette_of, small_font, soft
 from .photo_timeline_model import duration_text, ticks, to_moment
 
@@ -66,7 +67,7 @@ class GapItem(QGraphicsItem):
         painter.setPen(QPen(soft(text, 150), 1, Qt.PenStyle.DashLine))
         painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawRect(block)
-        words = f"Lücke {duration_text(self.seconds)}"
+        words = tr("Gap {duration}", duration=duration_text(self.seconds))
         painter.setFont(small_font())
         if painter.fontMetrics().horizontalAdvance(words) + 12 < self.width:
             caption = painter.fontMetrics().boundingRect(words).adjusted(-4, -2, 4, 2)
@@ -178,13 +179,13 @@ def paint_gutter(painter, view) -> None:
     flags = Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft
     if view.data.content_range():
         middle = (view.axis.left + view.axis.width) / 2
-        day = to_moment(view.axis.seconds_at(middle)).strftime("%d.%m.%Y")
-        painter.drawText(QRectF(6, 0, left - 8, tracks.ruler), flags, day)
+        shown = day(to_moment(view.axis.seconds_at(middle)))
+        painter.drawText(QRectF(6, 0, left - 8, tracks.ruler), flags, shown)
     painter.setFont(small_font(bold=True))
     marks_band = QRectF(6, tracks.ruler, left - 8, tracks.marks_bottom - tracks.ruler)
-    painter.drawText(marks_band, flags, "Messungen")
+    painter.drawText(marks_band, flags, tr("Measurements"))
     photos_band = QRectF(6, tracks.marks_bottom, left - 8, height - tracks.marks_bottom)
-    painter.drawText(photos_band, flags, "Fotos")
+    painter.drawText(photos_band, flags, tr("Photos"))
 
 
 def paint_empty_texts(painter, view) -> None:

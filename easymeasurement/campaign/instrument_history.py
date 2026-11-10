@@ -12,6 +12,7 @@ import json
 from dataclasses import asdict, dataclass
 from datetime import datetime
 
+from ..l10n import tr
 from .records import MANUAL, identity_from_json
 
 SIMULATOR = "simulator"
@@ -64,7 +65,8 @@ class InstrumentHistoryMixin:
     def instrument_history(self, serial_no: str) -> list[HistoryEntry]:
         """Newest first. A campaign shows what the instrument said at its start."""
         entries = [
-            HistoryEntry(row["tested_at"], "test", "Test über " + (row["connection"] or "?"),
+            HistoryEntry(row["tested_at"], "test",
+                         tr("Test via {connection}", connection=row["connection"] or "?"),
                          row["firmware"], row["calibrated_on"] or "",
                          row["recalibration_due"] or "", row["clock_offset_s"],
                          bool(row["ready"]), tuple(json.loads(row["checks_json"])))
@@ -76,7 +78,7 @@ class InstrumentHistoryMixin:
             if who is None or who.serial_no != serial_no:
                 continue
             entries.append(HistoryEntry(
-                campaign["started_at"], "campaign", f"Kampagne „{campaign['title']}“",
+                campaign["started_at"], "campaign", tr("Campaign “{title}”", title=campaign["title"]),
                 who.firmware, _day(who.calibrated_on), _day(who.recalibration_due),
                 self._found_offset(campaign)))
         return sorted(entries, key=lambda entry: entry.moment, reverse=True)

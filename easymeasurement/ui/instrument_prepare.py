@@ -12,13 +12,14 @@ from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import QLabel
 
 from ..devices import Capability, DeviceBlocked, DeviceError
+from ..l10n import N_, tr
 from .common import AppContext
 from .overlay import Overlay
 
-INTRO = ("Das Messgerät wird für dieses Programm vorbereitet. Beim ersten Mal und nach einem"
-         " Firmware-Update dauert das etwa eine Minute. Bitte das Drehrad auf <b>Setup</b>"
-         " lassen und das Gerät nicht trennen.")
-STEPS = (("identify", "Messgerät erkennen"), ("texts", "Gerätetexte übertragen"))
+INTRO = N_("The instrument is being prepared for this program. The first time and after a"
+           " firmware update this takes about a minute. Please leave the rotary switch at"
+           " <b>Setup</b> and do not disconnect the instrument.")
+STEPS = (("identify", N_("Recognise the instrument")), ("texts", N_("Transfer instrument texts")))
 MARKS = {"waiting": "○", "running": "…", "done": "✓", "skipped": "–", "failed": "✗"}
 
 
@@ -65,14 +66,14 @@ class PrepareWorker(QThread):
 
 
 class InstrumentPrepareOverlay(Overlay):
-    """Runs by itself on opening. "Später" leaves codes shown as codes until the next try."""
+    """Runs by itself on opening. "Later" leaves codes shown as codes until the next try."""
 
     def __init__(self, app: AppContext, driver_key: str, port: str, parent=None):
-        super().__init__("Messgerät wird vorbereitet", parent)
+        super().__init__(tr("Preparing the instrument"), parent)
         self.app, self.driver_key, self.port = app, driver_key, port
         self.worker: PrepareWorker | None = None
         self.done = False
-        intro = QLabel(INTRO)
+        intro = QLabel(tr(INTRO))
         intro.setWordWrap(True)
         self.body.addWidget(intro)
         self.lines: dict[str, QLabel] = {}
@@ -81,17 +82,17 @@ class InstrumentPrepareOverlay(Overlay):
             self.lines[key] = QLabel()
             self.body.addWidget(self.lines[key])
             self._show_step(key, "waiting", text)
-        self.ok_button.setText("Fertig")
-        self.cancel_button.setText("Später")
+        self.ok_button.setText(tr("Done"))
+        self.cancel_button.setText(tr("Later"))
         self.start()
 
     def _show_step(self, key: str, state: str, text: str | None = None) -> None:
         self.states[key] = state
-        label = text or dict(STEPS)[key]
+        label = tr(text or dict(STEPS)[key])
         self.lines[key].setText(f"{MARKS[state]}  {label}")
 
     def start(self) -> None:
-        self.ok_button.setText("Fertig")
+        self.ok_button.setText(tr("Done"))
         self.ok_button.setEnabled(False)
         self.cancel_button.setEnabled(False)  # a transfer is not cut off halfway
         self.hint.clear()
@@ -110,7 +111,7 @@ class InstrumentPrepareOverlay(Overlay):
             self.app.db.save_device_texts(self.driver_key, identity.firmware, texts.version,
                                           texts.texts)
         self.done = True
-        self.hint.setText("Das Messgerät ist bereit.")
+        self.hint.setText(tr("The instrument is ready."))
         self.ok_button.setEnabled(True)
         self.cancel_button.hide()
 
@@ -118,9 +119,9 @@ class InstrumentPrepareOverlay(Overlay):
         for key, state in self.states.items():
             if state == "running":
                 self._show_step(key, "failed")
-        advice = " Bitte das Drehrad auf Setup stellen." if setup_helps else ""
+        advice = " " + tr("Please turn the rotary switch to Setup.") if setup_helps else ""
         self.hint.setText(f"{message}{advice}")
-        self.ok_button.setText("Erneut versuchen")
+        self.ok_button.setText(tr("Try again"))
         self.ok_button.setEnabled(True)
         self.cancel_button.setEnabled(True)
 

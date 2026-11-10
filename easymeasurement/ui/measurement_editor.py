@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import N_, moment, tr
 from ..model import CONDUCTOR, FUNCTION_LABELS
 from ..store.device_texts import CODE
 from .common import AppContext, function_short, stored_parameters
@@ -32,7 +33,7 @@ from .place_line import PlaceLine
 from .value_rows import QuietCombo, ValueRows, verdict_combo
 
 READ_ONLY_STYLE = "background: transparent; border: none;"
-LOCKED_TEXT = "Die Kampagne ist abgeschlossen. Die Messung lässt sich nur lesen."
+LOCKED_TEXT = N_("The campaign is completed. The measurement can only be read.")
 
 
 def _facts(row, capture: str, db) -> str:
@@ -44,17 +45,19 @@ def _facts(row, capture: str, db) -> str:
         name, value = db.setting_words(parameter.key, parameter.value, words)
         if parameter.key != CONDUCTOR and not CODE.match(name) and not CODE.match(value):
             extra.append(f"{name}: {value}")
-    return " · ".join([f"{when:%d.%m.%Y %H:%M:%S}", capture, *extra])
+    return " · ".join([moment(when, seconds=True), capture, *extra])
 
 
-HINT_PLACEHOLDER = "Wie hier zu messen ist (intern)"
+HINT_PLACEHOLDER = N_("How to measure here (internal)")
+LOCATION_PLACEHOLDER = N_("Where it was measured")
+COMMENT_PLACEHOLDER = N_("Remark on the measurement")
 
 
 class MeasurementEditor(MeasurementEditing, QWidget):
     """Nothing is written while typing.
 
-    Übernehmen, Ctrl+Enter or moving on to another measurement writes what was
-    changed; Verwerfen and Esc bring back what is stored. The bar above the buttons
+    Apply, Ctrl+Enter or moving on to another measurement writes what was
+    changed; Discard and Esc bring back what is stored. The bar above the buttons
     says beforehand which changes the protocol will mark.
     """
 
@@ -66,7 +69,7 @@ class MeasurementEditor(MeasurementEditing, QWidget):
         self.row = None
         self.editable, self.capture = False, ""
         self._filling = False
-        self.title = QLabel("Keine Messung gewählt.")
+        self.title = QLabel(tr("No measurement selected."))
         self.title.setWordWrap(True)
         font = self.title.font()
         font.setBold(True)
@@ -77,7 +80,7 @@ class MeasurementEditor(MeasurementEditing, QWidget):
         self.function = QuietCombo()
         for key, label in FUNCTION_LABELS.items():
             self.function.addItem(label, key)
-        self.location = QLineEdit(placeholderText="Wo gemessen wurde")
+        self.location = QLineEdit(placeholderText=tr(LOCATION_PLACEHOLDER))
         # Booked onto an element, the element says where; the text is for what has none.
         self.place = PlaceLine(app)
         self.movable = False  # the view offers booking elsewhere
@@ -88,34 +91,35 @@ class MeasurementEditor(MeasurementEditing, QWidget):
         where_layout.addWidget(self.location)
         self.operator = QLineEdit()
         self.verdict = verdict_combo("")
-        self.comment = GrowingEdit("Bemerkung zur Messung")
-        self.hint = GrowingEdit(HINT_PLACEHOLDER)
-        self.hint.setToolTip("Wie hier zu messen ist. Bleibt intern und erscheint bei der"
-                             " Wiederholungsprüfung wieder, nicht im Protokoll.")
+        self.comment = GrowingEdit(tr(COMMENT_PLACEHOLDER))
+        self.hint = GrowingEdit(tr(HINT_PLACEHOLDER))
+        self.hint.setToolTip(tr("How to measure here. Stays internal and appears again at the"
+                                " repeat inspection, not in the report."))
         self.rows = ValueRows()
         self.values = self.rows.table
         # The measurement has its remark field, so only files are attached; images join its photos.
-        self.attachments = AttachmentList(app, "dieser Messung", self._add_photo, notes=False)
+        self.attachments = AttachmentList(app, tr("Note on this measurement"), self._add_photo,
+                                          notes=False)
         self.attachments.changed.connect(self.changed)
-        self.locked = QLabel(LOCKED_TEXT)
+        self.locked = QLabel(tr(LOCKED_TEXT))
         self.locked.setWordWrap(True)
         self.form = QWidget()
         form = QFormLayout(self.form)
         form.setContentsMargins(0, 0, 0, 0)
         form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
-        form.addRow("Bezeichnung", self.function)
-        form.addRow("Messort", where)
-        form.addRow("Prüfer", self.operator)
-        form.addRow("Bewertung", self.verdict)
-        form.addRow("Bemerkung", self.comment)
-        form.addRow("Hinweis", self.hint)
+        form.addRow(tr("Designation"), self.function)
+        form.addRow(tr("Measuring location"), where)
+        form.addRow(tr("Inspector"), self.operator)
+        form.addRow(tr("Verdict"), self.verdict)
+        form.addRow(tr("Remark"), self.comment)
+        form.addRow(tr("Hint"), self.hint)
 
         self.pending = QWidget()
         self.pending_hint = QLabel()
         self.pending_hint.setWordWrap(True)
-        self.discard_button = QPushButton("Verwerfen")
+        self.discard_button = QPushButton(tr("Discard"))
         self.discard_button.clicked.connect(self.discard)
-        self.apply_button = QPushButton("Übernehmen")
+        self.apply_button = QPushButton(tr("Apply"))
         self.apply_button.setDefault(True)
         self.apply_button.clicked.connect(self.apply)
         bar = QHBoxLayout(self.pending)
@@ -164,7 +168,7 @@ class MeasurementEditor(MeasurementEditing, QWidget):
         self.facts.setVisible(row is not None)
         self.locked.setVisible(row is not None and not editable)
         if row is None:
-            self.title.setText("Keine Messung gewählt.")
+            self.title.setText(tr("No measurement selected."))
             self.rows.fill([], False)
             self.attachments.show_target(None)
         else:
@@ -188,9 +192,9 @@ class MeasurementEditor(MeasurementEditing, QWidget):
             self.hint.setPlainText(row["hint"])
             self.rows.fill(self.app.service.values(row["id"]), editable)
             self.attachments.show_target(row["campaign_id"], editable, measurement_id=row["id"])
-        self.location.setPlaceholderText("Wo gemessen wurde" if editable else "")
-        self.comment.setPlaceholderText("Bemerkung zur Messung" if editable else "")
-        self.hint.setPlaceholderText(HINT_PLACEHOLDER if editable else "")
+        self.location.setPlaceholderText(tr(LOCATION_PLACEHOLDER) if editable else "")
+        self.comment.setPlaceholderText(tr(COMMENT_PLACEHOLDER) if editable else "")
+        self.hint.setPlaceholderText(tr(HINT_PLACEHOLDER) if editable else "")
         for field in (self.location, self.operator, self.comment, self.hint):
             field.setReadOnly(not editable)
             # Read-only, a field reads as text rather than as a box waiting for input.

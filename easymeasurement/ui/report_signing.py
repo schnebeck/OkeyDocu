@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import day, tr
 from ..paths import data_dir
 from ..reporting.archive import ReportError
 from ..reporting.sign import CertificateInfo, Pkcs12Signer, SigningError, inspect_certificate
@@ -36,15 +37,14 @@ def settings() -> QSettings:
 
 
 def describe(info: CertificateInfo) -> str:
-    lines = [f"Signiert wird als {info.name}"
-             + (f" ({info.email})" if info.email else "")
-             + f", ausgestellt von {info.issuer or '–'}, gültig bis {info.valid_until:%d.%m.%Y}."]
+    signer = f"{info.name} ({info.email})" if info.email else info.name
+    lines = [tr("Signing as {signer}, issued by {issuer}, valid until {day}.", signer=signer,
+                issuer=info.issuer or "–", day=day(info.valid_until))]
     if info.email_only:
-        lines.append(
-            "Das ist ein E-Mail-Zertifikat (S/MIME). Die Signatur ist technisch gültig. Ob ein"
-            " PDF-Programm sie als vertrauenswürdig anzeigt, hängt davon ab, ob es dem Aussteller"
-            " vertraut."
-        )
+        lines.append(tr(
+            "This is an email certificate (S/MIME). The signature is technically valid. Whether a"
+            " PDF program shows it as trustworthy depends on whether it trusts the issuer."
+        ))
     return "\n".join(lines)
 
 
@@ -56,8 +56,8 @@ class CertificateFields(QWidget):
     def __init__(self, certificate: str = ""):
         super().__init__()
         self.path = QLineEdit(certificate or settings().value("last_certificate", ""))
-        self.path.setPlaceholderText("Datei .p12 oder .pfx")
-        browse = QPushButton("Wählen …")
+        self.path.setPlaceholderText(tr("File .p12 or .pfx"))
+        browse = QPushButton(tr("Choose …"))
         browse.clicked.connect(self._browse)
         row = QHBoxLayout()
         row.setContentsMargins(0, 0, 0, 0)
@@ -68,8 +68,8 @@ class CertificateFields(QWidget):
         self.info.setWordWrap(True)
         form = QFormLayout()
         form.setContentsMargins(0, 0, 0, 0)
-        form.addRow("Zertifikat", row)
-        form.addRow("Passwort", self.passphrase)
+        form.addRow(tr("Certificate"), row)
+        form.addRow(tr("Password"), self.passphrase)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addLayout(form)
@@ -81,7 +81,7 @@ class CertificateFields(QWidget):
 
     def _browse(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
-            self, "Zertifikat wählen", self.path.text(), "PKCS#12 (*.p12 *.pfx)"
+            self, tr("Choose certificate"), self.path.text(), "PKCS#12 (*.p12 *.pfx)"
         )
         if path:
             self.path.setText(path)
@@ -104,9 +104,9 @@ class CertificateFields(QWidget):
         """Raises SigningError if the file, the password or the certificate will not do."""
         info = inspect_certificate(Path(self.path.text().strip()), self.passphrase.text())
         if info.expired:
-            raise SigningError(f"Das Zertifikat ist seit {info.valid_until:%d.%m.%Y} abgelaufen.")
+            raise SigningError(tr("The certificate expired on {day}.", day=day(info.valid_until)))
         if not info.can_sign:
-            raise SigningError("Dieses Zertifikat ist nicht zum Signieren ausgestellt.")
+            raise SigningError(tr("This certificate is not issued for signing."))
         return info
 
     def signer(self) -> Pkcs12Signer:
@@ -120,8 +120,8 @@ class SignOverlay(Overlay):
     """Signs a protocol that is already archived. The signed file is a new entry."""
 
     def __init__(self, parent=None, certificate: str = ""):
-        super().__init__("Protokoll signieren", parent)
-        self.ok_button.setText("Signieren")
+        super().__init__(tr("Sign report"), parent)
+        self.ok_button.setText(tr("Sign"))
         self.certificate = CertificateFields(certificate)
         self.certificate.changed.connect(self._update)
         self.body.addWidget(self.certificate)
@@ -132,7 +132,8 @@ class SignOverlay(Overlay):
 
     def _update(self) -> None:
         self.ok_button.setEnabled(self.certificate.ready())
-        self.hint.setText("" if self.certificate.ready() else "Es fehlt noch das Zertifikat.")
+        missing = "" if self.certificate.ready() else tr("The certificate is still missing.")
+        self.hint.setText(missing)
 
     def accept(self) -> None:
         try:

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from ..model import Verdict
 from ..campaign.repeat import REPEAT
+from ..l10n import plural, tr
 from .common import POINT_ID, ROW_ID
 from .structure_tree import UNPLACED
 
@@ -30,27 +31,29 @@ class CampaignChecks:
         blockers = self.app.service.blockers(campaign["id"])
         parts = []
         if unplaced:
-            parts.append(f'<a href="{UNPLACED_LINK}">{unplaced} ohne Ort</a>')
+            text = tr("{count} without location", count=unplaced)
+            parts.append(f'<a href="{UNPLACED_LINK}">{text}</a>')
         loose = len(self.app.service.stacked_photos(campaign["id"]))
         if loose:
-            word = "Foto" if loose == 1 else "Fotos"
-            parts.append(f'<a href="{STACK_LINK}" style="color:{NOTE}">{loose} {word} nicht'
-                         ' zugeordnet</a>')
+            text = plural(loose, "{count} photo not assigned", "{count} photos not assigned")
+            parts.append(f'<a href="{STACK_LINK}" style="color:{NOTE}">{text}</a>')
         if failed:
-            word = "Mangel" if failed == 1 else "Mängel"
-            parts.append(f'<a href="{FAILED_LINK}" style="color:{ALERT}">{failed} {word}</a>')
+            text = plural(failed, "{count} defect", "{count} defects")
+            parts.append(f'<a href="{FAILED_LINK}" style="color:{ALERT}">{text}</a>')
         if campaign["plan_key"] == REPEAT:
             missing = sum(row["status"] in ("pending", "active")
                           for row, _ in self.app.service.points(campaign["id"]))
             if missing:
-                parts.append(f'<a href="{POINTS_LINK}">{missing} offen</a>')
+                text = tr("{count} open", count=missing)
+                parts.append(f'<a href="{POINTS_LINK}">{text}</a>')
             if len(blockers) > (1 if missing else 0):
-                parts.append(f'<span style="color:{ALERT}">Einstellung abweichend</span>')
+                text = tr("Setting differs")
+                parts.append(f'<span style="color:{ALERT}">{text}</span>')
         elif blockers:
-            count = len(blockers)
-            parts.append(f"{count} {'Punkt' if count == 1 else 'Punkte'} offen")
+            parts.append(plural(len(blockers), "{count} point open", "{count} points open"))
         if not blockers:
-            parts.append(f'<span style="color:{DONE}">✓ bereit zum Bestätigen</span>')
+            text = tr("✓ ready to confirm")
+            parts.append(f'<span style="color:{DONE}">{text}</span>')
         label.setText("  ·  ".join(parts))
         label.setToolTip("\n".join(blockers))
 

@@ -12,9 +12,14 @@ import hashlib
 from datetime import datetime
 from pathlib import Path
 
+from ..l10n import N_, plural, tr
 from .records import IMPORTED, _iso
 from .repeat import REPEAT
 from .seal import SealCheck, SealState, authenticate, deletion_mark, digest, genuine
+
+# What a file of a closed campaign can lack: missing, or changed.
+PHOTO_PROBLEMS = (N_("Photo missing: {name}"), N_("Photo changed: {name}"))
+ATTACHMENT_PROBLEMS = (N_("Attachment missing: {name}"), N_("Attachment changed: {name}"))
 
 
 class ClosingMixin:
@@ -28,13 +33,14 @@ class ClosingMixin:
         if self.campaign(campaign_id)["plan_key"] == REPEAT:
             return self.repeat_blockers(campaign_id)
         problems = [
-            f"Schritt offen: {self.plan_step(step).title}"
+            tr("Step open: {title}", title=self.plan_step(step).title)
             for step in steps
             if step["status"] in ("pending", "active")
         ]
         unassigned = len(self.open_measurements(campaign_id))
         if unassigned:
-            problems.append(f"{unassigned} Messung(en) keinem Schritt zugeordnet")
+            problems.append(plural(unassigned, "{count} measurement not assigned to a step",
+                                   "{count} measurements not assigned to a step"))
         return problems
 
     def close(self, campaign_id: int) -> None:
@@ -88,10 +94,10 @@ class ClosingMixin:
             return []
         deleted = self.db.one("SELECT * FROM deleted_campaigns WHERE seal=?", previous)
         if deleted is None:
-            return ["Eine früher versiegelte Kampagne fehlt."]
+            return [tr("A campaign sealed earlier is missing.")]
         if key and not (deleted["seal_mac"] and genuine(
                 key, deleted["seal"], deletion_mark(deleted["deleted_at"]), deleted["seal_mac"])):
-            return ["Der Löschvermerk einer früheren Kampagne ist nicht echt."]
+            return [tr("The deletion note of an earlier campaign is not genuine.")]
         return []
 
     def _end_of(self, campaign_id: int) -> datetime:
@@ -118,7 +124,7 @@ class ClosingMixin:
             return SealCheck(SealState.NOT_SEALED)
         reasons = []
         if digest(self.db, campaign_id, campaign["closed_at"]) != campaign["seal"]:
-            reasons.append("Die Daten stimmen nicht mehr mit dem Siegel überein.")
+            reasons.append(tr("The data no longer match the seal."))
         previous = campaign["seal_previous"]
         reasons += self._previous_problems(previous, self.seal_key() if thorough else None)
         if thorough:
@@ -126,9 +132,9 @@ class ClosingMixin:
             key = self.seal_key()
             if key and campaign["seal_mac"]:
                 if not genuine(key, campaign["seal"], previous, campaign["seal_mac"]):
-                    reasons.append("Das Siegel ist nicht echt.")
+                    reasons.append(tr("The seal is not genuine."))
             elif key:
-                reasons.append("Das Siegel wurde ohne Schlüssel gesetzt oder entfernt.")
+                reasons.append(tr("The seal was set or removed without the key."))
         if reasons:
             return SealCheck(SealState.TAMPERED, tuple(reasons))
         if thorough and self.seal_key() and campaign["seal_mac"]:
@@ -137,16 +143,17 @@ class ClosingMixin:
 
     def _photo_problems(self, campaign_id: int) -> list[str]:
         files = [
-            (self.photo_path(campaign_id, row["file_name"]), row["sha256"], "Foto")
+            (self.photo_path(campaign_id, row["file_name"]), row["sha256"], PHOTO_PROBLEMS)
             for row in self.photos(campaign_id)
         ] + [
-            (self.attachment_path(campaign_id, row["file_name"]), row["sha256"], "Anlage")
+            (self.attachment_path(campaign_id, row["file_name"]), row["sha256"],
+             ATTACHMENT_PROBLEMS)
             for row in self.attachments(campaign_id) if row["file_name"]
         ]
         problems = []
-        for path, sha256, label in files:
+        for path, sha256, (missing, changed) in files:
             if not path.exists():
-                problems.append(f"{label} fehlt: {path.name}")
+                problems.append(tr(missing, name=path.name))
             elif hashlib.sha256(path.read_bytes()).hexdigest() != sha256:
-                problems.append(f"{label} wurde verändert: {path.name}")
+                problems.append(tr(changed, name=path.name))
         return problems

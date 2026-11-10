@@ -1,0 +1,62 @@
+# EasyMeasurement - German texts: the structure tree, its elements and moving them.
+texts:
+  Remove empty elements: Leere Elemente entfernen
+  Remove: Entfernen
+  These elements and everything below them hold no measurement, no note and no file, in no campaign.: An diesen Elementen und allem darunter hängt keine Messung, keine Notiz und keine Datei, in keiner Kampagne.
+  There are no empty elements here. Everything has measurements, notes or files.: Hier gibt es keine leeren Elemente. Alles hat Messungen, Notizen oder Dateien.
+  "(with {count} below)": "(mit {count} darunter)"
+  "Remove {count}": "{count} entfernen"
+  More: Weitere
+  New element below: Neues Element darunter
+  Rename: Umbenennen
+  Change kind: Typ ändern
+  Properties …: Eigenschaften …
+  Group under a new element: Zusammenfassen unter neuem Element
+  Remove empty elements …: Leere Elemente entfernen …
+  Delete …: Löschen …
+  Delete: Löschen
+  "“{name}” stays: {reason}": "„{name}“ bleibt: {reason}"
+  "“{name}”": "„{name}“"
+  "{names} and {count} more": "{names} und {count} weitere"
+  "Delete {names}?": "{names} löschen?"
+  Measurements of open campaigns move up one level.: Messungen offener Kampagnen wandern eine Ebene nach oben.
+  "With {count} element below. Measurements of open campaigns move up one level.": "Mit {count} Element darunter. Messungen offener Kampagnen wandern eine Ebene nach oben."
+  "With {count} elements below. Measurements of open campaigns move up one level.": "Mit {count} Elementen darunter. Messungen offener Kampagnen wandern eine Ebene nach oben."
+  Structure: Struktur
+  Count: Anzahl
+  No location: Ohne Ort
+  Measurements not yet assigned to an element. Drag them onto an element to assign them.: Messungen, die noch keinem Element zugeordnet sind. Auf ein Element ziehen, um sie zuzuordnen.
+  "Identifier: {identifier}": "Kennung: {identifier}"
+  "Last inspection: {before} measurements here, this inspection: {now}": "Letzte Prüfung: {before} Messungen hier, diese Prüfung: {now}"
+  "{count} measurement below": "{count} Messung darunter"
+  "{count} measurements below": "{count} Messungen darunter"
+  Drag measurements from the table onto an element to book them there. New measurements go to the chosen element.: Messungen aus der Tabelle auf ein Element ziehen, um sie dort zu buchen. Neue Messungen landen beim gewählten Element.
+  "+ Element": "+ Element"
+  Create an element below the chosen one (Ins): Ein Element unter dem gewählten anlegen (Einfg)
+  Search elements …: Element suchen …
+  this location: diesem Ort
+  Inspection interval: Prüfintervall
+  Designation: Bezeichnung
+  Identifier: Kennung
+  Manufacturer: Hersteller
+  Type designation: Typbezeichnung
+  Serial number: Seriennummer
+  Remark: Bemerkung
+  no repetition: keine Wiederholung
+  every month: jeden Monat
+  "every {count} months": "alle {count} Monate"
+  " months": " Monate"
+  as the kind: wie der Typ
+  Kind: Typ
+  Features: Merkmale
+  Empty features appear nowhere, not even in the report.: Leere Merkmale erscheinen nirgends, auch nicht im Protokoll.
+  "Features: {kind}": "Merkmale: {kind}"
+  "Kind: {interval}": "Typ: {interval}"
+  The element needs a designation.: Das Element braucht eine Bezeichnung.
+  Properties: Eigenschaften
+  Apply: Übernehmen
+  Move to: Verschieben nach
+  Move: Verschieben
+  "Double-click: move here": "Doppelklick: hierhin verschieben"
+  "Book the chosen measurement onto this element:": "Die gewählte Messung auf dieses Element buchen:"
+  "Book the {count} chosen measurements onto this element:": "Die {count} gewählten Messungen auf dieses Element buchen:"

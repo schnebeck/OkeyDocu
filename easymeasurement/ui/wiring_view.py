@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.plan import PlanStep
+from ..l10n import tr
 
 _DONE = QColor("#2e8b57")
 _NEXT = QColor("#e67e22")
@@ -149,9 +150,10 @@ class WiringView(QGraphicsView):
         used = {w.socket for w in wiring.wires}
 
         scene.addRect(INSTRUMENT, QPen(Qt.PenStyle.NoPen), QBrush(_PANEL))
-        self._text(wiring.instrument or "Messgerät", INSTRUMENT.left() + 16, 42, 11, _PAPER, True)
+        instrument = wiring.instrument or tr("Instrument")
+        self._text(instrument, INSTRUMENT.left() + 16, 42, 11, _PAPER, True)
         scene.addRect(QRectF(36, 72, 158, 62), QPen(Qt.PenStyle.NoPen), QBrush(QColor("#d9e2d0")))
-        self._text("Drehschalter", 44, 78, 8)
+        self._text(tr("Selector switch"), 44, 78, 8)
         self._text(self.step.selector, 44, 98, 12, _INK, True)
         knob = QRectF(52, 186, 92, 92)
         scene.addEllipse(knob, QPen(QColor("#141a20"), 2), QBrush(QColor("#47535e")))

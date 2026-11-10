@@ -11,6 +11,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
+from ..l10n import N_
+
 # The instrument stores whole seconds and the clock offset is measured to about
 # a second, so window edges get this much slack.
 WINDOW_SLACK = timedelta(seconds=2)
@@ -19,8 +21,8 @@ ISSUE_OUTSIDE = "outside_window"
 ISSUE_FUNCTION = "function_mismatch"
 
 ISSUE_TEXT = {
-    ISSUE_OUTSIDE: "Außerhalb jedes bestätigten Messschritts",
-    ISSUE_FUNCTION: "Messfunktion passt nicht zum Schritt",
+    ISSUE_OUTSIDE: N_("Outside every confirmed step"),
+    ISSUE_FUNCTION: N_("Measuring function does not match the step"),
 }
 
 

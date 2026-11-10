@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import plural, tr
 from ..reporting.archive import ReportError
 from ..reporting.language import languages
 from ..reporting.template import TemplateError
@@ -35,18 +36,18 @@ class GenerateOverlay(Overlay):
     """A further protocol of a confirmed campaign, for example with another template."""
 
     def __init__(self, app: AppContext, parent=None):
-        super().__init__("Protokoll erzeugen", parent)
-        self.ok_button.setText("Erzeugen")
+        super().__init__(tr("Generate report"), parent)
+        self.ok_button.setText(tr("Generate"))
         self.campaign = QComboBox()
         for row in app.service.campaigns():
             if row["status"] == "closed":
                 self.campaign.addItem(f"{row['title']} ({row['started_at'][:10]})", row["id"])
         self.template = TemplateChoice(app)
         form = QFormLayout()
-        form.addRow("Abgeschlossene Kampagne", self.campaign)
-        form.addRow("Vorlage", self.template)
+        form.addRow(tr("Completed campaign"), self.campaign)
+        form.addRow(tr("Template"), self.template)
         self.language = LanguageChoice()
-        form.addRow("Sprache", self.language)
+        form.addRow(tr("Language"), self.language)
         self.body.addLayout(form)
 
     def first_field(self):
@@ -61,21 +62,22 @@ class ReportsPage(QWidget):
     def __init__(self, app: AppContext):
         super().__init__()
         self.app = app
-        self.text = QLineEdit(placeholderText="Suchen: Kunde, Anlage, Kampagne, Prüfer …")
+        self.text = QLineEdit(
+            placeholderText=tr("Search: customer, installation, campaign, inspector …"))
         self.text.setClearButtonEnabled(True)
         self.signed = QComboBox()
-        self.signed.addItem("Alle Protokolle", None)
-        self.signed.addItem("Nur signierte", True)
-        self.signed.addItem("Nur unsignierte", False)
+        self.signed.addItem(tr("All reports"), None)
+        self.signed.addItem(tr("Signed only"), True)
+        self.signed.addItem(tr("Unsigned only"), False)
         self.text.textChanged.connect(self.refresh)
         self.signed.currentIndexChanged.connect(self.refresh)
         top = QHBoxLayout()
         top.addWidget(self.text, 1)
         top.addWidget(self.signed)
 
-        generate = QPushButton("Protokoll erzeugen")
-        self.open_button = QPushButton("Öffnen")
-        self.sign_button = QPushButton("Signieren")
+        generate = QPushButton(tr("Generate report"))
+        self.open_button = QPushButton(tr("Open"))
+        self.sign_button = QPushButton(tr("Sign"))
         generate.clicked.connect(lambda: self._generate())
         self.open_button.clicked.connect(self._open)
         self.sign_button.clicked.connect(self._sign)
@@ -87,13 +89,13 @@ class ReportsPage(QWidget):
         actions.addWidget(self.count)
 
         self.table = make_table(
-            ["Erstellt", "Kunde", "Anlage", "Kampagne", "Prüfer", "Vorlage", "Sprache",
-             "Signiert von", "Datei"],
+            [tr("Created"), tr("Customer"), tr("Installation"), tr("Campaign"), tr("Inspector"),
+             tr("Template"), tr("Language"), tr("Signed by"), tr("File")],
             stretch=7,
         )
         self.table.currentCellChanged.connect(lambda *_: self._update_buttons())
         self.table.doubleClicked.connect(self._open)
-        self.table.setToolTip("Doppelklick öffnet das Protokoll")
+        self.table.setToolTip(tr("Double-click opens the report"))
         layout = QVBoxLayout(self)
         layout.addLayout(top)
         layout.addLayout(actions)
@@ -109,12 +111,12 @@ class ReportsPage(QWidget):
                 row["created_at"].replace("T", " "), row["customer_name"], row["asset_name"],
                 row["campaign_title"], row["tester"], row["template_name"],
                 languages().get(row["language"], row["language"]), row["signed_by"],
-                "unverändert" if intact else "VERÄNDERT ODER FEHLT",
+                tr("unchanged") if intact else tr("CHANGED OR MISSING"),
             ]
             for column, text in enumerate(cells):
                 self.table.setItem(index, column, QTableWidgetItem(text))
             self.table.item(index, 0).setData(ROW_ID, row["id"])
-        self.count.setText(f"{len(rows)} Protokolle")
+        self.count.setText(plural(len(rows), "{count} report", "{count} reports"))
         self._update_buttons()
 
     def _report(self):
@@ -132,7 +134,7 @@ class ReportsPage(QWidget):
     def _generate(self, campaign_id: int | None = None) -> None:
         dialog = GenerateOverlay(self.app, self)
         if dialog.campaign.count() == 0:
-            show_error(self, "Es gibt noch keine abgeschlossene Kampagne.")
+            show_error(self, tr("There is no completed campaign yet."))
             return
         if campaign_id is not None:
             dialog.campaign.setCurrentIndex(max(dialog.campaign.findData(campaign_id), 0))
@@ -143,7 +145,7 @@ class ReportsPage(QWidget):
             self.app.archive.generate(
                 dialog.campaign.currentData(), dialog.template.currentText(),
                 dialog.template.currentData(), dialog.language.code(),
-                lambda work: run_busy(self, "Erstelle das Protokoll …", work),
+                lambda work: run_busy(self, tr("Creating the report …"), work),
             )
         except (ReportError, TemplateError) as err:
             show_error(self, str(err))

@@ -12,6 +12,8 @@ from PySide6.QtCore import QBuffer, QIODevice, QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QImage, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import QWidget
 
+from ..l10n import tr
+
 PAPER = QColor("white")
 INK = QColor("#14213d")
 GUIDE = QColor("#b8c0cc")
@@ -110,7 +112,7 @@ class SignaturePad(QWidget):
         if self.empty:
             painter.drawText(
                 self.rect().adjusted(0, 0, 0, -32), Qt.AlignmentFlag.AlignCenter,
-                "Hier mit Maus oder Stift unterschreiben",
+                tr("Sign here with mouse or pen"),
             )
         self._draw(painter)
 

@@ -13,31 +13,32 @@ from html import escape
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QLabel
 
+from ..l10n import N_, plural, tr
 from ..reporting.language import SOURCE, languages
 from ..reporting.sign import SigningError
 from .common import AppContext
 from .overlay import Overlay
 from .report_signing import CertificateFields, settings, user_certificate
 
-WHAT_HAPPENS = (
-    "Die Kampagne wird abgeschlossen und versiegelt. Danach lässt sich an den Messungen nichts"
-    " mehr ändern, und jede spätere Änderung am Datensatz wird erkannt. Das Protokoll wird als"
-    " PDF abgelegt."
+WHAT_HAPPENS = N_(
+    "The campaign is completed and sealed. After that the measurements can no longer be"
+    " changed, and any later change to the record is detected. The report is filed as a PDF."
 )
 
 
 def _summary(app: AppContext, campaign_id: int) -> str:
     rows = app.service.measurements(campaign_id)
     failed = sum(row["verdict"] == "failed" for row in rows)
-    text = "1 Messung" if len(rows) == 1 else f"{len(rows)} Messungen"
+    text = plural(len(rows), "{count} measurement", "{count} measurements")
     if failed:
-        text += f", davon {failed} nicht bestanden"
+        text = tr("{measurements}, of which {failed} failed", measurements=text, failed=failed)
     text = f"<b>{escape(app.service.campaign(campaign_id)['title'])}:</b> {text}."
     loose = len(app.service.stacked_photos(campaign_id))
     if loose:
-        photos = "1 Foto ist" if loose == 1 else f"{loose} Fotos sind"
-        text += (f'<br><span style="color:#d35400">{photos} keiner Messung zugeordnet und'
-                 " fehlen im Protokoll.</span>")
+        photos = plural(loose, "{count} photo is not assigned to any measurement and is missing"
+                        " from the report.", "{count} photos are not assigned to any measurement"
+                        " and are missing from the report.")
+        text += f'<br><span style="color:#d35400">{photos}</span>'
     return text
 
 
@@ -68,11 +69,11 @@ class ConfirmOverlay(Overlay):
     """One decision: after it the record is final and the protocol lies in the archive."""
 
     def __init__(self, app: AppContext, campaign, parent=None):
-        super().__init__("Protokoll bestätigen", parent, width=580)
-        self.ok_button.setText("Bestätigen und ablegen")
+        super().__init__(tr("Confirm report"), parent, width=580)
+        self.ok_button.setText(tr("Confirm and file"))
         self.problems = app.service.blockers(campaign["id"])
         simulated = campaign["driver"] == "simulator"
-        what = QLabel(WHAT_HAPPENS)
+        what = QLabel(tr(WHAT_HAPPENS))
         what.setWordWrap(True)
         self.summary = QLabel(_summary(app, campaign["id"]))
         self.summary.setWordWrap(True)
@@ -81,10 +82,10 @@ class ConfirmOverlay(Overlay):
         self.open_points.setTextFormat(Qt.TextFormat.RichText)
         self.template = TemplateChoice(app)
         form = QFormLayout()
-        form.addRow("Vorlage", self.template)
+        form.addRow(tr("Template"), self.template)
         self.language = LanguageChoice()
-        form.addRow("Sprache", self.language)
-        self.sign = QCheckBox("Mit Zertifikat signieren")
+        form.addRow(tr("Language"), self.language)
+        self.sign = QCheckBox(tr("Sign with certificate"))
         self.certificate = CertificateFields(user_certificate(app, campaign))
         self.sign.toggled.connect(self.certificate.setVisible)
         self.sign.toggled.connect(lambda: self._update())
@@ -93,7 +94,7 @@ class ConfirmOverlay(Overlay):
         self.certificate.setVisible(self.sign.isChecked())
         self.sign.setEnabled(not simulated)
         if simulated:
-            self.sign.setText("Signieren entfällt: Die Messwerte sind simuliert.")
+            self.sign.setText(tr("No signing: the readings are simulated."))
         self.body.addWidget(self.summary)
         self.body.addWidget(what)
         self.body.addWidget(self.open_points)
@@ -113,13 +114,13 @@ class ConfirmOverlay(Overlay):
     def _update(self) -> None:
         missing = list(self.problems)
         if self.template.count() == 0:
-            missing.append("Es gibt keine Protokollvorlage.")
+            missing.append(tr("There is no report template."))
         if self.signing() and not self.certificate.ready():
-            missing.append("Es fehlt noch das Zertifikat.")
+            missing.append(tr("The certificate is still missing."))
         self.ok_button.setEnabled(not missing)
-        self.hint.setText("Noch nicht möglich, siehe oben." if missing else "")
+        self.hint.setText(tr("Not possible yet, see above.") if missing else "")
         self.open_points.setText(
-            "<b>Noch offen:</b><ul style='margin: 0'>"
+            tr("<b>Still open:</b>") + "<ul style='margin: 0'>"
             + "".join(f"<li>{escape(text)}</li>" for text in missing) + "</ul>"
         )
         self.open_points.setVisible(bool(missing))

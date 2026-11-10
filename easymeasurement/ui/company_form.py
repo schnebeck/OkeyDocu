@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import N_, tr
 from ..reporting.logo import LogoError, decode_logo, prepare_logo
 from .common import AppContext
 from .overlay import Overlay
@@ -30,13 +31,13 @@ from .template_logo_form import read_image_file
 
 LOGO_PREVIEW = (240, 90)
 FIELDS = (
-    ("name", "Name", "z. B. Muster Elektrotechnik GmbH"),
-    ("street", "Straße", ""),
-    ("zip", "PLZ", ""),
-    ("city", "Ort", ""),
-    ("phone", "Telefon", ""),
-    ("email", "E-Mail", ""),
-    ("web", "Internet", ""),
+    ("name", N_("Name"), N_("e.g. Sample Electrical Ltd")),
+    ("street", N_("Street"), ""),
+    ("zip", N_("Postcode"), ""),
+    ("city", N_("City"), ""),
+    ("phone", N_("Phone"), ""),
+    ("email", N_("Email"), ""),
+    ("web", N_("Website"), ""),
 )
 
 
@@ -44,16 +45,16 @@ class CompanyForm(Overlay):
     """Kept only on taking it over; templates show it through their letterhead."""
 
     def __init__(self, app: AppContext, parent=None):
-        super().__init__("Firma", parent, 560)
+        super().__init__(tr("Company"), parent, 560)
         self.app = app
         stored = app.db.company()
         self.logo = stored["logo"]
-        self.ok_button.setText("Übernehmen")
+        self.ok_button.setText(tr("Apply"))
         self.fields: dict[str, QLineEdit] = {}
         form = QFormLayout()
         for key, label, hint in FIELDS:
             field = QLineEdit(stored[key])
-            field.setPlaceholderText(hint)
+            field.setPlaceholderText(tr(hint) if hint else "")
             self.fields[key] = field
             if key == "zip":
                 continue
@@ -62,15 +63,15 @@ class CompanyForm(Overlay):
                 self.fields["zip"].setMaximumWidth(90)
                 place.addWidget(self.fields["zip"])
                 place.addWidget(field, 1)
-                form.addRow("PLZ, Ort", place)
+                form.addRow(tr("Postcode, city"), place)
             else:
-                form.addRow(label, field)
+                form.addRow(tr(label), field)
         self.preview = QLabel(alignment=Qt.AlignmentFlag.AlignCenter)
         self.preview.setMinimumSize(*LOGO_PREVIEW)
         self.preview.setStyleSheet("border: 1px solid palette(mid);")
         self.choose_button = QPushButton()
         self.choose_button.clicked.connect(self._choose)
-        self.remove_button = QPushButton("Entfernen")
+        self.remove_button = QPushButton(tr("Remove"))
         self.remove_button.clicked.connect(self._remove)
         buttons = QHBoxLayout()
         buttons.addWidget(self.choose_button)
@@ -80,12 +81,12 @@ class CompanyForm(Overlay):
         logo.setSpacing(4)
         logo.addWidget(self.preview, 0, Qt.AlignmentFlag.AlignLeft)
         logo.addLayout(buttons)
-        note = QLabel("Im Briefkopf jedes Protokolls rechts neben dem Titel. PNG, JPEG, WebP"
-                      " oder SVG; Transparenz bleibt erhalten.")
+        note = QLabel(tr("In the letterhead of every report, to the right of the title. PNG,"
+                         " JPEG, WebP or SVG; transparency is kept."))
         note.setWordWrap(True)
         note.setEnabled(False)
         logo.addWidget(note)
-        form.addRow("Logo", logo)
+        form.addRow(tr("Logo"), logo)
         self.body.addLayout(form)
         self._show_logo()
 
@@ -101,20 +102,20 @@ class CompanyForm(Overlay):
                 pixmap = QPixmap()
         if pixmap.isNull():
             self.preview.setPixmap(QPixmap())
-            self.preview.setText("Kein Logo")
+            self.preview.setText(tr("No logo"))
         else:
             self.preview.setPixmap(pixmap.scaled(
                 *LOGO_PREVIEW, Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation))
-        self.choose_button.setText("Ersetzen …" if self.logo else "Logo wählen …")
+        self.choose_button.setText(tr("Replace …") if self.logo else tr("Choose logo …"))
         self.remove_button.setEnabled(bool(self.logo))
 
     def take_logo(self, path: Path) -> bool:
         try:
             _, self.logo = prepare_logo(read_image_file(path))
         except (LogoError, OSError) as err:
-            self.hint.setText(str(err) if isinstance(err, LogoError) else "Die Datei lässt sich"
-                              " nicht lesen.")
+            self.hint.setText(str(err) if isinstance(err, LogoError)
+                              else tr("The file cannot be read."))
             return False
         self.hint.clear()
         self._show_logo()
@@ -122,7 +123,8 @@ class CompanyForm(Overlay):
 
     def _choose(self) -> None:
         name, _ = QFileDialog.getOpenFileName(
-            self, "Logo wählen", "", "Bilder (*.png *.jpg *.jpeg *.webp *.bmp *.svg)")
+            self, tr("Choose logo"), "",
+            tr("Images ({patterns})", patterns="*.png *.jpg *.jpeg *.webp *.bmp *.svg"))
         if name:
             self.take_logo(Path(name))
 

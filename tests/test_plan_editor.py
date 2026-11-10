@@ -11,6 +11,7 @@ from PySide6.QtWidgets import QMessageBox
 
 from easymeasurement.campaign.plan import parse_plan
 from easymeasurement.devices import SelectorPosition
+from easymeasurement.l10n import tr
 from easymeasurement.ui.campaign_views import AssignPlanOverlay
 from easymeasurement.ui.instruction_panel import NO_INSTRUCTION, InstructionPanel
 from easymeasurement.ui.plan_editor import PlanEditorPage
@@ -187,7 +188,7 @@ def test_a_function_without_instruction_says_so(qtbot):
     panel = InstructionPanel()
     qtbot.addWidget(panel)
     panel.show_function("ures")
-    assert panel.text.text() == NO_INSTRUCTION
+    assert panel.text.text() == tr(NO_INSTRUCTION)
     assert panel.wiring.step is None
 
 
@@ -211,7 +212,7 @@ def test_a_switch_without_an_instruction_says_so(qtbot):
     panel = InstructionPanel()
     qtbot.addWidget(panel)
     panel.show_selector(SelectorPosition("IMD", frozenset({"imd"})))
-    assert panel.text.text() == NO_INSTRUCTION
+    assert panel.text.text() == tr(NO_INSTRUCTION)
 
 
 def test_free_measuring_offers_the_instruction_on_request(window, app, asset):

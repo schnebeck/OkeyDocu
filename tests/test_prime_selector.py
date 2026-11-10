@@ -13,6 +13,7 @@ from easymeasurement.devices.profitest_prime.driver import ProfitestPrimeDriver
 from easymeasurement.devices.profitest_prime.framing import EVENT, REPLY, TEXT, FrameSplitter
 from easymeasurement.devices.profitest_prime.push_print import PUSH_LEFT_ON
 from easymeasurement.devices.profitest_prime.selector import selector_position
+from easymeasurement.l10n import tr
 from easymeasurement.devices.profitest_prime.transport import (
     ALLOWED_COMMANDS,
     TEXT_COMMANDS,
@@ -181,7 +182,7 @@ def test_an_end_without_signing_off_warns(driver, instrument):
     driver.subscribe_live(lambda reading: None)
     instrument.broken = True
     driver.unsubscribe_live()
-    assert driver.stop_warning == PUSH_LEFT_ON
+    assert driver.stop_warning == tr(PUSH_LEFT_ON)
 
 
 def test_coming_back_on_another_connection_warns(instrument):
@@ -196,5 +197,5 @@ def test_coming_back_on_another_connection_warns(instrument):
     instrument.broken = True
     while len(states) < 2:
         pass
-    assert meter.stop_warning == PUSH_LEFT_ON
+    assert meter.stop_warning == tr(PUSH_LEFT_ON)
     meter.close()

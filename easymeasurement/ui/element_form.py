@@ -21,17 +21,21 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import N_, plural, tr
 from .common import AppContext, show_error
 from .kind_catalog import KindCatalog
 from .overlay import Overlay
 
-TEXTS = {"name": "Bezeichnung", "identifier": "Kennung", "manufacturer": "Hersteller",
-         "type": "Typbezeichnung", "serial_no": "Seriennummer", "comment": "Bemerkung"}
+TEXTS = {"name": N_("Designation"), "identifier": N_("Identifier"),
+         "manufacturer": N_("Manufacturer"), "type": N_("Type designation"),
+         "serial_no": N_("Serial number"), "comment": N_("Remark")}
 AS_KIND = -1  # the interval spin box's value for "as the kind says"
 
 
 def interval_text(months: int) -> str:
-    return "keine Wiederholung" if not months else f"alle {months} Monate"
+    if not months:
+        return tr("no repetition")
+    return plural(months, "every month", "every {count} months")
 
 
 class ElementForm(QWidget):
@@ -48,26 +52,26 @@ class ElementForm(QWidget):
         self.fields = {key: QLineEdit() for key in TEXTS}
         self.kind = QComboBox()
         self.kind.activated.connect(lambda _: self._kind_chosen())
-        self.interval = QSpinBox(minimum=AS_KIND, maximum=240, suffix=" Monate")
-        self.interval.setSpecialValueText("wie der Typ")
+        self.interval = QSpinBox(minimum=AS_KIND, maximum=240, suffix=tr(" months"))
+        self.interval.setSpecialValueText(tr("as the kind"))
         self.interval.editingFinished.connect(self._edited)
         self.interval_hint = QLabel()
         self.interval_hint.setEnabled(False)
         form = QFormLayout()
-        form.addRow(TEXTS["name"], self.fields["name"])
-        form.addRow("Typ", self.kind)
+        form.addRow(tr(TEXTS["name"]), self.fields["name"])
+        form.addRow(tr("Kind"), self.kind)
         for key in ("identifier", "manufacturer", "type", "serial_no", "comment"):
-            form.addRow(TEXTS[key], self.fields[key])
+            form.addRow(tr(TEXTS[key]), self.fields[key])
         repeat = QHBoxLayout()
         repeat.addWidget(self.interval)
         repeat.addWidget(self.interval_hint, 1)
-        form.addRow("Prüfintervall", repeat)
+        form.addRow(tr("Inspection interval"), repeat)
         for field in self.fields.values():
             field.editingFinished.connect(self._edited)
-        self.features = QGroupBox("Merkmale")
+        self.features = QGroupBox(tr("Features"))
         self.feature_form = QFormLayout(self.features)
         self.feature_fields: dict[str, QLineEdit] = {}
-        hint = QLabel("Leere Merkmale erscheinen nirgends, auch nicht im Protokoll.")
+        hint = QLabel(tr("Empty features appear nowhere, not even in the report."))
         hint.setEnabled(False)
         hint.setWordWrap(True)
         layout = QVBoxLayout(self)
@@ -108,7 +112,7 @@ class ElementForm(QWidget):
             unit.setFixedWidth(self.fontMetrics().horizontalAdvance("1/min") + 4)
             row.addWidget(unit)
             self.feature_form.addRow(feature.label, row)
-        self.features.setTitle(f"Merkmale: {kind.label}" if kind else "Merkmale")
+        self.features.setTitle(tr("Features: {kind}", kind=kind.label) if kind else tr("Features"))
         self.features.setVisible(bool(self.feature_fields))
 
     def _edited(self) -> None:
@@ -125,7 +129,8 @@ class ElementForm(QWidget):
         months = kind.interval_months if kind else 0
         own = self.interval.value()
         self.interval_hint.setText(
-            f"Typ: {interval_text(months)}" if own == AS_KIND else interval_text(own)
+            tr("Kind: {interval}", interval=interval_text(months)) if own == AS_KIND
+            else interval_text(own)
         )
 
     def save(self) -> None:
@@ -136,7 +141,7 @@ class ElementForm(QWidget):
         values = {key: field.text().strip() for key, field in self.fields.items()}
         if not values["name"]:
             self.fields["name"].setText(stored["name"])
-            show_error(self, "Das Element braucht eine Bezeichnung.")
+            show_error(self, tr("The element needs a designation."))
             return
         kind = self.kind.currentData()
         changed = kind != stored["kind"] or any(values[k] != stored[k] for k in values)
@@ -160,10 +165,10 @@ class ElementForm(QWidget):
 
 class ElementOverlay(Overlay):
     def __init__(self, app: AppContext, asset_id: int, parent=None):
-        super().__init__("Eigenschaften", parent, width=560)
-        self.ok_button.setText("Übernehmen")
+        super().__init__(tr("Properties"), parent, width=560)
+        self.ok_button.setText(tr("Apply"))
         self.form = ElementForm(app)
-        self.form.live = False  # Abbrechen leaves the element as it was
+        self.form.live = False  # Cancel leaves the element as it was
         self.form.load(asset_id)
         self.body.addWidget(self.form)
 

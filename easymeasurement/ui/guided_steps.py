@@ -12,6 +12,7 @@ from datetime import datetime
 
 from PySide6.QtWidgets import QListWidgetItem, QTableWidgetItem
 
+from ..l10n import tr
 from . import step_text
 from .common import ROW_ID, filling, function_short, value_line
 
@@ -64,9 +65,9 @@ class GuidedSteps:
         done = sum(1 for row in steps if row["status"] in ("done", "skipped"))
         self.progress.setRange(0, max(rows, 1))
         self.progress.setValue(done)
-        text = f"Punkt {index + 1} von {rows}" if rows else ""
+        text = tr("Point {number} of {total}", number=index + 1, total=rows) if rows else ""
         if rows and done == rows:
-            text += "  ·  Alle Punkte bearbeitet, jetzt nacharbeiten und abschließen."
+            text += "  ·  " + tr("All points done, now rework and complete.")
         self.position.setText(text)
 
     def _show_step(self) -> None:
@@ -131,21 +132,22 @@ class GuidedSteps:
             return ""
         wanted = step.selector or function_short(step.function)
         if not position.label:
-            return f"⚠ Der Drehschalter steht auf keiner Messstellung, gebraucht wird {wanted}."
+            return tr("⚠ The rotary switch is at no measuring position, {wanted} is needed.",
+                      wanted=wanted)
         if position.rules_out(step.function):
-            return f"⚠ Der Drehschalter steht auf {position.label}, gebraucht wird {wanted}."
+            return tr("⚠ The rotary switch is set to {position}, {wanted} is needed.",
+                      position=position.label, wanted=wanted)
         mark = "✓ " if position.functions else ""
-        return f"{mark}Der Drehschalter steht auf {position.label}."
+        return mark + tr("The rotary switch is set to {position}.", position=position.label)
 
     def _wiring_progress(self, done: int, total: int) -> None:
         if not total:
             self.wiring_hint.setText("")
         elif done == total:
-            self.wiring_hint.setText("Alle Verbindungen hergestellt.")
+            self.wiring_hint.setText(tr("All connections made."))
         else:
-            self.wiring_hint.setText(
-                f"Verbindung {done + 1} von {total} herstellen und in der Grafik anklicken."
-            )
+            self.wiring_hint.setText(tr("Make connection {number} of {total} and click it in the"
+                                        " drawing.", number=done + 1, total=total))
         self._update_actions()
 
     def _update_actions(self) -> None:
@@ -156,7 +158,7 @@ class GuidedSteps:
         self.device_set.setVisible(status in ("pending", "done", "skipped"))
         self.confirm_button.setVisible(status in ("pending", "done", "skipped"))
         self.confirm_button.setText(
-            "Aufbau bestätigen" if status == "pending" else "Schritt erneut messen"
+            tr("Confirm setup") if status == "pending" else tr("Measure step again")
         )
         ready = self.device_set.isChecked() and (
             self.wiring.complete or self.wiring.step is None

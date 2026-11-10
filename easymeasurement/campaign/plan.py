@@ -13,6 +13,8 @@ from importlib import resources
 
 import yaml
 
+from ..l10n import tr
+
 
 @dataclass(frozen=True)
 class Wire:
@@ -121,7 +123,7 @@ class Plan:
     def label(self) -> str:
         """The name as a campaign states it, which also tells a draft."""
         draft = not self.released and "Entwurf" not in self.title
-        return f"{self.title} (Entwurf)" if draft else self.title
+        return tr("{title} (draft)", title=self.title) if draft else self.title
 
 
 def _settings(raw: dict) -> list[tuple[str, str]]:

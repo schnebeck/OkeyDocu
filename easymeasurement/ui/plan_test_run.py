@@ -16,6 +16,7 @@ from PySide6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
 from ..campaign.plan import Plan
 from ..campaign.service import CampaignService
 from ..devices.simulator import SimulatedMeter
+from ..l10n import tr
 from ..reporting.archive import ReportArchive
 from ..store import Database
 from .common import AppContext
@@ -29,16 +30,18 @@ class PlanTestRun(QWidget):
 
     def __init__(self, plan: Plan):
         super().__init__()
-        self.setWindowTitle(f"Testlauf: {plan.title} – EasyMeasurement")
+        title = tr("Test run: {title}", title=plan.title)
+        self.setWindowTitle(f"{title} – EasyMeasurement")
         self.resize(1000, 640)
         self.folder = tempfile.TemporaryDirectory()
         self.db = Database(":memory:")
         service = CampaignService(self.db, Path(self.folder.name))
         self.app = AppContext(self.db, service, ReportArchive(service))
-        customer = self.db.add_customer("Testlauf")
-        asset = self.db.add_asset(customer, "installation", "Testanlage")
+        name = tr("Test run")
+        customer = self.db.add_customer(name)
+        asset = self.db.add_asset(customer, "installation", tr("Test installation"))
         meter = SimulatedMeter(failure_rate=0.0)
-        self.campaign_id = service.start(asset, plan, "Testlauf", "Testlauf", "simulator", meter)
+        self.campaign_id = service.start(asset, plan, name, name, "simulator", meter)
         self.app.devices.attach(self.campaign_id, meter)
         self.instrument = InstrumentControl(self.app, self)
         self.page = GuidedPage(self.app, self.instrument)
@@ -48,7 +51,7 @@ class PlanTestRun(QWidget):
         self.session.start()
         self.page.show_campaign(self.campaign_id)
         self.page.steps.setMaximumWidth(280)
-        note = QLabel("Testlauf: Nichts davon wird gespeichert, die Messwerte sind Zufallswerte.")
+        note = QLabel(tr("Test run: nothing of this is saved, the readings are random values."))
         row = QHBoxLayout()
         row.addWidget(self.page.steps)
         row.addWidget(self.page, 1)

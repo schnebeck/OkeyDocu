@@ -12,6 +12,7 @@ import logging
 import re
 import subprocess
 
+from ...l10n import tr
 from ..base import DeviceError, FoundInstrument
 from .channels import Channel, open_channel
 
@@ -42,7 +43,7 @@ def paired_addresses() -> list[str]:
             capture_output=True, text=True, timeout=5, check=False,
         )
     except (OSError, subprocess.TimeoutExpired) as err:
-        log.info("Bluetooth nicht abfragbar: %s", err)
+        log.info("Cannot query Bluetooth: %s", err)
         return []
     found = (_PAIRED_RE.match(line.strip()) for line in result.stdout.splitlines())
     return [m["address"] for m in found if m and m["name"].upper().startswith(BLUETOOTH_NAME)]
@@ -68,6 +69,5 @@ def open_any() -> Channel:
             problems.append(str(err))
     if problems:
         raise DeviceError(problems[-1])
-    raise DeviceError(
-        "Kein Messgerät gefunden. Bitte per USB anschließen oder einmal über Bluetooth einrichten."
-    )
+    raise DeviceError(tr(
+        "No instrument found. Please connect it by USB or set it up once over Bluetooth."))

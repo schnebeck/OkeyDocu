@@ -12,6 +12,7 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
+from ..l10n import tr
 from ..model import check_text
 from .kinds import KindsMixin
 from .device_texts import DeviceTextsMixin
@@ -58,10 +59,10 @@ class Database(KindsMixin, MasterDataMixin, DeviceTextsMixin):
             self.seed_kinds()
         elif version != SCHEMA_VERSION:
             self.connection.close()
-            raise SchemaMismatch(
-                f"Die Datenbank hat die Version {version}, dieses Programm braucht die Version"
-                f" {SCHEMA_VERSION}. Sie muss vorher mit einem externen Werkzeug umgestellt werden."
-            )
+            raise SchemaMismatch(tr(
+                "The database has version {found}, this program needs version {needed}."
+                " It has to be converted with an external tool first.",
+                found=version, needed=SCHEMA_VERSION))
         # Readers keep working while a measurement is written, and a crash cannot
         # damage what was committed. Synchronous stays at FULL: a value that was
         # reported as saved has to survive a power cut.

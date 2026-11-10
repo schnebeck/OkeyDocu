@@ -12,13 +12,14 @@ from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox, QFormLayout, QLabel, QLineEdit, QWidget
 
 from ..campaign.plan import load_instructions
+from ..l10n import N_, tr
 from ..model import FUNCTION_LABELS
 from .common import function_short
 from .growing_edit import GrowingEdit
 
-KIND_TEXT = {"check": "Prüffrage", "measure": "Messung", "note": "Hinweis"}
-TITLE_LABELS = {"check": "Frage", "measure": "Titel", "note": "Überschrift"}
-TEXT_LABELS = {"check": "Erläuterung", "note": "Text"}
+KIND_TEXT = {"check": N_("Check question"), "measure": N_("Measurement"), "note": N_("Hint")}
+TITLE_LABELS = {"check": N_("Question"), "measure": N_("Title"), "note": N_("Heading")}
+TEXT_LABELS = {"check": N_("Explanation"), "note": N_("Text")}
 
 
 class PlanStepForm(QWidget):
@@ -42,15 +43,15 @@ class PlanStepForm(QWidget):
         self.instruction_state.setWordWrap(True)
         self.text = GrowingEdit()
         self.expected = QComboBox()
-        self.expected.addItem("Ja", "yes")
-        self.expected.addItem("Nein", "no")
+        self.expected.addItem(tr("Yes"), "yes")
+        self.expected.addItem(tr("No"), "no")
         self.form = QFormLayout(self)
         self.form.addRow(self.heading)
-        self.form.addRow("Titel", self.title)
-        self.form.addRow("Messgröße", self.function)
+        self.form.addRow(tr("Title"), self.title)
+        self.form.addRow(tr("Measured quantity"), self.function)
         self.form.addRow("", self.instruction_state)
-        self.form.addRow("Text", self.text)
-        self.form.addRow("Erwartete Antwort", self.expected)
+        self.form.addRow(tr("Text"), self.text)
+        self.form.addRow(tr("Expected answer"), self.expected)
         self.title.textEdited.connect(self._store)
         self.function.activated.connect(lambda _: self._store())
         self.text.textChanged.connect(self._store)
@@ -60,12 +61,12 @@ class PlanStepForm(QWidget):
     def _set_row(self, field: QWidget, visible: bool, label: str = "") -> None:
         self.form.setRowVisible(field, visible)
         if label:
-            self.form.labelForField(field).setText(label)
+            self.form.labelForField(field).setText(tr(label))
 
     def show_step(self, step: dict | None) -> None:
         self.step = None
         kind = step.get("kind", "measure") if step else ""
-        self.heading.setText(KIND_TEXT.get(kind, "Einen Punkt wählen oder hinzufügen."))
+        self.heading.setText(tr(KIND_TEXT.get(kind, N_("Choose or add a point."))))
         self._set_row(self.title, bool(step), TITLE_LABELS.get(kind, ""))
         self._set_row(self.function, kind == "measure")
         self._set_row(self.instruction_state, kind == "measure")
@@ -84,8 +85,8 @@ class PlanStepForm(QWidget):
     def _show_instruction(self) -> None:
         known = self.function.currentData() in self.instructions
         self.instruction_state.setText(
-            "Anschlussbild und Anleitung kommen aus der Sammlung." if known
-            else "Für diese Messung gibt es noch keine Anleitung."
+            tr("Connection diagram and instructions come from the collection.") if known
+            else tr("There are no instructions for this measurement yet.")
         )
         placeholder = self.instructions.get(self.function.currentData())
         self.title.setPlaceholderText(placeholder.title if placeholder else "")

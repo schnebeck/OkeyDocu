@@ -11,27 +11,33 @@ from __future__ import annotations
 from html import escape
 
 from ..campaign.plan import PlanStep
+from ..l10n import tr
 
 
 def title_html(step: PlanStep) -> str:
-    return f"<h3>{escape(step.title)}</h3>Drehschalter: <b>{escape(step.selector)}</b>"
+    selector = tr("Rotary switch: {selector}", selector=f"<b>{escape(step.selector)}</b>")
+    return f"<h3>{escape(step.title)}</h3>{selector}"
 
 
 def settings_html(step: PlanStep) -> str:
     items = "".join(f"<li>{escape(k)}: <b>{escape(v)}</b></li>" for k, v in step.settings)
-    return f"<b>Am Gerät einstellen</b><ul>{items}</ul>" if items else ""
+    return f"<b>{tr('Set on the instrument')}</b><ul>{items}</ul>" if items else ""
 
 
 def warnings_html(step: PlanStep) -> str:
     items = "".join(f"<li>{escape(text)}</li>" for text in step.warnings)
-    return f"<span style='color:#b03a2e'><b>Achtung</b><ul>{items}</ul></span>" if items else ""
+    if not items:
+        return ""
+    return f"<span style='color:#b03a2e'><b>{tr('Caution')}</b><ul>{items}</ul></span>"
 
 
 def instructions_html(step: PlanStep) -> str:
     items = "".join(f"<li>{escape(text)}</li>" for text in step.instructions)
-    dut = f"<b>Prüfling</b><br>{escape(step.dut)}<br><br>" if step.dut else ""
-    return f"{dut}<b>Vorgehen</b><ol>{items}</ol>" if items else dut
+    dut = f"<b>{tr('Device under test')}</b><br>{escape(step.dut)}<br><br>" if step.dut else ""
+    return f"{dut}<b>{tr('Procedure')}</b><ol>{items}</ol>" if items else dut
 
 
 def source_html(step: PlanStep) -> str:
-    return f"<small>Quelle: {escape(step.source)}</small>" if step.source else ""
+    if not step.source:
+        return ""
+    return f"<small>{tr('Source: {source}', source=escape(step.source))}</small>"

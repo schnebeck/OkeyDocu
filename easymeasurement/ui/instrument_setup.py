@@ -13,16 +13,17 @@ from PySide6.QtWidgets import QFormLayout, QLabel, QLineEdit
 
 from ..devices import DeviceError
 from ..devices.profitest_prime import pairing
+from ..l10n import N_, tr
 from .overlay import Overlay
 
-INSTRUCTIONS = (
+INSTRUCTIONS = N_(
     "<ol>"
-    "<li>USB-Kabel abziehen.</li>"
-    "<li>Drehschalter auf <b>Setup</b> stellen.</li>"
-    "<li>Im Bluetooth-Menü Bluetooth <b>ein</b> und <b>sichtbar</b> stellen.</li>"
-    "<li>Hier auf <b>Einrichten</b> klicken und eine Abfrage am Gerät bestätigen.</li>"
+    "<li>Unplug the USB cable.</li>"
+    "<li>Turn the rotary switch to <b>Setup</b>.</li>"
+    "<li>In the Bluetooth menu, set Bluetooth to <b>on</b> and <b>visible</b>.</li>"
+    "<li>Click <b>Set up</b> here and confirm a request on the instrument.</li>"
     "</ol>"
-    "Das ist nur einmal nötig. Danach steht das Gerät in der Liste und wird nur noch ausgewählt."
+    "This is needed only once. After that the instrument is in the list and only gets chosen."
 )
 
 
@@ -50,19 +51,19 @@ class InstrumentSetupOverlay(Overlay):
     paired = Signal()
 
     def __init__(self, parent=None):
-        super().__init__("Messgerät einrichten", parent)
+        super().__init__(tr("Set up instrument"), parent)
         self.worker: PairingWorker | None = None
         self.address = ""  # of the instrument just paired
         self.pin = QLineEdit(pairing.DEFAULT_PIN)
         self.status = QLabel()
         self.status.setWordWrap(True)
-        guide = QLabel(INSTRUCTIONS)
+        guide = QLabel(tr(INSTRUCTIONS))
         guide.setWordWrap(True)
         self.start_button = self.ok_button
-        self.start_button.setText("Einrichten")
-        self.cancel_button.setText("Zurück")
+        self.start_button.setText(tr("Set up"))
+        self.cancel_button.setText(tr("Back"))
         form = QFormLayout()
-        form.addRow("PIN des Geräts", self.pin)
+        form.addRow(tr("Instrument PIN"), self.pin)
         self.body.addWidget(guide)
         self.body.addLayout(form)
         self.body.addWidget(self.status)
@@ -89,7 +90,7 @@ class InstrumentSetupOverlay(Overlay):
 
     def _paired(self, address: str) -> None:
         self.address = address
-        self.status.setText("Das Messgerät ist gekoppelt.")
+        self.status.setText(tr("The instrument is paired."))
         self.paired.emit()
         super().accept()
 

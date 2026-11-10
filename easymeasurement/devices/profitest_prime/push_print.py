@@ -17,6 +17,7 @@ import time
 from datetime import datetime
 from typing import Callable
 
+from ...l10n import N_, tr
 from ...model import UNREADABLE_FUNCTION, MeterMeasurement, Verdict
 from ..base import DeviceError, LinkState, LiveReading
 from .channels import Channel
@@ -30,14 +31,14 @@ PUSH_TIMEOUT_S = 10.0
 RECONNECT_DELAY_S = 3.0
 
 PUSH_REFUSALS = {
-    403: "Das Messgerät ist gerade anderweitig belegt und nimmt keine Verbindung an.",
-    500: "Am Messgerät sind schon drei Verbindungen angemeldet."
-         " Bitte es einmal aus- und wieder einschalten.",
+    403: N_("The instrument is busy elsewhere and accepts no connection."),
+    500: N_("Three connections are already signed on at the instrument."
+            " Please switch it off and on again."),
 }
 # Only the connection that signed on can sign off, and a save goes to whoever is signed on.
-PUSH_LEFT_ON = (
-    "Das Messgerät konnte nicht sauber getrennt werden. Bitte es einmal aus- und wieder"
-    " einschalten, bevor ohne Laptop gemessen wird. Sonst speichert es Messungen womöglich nicht."
+PUSH_LEFT_ON = N_(
+    "The instrument could not be disconnected cleanly. Please switch it off and on again"
+    " before measuring without the laptop. Otherwise it may not save measurements."
 )
 
 
@@ -62,9 +63,9 @@ class PushPrintMixin:
     ) -> None:
         """Switch on Push/Print. Both callbacks run on a worker thread."""
         if self._transport is None:
-            raise DeviceError("Die Verbindung zum Messgerät ist nicht geöffnet.")
+            raise DeviceError(tr("The connection to the instrument is not open."))
         if self._pushing.is_set():
-            raise DeviceError("Push/Print läuft bereits.")
+            raise DeviceError(tr("Push/Print is already running."))
         if not self._serial_no:
             self._serial_no = self._text("IDNXML:GET:SERIALNO")
         _enter_push(self._transport)
@@ -85,8 +86,8 @@ class PushPrintMixin:
             try:
                 transport.query("PPXML:LEAVE", PUSH_TIMEOUT_S)
             except DeviceError as err:
-                log.warning("PPXML:LEAVE fehlgeschlagen: %s", err)
-                self.stop_warning = PUSH_LEFT_ON
+                log.warning("PPXML:LEAVE failed: %s", err)
+                self.stop_warning = tr(PUSH_LEFT_ON)
         if self._dispatcher is not None:
             self._dispatcher.join(timeout=ACK_TIMEOUT_S + 2)
         self._dispatcher = None
@@ -113,8 +114,9 @@ class PushPrintMixin:
         try:
             self._on_reading(reading)
         except Exception as err:
-            log.exception("Messung konnte nicht übernommen werden")
-            self._report(LinkState.ERROR, f"Messung konnte nicht übernommen werden: {err}")
+            log.exception("Could not hand over a measurement")
+            self._report(LinkState.ERROR,
+                         tr("The measurement could not be taken over: {error}", error=err))
 
     @staticmethod
     def _acknowledge(transport: PrimeTransport) -> None:
@@ -122,7 +124,7 @@ class PushPrintMixin:
         try:
             transport.query("IDNXML:GET:ORDERNO", ACK_TIMEOUT_S)
         except DeviceError as err:
-            log.warning("Quittung fehlgeschlagen: %s", err)
+            log.warning("Acknowledgement failed: %s", err)
 
     def _report(self, state: LinkState, message: str = "") -> None:
         if self._on_state is None:
@@ -130,7 +132,7 @@ class PushPrintMixin:
         try:
             self._on_state(state, message)
         except Exception:
-            log.exception("Zustandsmeldung fehlgeschlagen")
+            log.exception("State report failed")
 
     def _reconnect(self, lost: PrimeTransport) -> bool:
         self._report(LinkState.LOST, str(lost.failure))
@@ -146,18 +148,18 @@ class PushPrintMixin:
                 if serial_no != self._serial_no:
                     transport.close()
                     self._pushing.clear()
-                    self._report(LinkState.ERROR, "Es hat sich ein anderes Messgerät gemeldet.")
+                    self._report(LinkState.ERROR, tr("A different instrument answered."))
                     return False
                 # After a radio dropout the instrument may still be in push mode.
                 if transport.query("PPXML:IS:ON", PUSH_TIMEOUT_S).strip() != b"true":
                     _enter_push(transport)
             except (DeviceError, OSError) as err:
-                log.info("Wiederverbinden fehlgeschlagen: %s", err)
+                log.info("Reconnecting failed: %s", err)
                 if transport is not None:
                     transport.close()
                 continue
             if type(channel) is not self._channel_kind:
-                self.stop_warning = PUSH_LEFT_ON
+                self.stop_warning = tr(PUSH_LEFT_ON)
             self._transport = transport
             self._report(LinkState.CONNECTED)
             return True
@@ -168,7 +170,8 @@ def _enter_push(transport: PrimeTransport) -> None:
     try:
         transport.query("PPXML:ENTER", PUSH_TIMEOUT_S)
     except InstrumentRefused as err:
-        raise DeviceError(PUSH_REFUSALS.get(err.code, str(err))) from err
+        refusal = PUSH_REFUSALS.get(err.code)
+        raise DeviceError(tr(refusal) if refusal else str(err)) from err
 
 
 def _measurement(frame: bytes, received_at: datetime) -> MeterMeasurement:
@@ -177,7 +180,7 @@ def _measurement(frame: bytes, received_at: datetime) -> MeterMeasurement:
     try:
         measurement = parse_event(frame)
     except (ValueError, SyntaxError) as err:
-        log.warning("Event nicht lesbar: %s", err)
+        log.warning("Unreadable event: %s", err)
         measurement = None
     if measurement is not None:
         return measurement

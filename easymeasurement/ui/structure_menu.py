@@ -12,6 +12,7 @@ from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtGui import QIcon, QKeySequence, QShortcut
 from PySide6.QtWidgets import QMenu, QMessageBox
 
+from ..l10n import plural, tr
 from .common import ROW_ID
 from .kind_catalog import KindCatalog
 from .structure_cleanup import CleanupOverlay
@@ -25,7 +26,7 @@ def kind_menu(menu: QMenu, catalog: KindCatalog, slot) -> None:
         menu.addAction(catalog.icon(kind.key), kind.label, lambda k=kind.key: slot(k))
     rest = [kind for kind in catalog.all if kind not in shown]
     if rest:
-        more = menu.addMenu("Weitere")
+        more = menu.addMenu(tr("More"))
         for kind in sorted(rest, key=lambda k: k.label.casefold()):
             more.addAction(catalog.icon(kind.key), kind.label, lambda k=kind.key: slot(k))
 
@@ -56,22 +57,22 @@ class StructureActions(QObject):
         menu = QMenu(self.tree)
         selected = self.tree.selected_ids()
         single = len(selected) <= 1 and self.tree.current_id() != UNPLACED
-        kind_menu(menu.addMenu(QIcon.fromTheme("list-add"), "Neues Element darunter"), catalog,
+        kind_menu(menu.addMenu(QIcon.fromTheme("list-add"), tr("New element below")), catalog,
                   self.new_element)
         if single and self.tree.current_id() is not None:
-            menu.addAction(QIcon.fromTheme("edit-rename"), "Umbenennen",
+            menu.addAction(QIcon.fromTheme("edit-rename"), tr("Rename"),
                            self.rename).setShortcut(QKeySequence("F2"))
-            kind_menu(menu.addMenu("Typ ändern"), catalog, self.change_kind)
-            menu.addAction(QIcon.fromTheme("document-properties"), "Eigenschaften …",
+            kind_menu(menu.addMenu(tr("Change kind")), catalog, self.change_kind)
+            menu.addAction(QIcon.fromTheme("document-properties"), tr("Properties …"),
                            lambda: self.properties_requested.emit(self._target()))
         if len(selected) > 1 or (selected and selected[0] != self.tree.root_id):
-            kind_menu(menu.addMenu("Zusammenfassen unter neuem Element"), catalog, self.group)
+            kind_menu(menu.addMenu(tr("Group under a new element")), catalog, self.group)
         menu.addSeparator()
-        menu.addAction(QIcon.fromTheme("edit-clear-all"), "Leere Elemente entfernen …",
+        menu.addAction(QIcon.fromTheme("edit-clear-all"), tr("Remove empty elements …"),
                        self.clean_up)
         removable = [i for i in selected if i != self.tree.root_id]
         if removable:
-            menu.addAction(QIcon.fromTheme("edit-delete"), "Löschen …",
+            menu.addAction(QIcon.fromTheme("edit-delete"), tr("Delete …"),
                            self.delete).setShortcut(QKeySequence.StandardKey.Delete)
         return menu
 
@@ -131,7 +132,8 @@ class StructureActions(QObject):
             blocker = self.app.service.deletion_blocker(asset_id)
             if blocker:
                 name = self.app.db.asset(asset_id)["name"]
-                QMessageBox.information(self.tree, "Löschen", f"„{name}“ bleibt: {blocker}")
+                QMessageBox.information(self.tree, tr("Delete"),
+                                        tr("“{name}” stays: {reason}", name=name, reason=blocker))
                 return
         if not self._confirm(chosen):
             return
@@ -142,16 +144,21 @@ class StructureActions(QObject):
 
     def _confirm(self, chosen: list[int]) -> bool:
         below = sum(len(self.app.service.subtree(i)) - 1 for i in chosen)
-        names = ", ".join(f"„{self.app.db.asset(i)['name']}“" for i in chosen[:3])
+        names = ", ".join(tr("“{name}”", name=self.app.db.asset(i)["name"]) for i in chosen[:3])
         if len(chosen) > 3:
-            names += f" und {len(chosen) - 3} weitere"
-        text = f"{names} löschen?"
-        detail = f"Mit {below} Elementen darunter. " if below else ""
-        detail += "Messungen offener Kampagnen wandern eine Ebene nach oben."
-        box = QMessageBox(QMessageBox.Icon.Question, "Löschen", text, parent=self.tree)
+            names = tr("{names} and {count} more", names=names, count=len(chosen) - 3)
+        text = tr("Delete {names}?", names=names)
+        detail = tr("Measurements of open campaigns move up one level.")
+        if below:
+            detail = plural(below,
+                            "With {count} element below. Measurements of open campaigns move"
+                            " up one level.",
+                            "With {count} elements below. Measurements of open campaigns move"
+                            " up one level.")
+        box = QMessageBox(QMessageBox.Icon.Question, tr("Delete"), text, parent=self.tree)
         box.setInformativeText(detail)
-        delete = box.addButton("Löschen", QMessageBox.ButtonRole.DestructiveRole)
-        box.setDefaultButton(box.addButton("Abbrechen", QMessageBox.ButtonRole.RejectRole))
+        delete = box.addButton(tr("Delete"), QMessageBox.ButtonRole.DestructiveRole)
+        box.setDefaultButton(box.addButton(tr("Cancel"), QMessageBox.ButtonRole.RejectRole))
         box.exec()
         return box.clickedButton() is delete
 

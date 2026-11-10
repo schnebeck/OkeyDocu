@@ -1,0 +1,22 @@
+# EasyMeasurement - German texts: the instrument connected, prepared and paired.
+texts:
+  Disconnecting from the instrument …: Trenne vom Messgerät …
+  Fetching the readings from the instrument …: Rufe die Messwerte vom Gerät ab …
+  Checking the instrument clock …: Prüfe die Geräteuhr …
+  Setting the instrument clock …: Stelle die Geräteuhr …
+  Clock offset: Uhrenversatz
+  "The instrument is ahead (+) or behind (−), in seconds:": "Das Messgerät geht vor (+) oder nach (−), in Sekunden:"
+  "The instrument is being prepared for this program. The first time and after a firmware update this takes about a minute. Please leave the rotary switch at <b>Setup</b> and do not disconnect the instrument.": "Das Messgerät wird für dieses Programm vorbereitet. Beim ersten Mal und nach einem Firmware-Update dauert das etwa eine Minute. Bitte das Drehrad auf <b>Setup</b> lassen und das Gerät nicht trennen."
+  Recognise the instrument: Messgerät erkennen
+  Transfer instrument texts: Gerätetexte übertragen
+  Preparing the instrument: Messgerät wird vorbereitet
+  Done: Fertig
+  Later: Später
+  The instrument is ready.: Das Messgerät ist bereit.
+  Please turn the rotary switch to Setup.: Bitte das Drehrad auf Setup stellen.
+  Try again: Erneut versuchen
+  "<ol><li>Unplug the USB cable.</li><li>Turn the rotary switch to <b>Setup</b>.</li><li>In the Bluetooth menu, set Bluetooth to <b>on</b> and <b>visible</b>.</li><li>Click <b>Set up</b> here and confirm a request on the instrument.</li></ol>This is needed only once. After that the instrument is in the list and only gets chosen.": "<ol><li>USB-Kabel abziehen.</li><li>Drehschalter auf <b>Setup</b> stellen.</li><li>Im Bluetooth-Menü Bluetooth <b>ein</b> und <b>sichtbar</b> stellen.</li><li>Hier auf <b>Einrichten</b> klicken und eine Abfrage am Gerät bestätigen.</li></ol>Das ist nur einmal nötig. Danach steht das Gerät in der Liste und wird nur noch ausgewählt."
+  Set up instrument: Messgerät einrichten
+  Set up: Einrichten
+  Instrument PIN: PIN des Geräts
+  The instrument is paired.: Das Messgerät ist gekoppelt.

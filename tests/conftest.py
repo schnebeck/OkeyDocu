@@ -21,8 +21,11 @@ from easymeasurement.__main__ import build_context
 from easymeasurement.campaign.plan import load_plans
 from easymeasurement.campaign.seal import KWalletKeyStore
 from easymeasurement.campaign.service import CampaignService
+from easymeasurement.l10n import set_language
 from easymeasurement.store import Database
 from easymeasurement.ui.main_window import MainWindow
+
+set_language("de")  # the German texts are what the tests read
 
 
 @pytest.fixture(autouse=True)

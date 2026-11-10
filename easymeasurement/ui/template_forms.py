@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import tr
 from ..reporting.template_model import BLOCK_LABELS, CONDITIONS, PLACEHOLDERS
 
 
@@ -34,7 +35,7 @@ class TemplateForms:
         form = QFormLayout(page)
         self.form = form
         if path is None:
-            form.addRow(QLabel("Oben einen Block wählen oder hinzufügen."))
+            form.addRow(QLabel(tr("Choose or add a block above.")))
         else:
             block = self._block(path)
             title = QLabel(f"<b>{BLOCK_LABELS.get(block['type'], block['type'])}</b>")
@@ -52,7 +53,7 @@ class TemplateForms:
 
     def _placeholder_box(self, insert) -> QComboBox:
         box = QComboBox()
-        box.addItem("Datenfeld einfügen …", None)
+        box.addItem(tr("Insert data field …"), None)
         for label, code in PLACEHOLDERS:
             box.addItem(label, code)
 
@@ -80,14 +81,14 @@ class TemplateForms:
             )
             insert = field.insert
         self.text_field = field
-        form.addRow("Text", field)
+        form.addRow(tr("Text"), field)
         form.addRow("", self._placeholder_box(insert))
 
     def _form_heading(self, block: dict, form: QFormLayout) -> None:
         self._text_rows(block, form, multi_line=False)
         level = QSpinBox(minimum=1, maximum=3, value=int(block.get("level", 1)))
         level.valueChanged.connect(lambda v: (block.__setitem__("level", v), self._changed()))
-        form.addRow("Ebene", level)
+        form.addRow(tr("Level"), level)
 
     def _form_text(self, block: dict, form: QFormLayout) -> None:
         self._text_rows(block, form, multi_line=True)
@@ -95,38 +96,38 @@ class TemplateForms:
     _form_notice = _form_text
 
     def _form_steps(self, block: dict, form: QFormLayout) -> None:
-        form.addRow(QLabel(
-            "Alles, was hier eingerückt steht, erscheint im Protokoll einmal je Messschritt\n"
-            "oder, ohne Messplan, einmal je Messgröße."
-        ))
+        form.addRow(QLabel(tr(
+            "Everything indented here appears in the report once per step\n"
+            "or, without a test plan, once per measured quantity."
+        )))
 
     def _form_attachments(self, block: dict, form: QFormLayout) -> None:
-        form.addRow(QLabel(
-            "Notizen und Dateien an Orten der Anlage oder an der Kampagne selbst.\n"
-            "Was an einer Messung hängt, steht im Protokoll bei dieser Messung."
-        ))
+        form.addRow(QLabel(tr(
+            "Notes and files at locations of the installation or at the campaign itself.\n"
+            "What belongs to a measurement appears in the report with that measurement."
+        )))
 
     def _form_letterhead(self, block: dict, form: QFormLayout) -> None:
         """One shared choice of data fields writes into the text field used last."""
         title = QLineEdit(str(block.get("title", "")))
         title.textChanged.connect(lambda text: (block.__setitem__("title", text), self._changed()))
-        form.addRow("Titel", title)
+        form.addRow(tr("Title"), title)
         edits = [self._lines_row(block, key, label, form) for key, label in (
-            ("lines", "Zeilen unter dem Titel"), ("client", "Auftraggeber"),
-            ("contractor", "Auftragnehmer"))]
-        edits[-1].setPlaceholderText("Eine Zeile je Eintrag; die eigene Firma steht unter"
-                                     " Einstellungen → Firma")
+            ("lines", tr("Lines below the title")), ("client", tr("Client")),
+            ("contractor", tr("Contractor")))]
+        edits[-1].setPlaceholderText(tr("One line per entry; the own company is under"
+                                        " Settings → Company"))
         self.letterhead_target = edits[0]
         for edit in edits:  # a click into a field places its cursor
             edit.cursorPositionChanged.connect(
                 lambda edit=edit: setattr(self, "letterhead_target", edit))
         form.addRow("", self._placeholder_box(
             lambda code: self.letterhead_target.insertPlainText(code)))
-        code = QCheckBox("QR-Code mit der Kennung der Prüfung")
+        code = QCheckBox(tr("QR code with the identifier of the inspection"))
         code.setChecked(bool(block.get("qr", True)))
         code.toggled.connect(lambda on: (block.__setitem__("qr", on), self._changed()))
         form.addRow("", code)
-        logo = QCheckBox("Firmenlogo rechts neben dem Titel (Einstellungen → Firma)")
+        logo = QCheckBox(tr("Company logo to the right of the title (Settings → Company)"))
         logo.setChecked(bool(block.get("logo", True)))
         logo.toggled.connect(lambda on: (block.__setitem__("logo", on), self._changed()))
         form.addRow("", logo)
@@ -142,10 +143,10 @@ class TemplateForms:
 
     def _form_signature(self, block: dict, form: QFormLayout) -> None:
         result = QLineEdit(str(block.get("result", "")))
-        result.setPlaceholderText("leer: ohne Rahmen und Ergebnis")
+        result.setPlaceholderText(tr("empty: without frame and result"))
         result.textChanged.connect(lambda text: (block.__setitem__("result", text),
                                                  self._changed()))
-        form.addRow("Ergebnis darüber", result)
+        form.addRow(tr("Result above"), result)
         form.addRow("", self._placeholder_box(result.insert))
         field = QLineEdit(", ".join(block.get("labels", [])))
 
@@ -154,7 +155,7 @@ class TemplateForms:
             self._changed()
 
         field.textChanged.connect(changed)
-        form.addRow("Felder (mit Komma getrennt)", field)
+        form.addRow(tr("Fields (separated by commas)"), field)
 
     def _condition_row(self, block: dict, form: QFormLayout) -> None:
         box = QComboBox()
@@ -163,7 +164,7 @@ class TemplateForms:
         current = block.get("when")
         index = box.findData(current)
         if current is not None and index < 0:  # written by hand in the source view
-            box.addItem(f"Eigene Bedingung: {current}", current)
+            box.addItem(tr("Custom condition: {condition}", condition=current), current)
             index = box.count() - 1
         box.setCurrentIndex(max(index, 0))
 
@@ -175,4 +176,4 @@ class TemplateForms:
 
         box.currentIndexChanged.connect(changed)
         self.condition = box
-        form.addRow("Anzeige", box)
+        form.addRow(tr("Display"), box)

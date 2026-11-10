@@ -11,6 +11,7 @@ from __future__ import annotations
 from PySide6.QtCore import QPoint, Qt, QTimer
 from PySide6.QtGui import QCursor
 
+from ..l10n import N_, tr
 from .photo_shared import start_photo_drag
 from .photo_timeline_gestures import GapGesture, Gesture, PanGesture, PhotoGesture
 from .photo_timeline_model import Zone, to_moment
@@ -19,20 +20,20 @@ EDGE_PX = 28  # near the view's edge a shift keeps going by itself
 EDGE_STEP_PX = 14
 EDGE_TICK_MS = 40
 
-IDLE_HINT = (
-    "Foto seitlich ziehen: alle Fotos verschieben · Foto auf eine Messung ziehen: nur dieses"
+IDLE_HINT = N_(
+    "Drag a photo sideways: move all photos · Drag a photo onto a measurement: only this one"
 )
-READ_ONLY_HINT = "Abgeschlossene Kampagne: nur ansehen. Doppelklick zeigt ein Foto groß."
+READ_ONLY_HINT = N_("Completed campaign: view only. Double-click shows a photo large.")
 HOVER_HINTS = {
-    "pinned": "Angeheftet: bleibt bei seiner Messung · Auf eine andere Messung ziehen · "
-              "Rechtsklick: wieder der Zeit folgen",
-    "photo": "Seitlich ziehen: alle Fotos verschieben · Nach oben auf eine Messung ziehen: "
-             "nur dieses Foto · Doppelklick: groß",
-    "mark": "Klick: diese Messung in der Tabelle zeigen",
-    "gap": "Lücke: die Fotos danach stehen später · Rechte Kante ziehen zum Dehnen",
-    "gap_grip": "Ziehen: Lücke dehnen oder kürzen",
-    "gap_close": "Klick: Lücke entfernen, die Fotos rücken zurück",
-    "strip": "Ziehen: Ansicht bewegen · Mausrad: zoomen · Rechtsklick: Lücke hier einfügen",
+    "pinned": N_("Pinned: stays with its measurement · Drag onto another measurement · "
+                 "Right-click: follow the time again"),
+    "photo": N_("Drag sideways: move all photos · Drag up onto a measurement: "
+                "only this photo · Double-click: large"),
+    "mark": N_("Click: show this measurement in the table"),
+    "gap": N_("Gap: the photos after it stand later · Drag the right edge to stretch"),
+    "gap_grip": N_("Drag: stretch or shorten the gap"),
+    "gap_close": N_("Click: remove the gap, the photos move back"),
+    "strip": N_("Drag: move the view · Mouse wheel: zoom · Right-click: insert gap here"),
 }
 CURSORS = {
     "pinned": Qt.CursorShape.OpenHandCursor, "photo": Qt.CursorShape.OpenHandCursor,
@@ -52,7 +53,7 @@ class TrackMouse:
         self.edge_timer.timeout.connect(self._edge_tick)
 
     def idle_hint(self) -> str:
-        return READ_ONLY_HINT if self.view.read_only else IDLE_HINT
+        return tr(READ_ONLY_HINT) if self.view.read_only else tr(IDLE_HINT)
 
     def press(self, pos: QPoint) -> None:
         view = self.view
@@ -101,7 +102,7 @@ class TrackMouse:
         self.gesture = None
         self.edge_timer.stop()
         view.thumbs.pause(False)
-        view.hint.emit("Loslassen auf dem Stapel, einer Messung oder der Messwerttabelle")
+        view.hint.emit(tr("Let go on the stack, a measurement or the table of readings"))
         item = view.photo_items[photo_id]
         start_photo_drag(view.viewport(), photo_id, item.pixmap)
         view.hint.emit(self.idle_hint())
@@ -150,7 +151,7 @@ class TrackMouse:
             view.set_hovered(None)
         editing = not view.read_only or kind == "mark"
         words = HOVER_HINTS.get(kind) if editing else None
-        view.hint.emit(words or self.idle_hint())
+        view.hint.emit(tr(words) if words else self.idle_hint())
         cursor = CURSORS.get(kind) if editing else None
         if cursor is None:
             view.viewport().unsetCursor()
@@ -166,10 +167,11 @@ class TrackMouse:
             view.set_target(mark.id if mark else None)
             if mark:
                 moment = to_moment(mark.at).strftime("%H:%M:%S")
-                view.hint.emit(f"Loslassen: Foto an {mark.label} {moment} heften")
+                view.hint.emit(tr("Let go: pin the photo to {mark} {moment}", mark=mark.label,
+                                   moment=moment))
         else:
             view.set_target(None)
-            view.hint.emit("Loslassen: Foto folgt wieder seiner Aufnahmezeit")
+            view.hint.emit(tr("Let go: the photo follows its time taken again"))
 
     def carried_away(self) -> None:
         self.view.set_target(None)

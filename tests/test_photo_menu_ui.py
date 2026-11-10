@@ -19,6 +19,7 @@ from PySide6.QtWidgets import QApplication
 
 from easymeasurement.ui import photo_overlays
 from easymeasurement.ui.photo_timeline_events import Hit
+from easymeasurement.l10n import tr
 from easymeasurement.ui.photo_timeline_mouse import IDLE_HINT
 
 from .photo_ui_helpers import (
@@ -112,7 +113,7 @@ def test_the_hint_returns_after_a_drag(app, timeline, case):
     press(view, start)
     move(view, start + QPoint(30, 0))
     QTest.keyClick(view, Qt.Key.Key_Escape)
-    assert timeline.hint_label.text() == IDLE_HINT
+    assert timeline.hint_label.text() == tr(IDLE_HINT)
 
 
 def test_double_click_shows_the_photo_large(monkeypatch, app, timeline, case):

@@ -27,6 +27,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..l10n import N_, plural, tr
 from ..store import CampaignClosed
 from .common import AppContext, ROW_ID, show_error
 from .photo_preview import PhotoPreview
@@ -34,9 +35,9 @@ from .photo_shared import accept_photo_drops, shared_thumbs, start_photo_drag
 
 ICON = QSize(96, 72)
 CELL = QSize(112, 112)
-EMPTY_TEXT = "Der Stapel ist leer. Hier landen Fotos, die von einer Messung gelöst wurden."
-HELP_TEXT = "Auf eine Zeile der Tabelle oder auf den Reiter „Messung“ ziehen."
-READ_ONLY_TEXT = "Abgeschlossene Kampagne: nur ansehen."
+EMPTY_TEXT = N_("The stack is empty. Photos detached from a measurement land here.")
+HELP_TEXT = N_("Drag onto a row of the table or onto the “Measurement” tab.")
+READ_ONLY_TEXT = N_("Completed campaign: view only.")
 
 
 class StackList(QListWidget):
@@ -66,7 +67,7 @@ class StackList(QListWidget):
             painter = QPainter(self.viewport())
             painter.setPen(self.palette().color(QPalette.ColorRole.PlaceholderText))
             flags = Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap
-            painter.drawText(self.viewport().rect().adjusted(12, 0, -12, 0), flags, EMPTY_TEXT)
+            painter.drawText(self.viewport().rect().adjusted(12, 0, -12, 0), flags, tr(EMPTY_TEXT))
 
 
 class PhotoStack(QWidget):
@@ -82,10 +83,10 @@ class PhotoStack(QWidget):
         self.by_path: dict[str, QListWidgetItem] = {}
         self.thumbs = shared_thumbs()
         self.list = StackList()
-        self.hint = QLabel(HELP_TEXT, wordWrap=True)
+        self.hint = QLabel(tr(HELP_TEXT), wordWrap=True)
         self.hint.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
-        self.back_button = QPushButton("Zurück auf die Zeitleiste")
-        self.delete_button = QPushButton("Löschen …")
+        self.back_button = QPushButton(tr("Back onto the timeline"))
+        self.delete_button = QPushButton(tr("Delete …"))
         buttons = QHBoxLayout()
         buttons.addWidget(self.back_button)
         buttons.addStretch(1)
@@ -127,7 +128,7 @@ class PhotoStack(QWidget):
         for photo_id, row in self.rows.items():
             item = QListWidgetItem(self._caption(row))
             item.setData(ROW_ID, photo_id)
-            item.setToolTip(f"{row['original_name']}\nDoppelklick: groß zeigen")
+            item.setToolTip(tr("{name}\nDouble-click: show large", name=row["original_name"]))
             path = service.photo_path(self.campaign_id, row["file_name"])
             self.by_path[str(path)] = item
             self._give_icon(item, path)
@@ -142,7 +143,7 @@ class PhotoStack(QWidget):
     @staticmethod
     def _caption(row) -> str:
         if not row["taken_at"]:
-            return "ohne Zeit"
+            return tr("no time")
         return f"{datetime.fromisoformat(row['taken_at']):%H:%M:%S}"
 
     def _give_icon(self, item: QListWidgetItem, path: Path) -> None:
@@ -157,7 +158,7 @@ class PhotoStack(QWidget):
     def _apply_lock(self) -> None:
         self.list.setDragEnabled(not self.read_only)
         self.target.enabled = not self.read_only
-        self.hint.setText(READ_ONLY_TEXT if self.read_only else HELP_TEXT)
+        self.hint.setText(tr(READ_ONLY_TEXT) if self.read_only else tr(HELP_TEXT))
         self._update_buttons()
 
     def _selected(self) -> list[int]:
@@ -169,9 +170,9 @@ class PhotoStack(QWidget):
         self.back_button.setEnabled(bool(timed) and not self.read_only)
         self.delete_button.setEnabled(bool(chosen) and not self.read_only)
         if chosen and not timed and not self.read_only:
-            self.hint.setText("Ohne Aufnahmezeit geht es nur per Ziehen auf eine Messung.")
+            self.hint.setText(tr("Without a time taken, only dragging onto a measurement works."))
         elif not self.read_only:
-            self.hint.setText(HELP_TEXT)
+            self.hint.setText(tr(HELP_TEXT))
 
     # Changing data --------------------------------------------------------
 
@@ -181,7 +182,7 @@ class PhotoStack(QWidget):
                 work(photo)
         except CampaignClosed:
             self.refresh()
-            show_error(self, "Die Kampagne ist abgeschlossen, Fotos lassen sich nicht mehr ändern.")
+            show_error(self, tr("The campaign is completed, photos can no longer be changed."))
             return
         self.refresh()
         self.changed.emit()
@@ -196,12 +197,15 @@ class PhotoStack(QWidget):
         if not chosen or self.read_only:
             return
         name = self.rows[chosen[0]]["original_name"]
-        what = f"Das Foto {name}" if len(chosen) == 1 else f"{len(chosen)} Fotos"
-        answer = QMessageBox.question(
-            self, "Foto löschen",
-            f"{what} endgültig löschen?\n\nDie Bilddatei wird entfernt. "
-            "Das lässt sich nicht rückgängig machen.",
+        question = plural(
+            len(chosen),
+            "Delete the photo {name} for good?\n\nThe image file is removed. This cannot be"
+            " undone.",
+            "Delete {count} photos for good?\n\nThe image files are removed. This cannot be"
+            " undone.",
+            name=name,
         )
+        answer = QMessageBox.question(self, tr("Delete photo"), question)
         if answer == QMessageBox.StandardButton.Yes:
             self._write(self.app.service.delete_photo, chosen)
 
@@ -212,8 +216,8 @@ class PhotoStack(QWidget):
     def _open(self, item: QListWidgetItem) -> None:
         row = self.rows[item.data(ROW_ID)]
         path = self.app.service.photo_path(self.campaign_id, row["file_name"])
-        taken = row["taken_at"].replace("T", " ") if row["taken_at"] else "ohne Aufnahmezeit"
-        PhotoPreview(row["original_name"], f"Aufgenommen {taken}", path, self, self.app,
+        taken = row["taken_at"].replace("T", " ") if row["taken_at"] else tr("without time taken")
+        PhotoPreview(row["original_name"], tr("Taken {taken}", taken=taken), path, self, self.app,
                      item.data(ROW_ID)).exec()
 
     def keyPressEvent(self, event) -> None:

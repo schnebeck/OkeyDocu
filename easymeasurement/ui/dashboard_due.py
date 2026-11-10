@@ -14,6 +14,7 @@ from html import escape
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 
+from ..l10n import day, plural, tr
 from .campaign_list import heading
 from .common import AppContext
 from .dashboard_card import ALERT, CARD_STYLE, TODO
@@ -25,11 +26,13 @@ SHOWN = 5
 def _since(due: date, today: date) -> str:
     days = (today - due).days
     if days < 0:
-        return f"fällig am {due:%d.%m.%Y}, in {-days} Tagen"
+        return tr("due on {day}, in {days} days", day=day(due), days=-days)
     if days == 0:
-        return "heute fällig"
+        return tr("due today")
     weeks = days // 7
-    return f"seit {due:%d.%m.%Y} fällig" + (f", {weeks} Wochen über" if weeks > 1 else "")
+    if weeks > 1:
+        return tr("due since {day}, {weeks} weeks overdue", day=day(due), weeks=weeks)
+    return tr("due since {day}", day=day(due))
 
 
 class DueRow(QFrame):
@@ -62,7 +65,7 @@ class DueSection(QWidget):
     def __init__(self, app: AppContext):
         super().__init__()
         self.app = app
-        self.title = heading("Fällig", 13)
+        self.title = heading(tr("Due"), 13)
         self.rows = QVBoxLayout()
         self.rows.setSpacing(6)
         self.more = QLabel()
@@ -85,26 +88,29 @@ class DueSection(QWidget):
                  for item in self.app.service.due_inspections(today)]
         for row in rows[:SHOWN]:
             self.rows.addWidget(row)
-        self.more.setText(f"und {len(rows) - SHOWN} weitere" if len(rows) > SHOWN else "")
+        more = tr("and {count} more", count=len(rows) - SHOWN) if len(rows) > SHOWN else ""
+        self.more.setText(more)
         self.more.setVisible(len(rows) > SHOWN)
         self.setVisible(bool(rows))
 
     def _inspection(self, item, catalog: KindCatalog, today: date) -> DueRow:
-        title = f"Wiederholungsprüfung {item.due:%Y}"
-        detail = (f"{_since(item.due, today)} · zuletzt geprüft am {item.last_day:%d.%m.%Y},"
-                  f" alle {item.months} Monate")
+        title = tr("Repeat inspection {year}", year=f"{item.due:%Y}")
+        detail = tr("{since} · last inspected on {day}, every {months} months",
+                    since=_since(item.due, today), day=day(item.last_day), months=item.months)
         return DueRow(
             catalog.icon(item.kind), f"{item.asset} · {item.customer}", detail,
-            ALERT if item.overdue(today) else TODO, "Prüfung anlegen …",
+            ALERT if item.overdue(today) else TODO, tr("Create inspection …"),
             lambda: self.start_requested.emit(item.asset_id, title, 0),
         )
 
     def _follow_up(self, item, catalog: KindCatalog) -> DueRow:
-        defects = "1 Mangel" if item.failed == 1 else f"{item.failed} Mängel"
-        detail = f"Nachprüfung offen: {defects} aus „{item.title}“ vom {item.closed:%d.%m.%Y}"
+        defects = plural(item.failed, "{count} defect", "{count} defects")
+        detail = tr("Follow-up open: {defects} from “{title}” of {day}", defects=defects,
+                    title=item.title, day=day(item.closed))
         return DueRow(
             catalog.icon(item.kind), f"{item.asset} · {item.customer}", detail, ALERT,
-            "Nachprüfung anlegen …",
-            lambda: self.start_requested.emit(item.asset_id, f"Nachprüfung: {item.title}",
+            tr("Create follow-up …"),
+            lambda: self.start_requested.emit(item.asset_id,
+                                              tr("Follow-up: {title}", title=item.title),
                                               item.campaign_id),
         )
