@@ -4,20 +4,27 @@
 #   none: no measurement   one: exactly one   many: several
 name: Standardprotokoll
 blocks:
-  - type: heading
-    text: "Prüfprotokoll"
+  - type: letterhead
+    title: "Prüfprotokoll"
+    lines:
+      - "{{ campaign.title }}"
+      - "{{ asset.kind_text }}: {{ asset.name }}"
+      - "Prüfung vom {{ campaign.started }}"
+    client:
+      - "{{ customer.name }}"
+      - "{{ customer.street }}"
+      - "{{ customer.zip }} {{ customer.city }}"
+    contractor:
+      - "Prüfer: {{ campaign.tester }}"
+    qr: true
   - type: fields
     rows:
-      - [Kunde, "{{ customer.name }}"]
-      - [Anschrift, "{{ customer.street }} {{ customer.zip }} {{ customer.city }}"]
       - ["{{ asset.kind_text }}", "{{ asset.name }}"]
       - [Kennung, "{{ asset.identifier }}"]
     features: asset
   - type: fields
     rows:
-      - [Prüfung, "{{ campaign.title }}"]
       - [Messplan, "{{ campaign.plan }}"]
-      - [Prüfer, "{{ campaign.tester }}"]
       - [Beginn, "{{ campaign.started }}"]
       - [Abschluss, "{{ campaign.closed }}"]
   - type: heading
@@ -57,9 +64,8 @@ blocks:
     level: 2
     text: Ergebnis
   - type: text
-    text: "Ergebnis der Messwerte: {{ verdict }}"
-  - type: text
     when: campaign.seal
     text: "Datensatz-Siegel: {{ campaign.seal }}"
   - type: signature
-    labels: ["Ort, Datum", "Unterschrift Prüfer"]
+    result: "Ergebnis der Prüfung: {{ verdict }}"
+    labels: ["Ort, Datum", "Unterschrift {{ campaign.tester }}"]

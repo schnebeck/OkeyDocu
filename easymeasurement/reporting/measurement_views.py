@@ -77,7 +77,7 @@ def _single(measurement: ReportMeasurement, options: dict) -> Fields:
     for result in data.results:
         limit = _limit(result)
         shown = _word(result.quantity.raw)
-        rows.append((result.label, f"{shown}  ({tr('Grenzwert')} {limit})" if limit else shown))
+        rows.append((tr(result.label), f"{shown}  ({tr('Grenzwert')} {limit})" if limit else shown))
     if measurement.photos:
         rows.append((tr("Fotos"), str(len(measurement.photos))))
     if data.results:
@@ -112,7 +112,7 @@ def _columns(group: list[ReportMeasurement]) -> list[tuple[str, str]]:
     columns: dict[str, str] = {}
     for measurement in group:
         for result in measurement.data.results:
-            columns.setdefault(result.key, result.label)
+            columns.setdefault(result.key, tr(result.label))
     return list(columns.items())
 
 

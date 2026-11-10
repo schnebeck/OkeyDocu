@@ -8,10 +8,16 @@
 
 from __future__ import annotations
 
+from PySide6.QtWidgets import QLabel
+
 from .common import ROW_ID, selected_id
 from .photo_shared import accept_photo_drops
 from .photo_stack import PhotoStack
 from .photo_timeline import PhotoTimeline
+from .proxy_progress import ProxyProgress
+
+WAIT_FOR_PROXIES = "Erst wenn die Fotos für das Protokoll vorbereitet sind (siehe Statuszeile)."
+DRAFT_TIP = "Das Protokoll, wie es jetzt aussähe. Es ist noch nicht gültig."
 
 
 class CampaignPhotos:
@@ -21,6 +27,11 @@ class CampaignPhotos:
         self.timeline = PhotoTimeline(self.app)
         self.timeline.hide()
         self.stack = PhotoStack(self.app)
+        self.proxies = ProxyProgress(self)
+        self.draft_open = False  # set with the campaign shown, so the timer needs no database
+        self.proxy_note = QLabel()
+        self.proxy_note.hide()
+        self.proxies.changed.connect(self._proxies_changed)
         self.timeline.changed.connect(self._photos_changed)
         self.stack.changed.connect(self._photos_changed)
         self.timeline.measurement_chosen.connect(self._select_measurement)
@@ -83,6 +94,7 @@ class CampaignPhotos:
                 return
 
     def _show_photos(self, campaign_id: int) -> None:
+        self.warm_proxies(campaign_id)
         self.timeline.show_campaign(campaign_id)
         self.stack.show_campaign(campaign_id)
         self._fit_photo_panels()
@@ -107,3 +119,19 @@ class CampaignPhotos:
     def _photos_changed(self) -> None:
         self.guided.reload()
         self._data_changed()
+
+    def warm_proxies(self, campaign_id: int) -> None:
+        """Reduced copies for thumbnails and the report, made beside the window."""
+        self.proxies.follow(campaign_id, self.app.service.warm_proxies(campaign_id))
+        self._proxies_changed()
+
+    def _proxies_changed(self) -> None:
+        """The draft waits for the proxies, so it never shows a half-prepared report."""
+        text = self.proxies.text()
+        self.proxy_note.setText(text)
+        self.proxy_note.setVisible(bool(text))
+        ready = self.proxies.ready(self.campaign_id)
+        usable = self.draft_open and ready
+        self.draft_action.setEnabled(usable)
+        self.header.draft_button.setEnabled(usable)
+        self.header.draft_button.setToolTip(DRAFT_TIP if ready else WAIT_FOR_PROXIES)

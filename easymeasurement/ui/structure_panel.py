@@ -148,7 +148,7 @@ class PlacePanel(QWidget):
         values = self.app.db.asset_features(row["id"])
         for feature in kind.features if kind else ():
             if values.get(feature.key):
-                lines.append((feature.label, f"{values[feature.key]} {feature.unit}".strip()))
+                lines.append((feature.label, f"{values[feature.key]}\u202f{feature.unit}".strip()))
         months = row["interval_months"]
         if months is None and kind is not None:
             months = kind.interval_months

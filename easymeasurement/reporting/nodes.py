@@ -48,6 +48,19 @@ class Photos:
 class SignatureLine:
     labels: list[str]
     image: bytes | None = None  # stands over the last label
+    result: str = ""  # framed above the lines where given
+    tone: str = ""  # "passed" or "failed" colours the result
+
+
+@dataclass
+class Letterhead:
+    """The top of the first page: title and code, who ordered the test, who carried it out."""
+
+    title: str
+    lines: list[str]
+    client: list[str]
+    contractor: list[str]
+    code: str = ""  # shown as a QR code where given
 
 
 @dataclass
@@ -62,4 +75,5 @@ class Logo:
     reserve: bool = True
 
 
-Node = Heading | Paragraph | Notice | Fields | Table | Photos | SignatureLine | Logo
+Node = (Heading | Paragraph | Notice | Fields | Table | Photos | SignatureLine | Logo
+        | Letterhead)

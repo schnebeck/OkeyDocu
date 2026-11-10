@@ -118,4 +118,5 @@ class MainMenus:
         bar.setContentsMargins(EDGE, 0, EDGE, 0)
         for widget in (self.campaign.link, self.campaign.clock, self.campaign.summary):
             bar.addWidget(widget)
+        bar.addPermanentWidget(self.campaign.proxy_note)
         bar.addPermanentWidget(self.campaign.notice)

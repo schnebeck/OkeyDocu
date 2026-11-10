@@ -39,6 +39,7 @@ from .measurement_views import (  # noqa: F401
 from .nodes import (  # noqa: F401
     Fields,
     Heading,
+    Letterhead,
     Logo,
     Node,
     Notice,
@@ -78,7 +79,7 @@ def parse_template(text: str) -> dict:
 
 _KNOWN_BLOCKS = {
     "heading", "text", "notice", "fields", "steps", "measurements", "photos", "signature", "logo",
-    "attachments",
+    "attachments", "letterhead",
 }
 
 
@@ -117,13 +118,21 @@ def _applies(block: dict, values: dict) -> bool:
 
 
 def resolve(template: dict, context: dict) -> list[Node]:
-    nodes: list[Node] = []
+    """Warnings stand first, or right below a letterhead that opens the report."""
+    warnings: list[Node] = []
     if context["campaign"].get("draft"):
-        nodes.append(Notice(tr(DRAFT_NOTICE)))
+        warnings.append(Notice(tr(DRAFT_NOTICE)))
     if context["campaign"].get("simulated"):
-        nodes.append(Notice(tr(SIMULATED_NOTICE)))
+        warnings.append(Notice(tr(SIMULATED_NOTICE)))
+    nodes: list[Node] = []
     _resolve_blocks(template["blocks"], {**context, "_images": template.get("images") or {}}, nodes)
-    return nodes
+    head = 0
+    for index, node in enumerate(nodes):  # logos stand apart from the flow of the text
+        if isinstance(node, Letterhead):
+            head = index + 1
+        if not isinstance(node, Logo):
+            break
+    return nodes[:head] + warnings + nodes[head:]
 
 
 def _resolve_blocks(blocks: list[dict], values: dict, nodes: list[Node]) -> None:
@@ -156,8 +165,16 @@ def _resolve_blocks(blocks: list[dict], values: dict, nodes: list[Node]) -> None
             nodes.extend(place_nodes(values.get("places", [])))
         elif kind == "signature":
             nodes.append(SignatureLine(
-                [pick(label) for label in block.get("labels", ["Ort, Datum", "Prüfer"])],
+                [_render(label, values) for label in block.get("labels", ["Ort, Datum", "Prüfer"])],
                 values.get("campaign", {}).get("signature"),
+                _render(block.get("result", ""), values), values.get("verdict_tone", ""),
+            ))
+        elif kind == "letterhead":
+            nodes.append(Letterhead(
+                _render(block.get("title", ""), values), *(
+                    [line for line in (_render(text, values).strip() for text in block.get(key, []))
+                     if line] for key in ("lines", "client", "contractor")),
+                values["campaign"].get("uuid", "") if block.get("qr", True) else "",
             ))
         elif kind == "logo" and block.get("image"):
             try:

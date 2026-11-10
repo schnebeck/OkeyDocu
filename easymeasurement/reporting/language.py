@@ -114,12 +114,16 @@ def moment(value: datetime | None, seconds: bool = False) -> str:
     return value.strftime(f"{_format('date')} {clock}")
 
 
+UNIT_SPACE = "\u202f"  # narrow no-break space, between a number and its unit
+
+
 def value_text(raw: str) -> str:
-    """A reading as the instrument gave it, only with the decimal sign and spacing of the
-    language: `2.05MΩ` becomes `2,05 MΩ`. Digits, qualifier and unit stay as they are."""
+    """A reading as the instrument gave it, only with the decimal sign of the language and a
+    narrow space that never breaks before the unit: `2.05MΩ` becomes `2,05 MΩ`. Digits,
+    qualifier and unit stay as they are."""
     match = _NUMBER.match(raw.strip()) if raw else None
     if not match:
         return raw
     qualifier, number, unit = match.groups()
     number = number.replace(".", _format("decimal")).replace(",", _format("decimal"))
-    return f"{qualifier}{number}" + (f" {unit}" if unit else "")
+    return f"{qualifier}{number}" + (f"{UNIT_SPACE}{unit}" if unit else "")

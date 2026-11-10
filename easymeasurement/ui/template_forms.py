@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 from PySide6.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QFormLayout,
     QLabel,
@@ -105,7 +106,42 @@ class TemplateForms:
             "Was an einer Messung hängt, steht im Protokoll bei dieser Messung."
         ))
 
+    def _form_letterhead(self, block: dict, form: QFormLayout) -> None:
+        """One shared choice of data fields writes into the text field used last."""
+        title = QLineEdit(str(block.get("title", "")))
+        title.textChanged.connect(lambda text: (block.__setitem__("title", text), self._changed()))
+        form.addRow("Titel", title)
+        edits = [self._lines_row(block, key, label, form) for key, label in (
+            ("lines", "Zeilen unter dem Titel"), ("client", "Auftraggeber"),
+            ("contractor", "Auftragnehmer"))]
+        edits[-1].setPlaceholderText("Eigene Firma und Anschrift, eine Zeile je Eintrag")
+        self.letterhead_target = edits[0]
+        for edit in edits:  # a click into a field places its cursor
+            edit.cursorPositionChanged.connect(
+                lambda edit=edit: setattr(self, "letterhead_target", edit))
+        form.addRow("", self._placeholder_box(
+            lambda code: self.letterhead_target.insertPlainText(code)))
+        code = QCheckBox("QR-Code mit der Kennung der Prüfung")
+        code.setChecked(bool(block.get("qr", True)))
+        code.toggled.connect(lambda on: (block.__setitem__("qr", on), self._changed()))
+        form.addRow("", code)
+
+    def _lines_row(self, block: dict, key: str, label: str, form: QFormLayout) -> QPlainTextEdit:
+        edit = QPlainTextEdit("\n".join(block.get(key, [])))
+        edit.setMaximumHeight(84)
+        edit.textChanged.connect(lambda: (
+            block.__setitem__(key, [line for line in edit.toPlainText().split("\n")]),
+            self._changed()))
+        form.addRow(label, edit)
+        return edit
+
     def _form_signature(self, block: dict, form: QFormLayout) -> None:
+        result = QLineEdit(str(block.get("result", "")))
+        result.setPlaceholderText("leer: ohne Rahmen und Ergebnis")
+        result.textChanged.connect(lambda text: (block.__setitem__("result", text),
+                                                 self._changed()))
+        form.addRow("Ergebnis darüber", result)
+        form.addRow("", self._placeholder_box(result.insert))
         field = QLineEdit(", ".join(block.get("labels", [])))
 
         def changed(text: str) -> None:

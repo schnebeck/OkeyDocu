@@ -85,6 +85,7 @@ class ReportArchive:
         folder.mkdir(exist_ok=True)
         stamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
         path = folder / f"protokoll-{stamp}-{language}.pdf"
+        self.service.tidy_proxies(campaign_id)
         with speaking(language):
             nodes = resolve(parse_template(template_body), build_context(self.service, campaign_id))
             footer = f"{tr('Prüfung')} {campaign['uuid']}"
@@ -103,6 +104,7 @@ class ReportArchive:
             raise ReportError("Ein Entwurf entsteht nur aus einer offenen Kampagne.")
         path = self.service.folder(campaign_id) / "drafts" / "entwurf.pdf"
         path.parent.mkdir(parents=True, exist_ok=True)
+        self.service.tidy_proxies(campaign_id)
         with speaking(language):
             nodes = resolve(parse_template(template_body), build_context(self.service, campaign_id))
             footer = tr("ENTWURF – nicht gültig")

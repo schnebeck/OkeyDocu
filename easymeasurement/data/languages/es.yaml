@@ -30,6 +30,16 @@ texts:
   Ergebnis: Resultado
   "Ergebnis der Messwerte: {{ verdict }}": "Resultado de las mediciones: {{ verdict }}"
   "Datensatz-Siegel: {{ campaign.seal }}": "Sello del registro: {{ campaign.seal }}"
+  Auftraggeber: Cliente
+  Auftragnehmer: Contratista
+  "Prüfung vom {{ campaign.started }}": "Inspección del {{ campaign.started }}"
+  "Prüfer: {{ campaign.tester }}": "Inspector: {{ campaign.tester }}"
+  "Ergebnis der Prüfung: {{ verdict }}": "Resultado de la inspección: {{ verdict }}"
+  "Unterschrift {{ campaign.tester }}": "Firma {{ campaign.tester }}"
+  Fortsetzung: continuación
+  Prüffrage: Pregunta
+  Antwort: Respuesta
+  Bemerkung: Observación
   Ort, Datum: Lugar, fecha
   Unterschrift Prüfer: Firma del inspector
   Keine Messung.: Sin medición.

@@ -18,6 +18,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.platypus import (
+    CondPageBreak,
     KeepTogether,
     Paragraph,
     SimpleDocTemplate,
@@ -28,27 +29,30 @@ from reportlab.platypus import TableStyle
 
 from .language import tr
 from .logo import MARGIN_MM
-from .nodes import Fields, Heading, Logo, Node, Notice, Photos, SignatureLine, Table
+from .nodes import Fields, Heading, Letterhead, Logo, Node, Notice, Photos, SignatureLine, Table
 from .nodes import Paragraph as TextNode
+from .pdf_frames import ContinuedTable, caption_of, column_widths, letterhead, signature
 from .pdf_parts import (
     _draw_logos,
     _NumberedCanvas,
     _photos,
     _register_fonts,
     _reserved_space,
-    _signature_image,
 )
 
 _INK = colors.HexColor("#1f2933")
 _RULE = colors.HexColor("#c8ced6")
 _SHADE = colors.HexColor("#eef1f4")
 _ALERT = colors.HexColor("#a4262c")
+_KEEP_TABLE = 22 * mm  # a table's header and its first rows
+_KEEP_PHOTOS = 75 * mm  # one row of photos with their captions
 
 
 def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -> None:
     regular, bold = _register_fonts()
+    # No paragraph leaves a single line at the foot or the head of a page.
     body = ParagraphStyle("body", fontName=regular, fontSize=9.5, leading=13, textColor=_INK,
-                          alignment=TA_LEFT)
+                          alignment=TA_LEFT, allowWidows=0, allowOrphans=0)
     cell = ParagraphStyle("cell", parent=body, fontSize=8.5, leading=11)
     head_cell = ParagraphStyle("headcell", parent=cell, fontName=bold)
     heading = {
@@ -80,11 +84,9 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
         rows = [[text(h, head_cell) for h in node.headers]]
         rows += [[text(c, cell) for c in row] for row in node.rows]
         rows += [[text(c, head_cell) for c in row] for row in node.summary]
-        count = len(node.headers)
-        fixed = {0: 14 * mm, 1: 26 * mm, count - 1: 32 * mm}
-        rest = (usable - sum(fixed.values())) / max(count - 3, 1)
-        widths = [fixed.get(i, rest) for i in range(count)]
-        result = PdfTable(rows, colWidths=widths, repeatRows=1)
+        widths = column_widths(node.headers, node.rows, node.summary, usable, (regular, bold),
+                               cell.fontSize)
+        result = ContinuedTable(rows, colWidths=widths, repeatRows=1)
         style = [
             ("BACKGROUND", (0, 0), (-1, 0), _SHADE),
             ("LINEBELOW", (0, 0), (-1, -1), 0.3, _RULE),
@@ -123,32 +125,17 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
                                   ("VALIGN", (0, 0), (-1, -1), "TOP")]))
         return grid
 
-    def signature(node: SignatureLine) -> PdfTable:
-        width = usable / len(node.labels)
-        line: list = [""] * len(node.labels)
-        if node.image:
-            line[-1] = _signature_image(node.image, width)
-        rows = [line, [text(label, cell) for label in node.labels]]
-        table_ = PdfTable(rows, colWidths=[width] * len(node.labels), rowHeights=[16 * mm, None])
-        table_.setStyle(TableStyle([
-            ("LINEBELOW", (0, 0), (-1, 0), 0.6, _INK),
-            ("LEFTPADDING", (0, 0), (-1, -1), 0),
-            ("VALIGN", (0, 0), (-1, 0), "BOTTOM"),
-            ("BOTTOMPADDING", (0, 0), (-1, 0), 1),
-        ]))
-        return table_
-
     logos = [node for node in nodes if isinstance(node, Logo)]
     every_top, first_top, bottom = _reserved_space(logos)
     story = []
     if first_top > every_top:
         story.append(Spacer(1, (first_top - every_top) * mm))
-    pending_heading = None
+    headings: list = []  # waiting for what they stand over
+    title = ""  # the nearest heading, named again where a table goes on over a page
     for node in nodes:
         if isinstance(node, Heading):
-            if pending_heading is not None:
-                story.append(pending_heading)
-            pending_heading = text(node.text, heading[min(node.level, 3)])
+            headings.append(text(node.text, heading[min(node.level, 3)]))
+            title = node.text
             continue
         if isinstance(node, TextNode):
             flowable = text(node.text)
@@ -158,25 +145,33 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
             flowable = fields(node)
         elif isinstance(node, Table):
             flowable = table(node)
+            flowable.caption = caption_of(title, heading[3]) if title else None
         elif isinstance(node, Photos):
             flowable = photos(node)
         elif isinstance(node, SignatureLine):
-            flowable = signature(node)
+            flowable = signature(node, usable, cell, body, bold)
+        elif isinstance(node, Letterhead):
+            story.extend(letterhead(node, usable, body, bold))
+            story.append(Spacer(1, 10))
+            continue
         else:
             continue
         if flowable is None:
             continue
-        # A heading must not be stranded at the bottom of a page.
-        if pending_heading is not None and not isinstance(node, Table):
-            story.append(KeepTogether([pending_heading, flowable]))
-        else:
-            if pending_heading is not None:
-                story.append(pending_heading)
+        # Headings never stay alone at the foot of a page: they go with what follows, and a
+        # long table or a row of photos starts on a new page unless its beginning still fits.
+        if isinstance(node, (Table, Photos)):
+            story.append(CondPageBreak((_KEEP_TABLE if isinstance(node, Table) else _KEEP_PHOTOS)
+                                       + 20 * len(headings)))
+            story.extend(headings)
             story.append(flowable)
-        pending_heading = None
+        elif headings:
+            story.append(KeepTogether([*headings, flowable]))
+        else:
+            story.append(flowable)
+        headings = []
         story.append(Spacer(1, 4))
-    if pending_heading is not None:
-        story.append(pending_heading)
+    story.extend(headings)
 
     canvas_class = type("Canvas", (_NumberedCanvas,), {"footer": footer, "font": regular})
     document = SimpleDocTemplate(

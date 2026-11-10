@@ -30,6 +30,16 @@ texts:
   Ergebnis: Result
   "Ergebnis der Messwerte: {{ verdict }}": "Result of the measurements: {{ verdict }}"
   "Datensatz-Siegel: {{ campaign.seal }}": "Record seal: {{ campaign.seal }}"
+  Auftraggeber: Client
+  Auftragnehmer: Contractor
+  "Prüfung vom {{ campaign.started }}": "Tested on {{ campaign.started }}"
+  "Prüfer: {{ campaign.tester }}": "Inspector: {{ campaign.tester }}"
+  "Ergebnis der Prüfung: {{ verdict }}": "Test result: {{ verdict }}"
+  "Unterschrift {{ campaign.tester }}": "Signature {{ campaign.tester }}"
+  Fortsetzung: continued
+  Prüffrage: Question
+  Antwort: Answer
+  Bemerkung: Remark
   Ort, Datum: Place, date
   Unterschrift Prüfer: Signature of inspector
   Keine Messung.: No measurement.

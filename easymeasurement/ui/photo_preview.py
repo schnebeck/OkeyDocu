@@ -11,7 +11,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from PySide6.QtCore import QRectF, QSize, Qt
-from PySide6.QtGui import QIcon, QImageReader, QPixmap
+from PySide6.QtGui import QIcon, QImageIOHandler, QImageReader, QPixmap
 from PySide6.QtWidgets import (
     QButtonGroup,
     QCheckBox,
@@ -39,6 +39,14 @@ def read_large(path: Path, room: QSize) -> QPixmap:
     """The picture upright and as large as `room` allows, without enlarging it."""
     reader = QImageReader(str(path))
     reader.setAutoTransform(True)
+    raw = reader.size()
+    if raw.isValid():
+        # Decoding at about the size shown spares reading every pixel of a large photo.
+        turned = reader.transformation() & QImageIOHandler.Transformation.TransformationRotate90
+        upright = raw.transposed() if turned else raw
+        factor = min(room.width() / upright.width(), room.height() / upright.height())
+        if factor < 0.5:
+            reader.setScaledSize(raw * (2 * factor))
     image = reader.read()
     if image.isNull():
         return QPixmap()

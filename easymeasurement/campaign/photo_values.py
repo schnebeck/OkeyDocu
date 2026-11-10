@@ -13,6 +13,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 
+from .photo_proxies import drop_proxy
 from .photos import nearest_measurement, read_photo_time, timeline_time
 from .records import _iso
 
@@ -187,4 +188,6 @@ class PhotoMixin:
     def delete_photo(self, photo_id: int) -> None:
         photo = self.db.one("SELECT * FROM photos WHERE id=?", photo_id)
         self.db.execute("DELETE FROM photos WHERE id=?", photo_id)
-        self.photo_path(photo["campaign_id"], photo["file_name"]).unlink(missing_ok=True)
+        original = self.photo_path(photo["campaign_id"], photo["file_name"])
+        original.unlink(missing_ok=True)
+        drop_proxy(original)

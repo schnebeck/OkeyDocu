@@ -21,6 +21,7 @@ BLOCK_LABELS = {
     "attachments": "Notizen und Anhänge zu Orten",
     "signature": "Unterschriftszeile",
     "logo": "Logo",
+    "letterhead": "Briefkopf",
 }
 
 # Offered in the editor, so nobody has to know the variable names.
@@ -68,7 +69,16 @@ def new_block(kind: str) -> dict:
         "measurements": {"none": {"text": "Nicht gemessen."}, "one": {}, "many": {"summary": True}},
         "photos": {},
         "attachments": {},
-        "signature": {"labels": ["Ort, Datum", "Unterschrift Prüfer"]},
+        "signature": {"result": "Ergebnis der Prüfung: {{ verdict }}",
+                      "labels": ["Ort, Datum", "Unterschrift {{ campaign.tester }}"]},
+        "letterhead": {
+            "title": "Prüfprotokoll",
+            "lines": ["{{ campaign.title }}", "Prüfung vom {{ campaign.started }}"],
+            "client": ["{{ customer.name }}", "{{ customer.street }}",
+                       "{{ customer.zip }} {{ customer.city }}"],
+            "contractor": ["Prüfer: {{ campaign.tester }}"],
+            "qr": True,
+        },
         "logo": {"image": "", "x_mm": 152.0, "y_mm": 8.0, "width_mm": 40.0, "pages": "first",
                  "reserve": True},
     }
@@ -85,6 +95,8 @@ def block_summary(block: dict) -> str:
         return f"{label}: {short[:60]}"
     if block["type"] == "fields":
         return f"{label} ({len(block.get('rows', ()))} Zeilen)"
+    if block["type"] == "letterhead":
+        return f"{label}: {block.get('title', '')}" + (" mit QR-Code" if block.get("qr") else "")
     if block["type"] == "logo":
         if not block.get("image"):
             return f"{label} (noch kein Bild)"

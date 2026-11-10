@@ -23,7 +23,7 @@ from ..model import (
     conductor_of,
 )
 from .attached import Attached, places, sort_attached
-from .language import day, feature_name, kind_name, moment, tr
+from .language import UNIT_SPACE, day, feature_name, kind_name, moment, tr
 
 VERDICT_TEXT = {
     Verdict.PASSED: "bestanden",
@@ -35,7 +35,7 @@ def _features(db, asset) -> list[tuple[str, str]]:
     """The features noted on the element, in the order of its kind; empty ones stay out."""
     kind, values = db.kind(asset["kind"]), db.asset_features(asset["id"])
     return [(feature_name(feature.key, feature.label),
-             f"{values[feature.key]} {feature.unit}".strip())
+             f"{values[feature.key]}{UNIT_SPACE}{feature.unit}".strip())
             for feature in (kind.features if kind else ()) if values.get(feature.key)]
 
 
@@ -170,6 +170,8 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
         "steps": steps,
         "places": places(service, campaign_id),
         "verdict": overall_verdict(steps),
+        "verdict_tone": {tr("Bestanden"): "passed", tr("Nicht bestanden"): "failed"}.get(
+            overall_verdict(steps), ""),
     }
 
 

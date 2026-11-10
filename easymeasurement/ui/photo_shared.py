@@ -17,6 +17,8 @@ from PySide6.QtCore import QByteArray, QEvent, QMimeData, QObject, QPoint, Qt, Q
 from PySide6.QtGui import QColor, QDrag, QImageReader, QPainter, QPixmap
 from PySide6.QtWidgets import QWidget
 
+from ..campaign.photo_proxies import fresh_proxy
+
 PHOTO_MIME = "application/x-easymeasurement-photo"
 DRAG_IMAGE_PX = 72
 THUMB_EDGE_PX = 192  # longest edge: sharp on a high-resolution screen too
@@ -42,8 +44,10 @@ def missing_picture() -> QPixmap:
 
 
 def read_thumbnail(path: str) -> QPixmap:
-    """Decode at the small size directly and honour the rotation stored in the file."""
-    reader = QImageReader(path)
+    """Decode at the small size directly and honour the rotation stored in the file.
+    A fresh proxy is read instead of the original: it is upright already and far smaller."""
+    proxy = fresh_proxy(Path(path))
+    reader = QImageReader(str(proxy) if proxy else path)
     reader.setAutoTransform(True)
     size = reader.size()
     if size.isValid() and max(size.width(), size.height()) > THUMB_EDGE_PX:

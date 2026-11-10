@@ -14,7 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from PIL import Image as PilImage
-from PIL import ImageDraw, ImageFont, ImageOps
+from PIL import ImageDraw, ImageFont
 from reportlab import rl_config
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -25,13 +25,12 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.platypus import Image
 
+from ..campaign.photo_proxies import QUALITY, make_proxy, reduced
 from .language import tr
 from .logo import MARGIN_MM, PAGE_HEIGHT_MM, logo_ratio
 from .nodes import Logo
 
 _FONT_DIRS = ("/usr/share/fonts/truetype/dejavu", "/usr/share/fonts/dejavu", "/usr/share/fonts/TTF")
-_MAX_PHOTO_PIXELS = 1400
-
 # Pictures and page streams go into the file as compressed bytes, not spelt out in ASCII85,
 # which makes them a quarter larger and is encoded slowly in Python.
 rl_config.useA85 = 0
@@ -136,17 +135,22 @@ def _draw_marks(image: PilImage.Image, marks) -> None:
 
 
 def _photo(path: Path, width: float, marks=()) -> Image | None:
-    try:
-        with PilImage.open(path) as source:
-            # A JPEG decodes straight to a half, quarter or eighth: no full picture in memory.
-            source.draft("RGB", (_MAX_PHOTO_PIXELS, _MAX_PHOTO_PIXELS))
-            source.thumbnail((_MAX_PHOTO_PIXELS, _MAX_PHOTO_PIXELS))
-            image = ImageOps.exif_transpose(source).convert("RGB")
-    except OSError:
-        return None
+    """From the proxy: as it is without marks, so its bytes go into the file unchanged."""
+    proxy = make_proxy(path)
+    if proxy is not None and not marks:
+        with PilImage.open(proxy) as header:
+            ratio = header.height / header.width
+        return Image(str(proxy), width=width, height=width * ratio)
+    if proxy is not None:
+        with PilImage.open(proxy) as source:
+            image = source.convert("RGB")
+    else:
+        image = reduced(path)
+        if image is None:
+            return None
     _draw_marks(image, marks)
     buffer = io.BytesIO()
-    image.save(buffer, "JPEG", quality=82)
+    image.save(buffer, "JPEG", quality=QUALITY)
     buffer.seek(0)
     return Image(buffer, width=width, height=width * image.height / image.width)
 

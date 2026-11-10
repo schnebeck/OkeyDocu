@@ -206,6 +206,7 @@ class CampaignActions:
         )
         self.guided.reload()
         self._data_changed()
+        self.warm_proxies(self.campaign_id)
         if result["matched"] or result["open"]:
             self.timeline_action.setChecked(True)  # the next step is checking where they went
 

@@ -149,7 +149,8 @@ class CampaignDisplay:
         self.resume_action.setEnabled(instrument and not here)
         self.pause_action.setEnabled(self.session is not None)
         self.finish_action.setEnabled(is_open)
-        self.draft_action.setEnabled(is_open)
+        self.draft_open = is_open
+        self._proxies_changed()
         self.tester_action.setEnabled(is_open)
         self.edit_action.setEnabled(is_open)
         self.delete_action.setEnabled(bool(campaign))
