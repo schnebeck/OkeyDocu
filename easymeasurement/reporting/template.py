@@ -28,7 +28,8 @@ import yaml
 from jinja2.sandbox import SandboxedEnvironment
 
 from .context import ReportMeasurement, function_label
-from .language import pick, tr
+from ..l10n import N_, tr
+from .language import pick
 from .logo import LogoError, decode_logo
 from .measurement_views import (  # noqa: F401
     _many,
@@ -51,8 +52,8 @@ from .nodes import (  # noqa: F401
     Table,
 )
 
-DRAFT_NOTICE = "ENTWURF – die Kampagne ist noch offen, dieses Protokoll ist nicht gültig."
-SIMULATED_NOTICE = "SIMULIERTE MESSWERTE – kein gültiges Prüfprotokoll."
+DRAFT_NOTICE = N_("DRAFT – the inspection is still open, this report is not valid.")
+SIMULATED_NOTICE = N_("SIMULATED VALUES – not a valid test report.")
 _env = SandboxedEnvironment(undefined=jinja2.ChainableUndefined, autoescape=False)
 
 
@@ -72,9 +73,9 @@ def parse_template(text: str) -> dict:
     try:
         template = yaml.safe_load(text)
     except yaml.YAMLError as err:
-        raise TemplateError(f"Die Vorlage ist kein gültiges YAML: {err}") from err
+        raise TemplateError(tr("The template is not valid YAML: {error}", error=err)) from err
     if not isinstance(template, dict) or not isinstance(template.get("blocks"), list):
-        raise TemplateError("Die Vorlage braucht eine Liste „blocks“.")
+        raise TemplateError(tr("The template needs a list “blocks”."))
     _validate(template["blocks"], template.get("images") or {})
     return template
 
@@ -89,17 +90,18 @@ def _validate(blocks: list, images: dict, nested: bool = False) -> None:
     for block in blocks:
         kind = block.get("type") if isinstance(block, dict) else None
         if kind not in _KNOWN_BLOCKS:
-            raise TemplateError(f"Unbekannter Block: {kind!r}")
+            raise TemplateError(tr("Unknown block: {kind}", kind=repr(kind)))
         if kind == "steps":
             if nested:
-                raise TemplateError("Wiederholungen lassen sich nicht verschachteln.")
+                raise TemplateError(tr("Repetitions cannot be nested."))
             _validate(block.get("blocks", []), images, nested=True)
         if kind == "logo":
             if nested:
-                raise TemplateError("Ein Logo gehört nicht in eine Wiederholung.")
+                raise TemplateError(tr("A logo does not belong in a repetition."))
             image = block.get("image")
             if image and image not in images:
-                raise TemplateError(f"Das Bild {image!r} fehlt in der Vorlage.")
+                raise TemplateError(tr("The image {image} is missing in the template.",
+                                       image=repr(image)))
 
 
 # Resolving --------------------------------------------------------------
@@ -109,7 +111,8 @@ def _render(text: str, values: dict) -> str:
     try:
         return _env.from_string(pick(text)).render(**values)
     except jinja2.TemplateError as err:
-        raise TemplateError(f"Fehler im Platzhalter {text!r}: {err}") from err
+        message = tr("Error in the placeholder {text}: {error}", text=repr(text), error=err)
+        raise TemplateError(message) from err
 
 
 def _applies(block: dict, values: dict) -> bool:
@@ -167,7 +170,7 @@ def _resolve_blocks(blocks: list[dict], values: dict, nodes: list[Node]) -> None
             nodes.extend(place_nodes(values.get("places", [])))
         elif kind == "signature":
             nodes.append(SignatureLine(
-                [_render(label, values) for label in block.get("labels", ["Ort, Datum", "Prüfer"])],
+                [_render(label, values) for label in block.get("labels", ["Place, date", "Inspector"])],
                 values.get("campaign", {}).get("signature"),
                 _render(block.get("result", ""), values), values.get("verdict_tone", ""),
             ))
@@ -217,7 +220,7 @@ def _resolve_measurements(block: dict, values: dict) -> list[Node]:
         none = block.get("none", {})
         if none.get("hide"):
             return []
-        return [Paragraph(_render(none.get("text", "Keine Messung."), values))]
+        return [Paragraph(_render(none.get("text", "No measurement."), values))]
 
     groups: dict[str, list[ReportMeasurement]] = {}
     for measurement in selected:

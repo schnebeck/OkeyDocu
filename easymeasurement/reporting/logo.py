@@ -14,6 +14,8 @@ import io
 
 from PIL import Image, ImageOps, UnidentifiedImageError
 
+from ..l10n import tr
+
 PAGE_WIDTH_MM = 210.0
 PAGE_HEIGHT_MM = 297.0
 MARGIN_MM = 18.0
@@ -38,7 +40,7 @@ def prepare_logo(data: bytes) -> tuple[str, str]:
             image = ImageOps.exif_transpose(source)
             image.load()
     except (UnidentifiedImageError, OSError, ValueError) as err:
-        raise LogoError("Die Datei ist kein lesbares Bild.") from err
+        raise LogoError(tr("The file is not a readable image.")) from err
     has_alpha = image.mode in ("RGBA", "LA") or "transparency" in image.info
     image = image.convert("RGBA" if has_alpha else "RGB")
     image.thumbnail((_MAX_PIXELS, _MAX_PIXELS))
@@ -48,7 +50,7 @@ def prepare_logo(data: bytes) -> tuple[str, str]:
         buffer = io.BytesIO()  # photo-like logos compress far better as JPEG
         image.save(buffer, "JPEG", quality=88)
     if buffer.tell() > _MAX_BYTES:
-        raise LogoError("Das Bild ist zu groß. Bitte eine kleinere Datei wählen.")
+        raise LogoError(tr("The image is too large. Please choose a smaller file."))
     encoded = buffer.getvalue()
     return hashlib.sha256(encoded).hexdigest()[:12], base64.b64encode(encoded).decode("ascii")
 
@@ -57,7 +59,7 @@ def decode_logo(text: str) -> bytes:
     try:
         return base64.b64decode(text, validate=True)
     except ValueError as err:
-        raise LogoError("Die Bilddaten in der Vorlage sind beschädigt.") from err
+        raise LogoError(tr("The image data in the template is damaged.")) from err
 
 
 def logo_ratio(data: bytes) -> float:

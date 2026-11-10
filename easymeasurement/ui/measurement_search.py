@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ..l10n import tr
+from ..l10n import in_language, tr
 from ..model import FUNCTION_LABELS, Quantity
 from ..store.search import MeasurementFilter
 from .board import GutterSplitter
@@ -147,7 +147,7 @@ class MeasurementsPage(MeasurementView):
             "SELECT key, min(label) AS label FROM measured_values WHERE base_value IS NOT NULL"
             " GROUP BY key ORDER BY label"
         )
-        self._refill(self.value_key, tr("Any reading"), [(k["label"], k["key"]) for k in keys])
+        self._refill(self.value_key, tr("Any reading"), [(in_language(k["label"]), k["key"]) for k in keys])
 
     def _customer_changed(self) -> None:
         customer = self.customer.currentData()

@@ -11,9 +11,12 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass, field
+from functools import cache
 from importlib import resources
 
 import yaml
+
+from ..l10n import is_translation, tr
 
 FALLBACK_ICON = "element"
 DEVICE_TYPES = ("", "MACHINE", "DISTRIBUTIONCABINET", "RCD", "CIRCUIT", "ELECTRICALEQUIPMENT",
@@ -40,9 +43,9 @@ class Kind:
 
 
 def slug(text: str) -> str:
-    """A stable key from a German label: lower case, ASCII, words joined by underscores."""
+    """A stable key from a label: lower case, ASCII, words joined by underscores."""
     folded = text.casefold().translate(_FOLDED)
-    return re.sub(r"[^a-z0-9]+", "_", folded).strip("_") or "merkmal"
+    return re.sub(r"[^a-z0-9]+", "_", folded).strip("_") or "feature"
 
 
 def _feature(spec: str) -> Feature:
@@ -62,6 +65,24 @@ def shipped_kinds() -> list[Kind]:
     ]
 
 
+@cache
+def shipped_names() -> dict:
+    """English names of the shipped kinds by key, of their features by (kind, feature) key."""
+    names: dict = {}
+    for kind in shipped_kinds():
+        names[kind.key] = kind.label
+        names.update({(kind.key, feature.key): feature.label for feature in kind.features})
+    return names
+
+
+def shown(shipped: str | None, label: str) -> str:
+    """A stored label in the current language. A shipped name is recognised in every catalogued
+    language by its key, so one word naming two things is no problem; a renamed one stays."""
+    if shipped and is_translation(label, shipped):
+        return tr(shipped)
+    return label
+
+
 class KindsMixin:
     """Kinds are shared by every customer, so changing one changes it everywhere."""
 
@@ -70,15 +91,17 @@ class KindsMixin:
             self.save_kind(kind, position)
 
     def kinds(self) -> list[Kind]:
+        """Labels in the current language, as far as they are the shipped ones."""
         rows = self.query("SELECT * FROM asset_kinds ORDER BY position, label COLLATE NOCASE")
+        names = shipped_names()
         features: dict[str, list[Feature]] = {}
         for row in self.query("SELECT * FROM kind_features ORDER BY position, id"):
-            features.setdefault(row["kind"], []).append(
-                Feature(row["key"], row["label"], row["unit"])
-            )
+            label = shown(names.get((row["kind"], row["key"])), row["label"])
+            features.setdefault(row["kind"], []).append(Feature(row["key"], label, row["unit"]))
         return [
-            Kind(row["key"], row["label"], row["icon"], row["device_type"], row["izytron_type"],
-                 row["interval_months"], tuple(features.get(row["key"], ())))
+            Kind(row["key"], shown(names.get(row["key"]), row["label"]), row["icon"],
+                 row["device_type"], row["izytron_type"], row["interval_months"],
+                 tuple(features.get(row["key"], ())))
             for row in rows
         ]
 
@@ -87,7 +110,8 @@ class KindsMixin:
 
     def kind_labels(self) -> dict[str, str]:
         rows = self.query("SELECT key, label FROM asset_kinds")
-        return {row["key"]: row["label"] for row in rows}
+        names = shipped_names()
+        return {row["key"]: shown(names.get(row["key"]), row["label"]) for row in rows}
 
     def new_kind_key(self, label: str) -> str:
         base = slug(label)

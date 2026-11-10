@@ -27,7 +27,7 @@ from reportlab.platypus import (
 from reportlab.platypus import Table as PdfTable
 from reportlab.platypus import TableStyle
 
-from .language import tr
+from ..l10n import tr
 from .logo import MARGIN_MM
 from .nodes import Fields, Heading, Letterhead, Logo, Node, Notice, Photos, SignatureLine, Table
 from .nodes import Paragraph as TextNode
@@ -178,7 +178,7 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
     document = SimpleDocTemplate(
         str(target) if isinstance(target, Path) else target, pagesize=A4, leftMargin=18 * mm,
         rightMargin=18 * mm, topMargin=(MARGIN_MM + every_top) * mm,
-        bottomMargin=(MARGIN_MM + bottom) * mm, title=tr("Prüfprotokoll"), author="",
+        bottomMargin=(MARGIN_MM + bottom) * mm, title=tr("Test report"), author="",
         creator="EasyMeasurement",
     )
     every_page = [logo for logo in logos if logo.every_page]

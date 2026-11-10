@@ -24,8 +24,8 @@ from contextvars import ContextVar
 from .catalog import SOURCE, Catalog, available, catalog, source_of
 from .formats import day, decimal, moment
 
-__all__ = ["SOURCE", "N_", "available", "current", "day", "decimal", "in_language", "moment",
-           "plural", "set_language", "speaking", "tr"]
+__all__ = ["SOURCE", "N_", "available", "current", "day", "decimal", "in_language",
+           "is_translation", "moment", "plural", "set_language", "speaking", "tr"]
 
 _chosen = SOURCE
 _speaking: ContextVar[str | None] = ContextVar("speaking", default=None)
@@ -76,6 +76,11 @@ def in_language(text: str) -> str:
     if source is None:
         return text
     return active().text(source) or source
+
+
+def is_translation(text: str, source: str) -> bool:
+    """Whether `text` is `source` itself or its translation into a catalogued language."""
+    return text == source or any(catalog(code).text(source) == text for code in available())
 
 
 def plural(count: int, one: str, many: str, /, context: str = "", **values) -> str:

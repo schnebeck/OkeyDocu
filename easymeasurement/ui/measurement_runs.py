@@ -51,7 +51,7 @@ def _measurement(row, when: datetime, show_time: Callable[[datetime], str], plac
     texts = [
         show_time(when), row["customer_name"], row["asset_name"],
         row["campaign_title"], place, function_short(row["function"]), values_text(row),
-        str(row["photo_count"] or ""), VERDICT_TEXT[Verdict(row["verdict"])], capture_text(row),
+        str(row["photo_count"] or ""), tr(VERDICT_TEXT[Verdict(row["verdict"])]), capture_text(row),
     ]
     return Line(texts, [sort_key(column, row) for column in range(len(texts))], row["verdict"],
                 row["id"])
@@ -81,7 +81,7 @@ def _head(run_id: int, steps: list[Line], rows: list, opened: bool) -> Line:
     line.texts[5] = first["run_kind"] or line.texts[5]
     line.texts[VALUES] = summary
     line.texts[7] = str(photos or "")
-    line.texts[VERDICT] = VERDICT_TEXT[Verdict(line.verdict)]
+    line.texts[VERDICT] = tr(VERDICT_TEXT[Verdict(line.verdict)])
     line.keys[7], line.keys[VALUES] = photos, (line.texts[5], float("inf"))
     return line
 

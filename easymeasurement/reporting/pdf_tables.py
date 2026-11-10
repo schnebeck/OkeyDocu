@@ -16,7 +16,7 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus import CondPageBreak, Paragraph
 from reportlab.platypus import Table as PdfTable
 
-from .language import tr
+from ..l10n import tr
 
 UNBROKEN = 14  # characters; a value with its unit stays on one line
 WIDEST_TEXT_MM = 70  # a longer text wraps rather than squeeze its neighbours
@@ -44,7 +44,7 @@ class ContinuedTable(PdfTable):
 
 
 def caption_of(heading: str, style: ParagraphStyle) -> Paragraph:
-    marker = escape(tr("Fortsetzung"))
+    marker = escape(tr("continued"))
     return Paragraph(f"{escape(heading)} <font size='8'>({marker})</font>", style)
 
 

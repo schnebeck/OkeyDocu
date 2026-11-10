@@ -50,8 +50,8 @@ def verdict_combo(current: str, short: bool = False) -> QuietCombo:
     if short:
         box.setMinimumContentsLength(5)
     for verdict in (Verdict.NOT_EVALUATED, Verdict.PASSED, Verdict.FAILED):
-        box.addItem(tr(SHORT_VERDICT[verdict]) if short else VERDICT_TEXT[verdict], verdict.value)
-        box.setItemData(box.count() - 1, VERDICT_TEXT[verdict], Qt.ItemDataRole.ToolTipRole)
+        box.addItem(tr(SHORT_VERDICT[verdict]) if short else tr(VERDICT_TEXT[verdict]), verdict.value)
+        box.setItemData(box.count() - 1, tr(VERDICT_TEXT[verdict]), Qt.ItemDataRole.ToolTipRole)
     box.setCurrentIndex(max(0, box.findData(current)))
     mark_failed(box)
     box.currentIndexChanged.connect(lambda: mark_failed(box))

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 
-from ..l10n import tr
+from ..l10n import N_, tr
 from ..model import SIGHT_CHECK_FUNCTION, Quantity, ResultValue, Verdict
 from ..store import CampaignClosed
 from .plan import Plan, builtin_plan_texts, parse_plan
@@ -69,11 +69,11 @@ class PlanStepMixin:
         self._forget_answer(step_id)
         verdict = Verdict.PASSED if answer == step.expected else Verdict.FAILED
         values = [
-            ResultValue("question", "Prüffrage", Quantity(raw=step.question or step.title)),
-            ResultValue("answer", "Antwort", Quantity(raw=answer), verdict, setpoint=step.expected),
+            ResultValue("question", N_("Inspection question"), Quantity(raw=step.question or step.title)),
+            ResultValue("answer", N_("Answer"), Quantity(raw=answer), verdict, setpoint=step.expected),
         ]
         if comment:
-            values.append(ResultValue("note", "Bemerkung", Quantity(raw=comment)))
+            values.append(ResultValue("note", N_("Remark"), Quantity(raw=comment)))
         measurement_id = self.add_measurement(
             row["campaign_id"], SIGHT_CHECK_FUNCTION, values, verdict=verdict, step_id=step_id,
             asset_id=step.asset_id,

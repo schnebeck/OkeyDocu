@@ -78,7 +78,7 @@ def test_new_readings_land_on_the_chosen_element(shown):
 
 
 def test_the_side_panel_names_the_chosen_element(shown, app):
-    app.db.set_asset_features(shown["cabinet"], {"schutzart_ip": "IP54"})
+    app.db.set_asset_features(shown["cabinet"], {"ip_rating": "IP54"})
     page = shown["page"]
     page.structure.select(shown["cabinet"])
     assert page.place.kind.text() == "Verteiler"
@@ -164,5 +164,5 @@ def test_searching_the_structure_keeps_the_way_to_a_hit(shown):
 
 def test_features_reach_the_report(app, shown):
     from easymeasurement.reporting.context import _features
-    app.db.set_asset_features(shown["press"], {"nennstrom": "16", "baujahr": ""})
+    app.db.set_asset_features(shown["press"], {"rated_current": "16", "year_of_manufacture": ""})
     assert _features(app.db, app.db.asset(shown["press"])) == [("Nennstrom", "16\u202fA")]

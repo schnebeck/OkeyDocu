@@ -9,28 +9,30 @@
 from __future__ import annotations
 
 import io
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from PySide6.QtCore import QBuffer, QByteArray, QIODevice
 from PySide6.QtWidgets import QInputDialog, QMessageBox
 
 from ..model import MeterMeasurement, Quantity, ResultValue, Verdict
 from ..reporting.context import ReportMeasurement, ReportStep, company_context
-from ..reporting.language import feature_name, kind_name, speaking, tr
+from ..l10n import day, in_language, moment, speaking, tr
 from ..reporting.pdf import render_pdf
 from ..reporting.template import TemplateError, parse_template, resolve
 from ..reporting.template_model import dump_template
 from .common import show_error
 
 
-# Shown until the own firm is entered, so the letterhead shows where it will stand.
-SAMPLE_COMPANY = {"name": "Eigene Firma (Einstellungen → Firma)", "street": "Prüferweg 2",
-                  "zip": "12345", "city": "Musterstadt", "phone": "", "email": "", "web": "",
-                  "logo": ""}
+def sample_company() -> dict[str, str]:
+    """Shown until the own firm is entered, so the letterhead shows where it will stand."""
+    return {"name": tr("Own company (Settings → Company)"), "street": tr("Sample street 2"),
+            "zip": "12345", "city": tr("Sampletown"), "phone": "", "email": "", "web": "",
+            "logo": ""}
 
 
 def sample_context(count: int) -> dict:
-    """Invented data to preview a template with exactly `count` measurements."""
+    """Invented data to preview a template with exactly `count` measurements, in the
+    language the preview speaks."""
     start = datetime(2026, 1, 15, 9, 0)
     measured = []
     for number in range(count):
@@ -39,25 +41,28 @@ def sample_context(count: int) -> dict:
         data = MeterMeasurement(f"m{number}", "riso", start, Verdict.PASSED, results=(result,))
         measured.append(ReportMeasurement(data, start + timedelta(minutes=number)))
     status = "done" if count else "skipped"
-    step = ReportStep("Isolationswiderstand", "riso", status,
-                      "" if count else "Anlage nicht zugänglich", measured)
+    reason = "" if count else tr("Installation not accessible")
+    step = ReportStep(in_language("Insulation resistance"), "riso", status, reason, measured)
     return {
-        "customer": {"name": "Musterkunde GmbH", "street": "Musterweg 1", "zip": "12345",
-                     "city": "Musterstadt"},
-        "asset": {"name": "Musteranlage", "identifier": "A-001",
-                  "kind_text": kind_name("installation", "Anlage"),
-                  "features": [(feature_name("netzform", "Netzform"), "TN-S"),
-                               (feature_name("nennstrom", "Nennstrom"), "63 A")]},
-        "campaign": {"title": "Vorschau", "tester": "Max Muster", "plan": "", "uuid": "vorschau",
-                     "department": "Instandhaltung", "contact": "Frau Beispiel", "contact_phone": "0123 4567-89",
-                     "contact_email": "beispiel@kunde.example", "cost_center": "4711",
-                     "started": "15.01.2026 09:00", "closed": "15.01.2026 11:00",
-                     "clock_offset_s": 0, "clock_summary": "am 01.01.2026 09:00 gestellt", "seal": "0" * 64, "simulated": False},
-        "device": {"manufacturer": "Beispiel", "model": "Messgerät", "serial_no": "0001",
-                   "firmware": "1.0", "calibrated_on": "01.01.2026",
-                   "recalibration_due": "01.01.2027", "overdue": False},
+        "customer": {"name": tr("Sample customer Ltd"), "street": tr("Sample road 1"),
+                     "zip": "12345", "city": tr("Sampletown")},
+        "asset": {"name": tr("Sample installation"), "identifier": "A-001",
+                  "kind_text": tr("Installation"),
+                  "features": [(tr("Earthing system type"), "TN-S"),
+                               (tr("Rated current"), "63 A")]},
+        "campaign": {"title": tr("Preview"), "tester": tr("Max Sample"), "plan": "",
+                     "uuid": "preview", "department": tr("Maintenance"),
+                     "contact": tr("Ms Example"), "contact_phone": "0123 4567-89",
+                     "contact_email": "example@customer.example", "cost_center": "4711",
+                     "started": moment(start), "closed": moment(start + timedelta(hours=2)),
+                     "clock_offset_s": 0,
+                     "clock_summary": tr("set on {moment}", moment=moment(start)),
+                     "seal": "0" * 64, "simulated": False},
+        "device": {"manufacturer": tr("Example"), "model": tr("Test instrument"),
+                   "serial_no": "0001", "firmware": "1.0", "calibrated_on": day(date(2026, 1, 1)),
+                   "recalibration_due": day(date(2027, 1, 1)), "overdue": False},
         "steps": [step],
-        "verdict": "Bestanden" if count else "Nicht vollständig geprüft",
+        "verdict": tr("Passed") if count else tr("Not completely tested"),
     }
 
 
@@ -78,7 +83,7 @@ class TemplateDocument:
     def _chosen(self) -> None:
         if self.dirty and self._shown_index >= 0 and self._shown_index != self.choice.currentIndex():
             answer = QMessageBox.question(
-                self, "Vorlage", "Die Änderungen sind nicht gespeichert. Verwerfen?"
+                self, tr("Template"), tr("The changes are not saved. Discard them?")
             )
             if answer != QMessageBox.StandardButton.Yes:
                 self.choice.blockSignals(True)
@@ -148,11 +153,11 @@ class TemplateDocument:
     def preview(self) -> bool:
         try:
             with speaking(self.preview_language.currentData()):
-                company = getattr(self, "company", None) or SAMPLE_COMPANY
+                company = getattr(self, "company", None) or sample_company()
                 values = {**sample_context(self.count.currentData()), **company_context(company)}
                 nodes = resolve(parse_template(self.current_text()), values)
                 stream = io.BytesIO()
-                render_pdf(nodes, stream, footer=tr("Vorschau mit Beispieldaten"))
+                render_pdf(nodes, stream, footer=tr("Preview with sample data"))
         except TemplateError as err:
             self.message.setText(str(err))
             return False
@@ -166,7 +171,7 @@ class TemplateDocument:
 
     def _save(self) -> None:
         if not self.preview():
-            show_error(self, "Die Vorlage enthält Fehler und wurde nicht gespeichert.")
+            show_error(self, tr("The template has errors and was not saved."))
             return
         body = self.current_text()
         self.app.db.save_template(self.choice.currentText(), body)
@@ -188,17 +193,17 @@ class TemplateDocument:
 
     def _save_as(self) -> None:
         if not self.preview():
-            show_error(self, "Die Vorlage enthält Fehler und wurde nicht gespeichert.")
+            show_error(self, tr("The template has errors and was not saved."))
             return
-        name, accepted = QInputDialog.getText(self, "Neue Vorlage", "Name:")
+        name, accepted = QInputDialog.getText(self, tr("New template"), tr("Name:"))
         if accepted and name.strip():
             self.save_as(name.strip())
 
     def _delete(self) -> None:
         name = self.choice.currentText()
         answer = QMessageBox.question(
-            self, "Vorlage löschen",
-            f"„{name}“ löschen? Bestehende Protokolle bleiben davon unberührt.",
+            self, tr("Delete template"),
+            tr("Delete “{name}”? Existing reports are not affected.", name=name),
         )
         if answer == QMessageBox.StandardButton.Yes:
             self.app.db.execute("DELETE FROM templates WHERE name=?", name)

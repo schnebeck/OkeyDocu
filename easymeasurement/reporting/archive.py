@@ -15,7 +15,7 @@ from pathlib import Path
 
 from ..campaign.service import CampaignService
 from .context import build_context
-from .language import speaking, tr
+from ..l10n import speaking, tr
 from .pdf import render_pdf
 from .sign import PdfSigner
 from .template import parse_template, resolve
@@ -64,7 +64,7 @@ class ReportArchive:
         check = self.service.check_seal(campaign_id)
         if check.rejected:
             raise ReportError(
-                "Der Datensatz wurde nach dem Abschluss verändert und wird abgewiesen.\n"
+                tr("The record was changed after it was completed and is refused.") + "\n"
                 + "\n".join(check.reasons)
             )
 
@@ -79,7 +79,7 @@ class ReportArchive:
         """Render a closed campaign to a new archived PDF, keeping template and language."""
         campaign = self.service.campaign(campaign_id)
         if campaign["status"] != "closed":
-            raise ReportError("Protokolle werden aus abgeschlossenen Kampagnen erzeugt.")
+            raise ReportError(tr("Reports are created from completed campaigns."))
         self._refuse_tampered(campaign_id)
         folder = self.service.folder(campaign_id) / "reports"
         folder.mkdir(exist_ok=True)
@@ -88,7 +88,7 @@ class ReportArchive:
         self.service.tidy_proxies(campaign_id)
         with speaking(language):
             nodes = resolve(parse_template(template_body), build_context(self.service, campaign_id))
-            footer = f"{tr('Prüfung')} {campaign['uuid']}"
+            footer = f"{tr('Inspection')} {campaign['uuid']}"
         run(_render(nodes, path, footer, language))
         return self.db.execute(
             "INSERT INTO reports (campaign_id, template_name, template_body, file_name, sha256,"
@@ -101,13 +101,13 @@ class ReportArchive:
               run: Runner = _at_once) -> Path:
         """A preview of an open campaign. It is overwritten each time and never archived."""
         if self.service.campaign(campaign_id)["status"] != "open":
-            raise ReportError("Ein Entwurf entsteht nur aus einer offenen Kampagne.")
+            raise ReportError(tr("A draft is made from an open campaign only."))
         path = self.service.folder(campaign_id) / "drafts" / "entwurf.pdf"
         path.parent.mkdir(parents=True, exist_ok=True)
         self.service.tidy_proxies(campaign_id)
         with speaking(language):
             nodes = resolve(parse_template(template_body), build_context(self.service, campaign_id))
-            footer = tr("ENTWURF – nicht gültig")
+            footer = tr("DRAFT – not valid")
         run(_render(nodes, path, footer, language))
         return path
 
@@ -116,16 +116,16 @@ class ReportArchive:
         report = self.db.one("SELECT * FROM reports WHERE id=?", report_id)
         campaign = self.service.campaign(report["campaign_id"])
         if campaign["driver"] == "simulator":
-            raise ReportError("Protokolle mit simulierten Messwerten werden nicht signiert.")
+            raise ReportError(tr("Reports with simulated values are not signed."))
         if report["signed_by"]:
-            raise ReportError("Dieses Protokoll ist bereits signiert.")
+            raise ReportError(tr("This report is already signed."))
         if not self.is_intact(report):
-            raise ReportError("Die archivierte Datei wurde verändert.")
+            raise ReportError(tr("The archived file was changed."))
         self._refuse_tampered(report["campaign_id"])
         source = self.path(report)
         target = source.with_name(f"{source.stem}-signiert.pdf")
         with speaking(report["language"]):
-            reason = f"{tr('Prüfprotokoll')} {campaign['title']}"
+            reason = f"{tr('Test report')} {campaign['title']}"
         signed_by = signer.sign(source, target, reason=reason)
         return self.db.execute(
             "INSERT INTO reports (campaign_id, template_name, template_body, file_name, sha256,"

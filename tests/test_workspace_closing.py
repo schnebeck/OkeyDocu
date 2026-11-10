@@ -10,6 +10,7 @@ from pathlib import Path
 
 from PySide6.QtGui import QDesktopServices
 
+from easymeasurement.l10n import tr
 from easymeasurement.reporting.archive import ReportError
 from easymeasurement.reporting.context import build_context as report_context
 from easymeasurement.reporting.nodes import Letterhead, Notice
@@ -135,7 +136,7 @@ def test_the_draft_says_it_is_one(app, asset):
     campaign = app.service.create(asset, "T", "P")
     context = report_context(app.service, campaign)
     nodes = resolve(parse_template(default_template_text()), context)
-    assert isinstance(nodes[0], Letterhead) and nodes[1] == Notice(DRAFT_NOTICE)
+    assert isinstance(nodes[0], Letterhead) and nodes[1] == Notice(tr(DRAFT_NOTICE))
 
 
 # Closed campaigns ------------------------------------------------------------

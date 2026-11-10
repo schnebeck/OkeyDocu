@@ -32,9 +32,9 @@ def element_icon(name: str) -> QIcon:
 
 
 def icon_text(name: str) -> str:
-    """A German name for a picture: the shipped kind that uses it, or a description."""
+    """A name for a picture: the shipped kind that uses it, or a description."""
     if not _ICON_TEXT:
-        _ICON_TEXT.update({kind.icon: kind.label for kind in shipped_kinds()})
+        _ICON_TEXT.update({kind.icon: tr(kind.label) for kind in shipped_kinds()})
         _ICON_TEXT.update(building=tr("Building"), room=tr("Room"), element=tr("General"))
     return _ICON_TEXT.get(name, name.replace("_", " "))
 

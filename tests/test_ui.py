@@ -187,10 +187,10 @@ def test_an_element_shows_the_features_of_its_kind(window):
     form = page.element_form
     assert page.forms.currentWidget() is form
     assert form.features.title() == "Merkmale: Maschine"
-    form.feature_fields["nennstrom"].setText("16")
-    form.feature_fields["nennstrom"].editingFinished.emit()
+    form.feature_fields["rated_current"].setText("16")
+    form.feature_fields["rated_current"].editingFinished.emit()
     asset = page.tree.current_id()
-    assert window.app.db.asset_features(asset) == {"nennstrom": "16"}
+    assert window.app.db.asset_features(asset) == {"rated_current": "16"}
 
 
 def test_closed_campaign_offers_no_new_measurement(window):

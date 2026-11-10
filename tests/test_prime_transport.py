@@ -116,7 +116,7 @@ def test_allowed_commands_are_read_commands_and_push_mode():
 
 @pytest.mark.parametrize("port", ["bt:nonsense", "bt:00:11:22:33:44", "bt:00:11:22:33:44:55/x"])
 def test_bad_bluetooth_address_is_refused(port):
-    with pytest.raises(DeviceError, match="Bluetooth-Adresse"):
+    with pytest.raises(DeviceError, match="Bluetooth address"):
         open_channel(port)
 
 

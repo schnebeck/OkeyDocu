@@ -10,8 +10,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from ..l10n import N_
+
 # A photo documents by default; it can point something out or show a defect.
-ROLES = {"": "Dokumentation", "hint": "Hinweis", "defect": "Mangel"}
+ROLES = {"": N_("Documentation"), "hint": N_("Notice"), "defect": N_("Defect")}
 
 
 @dataclass

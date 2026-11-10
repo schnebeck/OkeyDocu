@@ -26,7 +26,7 @@ from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.platypus import Image
 
 from ..campaign.photo_proxies import QUALITY, make_proxy, reduced
-from .language import tr
+from ..l10n import tr
 from .logo import MARGIN_MM, PAGE_HEIGHT_MM, logo_ratio
 from .nodes import Logo
 
@@ -46,7 +46,7 @@ def _register_fonts() -> tuple[str, str]:
             pdfmetrics.registerFont(TTFont("Report", str(regular)))
             pdfmetrics.registerFont(TTFont("Report-Bold", str(bold)))
             return "Report", "Report-Bold"
-    raise RuntimeError("Schrift DejaVu Sans fehlt (Paket fonts-dejavu-core).")
+    raise RuntimeError(tr("The font DejaVu Sans is missing (package fonts-dejavu-core)."))
 
 
 class _NumberedCanvas(pdf_canvas.Canvas):
@@ -70,8 +70,8 @@ class _NumberedCanvas(pdf_canvas.Canvas):
             self.setFont(self.font, 7.5)
             self.setFillColor(colors.HexColor("#5b6670"))
             self.drawString(18 * mm, 10 * mm, self.footer)
-            self.drawRightString(A4[0] - 18 * mm, 10 * mm, tr("Seite {page} von {total}").format(
-                page=self._pageNumber, total=total))
+            page = tr("Page {page} of {total}", page=self._pageNumber, total=total)
+            self.drawRightString(A4[0] - 18 * mm, 10 * mm, page)
             super().showPage()
         super().save()
 

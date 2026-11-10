@@ -10,7 +10,8 @@ from datetime import datetime
 
 from easymeasurement.model import Quantity, ResultValue, Verdict
 from easymeasurement.reporting.context import build_context
-from easymeasurement.reporting.language import day, languages, moment, speaking, tr, value_text
+from easymeasurement.l10n import tr
+from easymeasurement.reporting.language import day, languages, moment, speaking, value_text
 from easymeasurement.reporting.nodes import Fields, Heading, Letterhead, SignatureLine
 from easymeasurement.reporting.template import default_template_text, parse_template, resolve
 
@@ -64,7 +65,7 @@ def test_german_stays_as_it_is(app, asset):
 
 def test_kinds_and_features_are_translated_by_their_key(app):
     ladder = app.db.add_asset(app.db.add_customer("Muster AG"), "ladder", "Leiter 3 m")
-    app.db.set_asset_features(ladder, {"laenge": "3", "sprossenzahl": "10", "material": ""})
+    app.db.set_asset_features(ladder, {"length": "3", "number_of_rungs": "10", "material": ""})
     campaign = campaign_with_one_value(app, ladder)
     found = texts(app, campaign, "en")
     assert "Ladder" in found  # a ladder, not the conductors that share the German word
@@ -85,7 +86,7 @@ def test_a_kind_added_in_the_settings_keeps_its_german_name(app):
     assert "Pumpe" in found and "Förderhöhe" in found
 
 
-def test_what_is_not_translated_stays_german():
+def test_what_is_not_translated_stays_as_written():
     with speaking("en"):
         assert tr("Ein Satz, den niemand übersetzt hat") == "Ein Satz, den niemand übersetzt hat"
 
@@ -116,7 +117,7 @@ def test_the_language_is_left_after_the_protocol(app, asset):
     campaign = campaign_with_one_value(app, asset)
     app.service.close(campaign)
     app.archive.generate(campaign, "Standard", default_template_text(), "en")
-    assert tr("bestanden") == "bestanden"
+    assert tr("passed") == "bestanden"
 
 
 def test_a_reading_keeps_its_digits_and_takes_the_decimal_sign_of_the_language():
@@ -146,11 +147,21 @@ def test_the_same_campaign_in_three_languages(app, asset):
     assert "Informe de ensayo" in spanish and "0,21\u202fΩ" in spanish and "correcto" in spanish
 
 
-def test_every_language_knows_every_text():
+def test_every_report_language_knows_every_stored_word():
     import yaml
-    from importlib import resources
 
-    folder = resources.files("easymeasurement") / "data" / "languages"
-    keys = [set(yaml.safe_load((folder / f"{code}.yaml").read_text("utf-8"))["texts"])
-            for code in languages() if code != "de"]
-    assert all(k == keys[0] for k in keys)
+    from easymeasurement.l10n.catalog import STORED, folder
+
+    def stored(code):
+        return {text for entry in (folder() / code).iterdir() if entry.name.startswith(STORED)
+                for text in yaml.safe_load(entry.read_text("utf-8"))["texts"]}
+
+    words = [stored(code) for code in languages() if code != "en"]
+    assert all(found == words[0] for found in words)
+
+
+def test_a_german_template_reads_in_english(app, asset):
+    template = "blocks:\n  - type: heading\n    text: Prüfprotokoll\n"
+    campaign = campaign_with_one_value(app, asset)
+    assert texts(app, campaign, "en", template) == ["Test report"]
+    assert texts(app, campaign, "de", template) == ["Prüfprotokoll"]

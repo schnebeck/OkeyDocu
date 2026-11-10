@@ -124,13 +124,22 @@ wo sie erscheinen (`easymeasurement/l10n/`). Jede Sprache hat einen Ordner unter
 Bereich mit `texts` (Englisch → Sprache) und `contexts` für ein englisches Wort, das zwei Übersetzungen
 braucht. Ein Text darf in mehreren Dateien stehen, aber nur mit derselben Übersetzung.
 
-Die Programmsprache wird unter „Einstellungen → Sprache“ gewählt und gilt ab dem nächsten Start; ohne
-Wahl gilt die des Systems. Angeboten werden nur Sprachen mit `program: true`; die übrigen dienen
-Protokollen. `speaking()` setzt für einen Thread eine andere Sprache, etwa für ein Protokoll.
+Die Programmsprache wird unter „Einstellungen → Sprache“ gewählt und gilt ab dem nächsten Start;
+„Wie das System“ übernimmt bei jedem Start die Systemsprache. Der Hinweis darunter erscheint in der
+gerade gewählten Sprache. Angeboten werden nur Sprachen mit `program: true`; die übrigen dienen
+Protokollen. `speaking()` setzt für einen Thread eine andere Sprache, etwa für ein Protokoll, dessen
+Sprache mit der Programmsprache vorbelegt ist.
 
 Gespeicherte Wörter (Schritttitel, Vorlagenzeilen, Ergebnisnamen) können in jeder Katalogsprache
 geschrieben sein. `in_language()` erkennt sie über die Kataloge wieder und gibt sie in der aktuellen
-Sprache aus; Unbekanntes bleibt, wie es ist. Diese Wörter stehen in `stored.yaml`.
+Sprache aus; Unbekanntes bleibt, wie es ist. Diese Wörter stehen in `stored*.yaml`. So liest sich eine
+deutsch geschriebene Vorlage auch als englisches Protokoll. Die mitgelieferte Standardvorlage ist
+englisch und wird beim Anlegen der Datenbank in der Programmsprache abgelegt.
+
+Strukturtypen und Merkmale kommen englisch aus `data/kinds.yaml`. Beim Lesen aus der Datenbank
+erscheinen sie in der aktuellen Sprache, solange ihr Name einer der mitgelieferten ist, in welcher
+Sprache auch immer; erkannt wird er über den Schlüssel, damit „Leiter“ die Leiter bleibt. Ein
+umbenannter Typ behält seinen Namen.
 
 `tests/test_l10n.py` verlangt für jeden markierten Text einen deutschen Eintrag mit denselben
 Platzhaltern und meldet Einträge, die kein Code benutzt.

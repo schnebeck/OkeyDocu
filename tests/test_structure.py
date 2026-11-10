@@ -138,8 +138,8 @@ def test_a_kind_in_use_gives_its_elements_a_new_one(app, tree):
 
 
 def test_empty_features_are_not_kept(app, tree):
-    app.db.set_asset_features(tree["press"], {"nennstrom": " 16 ", "baujahr": "  "})
-    assert app.db.asset_features(tree["press"]) == {"nennstrom": "16"}
+    app.db.set_asset_features(tree["press"], {"rated_current": " 16 ", "year_of_manufacture": "  "})
+    assert app.db.asset_features(tree["press"]) == {"rated_current": "16"}
 
 
 # Due again -------------------------------------------------------------------

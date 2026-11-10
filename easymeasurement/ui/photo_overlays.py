@@ -89,7 +89,7 @@ class TimelineAsking:
         if hit.kind == "mark":
             row = self.rows[hit.id]
             lines = [function_text(row["function"]), row["local_time"].replace("T", "  "),
-                     value_line(self.app.service, row), VERDICT_TEXT[Verdict(row["verdict"])]]
+                     value_line(self.app.service, row), tr(VERDICT_TEXT[Verdict(row["verdict"])])]
             return "\n".join(line for line in lines if line)
         gap = self.view.data.gap(hit.id) if hit.kind.startswith("gap") else None
         return tr("Gap {duration}", duration=duration_text(gap.seconds)) if gap else ""

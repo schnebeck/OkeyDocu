@@ -1,12 +1,12 @@
 # EasyMeasurement - easymeasurement/data/kinds.yaml
 # The kinds of structure elements a new database starts with. All of it can be changed
-# under Einstellungen → Strukturtypen.
+# under Settings → Structure kinds.
 #
 # device:   what the element is on the PROFITEST PRIME (MACHINE, DISTRIBUTIONCABINET, RCD,
 #           CIRCUIT, ELECTRICALEQUIPMENT, MEASURINGPOINT), empty if it has no counterpart
 # izytron:  object type code in an IZYTRON.IQ database, for the import
 # interval: months until the next inspection is due, 0 for none
-# features: "Bezeichnung|Einheit"; features left empty are not shown anywhere
+# features: "Label|unit"; features left empty are not shown anywhere
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
@@ -14,96 +14,100 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 kinds:
-  - {key: installation, label: Anlage, icon: installation, device: MACHINE, interval: 48,
-     features: [Betreiber, Anlagenverantwortlicher, Errichter, Errichtungsjahr, Netzbetreiber,
-                Netzform, Netzspannung|V, Netzfrequenz|Hz, Nennstrom|A, Leitungstyp,
-                Querschnitt|mm², Leitungslänge|m]}
-  - {key: machine, label: Maschine, icon: machine, device: MACHINE, izytron: 231, interval: 12,
-     features: [CE-Kennzeichnung, Schutzart IP, Schutzklasse, Nennspannung|V, Netzform,
-                Zuleitung, Nennstrom|A, Nennleistung|kW, Aderzahl, Leistungsfaktor,
-                Charakteristik, Querschnitt|mm², Ex-Nummer, Ex-Zone, Zündschutzart,
-                Leitungslänge|m]}
-  - {key: device, label: Gerät, icon: device, device: ELECTRICALEQUIPMENT, interval: 12,
-     features: [Schutzklasse, Nennspannung|V, Nennstrom|A, Nennleistung|kW]}
-  - {key: distribution_board, label: Verteiler, icon: distribution_board,
+  - {key: installation, label: Installation, icon: installation, device: MACHINE, interval: 48,
+     features: [Operator, Person responsible, Installer, Year of installation, Network operator,
+                Earthing system type, "Supply voltage|V", "Supply frequency|Hz", "Rated current|A",
+                Cable type, "Cross-section|mm²", "Cable length|m"]}
+  - {key: machine, label: Machine, icon: machine, device: MACHINE, izytron: 231, interval: 12,
+     features: [CE marking, IP rating, Protection class, "Nominal voltage|V", Earthing system type,
+                Supply cable, "Rated current|A", "Rated power|kW", Number of cores, Power factor,
+                Characteristic, "Cross-section|mm²", Ex number, Ex zone,
+                Type of ignition protection, "Cable length|m"]}
+  - {key: device, label: Device, icon: device, device: ELECTRICALEQUIPMENT, interval: 12,
+     features: [Protection class, "Nominal voltage|V", "Rated current|A", "Rated power|kW"]}
+  - {key: distribution_board, label: Distribution board, icon: distribution_board,
      device: DISTRIBUTIONCABINET, izytron: 232, interval: 48,
-     features: [Verteilerart, Schutzart IP, Material, Installationsart, Schutzklasse, Netzform,
-                Leitungslänge|m]}
-  - {key: construction_distributor, label: Baustromverteiler, icon: construction_distributor,
-     device: DISTRIBUTIONCABINET, interval: 3,
-     features: [Materialnummer, Isolationsklasse, Baujahr, Phasen, Polzahl, Nennstrom|A,
-                Bemessungsspannung|V, Nennleistung|kW, Gewicht|kg]}
+     features: [Board type, IP rating, Material, Installation method, Protection class,
+                Earthing system type, "Cable length|m"]}
+  - {key: construction_distributor, label: Construction site distribution board,
+     icon: construction_distributor, device: DISTRIBUTIONCABINET, interval: 3,
+     features: [Material number, Insulation class, Year of manufacture, Phases, Number of poles,
+                "Rated current|A", "Rated voltage|V", "Rated power|kW", "Weight|kg"]}
   - {key: rcd, label: RCD, icon: rcd, device: RCD, izytron: 233, interval: 6,
-     features: [RCD-Typ, Polzahl, Bemessungsdifferenzstrom|mA, Nennstrom|A, Charakteristik,
-                Leitungsschutz-Charakteristik, Leitungstyp, Aderzahl, Querschnitt|mm²,
-                Leitungslänge|m]}
-  - {key: rcm, label: Differenzstromüberwachung, icon: rcm, device: RCD, interval: 6,
-     features: [RCM-Typ, Polzahl, Bemessungsdifferenzstrom|mA, Nennstrom|A, Charakteristik,
-                Alarmschwelle|mA]}
-  - {key: imd, label: Isolationsüberwachung, icon: imd, interval: 6,
-     features: [IMD-Art, Netznennspannung|V, Messspannung|V, Messstrom|mA, Warnwert|kΩ,
-                Alarmwert|kΩ]}
-  - {key: circuit, label: Stromkreis, icon: circuit, device: CIRCUIT, izytron: 236,
-     features: [Leitungstyp, Charakteristik, Aderzahl, Nennstrom|A, Querschnitt|mm², Polzahl,
-                Leitungslänge|m]}
-  - {key: cable, label: Leitung, icon: cable, device: CIRCUIT,
-     features: [Leitungstyp, Aderzahl, Querschnitt|mm², Leitungslänge|m]}
-  - {key: pa_conductor, label: Potentialausgleichsleiter, icon: pa_conductor, device: CIRCUIT,
-     interval: 48, features: [Leitungstyp, Leitermaterial, Querschnitt|mm², Leitungslänge|m]}
-  - {key: ground, label: Erdungsanlage, icon: ground, interval: 48,
-     features: [Erderart, Material, Zusammensetzung, Bodenbeschaffenheit, Zweck,
-                Querschnitt|mm², Leitungslänge|m]}
-  - {key: equipment, label: Betriebsmittel, icon: equipment, device: ELECTRICALEQUIPMENT,
-     izytron: 237, interval: 12,
-     features: [Betriebsmittelart, Leitungstyp, Schutzart, Aderzahl, Schutzklasse,
-                Querschnitt|mm², Leitungslänge|m]}
-  - {key: electric_engine, label: Elektromotor, icon: electric_engine, device: MACHINE,
+     features: [RCD type, Number of poles, "Rated residual current|mA", "Rated current|A",
+                Characteristic, Circuit breaker characteristic, Cable type, Number of cores,
+                "Cross-section|mm²", "Cable length|m"]}
+  - {key: rcm, label: Residual current monitor, icon: rcm, device: RCD, interval: 6,
+     features: [RCM type, Number of poles, "Rated residual current|mA", "Rated current|A",
+                Characteristic, "Alarm threshold|mA"]}
+  - {key: imd, label: Insulation monitoring device, icon: imd, interval: 6,
+     features: [IMD type, "Nominal system voltage|V", "Measuring voltage|V",
+                "Measuring current|mA", "Warning value|kΩ", "Alarm value|kΩ"]}
+  - {key: circuit, label: Circuit, icon: circuit, device: CIRCUIT, izytron: 236,
+     features: [Cable type, Characteristic, Number of cores, "Rated current|A",
+                "Cross-section|mm²", Number of poles, "Cable length|m"]}
+  - {key: cable, label: Cable, icon: cable, device: CIRCUIT,
+     features: [Cable type, Number of cores, "Cross-section|mm²", "Cable length|m"]}
+  - {key: pa_conductor, label: Equipotential bonding conductor, icon: pa_conductor,
+     device: CIRCUIT, interval: 48,
+     features: [Cable type, Conductor material, "Cross-section|mm²", "Cable length|m"]}
+  - {key: ground, label: Earthing system, icon: ground, interval: 48,
+     features: [Earth electrode type, Material, Composition, Soil condition, Purpose,
+                "Cross-section|mm²", "Cable length|m"]}
+  - {key: equipment, label: Equipment, icon: equipment, device: ELECTRICALEQUIPMENT, izytron: 237,
      interval: 12,
-     features: [Schutzart IP, Isolationsklasse, Baujahr, Getriebe, Polzahl, Phasen,
-                Bemessungsspannung|V, Nennstrom|A, Nennleistung|kW, Betriebsart, Drehzahl|1/min,
-                Leistungsfaktor]}
+     features: [Equipment type, Cable type, Degree of protection, Number of cores,
+                Protection class, "Cross-section|mm²", "Cable length|m"]}
+  - {key: electric_engine, label: Electric motor, icon: electric_engine, device: MACHINE,
+     interval: 12,
+     features: [IP rating, Insulation class, Year of manufacture, Gearbox, Number of poles, Phases,
+                "Rated voltage|V", "Rated current|A", "Rated power|kW", Duty type, "Speed|1/min",
+                Power factor]}
   - {key: generator, label: Generator, icon: generator, device: MACHINE, interval: 12,
-     features: [Schutzart IP, Wärmeklasse, Isolationsklasse, Phasen, Baujahr,
-                Bemessungsspannung|V, Nennstrom|A, Wirkleistung|kW, Scheinleistung|kVA,
-                Betriebsart, Drehzahl|1/min]}
-  - {key: wind_power, label: Windkraftanlage, icon: wind_power, device: MACHINE, interval: 12,
-     features: [Schutzart IP, Wärmeklasse, Phasen, Baujahr, Bemessungsspannung|V, Nennstrom|A,
-                Wirkleistung|kW, Scheinleistung|kVA, Drehzahl|1/min]}
-  - {key: photovoltaic, label: PV-Anlage, icon: photovoltaic, device: MACHINE, interval: 48,
-     features: [Modultyp, Nennleistung|kWp, Nennspannung|V, Nennstrom|A, Leerlaufspannung|V,
-                Kurzschlussstrom|A, Steckverbinder, Zellen je Modul]}
-  - {key: charging_station, label: Ladestation, icon: charging_station, device: MACHINE,
+     features: [IP rating, Thermal class, Insulation class, Phases, Year of manufacture,
+                "Rated voltage|V", "Rated current|A", "Active power|kW", "Apparent power|kVA",
+                Duty type, "Speed|1/min"]}
+  - {key: wind_power, label: Wind turbine, icon: wind_power, device: MACHINE, interval: 12,
+     features: [IP rating, Thermal class, Phases, Year of manufacture, "Rated voltage|V",
+                "Rated current|A", "Active power|kW", "Apparent power|kVA", "Speed|1/min"]}
+  - {key: photovoltaic, label: PV system, icon: photovoltaic, device: MACHINE, interval: 48,
+     features: [Module type, "Rated power|kWp", "Nominal voltage|V", "Rated current|A",
+                "Open-circuit voltage|V", "Short-circuit current|A", Connector, Cells per module]}
+  - {key: charging_station, label: Charging station, icon: charging_station, device: MACHINE,
      interval: 12,
-     features: [Ladeeinrichtung, Gesamtleistung|kW, Lademodus, Ladeart, Ladestrom|A,
-                Ladespannung DC|V, Steckertyp, Ladepunkte dreiphasig, Ladepunkte einphasig]}
-  - {key: battery, label: Batterie, icon: battery, device: ELECTRICALEQUIPMENT, interval: 12,
-     features: [Technologie, Schutzklasse, Nennspannung|V, Zellenzahl, Zellenspannung|V,
-                Nennkapazität|Ah, Entladeschlussspannung|V, Schutzart IP]}
-  - {key: battery_bank, label: Batterieanlage, icon: battery_bank, device: ELECTRICALEQUIPMENT,
+     features: [Charging equipment, "Total power|kW", Charging mode, Charging type,
+                "Charging current|A", "DC charging voltage|V", Plug type,
+                Three-phase charging points, Single-phase charging points]}
+  - {key: battery, label: Battery, icon: battery, device: ELECTRICALEQUIPMENT, interval: 12,
+     features: [Technology, Protection class, "Nominal voltage|V", Number of cells,
+                "Cell voltage|V", "Rated capacity|Ah", "Final discharge voltage|V", IP rating]}
+  - {key: battery_bank, label: Battery system, icon: battery_bank, device: ELECTRICALEQUIPMENT,
      interval: 12,
-     features: [Batterietyp, Blockzahl, Blockspannung|V, Gesamtspannung|V, Nennkapazität|Ah,
-                Ladespannung|V, Erhaltungsladespannung|V, Inbetriebnahme, Schutzart IP]}
-  - {key: vehicle, label: Fahrzeug, icon: vehicle, interval: 12,
-     features: [Fahrzeug-Identnummer, Erstzulassung, Leergewicht|kg, Gesamtgewicht|kg,
-                Bordspannung|V, HV-Batteriespannung|V, HV-Batteriekapazität|kWh]}
-  - {key: floor_conveyor, label: Flurförderzeug, icon: floor_conveyor, interval: 12,
-     features: [CE-Kennzeichnung, Artikelnummer, Sitzplätze, Gewicht|kg, Nutzlast|kg,
-                Höchstlast|kg, Bereifung]}
-  - {key: extinguisher, label: Feuerlöscher, icon: extinguisher, interval: 24,
-     features: [Löschmittel, Brandklasse, Füllmenge, Bauart, Treibmittel, Löschvermögen,
-                Gesamtgewicht|kg]}
-  - {key: ladder, label: Leiter, icon: ladder, interval: 12,
-     features: [Leiterart, Material, Länge|m, Sprossenzahl, Höchstlast|kg, Anschaffung,
-                Aussonderung]}
-  - {key: scaffolding, label: Gerüst, icon: scaffolding,
-     features: [Gerüstart, Bauart, Breitenklasse, Lastklasse]}
-  - {key: sling, label: Anschlagmittel, icon: sling, interval: 12,
-     features: [Material, Tragfähigkeit|kg, Prüflast|kg, Eigengewicht|kg, Länge|m]}
-  - {key: ppe, label: Schutzausrüstung, icon: ppe, interval: 12,
-     features: [Norm, Kennzeichnung, Material, Schutzklasse]}
-  - {key: building_access, label: Tür oder Tor, icon: building_access, interval: 12,
-     features: [Öffnungsart, Öffnungsrichtung, Material, Lastklasse, Breite|m, Höhe|m]}
-  - {key: esd, label: ESD-Arbeitsplatz, icon: esd, interval: 12,
-     features: [Prüfgegenstand, Messart, Messpunkte]}
-  - {key: measuring_point, label: Messpunkt, icon: measuring_point, device: MEASURINGPOINT,
-     izytron: 242, features: []}
+     features: [Battery type, Number of blocks, "Block voltage|V", "Total voltage|V",
+                "Rated capacity|Ah", "Charging voltage|V", "Float charge voltage|V", Commissioning,
+                IP rating]}
+  - {key: vehicle, label: Vehicle, icon: vehicle, interval: 12,
+     features: [Vehicle identification number, First registration, "Unladen weight|kg",
+                "Gross weight|kg", "On-board voltage|V", "HV battery voltage|V",
+                "HV battery capacity|kWh"]}
+  - {key: floor_conveyor, label: Industrial truck, icon: floor_conveyor, interval: 12,
+     features: [CE marking, Article number, Seats, "Weight|kg", "Payload|kg", "Maximum load|kg",
+                Tyres]}
+  - {key: extinguisher, label: Fire extinguisher, icon: extinguisher, interval: 24,
+     features: [Extinguishing agent, Fire class, Filling quantity, Design, Propellant,
+                Extinguishing rating, "Gross weight|kg"]}
+  - {key: ladder, label: Ladder, icon: ladder, interval: 12,
+     features: [Ladder type, Material, "Length|m", Number of rungs, "Maximum load|kg", Purchased,
+                Withdrawn]}
+  - {key: scaffolding, label: Scaffolding, icon: scaffolding,
+     features: [Scaffold type, Design, Width class, Load class]}
+  - {key: sling, label: Lifting accessory, icon: sling, interval: 12,
+     features: [Material, "Working load limit|kg", "Proof load|kg", "Dead weight|kg", "Length|m"]}
+  - {key: ppe, label: Protective equipment, icon: ppe, interval: 12,
+     features: [Standard, Marking, Material, Protection class]}
+  - {key: building_access, label: Door or gate, icon: building_access, interval: 12,
+     features: [Opening type, Opening direction, Material, Load class, "Width|m", "Height|m"]}
+  - {key: esd, label: ESD workstation, icon: esd, interval: 12,
+     features: [Test object, Measurement type, Measuring points]}
+  - {key: measuring_point, label: Measuring point, icon: measuring_point, device: MEASURINGPOINT,
+     izytron: 242}

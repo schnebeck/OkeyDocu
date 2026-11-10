@@ -18,8 +18,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ..reporting.language import SOURCE, languages
-from ..l10n import tr
+from ..reporting.language import languages
+from ..l10n import current, tr
 from .common import ROW_ID, AppContext
 from .report_signing import open_report, sign_report
 
@@ -64,7 +64,7 @@ class CampaignReports(QWidget):
             made = row["created_at"][:16].replace("T", " ")
             mark = "  ·  " + tr("signed") if row["signed_by"] else ""
             intact = "" if self.app.archive.is_intact(row) else "  ·  " + tr("CHANGED OR MISSING")
-            language = f"  ·  {languages()[row['language']]}" if row["language"] != SOURCE else ""
+            language = f"  ·  {languages()[row['language']]}" if row["language"] != current() else ""
             item = QListWidgetItem(f"{made}  {row['template_name']}{language}{mark}{intact}")
             item.setData(ROW_ID, row["id"])
             self.list.addItem(item)

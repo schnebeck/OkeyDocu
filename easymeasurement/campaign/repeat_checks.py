@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from datetime import datetime
 
-from ..l10n import day, plural, tr
+from ..l10n import day, in_language, plural, tr
 from ..model import Quantity
 from ..store.device_texts import CODE
 from .plan import PlanStep
@@ -88,7 +88,7 @@ class RepeatCheckMixin:
             old = before.get(value["key"])
             if old is None or value["key"] in ("question", "note"):
                 continue
-            parts.append(f"{old['label']} {old['raw']}")
+            parts.append(f"{in_language(old['label'])} {old['raw']}")
             new, then = value["base_value"], old["base_value"]
             if new is not None and then is not None and new > 0 and then > 0:
                 ratio = new / then

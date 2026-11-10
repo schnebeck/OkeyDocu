@@ -13,8 +13,8 @@ from html import escape
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QLabel
 
-from ..l10n import N_, plural, tr
-from ..reporting.language import SOURCE, languages
+from ..l10n import N_, current, plural, tr
+from ..reporting.language import languages
 from ..reporting.sign import SigningError
 from .common import AppContext
 from .overlay import Overlay
@@ -56,7 +56,7 @@ class LanguageChoice(QComboBox):
         super().__init__()
         for code, name in languages().items():
             self.addItem(name, code)
-        self.setCurrentIndex(max(0, self.findData(settings().value("protocol_language", SOURCE))))
+        self.setCurrentIndex(max(0, self.findData(settings().value("protocol_language", current()))))
 
     def code(self) -> str:
         return self.currentData()

@@ -1,0 +1,84 @@
+# EasyMeasurement - German texts: building blocks of report templates and their placeholders.
+texts:
+  Heading: Überschrift
+  Text: Text
+  Notice (red): Hinweis (rot)
+  Field list: Feldliste
+  Repeat for each step: Je Messschritt wiederholen
+  Measurements (0 / 1 / n): Messungen (0 / 1 / n)
+  Photos: Fotos
+  Notes and attachments on places: Notizen und Anhänge zu Orten
+  Signature line: Unterschriftszeile
+  Logo: Logo
+  Letterhead: Briefkopf
+  "Customer: name": "Kunde: Name"
+  "Customer: street": "Kunde: Straße"
+  "Customer: postcode": "Kunde: PLZ"
+  "Customer: city": "Kunde: Ort"
+  "Order: department": "Auftrag: Abteilung"
+  "Order: cost centre": "Auftrag: Kostenstelle"
+  "Contact person: name": "Ansprechpartner: Name"
+  "Contact person: direct line": "Ansprechpartner: Durchwahl"
+  "Contact person: e-mail": "Ansprechpartner: E-Mail"
+  "Own company: name": "Eigene Firma: Name"
+  "Own company: street": "Eigene Firma: Straße"
+  "Own company: postcode": "Eigene Firma: PLZ"
+  "Own company: city": "Eigene Firma: Ort"
+  "Own company: phone": "Eigene Firma: Telefon"
+  "Own company: e-mail": "Eigene Firma: E-Mail"
+  "Own company: web": "Eigene Firma: Internet"
+  "Installation: kind": "Anlage: Art"
+  "Installation: designation": "Anlage: Bezeichnung"
+  "Installation: identifier": "Anlage: Kennung"
+  "Campaign: title": "Kampagne: Titel"
+  "Campaign: test plan": "Kampagne: Messplan"
+  "Campaign: inspector": "Kampagne: Prüfer"
+  "Campaign: start": "Kampagne: Beginn"
+  "Campaign: completion": "Kampagne: Abschluss"
+  "Instrument: manufacturer": "Messgerät: Hersteller"
+  "Instrument: model": "Messgerät: Modell"
+  "Instrument: serial number": "Messgerät: Seriennummer"
+  "Instrument: firmware": "Messgerät: Firmware"
+  "Instrument: calibrated on": "Messgerät: Kalibriert am"
+  "Instrument: recalibration due": "Messgerät: Rekalibrierung fällig"
+  "Instrument: clock": "Messgerät: Uhr"
+  "Campaign: record seal": "Kampagne: Datensatz-Siegel"
+  "Step: title": "Messschritt: Titel"
+  "Step: reason": "Messschritt: Begründung"
+  Overall result: Gesamtergebnis
+  Always show: Immer anzeigen
+  Only if an instrument is involved: Nur wenn ein Messgerät beteiligt ist
+  Only if the calibration is overdue: Nur wenn die Kalibrierung überfällig ist
+  Only if there are notes or attachments on places: Nur wenn es Notizen oder Anhänge zu Orten gibt
+  New heading: Neue Überschrift
+  New text: Neuer Text
+  New notice: Neuer Hinweis
+  Not measured.: Nicht gemessen.
+  "{label} ({count} line)": "{label} ({count} Zeile)"
+  "{label} ({count} lines)": "{label} ({count} Zeilen)"
+  "{title} with QR code": "{title} mit QR-Code"
+  "{label} (no image yet)": "{label} (noch kein Bild)"
+  every page: jede Seite
+  first page: erste Seite
+  "{label} ({width} mm wide, {pages})": "{label} ({width} mm breit, {pages})"
+  "{label} (conditional)": "{label} (bedingt)"
+  Own company (Settings → Company): Eigene Firma (Einstellungen → Firma)
+  Sample street 2: Prüferweg 2
+  Sampletown: Musterstadt
+  Installation not accessible: Anlage nicht zugänglich
+  Sample customer Ltd: Musterkunde GmbH
+  Sample road 1: Musterweg 1
+  Sample installation: Musteranlage
+  Preview: Vorschau
+  Max Sample: Max Muster
+  Maintenance: Instandhaltung
+  Ms Example: Frau Beispiel
+  "set on {moment}": "am {moment} gestellt"
+  Example: Beispiel
+  Template: Vorlage
+  The changes are not saved. Discard them?: Die Änderungen sind nicht gespeichert. Verwerfen?
+  The template has errors and was not saved.: Die Vorlage enthält Fehler und wurde nicht gespeichert.
+  New template: Neue Vorlage
+  "Name:": "Name:"
+  Delete template: Vorlage löschen
+  "Delete “{name}”? Existing reports are not affected.": "„{name}“ löschen? Bestehende Protokolle bleiben davon unberührt."

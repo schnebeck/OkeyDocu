@@ -29,7 +29,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ..l10n import plural, tr
+from ..l10n import current, plural, tr
 from ..reporting.language import languages
 from ..reporting.template_model import BLOCK_LABELS
 from .board import GutterSplitter
@@ -73,6 +73,7 @@ class TemplatesPage(
         self.preview_language = QComboBox()
         for code, name in languages().items():
             self.preview_language.addItem(name, code)
+        self.preview_language.setCurrentIndex(max(0, self.preview_language.findData(current())))
         self.preview_language.setToolTip(tr("The preview shows the report in this language"))
         self.preview_language.currentIndexChanged.connect(self.preview)
         self.state = QLabel()
@@ -93,7 +94,7 @@ class TemplatesPage(
         self.tree.currentItemChanged.connect(lambda *_: self._show_form())
         menu = QMenu(self)
         for kind, label in BLOCK_LABELS.items():
-            menu.addAction(label, lambda kind=kind: self.add_block(kind))
+            menu.addAction(tr(label), lambda kind=kind: self.add_block(kind))
         self.add_button = QToolButton()
         self.add_button.setText(tr("Add block"))
         self.add_button.setMenu(menu)

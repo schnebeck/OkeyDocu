@@ -11,7 +11,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-WHOLE_CAMPAIGN = "Prüfung allgemein"
+from ..l10n import N_
+
+WHOLE_CAMPAIGN = N_("Inspection in general")
 
 
 @dataclass

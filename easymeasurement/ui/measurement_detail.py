@@ -89,7 +89,7 @@ class MeasurementDetail:
             item.setData(PHOTO_PATH, path)
             item.setData(PHOTO_ID, photo["id"])
             if photo["role"]:
-                item.setText(f"{ROLES[photo['role']]} · {item.text()}")
+                item.setText(f"{tr(ROLES[photo['role']])} · {item.text()}")
             item.setToolTip(photo["taken_at"] or tr("Time unknown"))
             self.gallery.addItem(item)
         self.gallery.setVisible(self.gallery.count() > 0 or not self.hide_empty_gallery)

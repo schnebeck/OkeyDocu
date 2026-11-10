@@ -106,7 +106,7 @@ class PhotoPreview(Overlay):
         choices = QHBoxLayout()
         role = self.app.service.photo_role(self.photo_id)
         for key, label in ROLES.items():
-            button = QRadioButton(label)
+            button = QRadioButton(tr(label))
             button.setProperty("role", key)
             button.setChecked(key == role)
             button.setEnabled(self.editable)

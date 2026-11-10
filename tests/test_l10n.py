@@ -108,7 +108,15 @@ def test_the_program_offers_only_languages_its_interface_speaks(qtbot, tmp_path,
     overlay = language_choice.LanguageOverlay()
     qtbot.addWidget(overlay)
     choice = overlay.choice
-    assert [choice.itemData(i) for i in range(choice.count())] == ["en", "de"]
-    choice.setCurrentIndex(0)
+    assert [choice.itemData(i) for i in range(choice.count())] == ["", "en", "de"]
+    assert choice.currentIndex() == 0  # nothing chosen yet: as the system
+    choice.setCurrentIndex(1)
+    assert overlay.hint.text() == "Applies from the next start."  # in the language chosen
+    choice.setCurrentIndex(2)
+    assert overlay.hint.text() == "Gilt ab dem nächsten Start."
+    choice.setCurrentIndex(1)
     overlay.accept()
     assert stored.value(language_choice.KEY) == "en"
+    assert language_choice.chosen_language() == "en"
+    stored.setValue(language_choice.KEY, language_choice.SYSTEM)
+    assert language_choice.chosen_language() == language_choice.system_language()

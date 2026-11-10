@@ -1,0 +1,23 @@
+# EasyMeasurement - German texts: messages while reports are made, signed and archived.
+texts:
+  The record was changed after it was completed and is refused.: Der Datensatz wurde nach dem Abschluss verändert und wird abgewiesen.
+  Reports are created from completed campaigns.: Protokolle werden aus abgeschlossenen Kampagnen erzeugt.
+  A draft is made from an open campaign only.: Ein Entwurf entsteht nur aus einer offenen Kampagne.
+  Reports with simulated values are not signed.: Protokolle mit simulierten Messwerten werden nicht signiert.
+  This report is already signed.: Dieses Protokoll ist bereits signiert.
+  The archived file was changed.: Die archivierte Datei wurde verändert.
+  The file is not a readable image.: Die Datei ist kein lesbares Bild.
+  The image is too large. Please choose a smaller file.: Das Bild ist zu groß. Bitte eine kleinere Datei wählen.
+  The image data in the template is damaged.: Die Bilddaten in der Vorlage sind beschädigt.
+  Certificate not readable or wrong password.: Zertifikat nicht lesbar oder Passwort falsch.
+  The file contains no certificate.: Die Datei enthält kein Zertifikat.
+  "The certificate expired on {day}.": "Das Zertifikat ist seit {day} abgelaufen."
+  This certificate is not issued for signing.: Dieses Zertifikat ist nicht zum Signieren ausgestellt.
+  The font DejaVu Sans is missing (package fonts-dejavu-core).: Schrift DejaVu Sans fehlt (Paket fonts-dejavu-core).
+  "The template is not valid YAML: {error}": "Die Vorlage ist kein gültiges YAML: {error}"
+  The template needs a list “blocks”.: Die Vorlage braucht eine Liste „blocks“.
+  "Unknown block: {kind}": "Unbekannter Block: {kind}"
+  Repetitions cannot be nested.: Wiederholungen lassen sich nicht verschachteln.
+  A logo does not belong in a repetition.: Ein Logo gehört nicht in eine Wiederholung.
+  "The image {image} is missing in the template.": "Das Bild {image} fehlt in der Vorlage."
+  "Error in the placeholder {text}: {error}": "Fehler im Platzhalter {text}: {error}"

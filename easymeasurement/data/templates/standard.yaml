@@ -2,60 +2,61 @@
 #
 # A "measurements" block defines its look for each amount of data:
 #   none: no measurement   one: exactly one   many: several
-name: Standardprotokoll
+# Texts are English and appear in the language of the report.
+name: Standard report
 blocks:
   - type: letterhead
-    title: "Prüfprotokoll"
+    title: "Test report"
     lines:
       - "{{ campaign.title }}"
       - "{{ asset.kind_text }}: {{ asset.name }}"
-      - "Prüfung vom {{ campaign.started }}"
+      - "Tested on {{ campaign.started }}"
     client:
       - "{{ customer.name }}"
       - "{{ customer.street }}"
       - "{{ customer.zip }} {{ customer.city }}"
-      - "Abteilung: {{ campaign.department }}"
-      - "Ansprechpartner: {{ campaign.contact }}"
-      - "Telefon: {{ campaign.contact_phone }}"
+      - "Department: {{ campaign.department }}"
+      - "Contact: {{ campaign.contact }}"
+      - "Phone: {{ campaign.contact_phone }}"
       - "{{ campaign.contact_email }}"
     contractor:
       - "{{ company.name }}"
       - "{{ company.street }}"
       - "{{ company.zip }} {{ company.city }}"
-      - "Kostenstelle: {{ campaign.cost_center }}"
-      - "Prüfer: {{ campaign.tester }}"
+      - "Cost centre: {{ campaign.cost_center }}"
+      - "Inspector: {{ campaign.tester }}"
     qr: true
     logo: true
   - type: fields
     rows:
       - ["{{ asset.kind_text }}", "{{ asset.name }}"]
-      - [Kennung, "{{ asset.identifier }}"]
-      - [Hersteller, "{{ asset.manufacturer }}"]
-      - [Typ, "{{ asset.type }}"]
-      - [Seriennummer, "{{ asset.serial_no }}"]
-      - [Bemerkung, "{{ asset.comment }}"]
+      - [Identifier, "{{ asset.identifier }}"]
+      - [Manufacturer, "{{ asset.manufacturer }}"]
+      - [Type, "{{ asset.type }}"]
+      - [Serial number, "{{ asset.serial_no }}"]
+      - [Remark, "{{ asset.comment }}"]
     features: asset
   - type: fields
     rows:
-      - [Messplan, "{{ campaign.plan }}"]
-      - [Beginn, "{{ campaign.started }}"]
-      - [Abschluss, "{{ campaign.closed }}"]
+      - [Test plan, "{{ campaign.plan }}"]
+      - [Started, "{{ campaign.started }}"]
+      - [Completed, "{{ campaign.closed }}"]
   - type: heading
     when: device.model
     level: 2
-    text: Messgerät
+    text: Test instrument
   - type: fields
     when: device.model
     rows:
-      - [Typ, "{{ device.manufacturer }} {{ device.model }}"]
-      - [Seriennummer, "{{ device.serial_no }}"]
+      - [Type, "{{ device.manufacturer }} {{ device.model }}"]
+      - [Serial number, "{{ device.serial_no }}"]
       - [Firmware, "{{ device.firmware }}"]
-      - [Kalibriert am, "{{ device.calibrated_on }}"]
-      - [Rekalibrierung fällig, "{{ device.recalibration_due }}"]
-      - [Geräteuhr, "{{ campaign.clock_summary }}"]
+      - [Calibrated on, "{{ device.calibrated_on }}"]
+      - [Recalibration due, "{{ device.recalibration_due }}"]
+      - [Instrument clock, "{{ campaign.clock_summary }}"]
   - type: notice
     when: device.overdue
-    text: "Die Rekalibrierung des Messgeräts war zum Prüfzeitpunkt überfällig ({{ device.recalibration_due }})."
+    text: "Recalibration of the test instrument was overdue at the time of testing ({{ device.recalibration_due }})."
   - type: steps
     blocks:
       - type: heading
@@ -63,7 +64,7 @@ blocks:
         text: "{{ step.title }}"
       - type: measurements
         none:
-          text: "Nicht gemessen.{% if step.note %} Begründung: {{ step.note }}{% endif %}"
+          text: "Not measured.{% if step.note %} Reason: {{ step.note }}{% endif %}"
         one: {}
         many:
           summary: true
@@ -71,14 +72,14 @@ blocks:
   - type: heading
     when: places
     level: 2
-    text: Notizen und Anhänge
+    text: Notes and attachments
   - type: attachments
   - type: heading
     level: 2
-    text: Ergebnis
+    text: Result
   - type: text
     when: campaign.seal
-    text: "Datensatz-Siegel: {{ campaign.seal }}"
+    text: "Record seal: {{ campaign.seal }}"
   - type: signature
-    result: "Ergebnis der Prüfung: {{ verdict }}"
-    labels: ["Ort, Datum", "Unterschrift {{ campaign.tester }}"]
+    result: "Test result: {{ verdict }}"
+    labels: ["Place, date", "Signature {{ campaign.tester }}"]

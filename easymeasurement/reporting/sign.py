@@ -17,6 +17,8 @@ from cryptography import x509
 from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography.x509.oid import ExtendedKeyUsageOID, NameOID
 
+from ..l10n import day, tr
+
 _DOCUMENT_SIGNING = x509.ObjectIdentifier("1.3.6.1.5.5.7.3.36")
 
 
@@ -59,9 +61,9 @@ def inspect_certificate(path: Path, passphrase: str) -> CertificateInfo:
             path.read_bytes(), passphrase.encode() or None
         )
     except (ValueError, OSError) as err:
-        raise SigningError("Zertifikat nicht lesbar oder Passwort falsch.") from err
+        raise SigningError(tr("Certificate not readable or wrong password.")) from err
     if certificate is None:
-        raise SigningError("Die Datei enthält kein Zertifikat.")
+        raise SigningError(tr("The file contains no certificate."))
     alternative = _extension(certificate, x509.SubjectAlternativeName)
     addresses = alternative.get_values_for_type(x509.RFC822Name) if alternative else []
     usage = _extension(certificate, x509.KeyUsage)
@@ -97,14 +99,14 @@ class Pkcs12Signer:
 
         info = inspect_certificate(self.certificate, self.passphrase)
         if info.expired:
-            raise SigningError(f"Das Zertifikat ist seit {info.valid_until:%d.%m.%Y} abgelaufen.")
+            raise SigningError(tr("The certificate expired on {day}.", day=day(info.valid_until)))
         if not info.can_sign:
-            raise SigningError("Dieses Zertifikat ist nicht zum Signieren ausgestellt.")
+            raise SigningError(tr("This certificate is not issued for signing."))
         signer = signers.SimpleSigner.load_pkcs12(
             pfx_file=str(self.certificate), passphrase=self.passphrase.encode() or None
         )
         if signer is None:
-            raise SigningError("Zertifikat nicht lesbar oder Passwort falsch.")
+            raise SigningError(tr("Certificate not readable or wrong password."))
         metadata = signers.PdfSignatureMetadata(
             field_name="Signatur",
             reason=reason,

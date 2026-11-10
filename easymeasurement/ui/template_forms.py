@@ -38,7 +38,8 @@ class TemplateForms:
             form.addRow(QLabel(tr("Choose or add a block above.")))
         else:
             block = self._block(path)
-            title = QLabel(f"<b>{BLOCK_LABELS.get(block['type'], block['type'])}</b>")
+            label = BLOCK_LABELS.get(block["type"])
+            title = QLabel(f"<b>{tr(label) if label else block['type']}</b>")
             form.addRow(title)
             builder = getattr(self, f"_form_{block['type']}", None)
             if builder:
@@ -55,7 +56,7 @@ class TemplateForms:
         box = QComboBox()
         box.addItem(tr("Insert data field …"), None)
         for label, code in PLACEHOLDERS:
-            box.addItem(label, code)
+            box.addItem(tr(label), code)
 
         def chosen(index: int) -> None:
             code = box.itemData(index)
@@ -160,7 +161,7 @@ class TemplateForms:
     def _condition_row(self, block: dict, form: QFormLayout) -> None:
         box = QComboBox()
         for label, value in CONDITIONS:
-            box.addItem(label, value)
+            box.addItem(tr(label), value)
         current = block.get("when")
         index = box.findData(current)
         if current is not None and index < 0:  # written by hand in the source view

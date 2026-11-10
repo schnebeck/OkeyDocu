@@ -47,7 +47,7 @@ class TemplateDataForms:
         table.itemChanged.connect(edited)
 
         def add_row() -> None:
-            rows.append(["Bezeichnung", ""])
+            rows.append([tr("Designation"), ""])
             self._show_form()
             self._touched()
 
@@ -60,7 +60,7 @@ class TemplateDataForms:
         def insert(code: str) -> None:
             row = table.currentRow()
             if row < 0:
-                rows.append(["Bezeichnung", code])
+                rows.append([tr("Designation"), code])
                 self._show_form()
                 self._touched()
             else:
@@ -113,7 +113,7 @@ class TemplateDataForms:
         show_text = QRadioButton(tr("Show sentence"))
         hide = QRadioButton(tr("Hide block"))
         (hide if none.get("hide") else show_text).setChecked(True)
-        text = QLineEdit(str(none.get("text", "Nicht gemessen.")))
+        text = QLineEdit(str(none.get("text", tr("Not measured."))))
         text.setEnabled(not none.get("hide"))
 
         def none_changed() -> None:

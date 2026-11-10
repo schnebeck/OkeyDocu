@@ -22,7 +22,7 @@ from reportlab.platypus import Image, Paragraph
 from reportlab.platypus import Table as PdfTable
 from reportlab.platypus import TableStyle
 
-from .language import tr
+from ..l10n import tr
 from .nodes import Letterhead, SignatureLine
 from .pdf_parts import _signature_image
 
@@ -82,8 +82,8 @@ def letterhead(node: Letterhead, usable: float, body: ParagraphStyle,
                               ("BOTTOMPADDING", (0, 0), (-1, -1), 8)]))
     half = usable / 2
     parties = PdfTable(
-        [[Paragraph(escape(tr("Auftraggeber")).upper(), label),
-          Paragraph(escape(tr("Auftragnehmer")).upper(), label)],
+        [[Paragraph(escape(tr("Client")).upper(), label),
+          Paragraph(escape(tr("Contractor")).upper(), label)],
          [_lines(node.client, body), _lines(node.contractor, body)]],
         colWidths=[half, half])
     parties.setStyle(TableStyle([

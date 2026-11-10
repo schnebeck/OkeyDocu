@@ -14,11 +14,10 @@ from PySide6.QtGui import QDesktopServices
 from ..reporting.archive import ReportError
 from ..reporting.sign import SigningError
 from ..reporting.template import TemplateError
-from ..l10n import N_, tr
+from ..l10n import N_, current, tr
 from .campaign_delete import ask_delete, dispose
 from .common import run_busy, show_error
 from .confirm_overlay import ConfirmOverlay
-from ..reporting.language import SOURCE
 from .report_signing import open_report, settings
 
 WEAK_SEAL = N_(
@@ -38,7 +37,7 @@ class CampaignConfirm:
         if campaign is None or campaign["status"] != "open" or not templates:
             return
         self.values.editor.apply()  # the draft shows what was typed, too
-        language = settings().value("protocol_language", SOURCE)
+        language = settings().value("protocol_language", current())
         try:
             path = self.app.archive.draft(campaign["id"], templates[0]["body"], language,
                                           lambda work: run_busy(self, tr(DRAWING), work))

@@ -11,6 +11,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from ..devices.profitest_prime.parser import CONDUCTOR_PARAMETERS, RESULT_CODES
+from ..l10n import N_
 from ..model import (
     CONDUCTOR,
     SIGHT_CHECK_FUNCTION,
@@ -130,10 +131,10 @@ def _parameter(item: dict) -> Parameter:
 def _check_measurement(step, data: dict, location: tuple[str, ...]) -> MeterMeasurement:
     results = []
     for check in data.get("VisualInspections") or ():
-        results.append(_text("question", "Prüffrage", check.get("Question") or ""))
-        results.append(_text("answer", "Antwort", "yes" if check.get("Result") else "no"))
+        results.append(_text("question", N_("Inspection question"), check.get("Question") or ""))
+        results.append(_text("answer", N_("Answer"), "yes" if check.get("Result") else "no"))
     if step["Comment"]:
-        results.append(_text("note", "Bemerkung", step["Comment"]))
+        results.append(_text("note", N_("Remark"), step["Comment"]))
     return MeterMeasurement(
         uid=step["ID"].lower(), function=SIGHT_CHECK_FUNCTION, taken_at=_time(step["Date"]),
         verdict=_verdict(step), operator=step["Tester_Name"] or "",

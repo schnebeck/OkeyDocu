@@ -23,20 +23,20 @@ from ..model import (
     conductor_of,
 )
 from .attached import Attached, places, sort_attached
-from .language import UNIT_SPACE, day, feature_name, kind_name, moment, tr
+from ..l10n import N_, in_language, tr
+from .language import UNIT_SPACE, day, moment
 from .logo import LogoError, decode_logo
 
 VERDICT_TEXT = {
-    Verdict.PASSED: "bestanden",
-    Verdict.FAILED: "nicht bestanden",
-    Verdict.NOT_EVALUATED: "nicht bewertet",
+    Verdict.PASSED: N_("passed"),
+    Verdict.FAILED: N_("failed"),
+    Verdict.NOT_EVALUATED: N_("not evaluated"),
 }
 
 def _features(db, asset) -> list[tuple[str, str]]:
     """The features noted on the element, in the order of its kind; empty ones stay out."""
     kind, values = db.kind(asset["kind"]), db.asset_features(asset["id"])
-    return [(feature_name(feature.key, feature.label),
-             f"{values[feature.key]}{UNIT_SPACE}{feature.unit}".strip())
+    return [(feature.label, f"{values[feature.key]}{UNIT_SPACE}{feature.unit}".strip())
             for feature in (kind.features if kind else ()) if values.get(feature.key)]
 
 
@@ -64,13 +64,13 @@ def overall_verdict(steps: list[ReportStep]) -> str:
     """Summarise honestly: a skipped or empty step is not a pass."""
     verdicts = [m.data.verdict for step in steps for m in step.measurements]
     if Verdict.FAILED in verdicts:
-        return tr("Nicht bestanden")
+        return tr("Failed")
     complete = bool(steps) and all(
         s.status == "done" and s.measurements for s in steps
     )
     if complete and all(v is Verdict.PASSED for v in verdicts):
-        return tr("Bestanden")
-    return tr("Nicht vollständig geprüft")
+        return tr("Passed")
+    return tr("Not completely tested")
 
 
 def _add_answers(steps: list[ReportStep], title: str, measured: list) -> None:
@@ -79,7 +79,7 @@ def _add_answers(steps: list[ReportStep], title: str, measured: list) -> None:
     if last and last.function == SIGHT_CHECK_FUNCTION and last.title == title:
         last.measurements.extend(measured)
     else:
-        steps.append(ReportStep(tr(title), SIGHT_CHECK_FUNCTION, "done", "", measured))
+        steps.append(ReportStep(in_language(title), SIGHT_CHECK_FUNCTION, "done", "", measured))
 
 
 def _point_title(service: CampaignService, step, title: str) -> str:
@@ -129,7 +129,7 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
         if repeat and row["status"] == "done":
             loose.setdefault(plan_step.function, []).extend(measured)
             continue
-        title = tr(plan_step.title)
+        title = in_language(plan_step.title)
         if repeat:
             title = _point_title(service, plan_step, title)
         steps.append(ReportStep(title, plan_step.function, row["status"], row["note"], measured))
@@ -143,8 +143,7 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
     return {
         **company_context(service.db.company()),
         "customer": dict(customer),
-        "asset": {**dict(asset), "kind_text": kind_name(
-                      asset["kind"], service.db.kind_labels().get(asset["kind"], "")),
+        "asset": {**dict(asset), "kind_text": service.db.kind_labels().get(asset["kind"], ""),
                   "features": _features(service.db, asset)},
         "campaign": {
             "title": campaign["title"],
@@ -179,7 +178,7 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
         "steps": steps,
         "places": places(service, campaign_id),
         "verdict": overall_verdict(steps),
-        "verdict_tone": {tr("Bestanden"): "passed", tr("Nicht bestanden"): "failed"}.get(
+        "verdict_tone": {tr("Passed"): "passed", tr("Failed"): "failed"}.get(
             overall_verdict(steps), ""),
     }
 
@@ -207,15 +206,15 @@ def clock_summary(campaign, checks, offsets) -> str:
     for check in checks:
         moment = _date_text(check["checked_at"])
         if check["kind"] == "set":
-            notes.append(tr("am {moment} gestellt (Abweichung vorher {offset} s)").format(
-                moment=moment, offset=f"{check['offset_before_s']:+.0f}"))
+            notes.append(tr("set on {moment} (deviation before {offset} s)",
+                            moment=moment, offset=f"{check['offset_before_s']:+.0f}"))
         elif check["kind"] == "manual":
-            notes.append(tr("Versatz am {moment} von Hand auf {offset} s festgelegt").format(
-                moment=moment, offset=f"{check['offset_s']:+.0f}"))
+            notes.append(tr("offset set by hand to {offset} s on {moment}",
+                            moment=moment, offset=f"{check['offset_s']:+.0f}"))
     offset = round(campaign["clock_offset_s"])
     if offset:
-        notes.append(tr("Versatz {offset} s, die Zeiten unten sind korrigiert").format(
-            offset=f"{offset:+d}"))
+        notes.append(tr("offset {offset} s, the times below are corrected",
+                        offset=f"{offset:+d}"))
     return "; ".join(notes)
 
 
@@ -232,4 +231,4 @@ def _date_text(value: str | None) -> str:
 
 
 def function_label(key: str) -> str:
-    return tr(FUNCTION_LABELS.get(key, key))
+    return in_language(FUNCTION_LABELS.get(key, key))

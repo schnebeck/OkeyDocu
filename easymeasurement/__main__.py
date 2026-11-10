@@ -17,6 +17,7 @@ from .campaign.service import CampaignService
 from .paths import data_dir
 from .reporting.archive import ReportArchive
 from .reporting.template import default_template_text
+from .reporting.template_model import in_program_language
 from .store import Database, SchemaMismatch
 
 
@@ -26,7 +27,7 @@ def build_context():
     root = data_dir()
     db = Database(root / "easymeasurement.sqlite")
     if not db.templates():
-        db.save_template(tr("Standard report"), default_template_text())
+        db.save_template(tr("Standard report"), in_program_language(default_template_text()))
     service = CampaignService(db, root, KWalletKeyStore())
     service.seed_plans()
     return AppContext(db, service, ReportArchive(service))
@@ -38,10 +39,9 @@ def choose_language(application) -> None:
     from PySide6.QtCore import QLibraryInfo, QLocale, QTranslator
 
     from .l10n import current, set_language
-    from .ui.language_choice import KEY
-    from .ui.report_signing import settings
+    from .ui.language_choice import chosen_language
 
-    set_language(settings().value(KEY, QLocale.system().name().split("_")[0]))
+    set_language(chosen_language())
     QLocale.setDefault(QLocale(current()))
     translator = QTranslator(application)
     folder = QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)

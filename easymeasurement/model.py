@@ -13,6 +13,8 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from enum import Enum
 
+from .l10n import N_, tr
+
 
 class Verdict(str, Enum):
     PASSED = "passed"
@@ -53,11 +55,13 @@ SIGHT_CHECK_FUNCTION = "visual_inspection"
 UNREADABLE_FUNCTION = "unreadable"  # a record kept as it came, for a person to look at
 
 # Outcomes of checks without a number are stored as neutral words.
-CHECK_TEXTS = {"right": "rechts", "left": "links", "error": "Fehler", "yes": "ja", "no": "nein"}
+CHECK_TEXTS = {"right": N_("clockwise"), "left": N_("anticlockwise"), "error": N_("error"),
+               "yes": N_("yes"), "no": N_("no")}
 
 
 def check_text(word: str) -> str:
-    return CHECK_TEXTS.get(word, word)
+    """A neutral word in the current language; anything else as it is."""
+    return tr(CHECK_TEXTS[word]) if word in CHECK_TEXTS else word
 
 _SI_PREFIX = {"µ": 1e-6, "u": 1e-6, "m": 1e-3, "k": 1e3, "M": 1e6, "G": 1e9}
 _BASE_UNITS = ("Ω", "V", "A", "Hz", "s")

@@ -28,7 +28,7 @@ from PySide6.QtWidgets import (
 from ..campaign.service import CampaignService
 from ..devices import MeterDriver, create_driver
 from ..devices.simulator import SimulatedMeter
-from ..l10n import tr
+from ..l10n import in_language, tr
 from ..model import FUNCTION_LABELS, Parameter, Verdict, check_text, conductor_of
 from ..reporting.archive import ReportArchive
 from ..reporting.context import VERDICT_TEXT
@@ -95,7 +95,7 @@ def function_short(key: str) -> str:
 
 
 def verdict_item(verdict: str) -> QTableWidgetItem:
-    item = QTableWidgetItem(VERDICT_TEXT[Verdict(verdict)])
+    item = QTableWidgetItem(tr(VERDICT_TEXT[Verdict(verdict)]))
     if verdict == Verdict.FAILED.value:
         item.setForeground(QColor("#c0392b"))
         font = item.font()
@@ -228,7 +228,7 @@ def stored_parameters(row) -> list[Parameter]:
 def value_line(service, row) -> str:
     """One measurement in a line: which conductors, then what was read."""
     values = "   ".join(
-        f"{v['label']} {check_text(v['raw'])}"
+        f"{in_language(v['label'])} {check_text(v['raw'])}"
         for v in service.values(row["id"])
     )
     conductor = conductor_of(stored_parameters(row))

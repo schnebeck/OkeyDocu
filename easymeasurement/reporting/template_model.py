@@ -10,92 +10,96 @@ from __future__ import annotations
 
 import yaml
 
+from ..l10n import N_, in_language, plural, tr
+
 BLOCK_LABELS = {
-    "heading": "Überschrift",
-    "text": "Text",
-    "notice": "Hinweis (rot)",
-    "fields": "Feldliste",
-    "steps": "Je Messschritt wiederholen",
-    "measurements": "Messungen (0 / 1 / n)",
-    "photos": "Fotos",
-    "attachments": "Notizen und Anhänge zu Orten",
-    "signature": "Unterschriftszeile",
-    "logo": "Logo",
-    "letterhead": "Briefkopf",
+    "heading": N_("Heading"),
+    "text": N_("Text"),
+    "notice": N_("Notice (red)"),
+    "fields": N_("Field list"),
+    "steps": N_("Repeat for each step"),
+    "measurements": N_("Measurements (0 / 1 / n)"),
+    "photos": N_("Photos"),
+    "attachments": N_("Notes and attachments on places"),
+    "signature": N_("Signature line"),
+    "logo": N_("Logo"),
+    "letterhead": N_("Letterhead"),
 }
 
 # Offered in the editor, so nobody has to know the variable names.
 PLACEHOLDERS = [
-    ("Kunde: Name", "{{ customer.name }}"),
-    ("Kunde: Straße", "{{ customer.street }}"),
-    ("Kunde: PLZ", "{{ customer.zip }}"),
-    ("Kunde: Ort", "{{ customer.city }}"),
-    ("Auftrag: Abteilung", "{{ campaign.department }}"),
-    ("Auftrag: Kostenstelle", "{{ campaign.cost_center }}"),
-    ("Ansprechpartner: Name", "{{ campaign.contact }}"),
-    ("Ansprechpartner: Durchwahl", "{{ campaign.contact_phone }}"),
-    ("Ansprechpartner: E-Mail", "{{ campaign.contact_email }}"),
-    ("Eigene Firma: Name", "{{ company.name }}"),
-    ("Eigene Firma: Straße", "{{ company.street }}"),
-    ("Eigene Firma: PLZ", "{{ company.zip }}"),
-    ("Eigene Firma: Ort", "{{ company.city }}"),
-    ("Eigene Firma: Telefon", "{{ company.phone }}"),
-    ("Eigene Firma: E-Mail", "{{ company.email }}"),
-    ("Eigene Firma: Internet", "{{ company.web }}"),
-    ("Anlage: Art", "{{ asset.kind_text }}"),
-    ("Anlage: Bezeichnung", "{{ asset.name }}"),
-    ("Anlage: Kennung", "{{ asset.identifier }}"),
-    ("Kampagne: Titel", "{{ campaign.title }}"),
-    ("Kampagne: Messplan", "{{ campaign.plan }}"),
-    ("Kampagne: Prüfer", "{{ campaign.tester }}"),
-    ("Kampagne: Beginn", "{{ campaign.started }}"),
-    ("Kampagne: Abschluss", "{{ campaign.closed }}"),
-    ("Messgerät: Hersteller", "{{ device.manufacturer }}"),
-    ("Messgerät: Modell", "{{ device.model }}"),
-    ("Messgerät: Seriennummer", "{{ device.serial_no }}"),
-    ("Messgerät: Firmware", "{{ device.firmware }}"),
-    ("Messgerät: Kalibriert am", "{{ device.calibrated_on }}"),
-    ("Messgerät: Rekalibrierung fällig", "{{ device.recalibration_due }}"),
-    ("Messgerät: Uhr", "{{ campaign.clock_summary }}"),
-    ("Kampagne: Datensatz-Siegel", "{{ campaign.seal }}"),
-    ("Messschritt: Titel", "{{ step.title }}"),
-    ("Messschritt: Begründung", "{{ step.note }}"),
-    ("Gesamtergebnis", "{{ verdict }}"),
+    (N_("Customer: name"), "{{ customer.name }}"),
+    (N_("Customer: street"), "{{ customer.street }}"),
+    (N_("Customer: postcode"), "{{ customer.zip }}"),
+    (N_("Customer: city"), "{{ customer.city }}"),
+    (N_("Order: department"), "{{ campaign.department }}"),
+    (N_("Order: cost centre"), "{{ campaign.cost_center }}"),
+    (N_("Contact person: name"), "{{ campaign.contact }}"),
+    (N_("Contact person: direct line"), "{{ campaign.contact_phone }}"),
+    (N_("Contact person: e-mail"), "{{ campaign.contact_email }}"),
+    (N_("Own company: name"), "{{ company.name }}"),
+    (N_("Own company: street"), "{{ company.street }}"),
+    (N_("Own company: postcode"), "{{ company.zip }}"),
+    (N_("Own company: city"), "{{ company.city }}"),
+    (N_("Own company: phone"), "{{ company.phone }}"),
+    (N_("Own company: e-mail"), "{{ company.email }}"),
+    (N_("Own company: web"), "{{ company.web }}"),
+    (N_("Installation: kind"), "{{ asset.kind_text }}"),
+    (N_("Installation: designation"), "{{ asset.name }}"),
+    (N_("Installation: identifier"), "{{ asset.identifier }}"),
+    (N_("Campaign: title"), "{{ campaign.title }}"),
+    (N_("Campaign: test plan"), "{{ campaign.plan }}"),
+    (N_("Campaign: inspector"), "{{ campaign.tester }}"),
+    (N_("Campaign: start"), "{{ campaign.started }}"),
+    (N_("Campaign: completion"), "{{ campaign.closed }}"),
+    (N_("Instrument: manufacturer"), "{{ device.manufacturer }}"),
+    (N_("Instrument: model"), "{{ device.model }}"),
+    (N_("Instrument: serial number"), "{{ device.serial_no }}"),
+    (N_("Instrument: firmware"), "{{ device.firmware }}"),
+    (N_("Instrument: calibrated on"), "{{ device.calibrated_on }}"),
+    (N_("Instrument: recalibration due"), "{{ device.recalibration_due }}"),
+    (N_("Instrument: clock"), "{{ campaign.clock_summary }}"),
+    (N_("Campaign: record seal"), "{{ campaign.seal }}"),
+    (N_("Step: title"), "{{ step.title }}"),
+    (N_("Step: reason"), "{{ step.note }}"),
+    (N_("Overall result"), "{{ verdict }}"),
 ]
 
 CONDITIONS = [
-    ("Immer anzeigen", None),
-    ("Nur wenn ein Messgerät beteiligt ist", "device.model"),
-    ("Nur wenn die Kalibrierung überfällig ist", "device.overdue"),
-    ("Nur wenn es Notizen oder Anhänge zu Orten gibt", "places"),
+    (N_("Always show"), None),
+    (N_("Only if an instrument is involved"), "device.model"),
+    (N_("Only if the calibration is overdue"), "device.overdue"),
+    (N_("Only if there are notes or attachments on places"), "places"),
 ]
 
 
 def new_block(kind: str) -> dict:
+    """A block as it is inserted: its texts in the language of the program."""
     defaults = {
-        "heading": {"text": "Neue Überschrift", "level": 2},
-        "text": {"text": "Neuer Text"},
-        "notice": {"text": "Neuer Hinweis"},
-        "fields": {"rows": [["Bezeichnung", "{{ customer.name }}"]]},
+        "heading": {"text": tr("New heading"), "level": 2},
+        "text": {"text": tr("New text")},
+        "notice": {"text": tr("New notice")},
+        "fields": {"rows": [[tr("Designation"), "{{ customer.name }}"]]},
         "steps": {"blocks": []},
-        "measurements": {"none": {"text": "Nicht gemessen."}, "one": {}, "many": {"summary": True}},
+        "measurements": {"none": {"text": tr("Not measured.")}, "one": {},
+                         "many": {"summary": True}},
         "photos": {},
         "attachments": {},
-        "signature": {"result": "Ergebnis der Prüfung: {{ verdict }}",
-                      "labels": ["Ort, Datum", "Unterschrift {{ campaign.tester }}"]},
+        "signature": {"result": tr("Test result: {{ verdict }}"),
+                      "labels": [tr("Place, date"), tr("Signature {{ campaign.tester }}")]},
         "letterhead": {
-            "title": "Prüfprotokoll",
-            "lines": ["{{ campaign.title }}", "Prüfung vom {{ campaign.started }}"],
+            "title": tr("Test report"),
+            "lines": ["{{ campaign.title }}", tr("Tested on {{ campaign.started }}")],
             "client": ["{{ customer.name }}", "{{ customer.street }}",
                        "{{ customer.zip }} {{ customer.city }}",
-                       "Abteilung: {{ campaign.department }}",
-                       "Ansprechpartner: {{ campaign.contact }}",
-                       "Telefon: {{ campaign.contact_phone }}",
+                       tr("Department: {{ campaign.department }}"),
+                       tr("Contact: {{ campaign.contact }}"),
+                       tr("Phone: {{ campaign.contact_phone }}"),
                        "{{ campaign.contact_email }}"],
             "contractor": ["{{ company.name }}", "{{ company.street }}",
                            "{{ company.zip }} {{ company.city }}",
-                           "Kostenstelle: {{ campaign.cost_center }}",
-                           "Prüfer: {{ campaign.tester }}"],
+                           tr("Cost centre: {{ campaign.cost_center }}"),
+                           tr("Inspector: {{ campaign.tester }}")],
             "qr": True,
             "logo": True,
         },
@@ -106,25 +110,56 @@ def new_block(kind: str) -> dict:
 
 
 def block_summary(block: dict) -> str:
-    label = BLOCK_LABELS.get(block["type"], block["type"])
+    label = tr(BLOCK_LABELS[block["type"]]) if block["type"] in BLOCK_LABELS else block["type"]
     text = block.get("text")
     if text:
         short = " ".join(str(text).split())
         for name, code in PLACEHOLDERS:
-            short = short.replace(code, f"[{name}]")
+            short = short.replace(code, f"[{tr(name)}]")
         return f"{label}: {short[:60]}"
     if block["type"] == "fields":
-        return f"{label} ({len(block.get('rows', ()))} Zeilen)"
+        return plural(len(block.get("rows", ())), "{label} ({count} line)",
+                      "{label} ({count} lines)", label=label)
     if block["type"] == "letterhead":
-        return f"{label}: {block.get('title', '')}" + (" mit QR-Code" if block.get("qr") else "")
+        title = f"{label}: {block.get('title', '')}"
+        return tr("{title} with QR code", title=title) if block.get("qr") else title
     if block["type"] == "logo":
         if not block.get("image"):
-            return f"{label} (noch kein Bild)"
-        pages = "jede Seite" if block.get("pages") == "all" else "erste Seite"
-        return f"{label} ({block.get('width_mm', 0):.0f} mm breit, {pages})"
+            return tr("{label} (no image yet)", label=label)
+        pages = tr("every page") if block.get("pages") == "all" else tr("first page")
+        width = f"{block.get('width_mm', 0):.0f}"
+        return tr("{label} ({width} mm wide, {pages})", label=label, width=width, pages=pages)
     if block.get("when"):
-        return f"{label} (bedingt)"
+        return tr("{label} (conditional)", label=label)
     return label
+
+
+TEXT_KEYS = {"title", "lines", "client", "contractor", "rows", "text", "result", "labels",
+             "name"}
+
+
+def _told(value):
+    if isinstance(value, str):
+        return in_language(value)
+    if isinstance(value, list):
+        return [_told(item) for item in value]
+    return value
+
+
+def _localised(node):
+    """Texts of the blocks in the current language; keys, conditions and data stay."""
+    if isinstance(node, list):
+        return [_localised(item) for item in node]
+    if not isinstance(node, dict):
+        return node
+    return {key: _told(value) if key in TEXT_KEYS else _localised(value)
+            for key, value in node.items()}
+
+
+def in_program_language(text: str) -> str:
+    """A shipped template as it is stored for its user: worded in the program's language,
+    which every report language still recognises."""
+    return dump_template(_localised(yaml.safe_load(text)))
 
 
 def dump_template(template: dict) -> str:
