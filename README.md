@@ -29,6 +29,10 @@ Alles dreht sich um eine Kette:
     tools/setup-venv.sh
     .venv/bin/python -m easymeasurement
 
+Ins Startmenü kommt das Programm mit `tools/install-desktop-entry.sh`: Das Skript trägt den
+Start aus diesem Checkout und das Programmsymbol für den angemeldeten Nutzer ein
+(`--remove` nimmt beides wieder heraus).
+
 Die `.venv` ist isoliert und nutzt die festen Versionen aus `requirements.txt`. Nur PySide6 kommt
 aus der Distribution (Paket `python3-pyside6`), weil es zum System-Qt passen muss, damit der
 Plasma-Stil geladen wird. Daten liegen unter

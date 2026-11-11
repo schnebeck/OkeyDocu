@@ -20,7 +20,8 @@ from ..l10n import N_, tr
 from ..model import Verdict
 from .compact import found_cell, limit_cell, what_cell
 from .footnotes import Footnotes, references
-from .measurement_table import Columns, remark, verdict_mark
+from .measurement_remarks import remark
+from .measurement_table import Columns, verdict_mark
 from .nodes import Heading, Markup, Node, Paragraph, Table
 from .structure import report_levels
 

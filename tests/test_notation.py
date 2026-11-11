@@ -68,10 +68,9 @@ def test_the_lead_compensation_is_a_condition_of_rlo():
     assert role("rcd_time", "ta", "18ms") is Role.RESULT
 
 
-def test_the_polarities_count_only_where_rlo_did_not_pass():
-    assert role("rlo", "rlo_plus", "0.21Ω") is Role.ON_FAIL
-    assert not counts("rlo", "rlo_plus", "0.21Ω", passed=True)
-    assert counts("rlo", "rlo_plus", "0.21Ω", passed=False)
+def test_the_directions_of_rlo_count_where_a_driver_delivers_them():
+    assert role("rlo", "rlo_plus", "0.34Ω") is Role.RESULT
+    assert counts("rlo", "rlo_plus", "0.34Ω", passed=True)
     assert counts("rlo", "rlo_offset", "0.04Ω", passed=True)
     assert not counts("rlo", "rlo_minus", "---", passed=False)
 

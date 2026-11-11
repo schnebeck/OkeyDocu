@@ -17,20 +17,12 @@ from xml.sax.saxutils import escape
 from ..l10n import N_, tr
 from ..model import conductor_of
 from ..vocabulary import conductors as low_numbers
-from ..vocabulary import function_markup, symbols_marked
+from ..vocabulary import function_markup, result_markup, symbols_marked
 from .context import ReportMeasurement
 from .footnotes import Footnotes
 from .language import value_text
-from .measurement_table import (
-    CONDITIONS,
-    NOTE,
-    SETTINGS,
-    SHARED,
-    Columns,
-    limit_text,
-    remark,
-    verdict_mark,
-)
+from .measurement_remarks import NOTE, SHARED, remark
+from .measurement_table import CONDITIONS, SETTINGS, Columns, limit_text, verdict_mark
 from .measurement_words import clock_times, word
 from .nodes import Fields, Footnoted, Markup, Node, Table
 
@@ -41,13 +33,17 @@ LIMIT = N_("Limit")
 
 
 def found_cell(columns: Columns, row: int) -> Markup:
-    """The figures of a measurement; with more than one, each with its symbol on a line."""
+    """The figures of a measurement; with more than one, each with its own symbol on a line,
+    so a current direction standing for RLO says which it is."""
     found = columns.found[row]
     keys = [key for key in columns.results if key in found and key not in (NOTE, QUESTION)]
     if len(keys) == 1:
         return Markup(escape(word(found[keys[0]][0].quantity.raw)))
-    return Markup("<br/>".join(f"{columns.symbol(key)} {escape(word(found[key][0].quantity.raw))}"
-                               for key in keys))
+    lines = []
+    for key in keys:
+        result = found[key][0]
+        lines.append(f"{result_markup(result.key, result.label)} {escape(word(result.quantity.raw))}")
+    return Markup("<br/>".join(lines))
 
 
 def limit_cell(columns: Columns, row: int) -> Markup:

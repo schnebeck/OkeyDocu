@@ -23,6 +23,7 @@ from ...model import (
 )
 from ...vocabulary import plain, vocabulary
 from .mapping import conductor, function_key, is_conductor_setting, outcome, result_key
+from .polarity import by_direction
 
 # The instrument has one voltage function. A three-phase reading is what makes
 # it a rotating field measurement.
@@ -118,6 +119,7 @@ def _parse_measurement(node: ET.Element, location: tuple[str, ...]) -> MeterMeas
     results = tuple(_parse_result(child) for child in node.findall("RESULT")) + tuple(
         _parse_verification(child) for child in node.findall("VERIFICATION")
     )
+    results = by_direction(results)
     return MeterMeasurement(
         uid=node.get("guid", ""),
         function=_function(node.get("type", ""), results),

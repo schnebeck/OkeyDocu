@@ -8,6 +8,11 @@
 #             optionally, the results it produces, those that state its conditions
 #             (conditions) and those that count only if it did not pass (on_fail)
 #
+# stands_for: a result that takes the place of another where that one is missing
+#
+# rlo: a driver delivers rlo where both current directions agree; where they differ, it
+#      delivers rlo_plus and rlo_minus instead, the higher first (docs/hardware-abstraction.md)
+#
 # Symbols are written as in vocabulary/notation.py: one letter for the quantity, `_` before
 # the subscript, `^` before the superscript, such as R_LO, ΔR_LO or U_L1-L2.
 # outcomes:   neutral words of checks without a number
@@ -42,8 +47,10 @@ results:
   f: {symbol: f, quantity: frequency, name: Frequency}
   rotation: {symbol: Rotating field, quantity: direction, name: Phase sequence}
   rlo: {symbol: R_LO, quantity: resistance, name: Protective conductor resistance}
-  rlo_plus: {symbol: R_LO^+, quantity: resistance, name: "Protective conductor resistance, positive"}
-  rlo_minus: {symbol: R_LO^−, quantity: resistance, name: "Protective conductor resistance, negative"}
+  rlo_plus: {symbol: R_LO^+, quantity: resistance, stands_for: rlo,
+             name: "Protective conductor resistance, positive"}
+  rlo_minus: {symbol: R_LO^−, quantity: resistance, stands_for: rlo,
+              name: "Protective conductor resistance, negative"}
   rlo_delta: {symbol: ΔR_LO, quantity: resistance, name: Difference of the polarities}
   rlo_offset: {symbol: "R_LO,offset", quantity: resistance, name: Lead compensation}
   riso: {symbol: R_ISO, quantity: resistance, name: Insulation resistance}
@@ -65,10 +72,9 @@ results:
 functions:
   u: {symbol: U, name: Voltage, conditions: [f]}
   u3: {symbol: U3~, name: Phase sequence, conditions: [f]}
-  rlo: {symbol: R_LO, name: Protective conductor resistance, conditions: [rlo_offset],
-        on_fail: [rlo_plus, rlo_minus, rlo_delta]}
+  rlo: {symbol: R_LO, name: Protective conductor resistance, conditions: [rlo_offset]}
   rlo_25a: {symbol: R_LO 25 A, name: Protective conductor resistance 25 A,
-            conditions: [rlo_offset], on_fail: [rlo_plus, rlo_minus, rlo_delta]}
+            conditions: [rlo_offset]}
   riso: {symbol: R_ISO, name: Insulation resistance, conditions: [u_iso]}
   riso_ramp: {symbol: R_ISO ramp, name: Insulation resistance}
   il: {symbol: I_L, name: Leakage current, conditions: [f]}

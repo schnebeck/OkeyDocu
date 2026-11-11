@@ -19,13 +19,13 @@ from xml.sax.saxutils import escape
 
 from ..l10n import in_language, tr
 from .notation import conductors, is_marked, markup, plain
-from .roles import ROLE_TEXT, Role, counts, role
+from .roles import ROLE_TEXT, Role, counts, role, stands_for
 from .terms import Term, Vocabulary, VocabularyError, vocabulary
 
 __all__ = ["ROLE_TEXT", "Role", "Term", "Vocabulary", "VocabularyError", "conductors", "counts",
            "function_keys", "function_label", "function_markup", "function_symbol", "markup",
            "outcome_text", "plain", "result_label", "result_markup", "result_name", "symbols_marked", "role", "setting_name",
-           "units", "vocabulary"]
+           "stands_for", "units", "vocabulary"]
 
 LABEL_SEPARATOR = " – "
 

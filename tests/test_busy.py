@@ -46,3 +46,10 @@ def test_work_done_before_the_cancel_keeps_its_result(qtbot):
     window = QWidget()
     qtbot.addWidget(window)
     assert run_busy(window, "Warten …", lambda: 42, lambda: None) == 42
+
+
+def test_the_program_has_its_own_icon(qtbot):
+    from easymeasurement.__main__ import program_icon
+
+    icon = program_icon()
+    assert not icon.isNull() and not icon.pixmap(32, 32).isNull()

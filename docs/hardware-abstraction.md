@@ -43,12 +43,12 @@ quantities:
   voltage: {unit: V, name: Voltage}
 results:
   rlo: {symbol: R_LO, quantity: resistance, name: Protective conductor resistance}
-  rlo_plus: {symbol: R_LO^+, quantity: resistance, name: "Protective conductor resistance, positive"}
+  rlo_plus: {symbol: R_LO^+, quantity: resistance, stands_for: rlo,
+             name: "Protective conductor resistance, positive"}
   rlo_offset: {symbol: "R_LO,offset", quantity: resistance, name: Lead compensation}
   u_ln: {symbol: U_L-N, quantity: voltage, name: Voltage L-N}
 functions:
-  rlo: {symbol: R_LO, name: Protective conductor resistance, conditions: [rlo_offset],
-        on_fail: [rlo_plus, rlo_minus, rlo_delta]}
+  rlo: {symbol: R_LO, name: Protective conductor resistance, conditions: [rlo_offset]}
 outcomes:
   right: {name: right}
 settings:
@@ -63,7 +63,8 @@ settings:
   these. Its label is `symbol – name`. It may list the results it produces (`results`), the
   results that state the conditions of a measurement (`conditions`, such as the lead
   compensation of RLO or the test voltage of RISO) and those that count only where the
-  measurement did not pass (`on_fail`, such as the two polarities of RLO). An instrument sends
+  measurement did not pass (`on_fail`). A result may stand for another where that one is
+  missing (`stands_for`, such as a current direction for RLO). An instrument sends
   its whole result block; `vocabulary/roles.py` tells from these lists, and from a figure without
   a value, what each figure is. Reports show conditions with the settings and leave out what does
   not count; the view "How it was measured" shows every figure with its role.
@@ -81,6 +82,32 @@ Keys are stable: they are stored with every measurement. Names and symbols may c
 time, and a language may write a symbol its own way (`I_clamp` is `I_Zange` in German). Two
 files may not define the same key, and a field the loader does not know is refused, so an
 unquoted comma in a name cannot go unnoticed.
+
+## What a driver delivers for a function
+
+The application does no measuring of its own: a driver hands over each measurement already
+in the shape the vocabulary asks for, and reports show what they get. Where an instrument
+cannot do something itself, its driver makes up for it.
+
+Protective conductor resistance (`rlo`, `rlo_25a`) is always measured in both current
+directions. A driver delivers
+
+- where both directions agree: `rlo` alone, the value they agree on;
+- where they differ: **no** `rlo`, but `rlo_plus` and `rlo_minus`, the higher first. The higher
+  is the reference and is judged by the limit of `rlo`; the lower is named beside it.
+
+A difference between the directions points to something that is not plain resistance, such as
+a contact that rectifies, so a single value would hide it. The difference itself is not
+delivered: no reading shows `rlo` together with both directions.
+
+The vocabulary marks `rlo_plus` and `rlo_minus` with `stands_for: rlo`. A report shows the
+reference in the column of `rlo` with its own symbol beside the value, such as
+430 mΩ (R_LO⁻), and names the lower in the remark, such as R_LO⁺ = 340 mΩ.
+
+The PROFITEST PRIME measures both directions itself and sends them always;
+`profitest_prime/polarity.py` brings that into the contract, and the IZYTRON import uses the
+same function. An instrument that measures one direction at a time would have its driver join
+two readings into one measurement.
 
 ## Passing unknown codes through
 

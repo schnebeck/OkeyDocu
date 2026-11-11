@@ -16,7 +16,8 @@ from ..model import conductor_of
 from ..vocabulary import conductors, function_markup, symbols_marked
 from .context import VERDICT_TEXT, ReportStep
 from .footnotes import Footnotes
-from .measurement_table import Columns, group_nodes, limit_text, remark
+from .measurement_remarks import remark
+from .measurement_table import Columns, group_nodes, limit_text
 from .measurement_words import when, word
 from .nodes import Fields, Footnoted, Markup, Node, Photos
 

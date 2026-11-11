@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<!-- SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net> -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- The program: a scale with its pointer, and the tick of a passed test. -->
+<rect x="2" y="2" width="60" height="60" rx="14" fill="#1d4e89"/>
+<path d="M11 41 A21 21 0 0 1 53 41" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+<path d="M17.6 25.6l3.2 2.6M32 17v4.2M46.4 25.6l-3.2 2.6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+<path d="M32 41L42.5 26.5" fill="none" stroke="#ffc83d" stroke-width="4.5" stroke-linecap="round"/>
+<circle cx="32" cy="41" r="4.5" fill="#fff"/>
+<circle cx="46" cy="47" r="11" fill="#2fbf71" stroke="#1d4e89" stroke-width="3"/>
+<path d="M40.5 47.2l3.8 3.8 7.2-8" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

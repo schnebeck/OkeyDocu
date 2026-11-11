@@ -10,19 +10,22 @@
 conditions they were taken under and their limits. The table below lists each measurement
 with only what differs and what it found. Figures the vocabulary calls conditions join the
 settings; figures that count only where a measurement did not pass get a column only when
-one did not. A remark says what restricted or explained a measurement and which photos and
-notes in them belong to it."""
+one did not. A figure that stands for another, as one current direction for RLO, fills that
+figure's column where the measurement has none, marked with its own symbol; a second such
+figure is named in the remark. A remark says what restricted or explained a measurement and
+which photos and notes in them belong to it."""
 from __future__ import annotations
 
 from xml.sax.saxutils import escape
 
 from ..l10n import N_, tr
 from ..model import Verdict, conductor_of
-from ..vocabulary import Role, counts, result_markup, role, symbols_marked
+from ..vocabulary import Role, counts, result_markup, role, stands_for, symbols_marked
 from ..vocabulary import conductors as low_numbers
 from .context import ReportMeasurement
 from .footnotes import Footnotes
 from .language import value_text
+from .measurement_remarks import SHARED, join_notes, move_sparse, referred
 from .measurement_words import clock_times, shared_time, word
 from .nodes import Fields, Footnoted, Markup, Node, Table
 
@@ -30,18 +33,24 @@ CONDUCTORS = N_("Conductors")
 LOCATION = N_("Measuring location")
 POINT = N_("Test point")
 SETTINGS, CONDITIONS, LIMITS = N_("Settings"), N_("Conditions"), N_("Limits")
-SHARED = " · "
-NOTE = "note"  # a figure that is itself a remark, as with answers to a check
 SUMMED = 3  # rows from which a table gets its minimum and maximum
 
 
 def figures(measurement: ReportMeasurement) -> dict[str, tuple]:
-    """Each figure that counts, by key: the result and its role."""
+    """Each figure that counts, by the key of the column it fills: the result and its role.
+    The first figure that stands for a missing one takes that one's key."""
     data = measurement.data
     passed = data.verdict is Verdict.PASSED
-    return {result.key: (result, role(data.function, result.key, result.quantity.raw))
-            for result in data.results
-            if counts(data.function, result.key, result.quantity.raw, passed)}
+    delivered = {result.key for result in data.results}
+    found = {}
+    for result in data.results:
+        if not counts(data.function, result.key, result.quantity.raw, passed):
+            continue
+        key = stands_for(result.key)
+        if not key or key in delivered or key in found:
+            key = result.key
+        found[key] = (result, role(data.function, result.key, result.quantity.raw))
+    return found
 
 
 def limit_text(result) -> str:
@@ -87,7 +96,7 @@ class Columns:
 
     def symbol(self, key: str) -> Markup:
         result = self.labels[key]
-        return Markup(result_markup(result.key, result.label))
+        return Markup(result_markup(key, result.label if result.key == key else ""))
 
     def stated(self) -> dict[str, list[str]]:
         """What all measurements share, by kind, each part marked up."""
@@ -96,7 +105,9 @@ class Columns:
                        for n, v in self.shared_settings.items() if v],
             CONDITIONS: [f"{self.symbol(k)} = {escape(value_text(v))}"
                          for k, v in self.shared_conditions.items() if v],
-            LIMITS: [f"{self.symbol(k)} {escape(v)}" for k, v in self.shared_limits.items() if v],
+            # A figure named beside the one it stands for is not judged on its own.
+            LIMITS: [f"{self.symbol(k)} {escape(v)}" for k, v in self.shared_limits.items()
+                     if v and not stands_for(k)],
         }
 
     def head(self, known: dict | None = None) -> list[tuple[str, Markup]]:
@@ -119,42 +130,16 @@ def verdict_mark(verdict: Verdict) -> Markup:
     return Markup(f'<font color="{colour}"><b>{sign}</b></font>' if colour else sign)
 
 
-def _cell(found: dict, key: str, with_limit: bool) -> str:
+def _cell(found: dict, key: str, with_limit: bool) -> Markup:
+    """The value; in brackets the symbol of a figure standing in for the column's own, and
+    the limit where the rows differ in it."""
     if key not in found:
-        return "–"
+        return Markup("–")
     result = found[key][0]
-    shown = word(result.quantity.raw)
-    limit = limit_text(result) if with_limit else ""
-    return f"{shown} ({limit})" if limit else shown
-
-
-def remark(measurement: ReportMeasurement, references: list[str]) -> str:
-    texts = [measurement.data.comment, *measurement.attached.notes,
-             *(f"{tr('Attachment')} {name}" for name in measurement.attached.documents),
-             *references]
-    return "\n".join(text.strip() for text in texts if text and text.strip())
-
-
-def _referred(group: list[ReportMeasurement], notes: Footnotes) -> tuple[list, list, list]:
-    """The photos of the rows, which rows refer to which, and each row's remark."""
-    photos, refs, remarks = [], [], []
-    for measurement in group:
-        taken, references = notes.take(measurement)
-        refs.append(list(range(len(photos), len(photos) + len(taken))))
-        photos += taken
-        remarks.append(remark(measurement, references))
-    return photos, refs, remarks
-
-
-def _join_notes(columns: Columns, remarks: list[str]) -> None:
-    """A figure that is itself a remark, as with a check, shares the column of remarks."""
-    if NOTE not in columns.results:
-        return
-    for number, found in enumerate(columns.found):
-        if NOTE in found:
-            said = word(found[NOTE][0].quantity.raw)
-            remarks[number] = f"{said}\n{remarks[number]}" if remarks[number] else said
-    columns.results.remove(NOTE)
+    marks = [result_markup(result.key, result.label)] if result.key != key else []
+    marks += [escape(limit_text(result))] if with_limit and limit_text(result) else []
+    shown = escape(word(result.quantity.raw))
+    return Markup(f"{shown} ({'; '.join(marks)})" if marks else shown)
 
 
 def _differing(texts: list[str]) -> list[str]:
@@ -169,8 +154,9 @@ def group_nodes(group: list[ReportMeasurement], options: dict, notes: Footnotes,
     conductors = [conductor_of(m.data.parameters) for m in group]
     places = _differing([m.data.location[-1] if m.data.location else "" for m in group])
     named = _differing([m.point for m in group]) if points else []
-    photos, refs, remarks = _referred(group, notes)
-    _join_notes(columns, remarks)
+    photos, refs, remarks = referred(group, notes)
+    join_notes(columns, remarks)
+    remarks = move_sparse(columns, remarks)
     # Answers saved together share one time: it is said once above, not in every row.
     once = shared_time(group)
     leading = [tr("No.")] + ([] if once else [tr("Time")]) + ([tr(POINT)] if named else [])

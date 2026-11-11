@@ -11,6 +11,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from ..devices.profitest_prime.mapping import is_conductor_setting, result_key
+from ..devices.profitest_prime.polarity import by_direction
 from ..l10n import N_
 from ..model import (
     CONDUCTOR,
@@ -110,7 +111,7 @@ def _verdict(step) -> Verdict:
 
 
 def _device_measurement(step, data: dict, location: tuple[str, ...]) -> MeterMeasurement:
-    results = _results(data)
+    results = by_direction(_results(data))
     function = FUNCTIONS.get(step["Name"], step["Name"])
     if function == "u" and _LINE_VOLTAGES & {result.key for result in results}:
         function = "u3"

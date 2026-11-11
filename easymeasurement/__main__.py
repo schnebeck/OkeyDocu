@@ -50,6 +50,15 @@ def choose_language(application) -> None:
         application.installTranslator(translator)
 
 
+def program_icon():
+    """The program's own picture, for the window manager and the task bar."""
+    from importlib import resources
+
+    from PySide6.QtGui import QIcon
+
+    return QIcon(str(resources.files("easymeasurement") / "data" / "icons" / "easymeasurement.svg"))
+
+
 def main() -> int:
     from PySide6.QtCore import QTimer
     from PySide6.QtWidgets import QApplication, QMessageBox
@@ -59,6 +68,7 @@ def main() -> int:
     application = QApplication(sys.argv)
     application.setApplicationName("EasyMeasurement")
     application.setDesktopFileName("easymeasurement")
+    application.setWindowIcon(program_icon())
     choose_language(application)
     try:
         context = build_context()

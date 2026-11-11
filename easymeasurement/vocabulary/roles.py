@@ -9,8 +9,9 @@
 """An instrument sends the whole result block of a function, whether every figure in it
 was taken or not. The vocabulary of the function says which figures tell the conditions of
 the measurement, such as the lead compensation of RLO, and which count only where the
-measurement did not pass, such as the two polarities of RLO. A figure without a value is
-not measured. Every other figure is a result of its own."""
+measurement did not pass. A figure without a value is not measured. Every other figure is a
+result of its own; it may stand for another where that one is missing, as a current direction
+for RLO."""
 from __future__ import annotations
 
 import re
@@ -54,3 +55,9 @@ def counts(function: str, key: str, raw: str, passed: bool) -> bool:
     if found is Role.NOT_MEASURED:
         return False
     return found is not Role.ON_FAIL or not passed
+
+
+def stands_for(key: str) -> str:
+    """The figure this one takes the place of where that one is missing; empty for none."""
+    term = vocabulary().results.get(key)
+    return term.stands_for if term else ""

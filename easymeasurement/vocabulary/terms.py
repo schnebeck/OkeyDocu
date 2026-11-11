@@ -40,6 +40,7 @@ class Term:
     # results that count only where the measurement did not pass.
     conditions: tuple[str, ...] = ()
     on_fail: tuple[str, ...] = ()
+    stands_for: str = ""  # results only: the figure it takes the place of, where that is missing
 
 
 @dataclass(frozen=True)
@@ -55,7 +56,7 @@ def folder():
     return resources.files("easymeasurement") / "data" / "vocabulary"
 
 
-FIELDS = {"name", "symbol", "unit", "quantity", "results", "conditions", "on_fail"}
+FIELDS = {"name", "symbol", "unit", "quantity", "results", "conditions", "on_fail", "stands_for"}
 _LISTS = ("results", "conditions", "on_fail")
 
 
@@ -65,7 +66,8 @@ def _term(key, spec: dict) -> Term:
         raise VocabularyError(f"{key}: unknown fields {sorted(unknown)}")
     lists = {name: tuple(str(result) for result in spec.get(name, ())) for name in _LISTS}
     return Term(str(key), str(spec.get("name", key)), str(spec.get("symbol", "")),
-                str(spec.get("unit", "")), str(spec.get("quantity", "")), **lists)
+                str(spec.get("unit", "")), str(spec.get("quantity", "")), **lists,
+                stands_for=str(spec.get("stands_for", "")))
 
 
 @cache
