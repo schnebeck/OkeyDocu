@@ -166,7 +166,8 @@ def group_nodes(group: list[ReportMeasurement], options: dict, notes: Footnotes,
     leading += [tr(CONDUCTORS)] if any(conductors) else []
     leading += columns.varying_settings
     leading += [columns.symbol(k) for k in columns.varying_conditions]
-    trailing = [tr("Verdict")] + ([tr("Remark")] if any(remarks) else [])
+    # Every table has room for remarks, so the blocks of a report look alike.
+    trailing = [tr("Verdict"), tr("Remark")]
     headers = leading + [columns.symbol(k) for k in columns.results] + trailing
     rows = []
     for number, measurement in enumerate(group, 1):
@@ -180,7 +181,7 @@ def group_nodes(group: list[ReportMeasurement], options: dict, notes: Footnotes,
         cells += [_cell(found, k, False) for k in columns.varying_conditions]
         cells += [_cell(found, k, columns.shared_limits[k] is None) for k in columns.results]
         cells.append(tr(VERDICT_TEXT[measurement.data.verdict]))
-        cells += [remarks[number - 1]] if any(remarks) else []
+        cells.append(remarks[number - 1])
         rows.append(cells)
     summary = []
     if options.get("summary", True) and len(group) >= SUMMED and len(set(conductors)) <= 1:
@@ -188,8 +189,8 @@ def group_nodes(group: list[ReportMeasurement], options: dict, notes: Footnotes,
     head = columns.head(known)
     if points and group[0].point and not named:
         head.insert(0, (tr(POINT), group[0].point))
-    return ([Fields(head)] if head else []) + [Footnoted(Table(headers, rows, summary), photos,
-                                                         refs)]
+    table = Table(headers, rows, summary, len(headers) - 1)
+    return ([Fields(head)] if head else []) + [Footnoted(table, photos, refs)]
 
 
 def _summary(columns: Columns, before: int, after: int) -> list[list[str]]:

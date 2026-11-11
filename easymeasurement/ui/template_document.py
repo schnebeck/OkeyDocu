@@ -55,6 +55,7 @@ def sample_context(count: int) -> dict:
                      "contact": tr("Ms Example"), "contact_phone": "0123 4567-89",
                      "contact_email": "example@customer.example", "cost_center": "4711",
                      "started": moment(start), "closed": moment(start + timedelta(hours=2)),
+                     "date": day(start),
                      "clock_offset_s": 0,
                      "clock_summary": tr("set on {moment}", moment=moment(start)),
                      "seal": "0" * 64, "simulated": False},

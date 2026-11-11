@@ -13,7 +13,13 @@ import subprocess
 import pytest
 from PIL import Image
 
-from easymeasurement.reporting.logo import LogoError, clamp_placement, decode_logo, prepare_logo
+from easymeasurement.reporting.logo import (
+    LogoError,
+    clamp_placement,
+    decode_logo,
+    prepare_logo,
+    trimmed,
+)
 from easymeasurement.reporting.pdf import render_pdf
 from easymeasurement.reporting.template import Heading, Logo, TemplateError, parse_template, resolve
 from easymeasurement.reporting.template_model import dump_template, new_block
@@ -206,3 +212,16 @@ def test_conditional_logo():
     template = {"images": {key: encoded}, "blocks": [block]}
     base = {"campaign": {}, "steps": [], "device": {"overdue": False}}
     assert resolve(template, base) == []
+
+
+def _bordered(mode: str, background) -> bytes:
+    image = Image.new(mode, (100, 50), background)
+    image.paste(Image.new(mode, (60, 30), (200, 0, 0, 255)[:len(mode)]), (10, 5))
+    buffer = io.BytesIO()
+    image.save(buffer, "PNG")
+    return buffer.getvalue()
+
+
+@pytest.mark.parametrize("mode,background", [("RGBA", (0, 0, 0, 0)), ("RGB", (255, 255, 255))])
+def test_the_letterhead_cuts_the_empty_border_of_a_logo(mode, background):
+    assert Image.open(io.BytesIO(trimmed(_bordered(mode, background)))).size == (60, 30)

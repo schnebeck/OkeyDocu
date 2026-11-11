@@ -85,3 +85,20 @@ PRESETS = [
     ("Unten Mitte", lambda w, h: ((PAGE_WIDTH_MM - w) / 2, PAGE_HEIGHT_MM - 16.0 - h)),
     ("Unten rechts", lambda w, h: (PAGE_WIDTH_MM - MARGIN_MM - w, PAGE_HEIGHT_MM - 16.0 - h)),
 ]
+
+
+def trimmed(data: bytes) -> bytes:
+    """The logo without the empty border around it, transparent or white, so it can stand
+    flush with the edge of the printed area."""
+    with Image.open(io.BytesIO(data)) as source:
+        image = source.convert("RGBA")
+    alpha = image.getchannel("A")
+    box = alpha.getbbox()
+    if box is not None and alpha.getextrema()[0] == 255:  # opaque: the border is white
+        inked = ImageOps.invert(image.convert("L")).point(lambda level: 255 if level > 8 else 0)
+        box = inked.getbbox() or box
+    if box is None or box == (0, 0, image.width, image.height):
+        return data
+    buffer = io.BytesIO()
+    image.crop(box).save(buffer, "PNG")
+    return buffer.getvalue()

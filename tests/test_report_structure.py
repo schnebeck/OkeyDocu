@@ -48,7 +48,7 @@ def table_and_head(group):
 
 def test_a_passed_rlo_shows_neither_polarity():
     head, table = table_and_head([rlo(n=1), rlo("0.30Ω", n=2)])
-    assert [plain(h) for h in table.headers] == ["Nr.", "Zeitpunkt", "RLO", "Bewertung"]
+    assert [plain(h) for h in table.headers] == ["Nr.", "Zeitpunkt", "RLO", "Bewertung", "Bemerkung"]
     assert head["Bedingungen"] == "<i>R</i><sub rise='30%'>LO,Offset</sub> = 40 mΩ"
     assert head["Grenzwerte"] == "<i>R</i><sub rise='30%'>LO</sub> &lt; 1,00 Ω"
 
@@ -183,3 +183,43 @@ def test_measurement_block_outside_a_repeat_covers_the_campaign():
     values = {"campaign": {}, "steps": [step]}
     head, node = resolve(template, values)
     assert isinstance(node.body, Table) and len(node.body.rows) == 2
+
+
+def test_the_remarks_take_the_room_the_other_columns_leave():
+    from easymeasurement.reporting.pdf_tables import column_widths
+
+    headers = ["Nr.", "Zeit", "Bemerkung"]
+    rows = [["1", "10:00:00", "kurz"]]
+    widths = column_widths(headers, rows, [], 400, ("Helvetica", "Helvetica-Bold"), 8.5, 2)
+    assert sum(widths) == pytest.approx(400) and widths[2] > 300
+    even = column_widths(headers, rows, [], 400, ("Helvetica", "Helvetica-Bold"), 8.5)
+    assert even[2] < 300
+
+
+def test_the_letterhead_names_the_later_pages():
+    from easymeasurement.reporting.nodes import Letterhead
+    from easymeasurement.reporting.pdf_pages import running_head
+
+    head = Letterhead("Prüfprotokoll", ["Prüfung", "Maschine: Presse", "Prüfung vom 01.03.2026"],
+                      [], [])
+    assert running_head([head]) == ("Prüfprotokoll · Prüfung · Maschine: Presse",
+                                    "Prüfung vom 01.03.2026")
+    assert running_head([]) == ("", "")
+
+
+def test_elements_side_by_side_follow_the_order_they_were_measured_in(app):
+    db = app.db
+    customer = db.add_customer("Muster AG")
+    root = db.add_asset(customer, "machine", "Presse")
+    early, late = (db.add_asset(customer, "measuring_point", name, parent_id=root)
+                   for name in ("Zuleitung", "Antrieb"))
+    campaign = app.service.create(root, "Prüfung", "Prüfer")
+    for asset, minute in ((late, 30), (early, 10), (late, 5)):
+        result = ResultValue("rlo", "RLO", Quantity.parse("0.10Ω"), Verdict.PASSED, "", "<1.00Ω")
+        app.service.add_measurement(campaign, "rlo", [result], T0 + timedelta(minutes=minute),
+                                    Verdict.PASSED, asset_id=asset)
+    nodes = resolve({"blocks": [{"type": "structure"}]}, build_context(app.service, campaign))
+    places = [title for title in headings(nodes) if "Messpunkt" in title]
+    assert places == ["Antrieb (Messpunkt)", "Zuleitung (Messpunkt)"]
+    times = [row[1][:8] for node in nodes if hasattr(node, "body") for row in node.body.rows]
+    assert times == ["10:05:00", "10:30:00", "10:10:00"]

@@ -34,6 +34,8 @@ class Level:
 
 
 def structure_levels(service, root_id: int, measured: list[ReportMeasurement]) -> list[Level]:
+    """The installation first, then each element below it; elements side by side in the
+    order they were first measured, so the report follows the way the inspection went."""
     db = service.db
     root = db.asset(root_id)
     below: dict[int | None, list] = {}
@@ -45,6 +47,14 @@ def structure_levels(service, root_id: int, measured: list[ReportMeasurement]) -
         by_place.setdefault(place, []).append(measurement)
     kinds = db.kind_labels()
     levels: list[Level] = []
+    first: dict[int, object] = {}
+
+    def earliest(row):
+        """The first time anything was measured on the element or below it."""
+        times = [m.local_time for m in by_place.get(row["id"], ())]
+        times += [t for t in map(earliest, below.get(row["id"], ())) if t is not None]
+        first[row["id"]] = min(times) if times else None
+        return first[row["id"]]
 
     def visit(row, names: list[str]) -> None:
         mine = by_place.pop(row["id"], [])
@@ -52,9 +62,14 @@ def structure_levels(service, root_id: int, measured: list[ReportMeasurement]) -
             levels.append(Level(row["id"], " / ".join(names) or row["name"],
                                 kinds.get(row["kind"], ""), asset_features(db, row),
                                 sorted(mine, key=lambda m: m.local_time)))
-        for child in below.get(row["id"], ()):
+        # Elements side by side follow in the order they were measured in.
+        children = sorted(below.get(row["id"], ()),
+                          key=lambda child: (first[child["id"]] is None,
+                                             first[child["id"]] or 0, child["name"]))
+        for child in children:
             visit(child, [*names, child["name"]])
 
+    earliest(root)
     visit(root, [])
     # An element moved to another customer's tree still shows what was measured on it.
     for place, mine in by_place.items():

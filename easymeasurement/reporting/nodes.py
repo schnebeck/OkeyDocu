@@ -58,6 +58,7 @@ class Table:
     headers: list[str]
     rows: list[list[str]]
     summary: list[list[str]] = field(default_factory=list)
+    stretch: int | None = None  # the column that takes the room the others leave
 
 
 @dataclass

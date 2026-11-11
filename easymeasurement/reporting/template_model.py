@@ -55,6 +55,7 @@ PLACEHOLDERS = [
     (N_("Campaign: test plan"), "{{ campaign.plan }}"),
     (N_("Campaign: inspector"), "{{ campaign.tester }}"),
     (N_("Campaign: start"), "{{ campaign.started }}"),
+    (N_("Campaign: day of the test"), "{{ campaign.date }}"),
     (N_("Campaign: completion"), "{{ campaign.closed }}"),
     (N_("Instrument: manufacturer"), "{{ device.manufacturer }}"),
     (N_("Instrument: model"), "{{ device.model }}"),
@@ -96,7 +97,7 @@ def new_block(kind: str) -> dict:
                       "fills": [FILLED_PLACE, "{{ campaign.tester }}"]},
         "letterhead": {
             "title": tr("Test report"),
-            "lines": ["{{ campaign.title }}", tr("Tested on {{ campaign.started }}")],
+            "lines": ["{{ campaign.title }}", tr("Tested on {{ campaign.date }}")],
             "client": ["{{ customer.name }}", "{{ customer.street }}",
                        "{{ customer.zip }} {{ customer.city }}",
                        tr("Department: {{ campaign.department }}"),

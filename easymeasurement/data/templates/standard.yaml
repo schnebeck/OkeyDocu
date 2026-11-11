@@ -11,7 +11,7 @@ blocks:
     lines:
       - "{{ campaign.title }}"
       - "{{ asset.kind_text }}: {{ asset.name }}"
-      - "Tested on {{ campaign.started }}"
+      - "Tested on {{ campaign.date }}"
     client:
       - "{{ customer.name }}"
       - "{{ customer.street }}"

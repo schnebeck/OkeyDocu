@@ -24,6 +24,7 @@ from reportlab.platypus import TableStyle
 
 from ..l10n import tr
 from .nodes import Letterhead, SignatureLine
+from .logo import trimmed
 from .pdf_parts import _signature_image
 
 QR_MM = 24
@@ -46,7 +47,9 @@ def _qr(code: str, size: float) -> Drawing:
 
 
 def _logo(data: bytes) -> Image:
-    """As large as the box beside the title allows, keeping its proportions."""
+    """As large as the box beside the title allows, keeping its proportions; its empty
+    border cut off, so it stands flush with the top and the right of the printed area."""
+    data = trimmed(data)
     with PilImage.open(io.BytesIO(data)) as source:
         ratio = source.width / source.height
     width, height = LOGO_BOX_MM[0] * mm, LOGO_BOX_MM[1] * mm
@@ -79,6 +82,7 @@ def letterhead(node: Letterhead, usable: float, body: ParagraphStyle,
                               "RIGHT" if node.logo else "LEFT"),
                               ("LEFTPADDING", (0, 0), (-1, -1), 0),
                               ("RIGHTPADDING", (-1, 0), (-1, 0), 0),
+                              ("TOPPADDING", (-1, 0), (-1, 0), 0),
                               ("BOTTOMPADDING", (0, 0), (-1, -1), 8)]))
     half = usable / 2
     parties = PdfTable(

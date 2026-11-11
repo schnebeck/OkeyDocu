@@ -168,6 +168,7 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
             "plan": campaign["plan_title"],
             "uuid": campaign["uuid"],
             "started": _date_text(campaign["started_at"]),
+            "date": day(datetime.fromisoformat(campaign["started_at"])),
             "closed": _date_text(campaign["closed_at"]),
             "clock_offset_s": round(campaign["clock_offset_s"]),
             "clock_summary": clock_summary(

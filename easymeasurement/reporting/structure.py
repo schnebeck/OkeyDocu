@@ -55,7 +55,9 @@ def structure_nodes(block: dict, values: dict) -> list[Node]:
     options = block.get("many", {})
     nodes: list[Node] = []
     if block.get("order", "place") == "function":
-        functions = _by_function([m for level in levels for m in level.measurements])
+        everything = sorted((m for level in levels for m in level.measurements),
+                            key=lambda m: m.local_time)
+        functions = _by_function(everything)
         for function, everywhere in functions.items():
             # What every level shares is said once, under the function.
             shared = Columns(everywhere)

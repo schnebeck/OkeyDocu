@@ -51,12 +51,14 @@ def caption_of(heading: str, style: ParagraphStyle) -> Paragraph:
 
 
 def column_widths(headers: list[str], rows: list[list[str]], summary: list[list[str]],
-                  usable: float, fonts: tuple[str, str], size: float) -> list[float]:
+                  usable: float, fonts: tuple[str, str], size: float,
+                  stretch: int | None = None) -> list[float]:
     """Each column wants its longest text and needs at least its longest word, so numbers
     never wrap; short of room, only the columns of long texts give way. The header and the
-    summary rows are set in bold and measured so."""
+    summary rows are set in bold and measured so. A `stretch` column, such as the remarks,
+    takes whatever room the others leave, as long as it keeps at least its longest word."""
     regular, bold = fonts
-    padding = 12  # the cell's own padding, left and right
+    padding = 12 + 2  # the cell's own padding, left and right, and a little air
 
     def measure(index: int) -> tuple[float, float]:
         texts = [(plain(headers[index]), bold)] + [(plain(row[index]), regular) for row in rows] + [
@@ -69,6 +71,12 @@ def column_widths(headers: list[str], rows: list[list[str]], summary: list[list[
     wants = {i: measure(i) for i in range(len(headers))}
     room = usable
     wanted = sum(want for want, _ in wants.values())
+    if stretch is not None:
+        others = wanted - wants[stretch][0]
+        if room - others >= wants[stretch][1]:
+            share = {i: want for i, (want, _) in wants.items()}
+            share[stretch] = room - others
+            return [share[i] for i in range(len(headers))]
     if wanted <= room:
         share = {i: want * room / wanted for i, (want, _) in wants.items()}
     else:

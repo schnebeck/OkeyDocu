@@ -45,7 +45,8 @@ from .nodes import (
 from .nodes import Paragraph as TextNode
 from .pdf_frames import letterhead, signature
 from .pdf_tables import ContinuedTable, caption_of, column_widths
-from .pdf_parts import _draw_logos, _NumberedCanvas, _register_fonts, _reserved_space
+from .pdf_pages import page_painters
+from .pdf_parts import _NumberedCanvas, _register_fonts, _reserved_space
 from .pdf_photos import Footnoted as FootnotedFlowable
 from .pdf_photos import PageBudget, photo_cells, photo_rows
 
@@ -105,12 +106,13 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
         rows += [[text(c, head_cell) for c in row] for row in node.summary] if last else []
         if not hasattr(node, "widths"):  # the same columns on every page the table spans
             node.widths = column_widths(node.headers, node.rows, node.summary, usable,
-                                        (regular, bold), cell.fontSize)
+                                        (regular, bold), cell.fontSize, node.stretch)
         result = ContinuedTable(rows, colWidths=node.widths, repeatRows=1)
         style = [
             ("BACKGROUND", (0, 0), (-1, 0), _SHADE),
             ("LINEBELOW", (0, 0), (-1, -1), 0.3, _RULE),
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            # A row reads like a line of a list: everything starts at its first line.
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ("TOPPADDING", (0, 0), (-1, -1), 2.5),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
         ]
@@ -206,15 +208,7 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
         bottomMargin=(MARGIN_MM + bottom) * mm, title=tr("Test report"), author="",
         creator="EasyMeasurement",
     )
-    every_page = [logo for logo in logos if logo.every_page]
-
-    def first_page(canvas, _) -> None:
-        budget.new_page()
-        _draw_logos(canvas, logos)
-
-    def later_page(canvas, _) -> None:
-        budget.new_page()
-        _draw_logos(canvas, every_page)
-
+    top = A4[1] - document.topMargin
+    first_page, later_page = page_painters(nodes, logos, budget, regular, top)
     document.build(story, onFirstPage=first_page, onLaterPages=later_page,
                    canvasmaker=canvas_class)
