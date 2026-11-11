@@ -20,7 +20,7 @@ from ..l10n import N_, tr
 from ..model import Verdict, conductor_of
 from ..vocabulary import Role, counts, result_markup, role
 from ..vocabulary import conductors as low_numbers
-from .context import VERDICT_TEXT, ReportMeasurement
+from .context import ReportMeasurement
 from .footnotes import Footnotes
 from .language import value_text
 from .measurement_words import marks, word
@@ -109,6 +109,16 @@ class Columns:
         return rows
 
 
+VERDICT_MARKS = {Verdict.PASSED: ("✓", "#1e7b45"), Verdict.FAILED: ("✗", "#a4262c"),
+                 Verdict.NOT_EVALUATED: ("–", "")}
+
+
+def verdict_mark(verdict: Verdict) -> Markup:
+    """A tick or a cross in the colour of the result; a dash where nothing was judged."""
+    sign, colour = VERDICT_MARKS[verdict]
+    return Markup(f'<font color="{colour}"><b>{sign}</b></font>' if colour else sign)
+
+
 def _cell(found: dict, key: str, with_limit: bool) -> str:
     if key not in found:
         return "–"
@@ -166,8 +176,9 @@ def group_nodes(group: list[ReportMeasurement], options: dict, notes: Footnotes,
     leading += [tr(CONDUCTORS)] if any(conductors) else []
     leading += columns.varying_settings
     leading += [columns.symbol(k) for k in columns.varying_conditions]
-    # Every table has room for remarks, so the blocks of a report look alike.
-    trailing = [tr("Verdict"), tr("Remark")]
+    # The verdict speaks for itself and needs no title; every table has room for remarks,
+    # so the blocks of a report look alike.
+    trailing = ["", tr("Remark")]
     headers = leading + [columns.symbol(k) for k in columns.results] + trailing
     rows = []
     for number, measurement in enumerate(group, 1):
@@ -180,7 +191,7 @@ def group_nodes(group: list[ReportMeasurement], options: dict, notes: Footnotes,
                   for n in columns.varying_settings]
         cells += [_cell(found, k, False) for k in columns.varying_conditions]
         cells += [_cell(found, k, columns.shared_limits[k] is None) for k in columns.results]
-        cells.append(tr(VERDICT_TEXT[measurement.data.verdict]))
+        cells.append(verdict_mark(measurement.data.verdict))
         cells.append(remarks[number - 1])
         rows.append(cells)
     summary = []

@@ -6,6 +6,7 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import pytest
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtGui import QImage
 from PySide6.QtTest import QTest
@@ -37,12 +38,30 @@ def test_an_empty_pad_gives_nothing(qtbot):
     assert pad.data() is None
 
 
-def test_what_was_written_comes_out_cut_to_size(qtbot):
+def test_what_was_written_keeps_its_place_on_the_line(qtbot):
     pad = SignaturePad()
     write(qtbot, pad)
     image = QImage.fromData(pad.data())
-    assert not image.isNull()
-    assert image.height() < pad.height() * 3
+    assert (image.width(), image.height()) == (1200, 300)
+    assert image.text("baseline") == "0.75"
+
+
+def test_aligning_drags_the_signature_and_the_report_puts_it_on_the_line(qtbot):
+    from easymeasurement.reporting.pdf_parts import SignatureBox, _signature_image
+
+    pad = SignaturePad()
+    write(qtbot, pad)
+    pad.set_aligning(True)
+    assert not pad.strokes and pad.picture is not None
+    before = pad.place.topLeft()
+    left = Qt.MouseButton.LeftButton
+    QTest.mousePress(pad, left, pos=QPoint(100, 60))
+    QTest.mouseMove(pad, QPoint(140, 70))
+    QTest.mouseRelease(pad, left, pos=QPoint(140, 70))
+    assert pad.place.x() > before.x() and pad.place.y() > before.y()
+    box = _signature_image(pad.data(), 200)
+    assert isinstance(box, SignatureBox)
+    assert box.wrap(200, 100)[1] == pytest.approx(box.box_height * 0.75)
 
 
 def test_writing_leaves_a_transparent_background(qtbot):
@@ -168,3 +187,12 @@ def test_removing_after_confirmation(qtbot, app, monkeypatch):
     qtbot.addWidget(overlay)
     overlay.remove_button.click()
     assert overlay.list.count() == 0
+
+
+def test_a_person_with_a_signature_opens_and_keeps_it(qtbot, app):
+    source = QImage(200, 80, QImage.Format.Format_ARGB32)
+    source.fill(Qt.GlobalColor.black)
+    user = app.db.add_user("Anna", signature=_png(source))
+    form = UserForm(app, user=app.db.user(user))
+    qtbot.addWidget(form)
+    assert form.clear_button.isEnabled() and not form.pad.empty

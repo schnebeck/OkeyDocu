@@ -170,6 +170,8 @@ texts:
   "{count} elements are of this kind. They get the one chosen here instead. Their names, measurements and feature values are kept.": "{count} Elemente sind von diesem Typ. Sie bekommen stattdessen den hier gewählten. Ihre Namen, Messungen und Merkmalswerte bleiben erhalten."
   No element is of this kind. It simply disappears from the choice.: Kein Element ist von diesem Typ. Er verschwindet einfach aus der Auswahl.
   Instead: Stattdessen
+  Align: Ausrichten
+  Drag the signature onto the line; the mouse wheel makes it larger or smaller.: Die Unterschrift auf die Linie ziehen; das Mausrad macht sie größer oder kleiner.
 contexts:
   type code:
     none: keiner

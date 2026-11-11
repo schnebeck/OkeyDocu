@@ -47,15 +47,20 @@ class UserForm(Overlay):
         self.name.textChanged.connect(self._update)
 
         self.pad = SignaturePad()
-        self.pad.changed.connect(self._update)
         if user:
             self.pad.load(user["signature"])
+        self.pad.changed.connect(self._update)  # once the buttons it updates are there
         self.clear_button = QPushButton(tr("Clear"))
         self.clear_button.clicked.connect(self.pad.clear)
         self.file_button = QPushButton(tr("From file …"))
         self.file_button.clicked.connect(self._load_signature)
+        self.align_button = QPushButton(tr("Align"), checkable=True)
+        self.align_button.setToolTip(tr("Drag the signature onto the line; the mouse wheel makes"
+                                        " it larger or smaller."))
+        self.align_button.toggled.connect(self.pad.set_aligning)
         pad_buttons = QHBoxLayout()
         pad_buttons.addWidget(self.file_button)
+        pad_buttons.addWidget(self.align_button)
         pad_buttons.addWidget(self.clear_button)
         pad_buttons.addStretch()
         signature = QVBoxLayout()

@@ -13,6 +13,9 @@ from typing import TYPE_CHECKING
 
 from .language import UNIT_SPACE
 
+# Narrow spaces around the slash: kept before it, a line may break after it.
+PATH = "\u202f/\u2009"
+
 if TYPE_CHECKING:
     from .context import ReportMeasurement
 
@@ -59,7 +62,7 @@ def structure_levels(service, root_id: int, measured: list[ReportMeasurement]) -
     def visit(row, names: list[str]) -> None:
         mine = by_place.pop(row["id"], [])
         if mine:
-            levels.append(Level(row["id"], " / ".join(names) or row["name"],
+            levels.append(Level(row["id"], PATH.join(names) or row["name"],
                                 kinds.get(row["kind"], ""), asset_features(db, row),
                                 sorted(mine, key=lambda m: m.local_time)))
         # Elements side by side follow in the order they were measured in.

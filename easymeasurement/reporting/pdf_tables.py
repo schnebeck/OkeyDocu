@@ -20,6 +20,17 @@ from ..l10n import tr
 from .nodes import Markup, plain
 
 UNBROKEN = 14  # characters; a value with its unit stays on one line
+KEPT_NARROW = "\u202f"  # between a number and its unit: never broken
+BREAKING_NARROW = "\u2009"  # after a separator such as "/": a line may break there
+_NARROW = 0.6  # a narrow space as a part of a normal one
+
+
+def narrow_spaces(markup: str, size: float) -> str:
+    """The layout breaks lines at every space and sets each one as wide as a normal space;
+    a narrow one is set as a smaller space, kept or breakable as it says."""
+    small = f"{size * _NARROW:.1f}"
+    return (markup.replace(KEPT_NARROW, f'<font size="{small}">\xa0</font>')
+            .replace(BREAKING_NARROW, f'<font size="{small}"> </font>'))
 WIDEST_TEXT_MM = 70  # a longer text wraps rather than squeeze its neighbours
 
 
@@ -47,7 +58,8 @@ class ContinuedTable(PdfTable):
 def caption_of(heading: str, style: ParagraphStyle) -> Paragraph:
     marker = escape(tr("continued"))
     title = heading if isinstance(heading, Markup) else escape(heading)
-    return Paragraph(f"{title} <font size='8'>({marker})</font>", style)
+    return Paragraph(narrow_spaces(f"{title} <font size='8'>({marker})</font>", style.fontSize),
+                     style)
 
 
 def column_widths(headers: list[str], rows: list[list[str]], summary: list[list[str]],

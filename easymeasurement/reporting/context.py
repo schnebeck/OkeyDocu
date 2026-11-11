@@ -164,7 +164,7 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
             "contact_phone": campaign["contact_phone"],
             "contact_email": campaign["contact_email"],
             "cost_center": campaign["cost_center"],
-            "signature": campaign["signature"],
+            "signature": _signature(service.db, campaign),
             "plan": campaign["plan_title"],
             "uuid": campaign["uuid"],
             "started": _date_text(campaign["started_at"]),
@@ -230,6 +230,14 @@ def clock_summary(campaign, checks, offsets) -> str:
         notes.append(tr("offset {offset} s, the times below are corrected",
                         offset=f"{offset:+d}"))
     return "; ".join(notes)
+
+
+def _signature(db, campaign) -> bytes | None:
+    """A closed campaign keeps the signature of its day; a draft shows the inspector's own."""
+    if campaign["signature"] or campaign["status"] != "open" or campaign["user_id"] is None:
+        return campaign["signature"]
+    user = db.user(campaign["user_id"])
+    return user["signature"] if user else None
 
 
 def _reference_day(campaign) -> date:

@@ -48,7 +48,7 @@ def table_and_head(group):
 
 def test_a_passed_rlo_shows_neither_polarity():
     head, table = table_and_head([rlo(n=1), rlo("0.30Ω", n=2)])
-    assert [plain(h) for h in table.headers] == ["Nr.", "Zeitpunkt", "RLO", "Bewertung", "Bemerkung"]
+    assert [plain(h) for h in table.headers] == ["Nr.", "Zeitpunkt", "RLO", "", "Bemerkung"]
     assert head["Bedingungen"] == "<i>R</i><sub rise='30%'>LO,Offset</sub> = 40 mΩ"
     assert head["Grenzwerte"] == "<i>R</i><sub rise='30%'>LO</sub> &lt; 1,00 Ω"
 
@@ -105,7 +105,7 @@ def test_levels_follow_the_structure_tree(app, tree):
     assert headings(nodes) == [
         "Presse (Maschine)", "RLO – Schutzleiterwiderstand",
         "Schrank (Verteiler)", "RLO – Schutzleiterwiderstand",
-        "Schrank / Tür (Messpunkt)", "RLO – Schutzleiterwiderstand",
+        "Schrank\u202f/\u2009Tür (Messpunkt)", "RLO – Schutzleiterwiderstand",
     ]
 
 

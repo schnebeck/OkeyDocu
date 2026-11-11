@@ -44,7 +44,7 @@ from .nodes import (
 )
 from .nodes import Paragraph as TextNode
 from .pdf_frames import letterhead, signature
-from .pdf_tables import ContinuedTable, caption_of, column_widths
+from .pdf_tables import ContinuedTable, caption_of, column_widths, narrow_spaces
 from .pdf_pages import page_painters
 from .pdf_parts import _NumberedCanvas, _register_fonts, _reserved_space
 from .pdf_photos import Footnoted as FootnotedFlowable
@@ -83,7 +83,7 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
     def text(value: str, style=body) -> Paragraph:
         """Markup as it is; plain text escaped, each of its lines on a line of its own."""
         shown = value if isinstance(value, Markup) else escape(value).replace("\n", "<br/>")
-        return Paragraph(shown, style)
+        return Paragraph(narrow_spaces(shown, style.fontSize), style)
 
     def field_rows(node: Fields) -> list[list[Paragraph]]:
         return [[text(k, head_cell), text(v, cell)] for k, v in node.rows if v.strip()]

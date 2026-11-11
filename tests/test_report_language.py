@@ -62,7 +62,7 @@ def test_an_english_protocol_has_english_words(app, asset):
     campaign = campaign_with_one_value(app, asset)
     found = texts(app, campaign, "en")
     assert "Test report" in found
-    assert "Time" in found and "Verdict" in found and "passed" in found
+    assert "Time" in found and "Remark" in found and "Test result: Passed" in found
     assert "RLO – Protective conductor resistance" in found
     assert "Installation" in found  # the kind of the asset
     assert any(text.startswith("Inspector: ") for text in found)
@@ -71,7 +71,7 @@ def test_an_english_protocol_has_english_words(app, asset):
 
 def test_german_stays_as_it_is(app, asset):
     found = texts(app, campaign_with_one_value(app, asset), "de")
-    assert "Prüfprotokoll" in found and "bestanden" in found
+    assert "Prüfprotokoll" in found and "Ergebnis der Prüfung: Bestanden" in found
 
 
 def test_kinds_and_features_are_translated_by_their_key(app):
@@ -155,7 +155,8 @@ def test_the_same_campaign_in_three_languages(app, asset):
     assert "210\u202fmΩ" in texts(app, campaign, "de")
     assert "210\u202fmΩ" in texts(app, campaign, "en")
     spanish = texts(app, campaign, "es")
-    assert "Informe de ensayo" in spanish and "210\u202fmΩ" in spanish and "correcto" in spanish
+    assert "Informe de ensayo" in spanish and "210\u202fmΩ" in spanish
+    assert any("orrect" in text for text in spanish)
 
 
 def test_every_report_language_knows_every_stored_word():

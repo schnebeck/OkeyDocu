@@ -24,7 +24,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas as pdf_canvas
-from reportlab.platypus import Image
+from reportlab.platypus import Flowable, Image
 
 from ..campaign.photo_proxies import QUALITY, make_proxy, reduced
 from ..l10n import tr
@@ -122,10 +122,33 @@ def _reserved_space(logos: list[Logo]) -> tuple[float, float, float]:
     return every_top, first_top, bottom
 
 
-def _signature_image(data: bytes, width: float) -> Image:
-    """As large as the space above the line allows, without distorting it."""
+class SignatureBox(Flowable):
+    """A signature written on the pad that stands for the line: its line lies on this one,
+    what was written below it hangs below. Never taller above the line than the room there."""
+
+    def __init__(self, data: bytes, width: float, baseline: float, ratio: float):
+        super().__init__()
+        self.data, self.baseline = data, baseline
+        self.box_width = min(width, _SIGNATURE_HEIGHT / baseline * ratio)
+        self.box_height = self.box_width / ratio
+
+    def wrap(self, availWidth, availHeight):
+        return self.box_width, self.box_height * self.baseline
+
+    def draw(self):
+        below = self.box_height * (1 - self.baseline)
+        self.canv.drawImage(ImageReader(io.BytesIO(self.data)), 0, -below, self.box_width,
+                            self.box_height, mask="auto")
+
+
+def _signature_image(data: bytes, width: float) -> Flowable:
+    """As large as the space above the line allows, without distorting it; one written on
+    the pad keeps where it stood on its line."""
     with PilImage.open(io.BytesIO(data)) as source:
         ratio = source.width / source.height
+        baseline = source.info.get("baseline")
+    if baseline:
+        return SignatureBox(data, width, float(baseline), ratio)
     height = min(_SIGNATURE_HEIGHT, width / ratio)
     return Image(io.BytesIO(data), width=height * ratio, height=height, hAlign="LEFT")
 
