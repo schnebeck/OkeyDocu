@@ -24,7 +24,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.plan import load_instructions, parse_plan
-from ..l10n import tr
+from ..l10n import in_language, tr
 from .board import GutterSplitter
 from .common import ROW_ID, AppContext
 from .plan_editor_points import PlanEditorPoints, new_key
@@ -126,7 +126,7 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
         self.plans.blockSignals(True)
         self.plans.clear()
         for row in self.app.db.plans():
-            item = QListWidgetItem(row["title"])
+            item = QListWidgetItem(in_language(row["title"]))
             item.setData(ROW_ID, row["key"])
             self.plans.addItem(item)
             if row["key"] == keep:
@@ -145,7 +145,8 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
         self.data = yaml.safe_load(row["body"]) if row else None
         self.title.blockSignals(True)
         self.released.blockSignals(True)
-        self.title.setText(self.data["title"] if self.data else "")
+        # A shipped plan keeps its title in the source language; it is shown in this one.
+        self.title.setText(in_language(self.data["title"]) if self.data else "")
         self.released.setChecked(bool(self.data and self.data.get("released")))
         self.title.blockSignals(False)
         self.released.blockSignals(False)

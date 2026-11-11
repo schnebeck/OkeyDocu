@@ -131,6 +131,7 @@ texts:
   Assign test plan: Messplan zuweisen
   Assign: Zuweisen
   "{plan} ({count} points)": "{plan} ({count} Punkte)"
+  "{plan} (draft, {count} points)": "{plan} (Entwurf, {count} Punkte)"
   There is no test plan yet.: Es gibt noch keinen Messplan.
   Simulate measurement: Messung simulieren
   Measurement instructions: Anleitung zur Messung

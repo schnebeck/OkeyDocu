@@ -95,11 +95,16 @@ class CampaignDialog(Overlay):
         self._update()
 
     def _offer_repeat(self) -> None:
+        """An inspection without a single point leaves nothing to repeat."""
         asset = self.asset.currentData()
         self.previous = self.app.service.last_closed(asset) if asset is not None else None
+        count = 0
         if self.previous is not None:
             count = self.app.db.one("SELECT count(*) FROM measurements WHERE campaign_id=?",
                                     self.previous["id"])[0]
+        if not count:
+            self.previous = None
+        if self.previous is not None:
             closed = datetime.fromisoformat(self.previous["closed_at"])
             self.repeat.setText(tr("Repeat like the inspection of {day} ({count} points)",
                                    day=day(closed), count=count))

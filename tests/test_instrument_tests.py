@@ -59,7 +59,7 @@ def test_every_part_is_tried_once_and_nothing_is_set(app):
 def test_a_clock_off_or_an_overdue_calibration_is_noted_not_failed():
     run = run_checks(_Instrument(skew_s=-60), date(2026, 10, 1))
     states = {c.key: (c.state, c.detail) for c in run.checks}
-    assert states["clock"][0] == NOTE and "-60 s" in states["clock"][1]
+    assert states["clock"][0] == NOTE and "\u221260 s" in states["clock"][1]
     assert states["calibration"] == (NOTE, "seit 01.09.2026 überfällig")
     assert run.ready and round(run.clock_offset_s) == -60
 

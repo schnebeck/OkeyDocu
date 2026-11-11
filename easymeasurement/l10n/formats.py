@@ -29,6 +29,11 @@ def day(value: date | None) -> str:
     return value.strftime(pattern("date")) if value else EMPTY
 
 
+def stored_day(text: str | None) -> str:
+    """The day of a moment as the database keeps it, in ISO form."""
+    return day(datetime.fromisoformat(text)) if text else EMPTY
+
+
 def moment(value: datetime | None, seconds: bool = False) -> str:
     if value is None:
         return EMPTY

@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..campaign.plan import says_draft
 from ..campaign.service import IMPORTED
 from ..devices import Capability
 from ..devices.simulator import SIMULATED_FUNCTIONS
@@ -40,6 +41,8 @@ GUIDANCE = {
             " or wait, the app connects by itself."),
 }
 WAITING_GUIDANCE = N_("<b>Connecting to the instrument …</b>")
+POINTS = N_("{plan} ({count} points)")
+DRAFT_POINTS = N_("{plan} (draft, {count} points)")
 MANUAL_GUIDANCE = N_(
     "<b>Enter readings by hand or add photos.</b>"
     " This campaign runs without an instrument."
@@ -87,8 +90,10 @@ class AssignPlanOverlay(Overlay):
         self.ok_button.setText(tr("Assign"))
         self.plan = QComboBox()
         for plan in plans:
-            text = tr("{plan} ({count} points)", plan=plan.label, count=len(plan.steps))
-            self.plan.addItem(text, plan)
+            # A draft says so in the same brackets as its points.
+            draft = not plan.released and not says_draft(plan.title)
+            shown = DRAFT_POINTS if draft else POINTS
+            self.plan.addItem(tr(shown, plan=plan.title, count=len(plan.steps)), plan)
         self.ok_button.setEnabled(bool(plans))
         self.hint.setText("" if plans else tr("There is no test plan yet."))
         form = QFormLayout()

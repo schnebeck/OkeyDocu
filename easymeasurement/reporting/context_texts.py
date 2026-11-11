@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
-from ..l10n import tr
+from ..l10n import signed_seconds, tr
 from .language import moment
 from .logo import LogoError, decode_logo
 
@@ -39,14 +39,14 @@ def clock_summary(campaign, checks, offsets) -> str:
         moment = date_text(check["checked_at"])
         if check["kind"] == "set":
             notes.append(tr("set on {moment} (deviation before {offset} s)",
-                            moment=moment, offset=f"{check['offset_before_s']:+.0f}"))
+                            moment=moment, offset=signed_seconds(check['offset_before_s'])))
         elif check["kind"] == "manual":
             notes.append(tr("offset set by hand to {offset} s on {moment}",
-                            moment=moment, offset=f"{check['offset_s']:+.0f}"))
+                            moment=moment, offset=signed_seconds(check['offset_s'])))
     offset = round(campaign["clock_offset_s"])
     if offset:
         notes.append(tr("offset {offset} s, the times below are corrected",
-                        offset=f"{offset:+d}"))
+                        offset=signed_seconds(offset)))
     return "; ".join(notes)
 
 

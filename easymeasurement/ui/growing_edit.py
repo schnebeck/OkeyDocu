@@ -19,6 +19,9 @@ class GrowingEdit(QPlainTextEdit):
 
     def __init__(self, placeholder: str = ""):
         super().__init__()
+        # Breeze draws no frame around a view that stands alone in its layout, which leaves a
+        # single field in an overlay looking like a bare strip of white.
+        self.setProperty("_breeze_force_frame", True)
         self.setPlaceholderText(placeholder)
         self.setTabChangesFocus(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)

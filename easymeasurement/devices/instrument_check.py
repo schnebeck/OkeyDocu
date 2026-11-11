@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Callable
 
-from ..l10n import day, tr
+from ..l10n import day, signed_seconds, tr
 from ..model import DeviceIdentity
 from .base import Capability, DeviceError, MeterDriver
 
@@ -100,7 +100,7 @@ def _clock(driver, run: TestRun, report) -> None:
         report("clock", tr("Clock"), OK, tr("is exact"))
     else:
         report("clock", tr("Clock"), NOTE,
-               tr("is {offset} s off, set when a measurement starts", offset=f"{offset:+.0f}"))
+               tr("is {offset} s off, set when a measurement starts", offset=signed_seconds(offset)))
 
 
 def _selector(driver, report) -> None:

@@ -68,3 +68,12 @@ def quantity_text(raw: str, bases: tuple[str, ...]) -> str:
     if qualifier:
         text = f"{qualifier}{NARROW}{text}"
     return f"{text}{NARROW}{unit}" if unit else text
+
+
+def signed_seconds(seconds: float) -> str:
+    """Whole seconds with their sign, as a clock offset is said: +3, −3, and 0 without a sign,
+    also where a fraction below half a second was negative."""
+    whole = round(seconds)
+    if whole == 0:
+        return "0"
+    return f"+{whole}" if whole > 0 else f"{MINUS}{-whole}"

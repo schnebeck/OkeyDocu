@@ -118,3 +118,11 @@ def test_questions_are_answered_and_points_left_out_with_a_reason(repeat, monkey
     assert values.table.item(row, 0).text() == "ausgelassen"
     assert "Schrank verschlossen" in values.table.item(row, VALUES).text()
     assert repeat["page"].app.service.blockers(repeat["campaign"]) == []
+
+
+def test_an_inspection_without_points_is_not_offered_for_repeating(app, window):
+    press = app.db.add_asset(app.db.add_customer("Muster AG"), "machine", "Presse")
+    app.service.close(app.service.create(press, "Leer", "Prüfer"))
+    dialog = CampaignDialog(app, window)
+    dialog.asset.setCurrentIndex(dialog.asset.findData(press))
+    assert dialog.previous is None and dialog.repeat.isHidden() and dialog.plan.isEnabled()

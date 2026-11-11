@@ -28,7 +28,7 @@ from PySide6.QtWidgets import (
 from ..campaign.service import CampaignService
 from ..devices import Cancelled, MeterDriver, create_driver, is_simulated
 from ..devices.simulator import SimulatedMeter
-from ..l10n import tr
+from ..l10n import signed_seconds, tr
 from ..model import Parameter, Verdict, conductor_of
 from ..vocabulary import function_label, function_symbol
 from ..reporting.archive import ReportArchive
@@ -233,7 +233,7 @@ def run_busy(parent, text: str, work: Callable[[], T],
 def ask_clock_sync(parent, offset_s: float) -> bool:
     """Whether the program sets the clock or the operator does it on the instrument."""
     box = QMessageBox(QMessageBox.Icon.Question, tr("Instrument clock"),
-                      tr("The instrument clock is {offset} s off.", offset=f"{offset_s:+.0f}"),
+                      tr("The instrument clock is {offset} s off.", offset=signed_seconds(offset_s)),
                       QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, parent)
     box.button(QMessageBox.StandardButton.Yes).setText(tr("Set automatically"))
     box.button(QMessageBox.StandardButton.No).setText(tr("Set by hand"))

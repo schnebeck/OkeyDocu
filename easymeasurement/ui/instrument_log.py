@@ -21,12 +21,12 @@ from PySide6.QtWidgets import (
 )
 
 from ..devices.instrument_check import Check
-from ..l10n import N_, day, moment, tr
+from ..l10n import N_, day, moment, signed_seconds, tr
 from .common import AppContext
 from .instrument_test import MARKS, run_text
 from .overlay import Overlay
 
-COLUMNS = (N_("Time"), N_("Entry"), N_("Firmware"), N_("Calibrated"), N_("due"), N_("Clock"))
+COLUMNS = (N_("Time"), N_("Entry"), N_("Firmware"), N_("Calibrated"), N_("Due"), N_("Clock"))
 EMPTY = N_("No instrument tested or used in a campaign yet.")
 
 
@@ -36,7 +36,7 @@ def _day(text: str) -> str:
 
 def _line(entry) -> list[str]:
     mark = "" if entry.ready is None else ("✓ " if entry.ready else "✗ ")
-    clock = "" if entry.clock_offset_s is None else f"{entry.clock_offset_s:+.0f} s"
+    clock = "" if entry.clock_offset_s is None else f"{signed_seconds(entry.clock_offset_s)} s"
     return [moment(datetime.fromisoformat(entry.moment)), mark + entry.title,
             entry.firmware, _day(entry.calibrated_on), _day(entry.recalibration_due), clock]
 

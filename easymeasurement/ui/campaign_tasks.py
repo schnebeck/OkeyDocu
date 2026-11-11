@@ -11,7 +11,7 @@ from __future__ import annotations
 from PySide6.QtGui import QAction
 
 from ..campaign.clock import CLOCK_SET_ACCURACY_S
-from ..l10n import tr
+from ..l10n import signed_seconds, tr
 from .campaign_edit import PLAN, TESTER, CampaignEditOverlay
 from .campaign_views import AssignPlanOverlay, TesterOverlay
 
@@ -102,7 +102,7 @@ class CampaignTasks:
                 self.notice.setText(tr("Instrument clock is exact"))
             else:
                 self.notice.setText(tr("Instrument clock is {offset} s off: please set it on"
-                                       " the instrument", offset=f"{offset:+.0f}"))
+                                       " the instrument", offset=signed_seconds(offset)))
         self.refresh()
 
     def correct_clock(self) -> None:

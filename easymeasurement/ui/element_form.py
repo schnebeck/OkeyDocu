@@ -100,7 +100,8 @@ class ElementForm(QWidget):
         area.setWidgetResizable(True)
         area.setFrameShape(QFrame.Shape.NoFrame)
         area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        area.setMinimumHeight(4 * self.fontMetrics().height() * 2)
+        # Two rows stay in view, so the fields above keep their room in a low window.
+        area.setMinimumHeight(3 * QLineEdit().sizeHint().height())
         area.viewport().setAutoFillBackground(False)
         inner.setAutoFillBackground(False)
         area.setWidget(inner)

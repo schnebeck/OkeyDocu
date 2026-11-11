@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ..l10n import plural, tr
+from ..l10n import plural, stored_day, tr
 from ..reporting.archive import ReportError
 from ..reporting.language import languages
 from ..reporting.template import TemplateError
@@ -41,7 +41,8 @@ class GenerateOverlay(Overlay):
         self.campaign = QComboBox()
         for row in app.service.campaigns():
             if row["status"] == "closed":
-                self.campaign.addItem(f"{row['title']} ({row['started_at'][:10]})", row["id"])
+                label = f"{row['title']} ({stored_day(row['started_at'])})"
+                self.campaign.addItem(label, row["id"])
         self.template = TemplateChoice(app)
         form = QFormLayout()
         form.addRow(tr("Completed campaign"), self.campaign)
@@ -91,7 +92,7 @@ class ReportsPage(QWidget):
         self.table = make_table(
             [tr("Created"), tr("Customer"), tr("Installation"), tr("Campaign"), tr("Inspector"),
              tr("Template"), tr("Language"), tr("Signed by"), tr("File")],
-            stretch=7,
+            stretch=3,  # the campaign is what a report is looked for by
         )
         self.table.currentCellChanged.connect(lambda *_: self._update_buttons())
         self.table.doubleClicked.connect(self._open)

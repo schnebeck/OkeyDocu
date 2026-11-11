@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ..l10n import in_language, tr
+from ..l10n import in_language, stored_day, tr
 from ..model import Quantity
 from ..vocabulary import function_keys, function_label
 from ..store.search import MeasurementFilter
@@ -158,7 +158,8 @@ class MeasurementsPage(MeasurementView):
         self._customer_changed()
         self._refill(
             self.campaign, tr("All campaigns"),
-            [(f"{c['title']} ({c['started_at'][:10]})", c["id"]) for c in self.app.service.campaigns()],
+            [(f"{c['title']} ({stored_day(c['started_at'])})", c["id"])
+             for c in self.app.service.campaigns()],
         )
         keys = db.query(
             "SELECT key, min(label) AS label FROM measured_values WHERE base_value IS NOT NULL"

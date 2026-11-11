@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 
 from ..devices.base import Capability, DeviceError, MeterDriver
-from ..l10n import N_, tr
+from ..l10n import N_, signed_seconds, tr
 from ..model import DeviceIdentity
 from .assignment import assign
 from .records import NO_INSTRUMENT, _iso
@@ -68,7 +68,7 @@ def set_instrument_clock(driver: MeterDriver) -> float:
     if abs(after) >= CLOCK_SET_ACCURACY_S:
         raise DeviceError(tr(
             "The instrument's clock could not be set, it is still {offset} s off."
-            " Please try again.", offset=f"{after:+.0f}"))
+            " Please try again.", offset=signed_seconds(after)))
     return before
 
 
@@ -121,7 +121,7 @@ class ClockMixin:
             return ClockStatus(
                 ClockState.OFFSET,
                 tr("Instrument clock is {offset} s off, times are corrected",
-                   offset=f"{last['offset_s']:+.0f}"),
+                   offset=signed_seconds(last['offset_s'])),
             )
         text = tr(SYNCED_TEXTS[last["kind"]], time=f"{moment:%H:%M:%S}")
         return ClockStatus(ClockState.SYNCED, text)

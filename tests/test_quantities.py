@@ -50,3 +50,11 @@ def test_english_keeps_the_point_and_words_stay_as_they_are():
         assert value_text("1234Ω") == f"1.234{N}kΩ"
     assert german("rechts") == "rechts"
     assert german("100mV/mA") == f"100{N}mV/mA"
+
+
+def test_a_clock_offset_has_its_sign_but_zero_has_none():
+    from easymeasurement.l10n import signed_seconds
+
+    assert signed_seconds(3.4) == "+3"
+    assert signed_seconds(-60.0) == "−60"
+    assert signed_seconds(-0.3) == "0" and signed_seconds(0) == "0"

@@ -151,7 +151,7 @@ def test_instrument_and_overdue_calibration_are_known(service, imported):
 
 def test_offset_shows_up_in_the_report_data(service, imported):
     summary = build_context(service, imported.campaign_id)["campaign"]["clock_summary"]
-    assert "-600 s" in summary
+    assert "\u2212600 s" in summary
 
 
 def test_parameters_are_readable(service, imported):

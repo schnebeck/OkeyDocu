@@ -15,9 +15,11 @@ from PySide6.QtWidgets import (
     QDateTimeEdit,
     QFormLayout,
     QHBoxLayout,
+    QHeaderView,
     QLabel,
     QLineEdit,
     QPushButton,
+    QSizePolicy,
     QSpinBox,
     QTableWidget,
     QTableWidgetItem,
@@ -68,6 +70,8 @@ class MeasurementOverlay(Overlay):
         for key in function_keys():
             self.function.addItem(function_label(key), key)
         self.function.setCurrentIndex(self.function.findData("other"))
+        # As wide as the other fields, so a long function name is not cut off.
+        self.function.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.function.currentIndexChanged.connect(self._name_first_value)
         self.moment = QDateTimeEdit(QDateTime.currentDateTime())
         self.moment.setDisplayFormat(qt_moment())
@@ -77,7 +81,7 @@ class MeasurementOverlay(Overlay):
         self.verdict = verdict_combo(Verdict.NOT_EVALUATED.value)
         self.table = QTableWidget(1, len(self.HEADERS))
         self.table.setHorizontalHeaderLabels([tr(header) for header in self.HEADERS])
-        self.table.horizontalHeader().setStretchLastSection(True)
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.table.verticalHeader().hide()
         self.table.setMinimumHeight(140)
         add = QPushButton(tr("Add reading"))

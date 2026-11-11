@@ -36,6 +36,11 @@ def test_seeded_plan_is_listed(editor):
     assert editor.steps.count() == 5
 
 
+def test_a_shipped_plan_is_titled_in_the_language_of_the_program(editor):
+    assert editor.title.text() == tr("Machine – electrical inspection")
+    assert editor.plans.currentItem().text() == editor.title.text()
+
+
 def test_new_plan_is_saved_at_once(app, editor):
     editor.new_plan()
     assert editor.plans.count() == 2

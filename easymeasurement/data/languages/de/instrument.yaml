@@ -30,7 +30,7 @@ texts:
   Entry: Eintrag
   Firmware: Firmware
   Calibrated: Kalibriert
-  due: fällig
+  Due: Fällig
   No instrument tested or used in a campaign yet.: Noch kein Messgerät getestet oder in einer Kampagne benutzt.
   Instrument log: Geräteprotokoll
   "{model}, serial number {serial}": "{model}, Seriennummer {serial}"
