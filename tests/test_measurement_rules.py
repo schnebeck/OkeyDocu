@@ -220,3 +220,16 @@ def test_deleted_measurement_is_not_mentioned_in_the_report(service, asset_id):
 def test_untouched_measurement_has_no_mark(service, stored):
     campaign, _, _, _ = stored
     assert _marks(report_measurements(service, campaign)[0]) == ""
+
+
+def test_answers_saved_together_show_their_time_once():
+    from datetime import datetime, timedelta
+    from types import SimpleNamespace
+
+    from easymeasurement.reporting.measurement_words import clock_times
+
+    at = datetime(2026, 5, 4, 10, 38, 12)
+    rows = [SimpleNamespace(local_time=time, manual=manual, edited=False)
+            for time, manual in ((at, False), (at, False), (at, True),
+                                 (at + timedelta(minutes=1), False))]
+    assert clock_times(rows) == ["10:38:12", "", "(manuell)", "10:39:12"]

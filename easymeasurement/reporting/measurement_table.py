@@ -23,7 +23,7 @@ from ..vocabulary import conductors as low_numbers
 from .context import ReportMeasurement
 from .footnotes import Footnotes
 from .language import value_text
-from .measurement_words import marks, word
+from .measurement_words import clock_times, shared_time, word
 from .nodes import Fields, Footnoted, Markup, Node, Table
 
 CONDUCTORS = N_("Conductors")
@@ -171,7 +171,9 @@ def group_nodes(group: list[ReportMeasurement], options: dict, notes: Footnotes,
     named = _differing([m.point for m in group]) if points else []
     photos, refs, remarks = _referred(group, notes)
     _join_notes(columns, remarks)
-    leading = [tr("No."), tr("Time")] + ([tr(POINT)] if named else [])
+    # Answers saved together share one time: it is said once above, not in every row.
+    once = shared_time(group)
+    leading = [tr("No.")] + ([] if once else [tr("Time")]) + ([tr(POINT)] if named else [])
     leading += [tr(LOCATION)] if places else []
     leading += [tr(CONDUCTORS)] if any(conductors) else []
     leading += [Markup(symbols_marked(name)) for name in columns.varying_settings]
@@ -180,10 +182,10 @@ def group_nodes(group: list[ReportMeasurement], options: dict, notes: Footnotes,
     # so the blocks of a report look alike.
     trailing = ["", tr("Remark")]
     headers = leading + [columns.symbol(k) for k in columns.results] + trailing
-    rows = []
+    rows, times = [], clock_times(group)
     for number, measurement in enumerate(group, 1):
         found = columns.found[number - 1]
-        cells = [str(number), measurement.local_time.strftime("%H:%M:%S") + marks(measurement)]
+        cells = [str(number)] + ([] if once else [times[number - 1]])
         cells += [named[number - 1] or "–"] if named else []
         cells += [places[number - 1] or "–"] if places else []
         cells += [Markup(low_numbers(conductors[number - 1] or "–"))] if any(conductors) else []
@@ -198,6 +200,8 @@ def group_nodes(group: list[ReportMeasurement], options: dict, notes: Footnotes,
     if options.get("summary", True) and len(group) >= SUMMED and len(set(conductors)) <= 1:
         summary = _summary(columns, len(leading), len(trailing))
     head = columns.head(known)
+    if once:
+        head.insert(0, (tr("Time"), once))
     if points and group[0].point and not named:
         head.insert(0, (tr(POINT), group[0].point))
     table = Table(headers, rows, summary, len(headers) - 1)

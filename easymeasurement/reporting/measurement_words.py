@@ -27,6 +27,24 @@ def word(text: str) -> str:
     return value_text(in_language(outcome_text(text)))
 
 
+def clock_times(measured) -> list[str]:
+    """The time of each row, said only where it changes: answers saved together share one."""
+    shown, last = [], None
+    for measurement in measured:
+        time = measurement.local_time.strftime("%H:%M:%S")
+        shown.append((time if time != last else "") + marks(measurement))
+        last = time
+    return [text.strip() for text in shown]
+
+
+def shared_time(measured) -> str:
+    """The one moment several measurements share, none of them marked; else empty."""
+    if len(measured) < 2 or any(m.manual or m.edited for m in measured):
+        return ""
+    moments = {m.local_time for m in measured}
+    return moment(measured[0].local_time, seconds=True) if len(moments) == 1 else ""
+
+
 def when(measurement) -> str:
     return moment(measurement.local_time, seconds=True) + marks(measurement)
 

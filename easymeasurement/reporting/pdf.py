@@ -152,6 +152,8 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
             headings.append(text(node.text, heading[min(node.level, 3)]))
             title = node.text
             continue
+        if isinstance(node, Fields) and not field_rows(node):
+            continue  # a list whose fields are all empty says nothing
         following = next((n for n in nodes[index + 1:] if not isinstance(n, (Heading, Fields))),
                          None)
         if isinstance(node, Fields) and isinstance(following, (Table, Footnoted)):

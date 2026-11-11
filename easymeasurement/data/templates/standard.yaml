@@ -40,8 +40,6 @@ blocks:
   - type: fields
     rows:
       - [Test plan, "{{ campaign.plan }}"]
-      - [Started, "{{ campaign.started }}"]
-      - [Completed, "{{ campaign.closed }}"]
   - type: heading
     when: device.model
     level: 2

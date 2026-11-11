@@ -31,7 +31,7 @@ from .measurement_table import (
     remark,
     verdict_mark,
 )
-from .measurement_words import marks, word
+from .measurement_words import clock_times, word
 from .nodes import Fields, Footnoted, Markup, Node, Table
 
 FUNCTION = N_("Measurement")
@@ -108,14 +108,14 @@ def compact_nodes(measured: list[ReportMeasurement], notes: Footnotes) -> list[N
     limited = any(limit_cell(columns[m.data.function], groups[m.data.function].index(m))
                   for m in measured)
     headers += [tr(RESULT)] + ([tr(LIMIT)] if limited else []) + ["", tr("Remark")]
-    rows, photos, refs = [], [], []
+    rows, photos, refs, times = [], [], [], clock_times(measured)
     for number, measurement in enumerate(measured):
         group = columns[measurement.data.function]
         row = groups[measurement.data.function].index(measurement)
         taken, references = notes.take(measurement)
         refs.append(list(range(len(photos), len(photos) + len(taken))))
         photos += taken
-        cells = [str(number + 1), measurement.local_time.strftime("%H:%M:%S") + marks(measurement),
+        cells = [str(number + 1), times[number],
                  what_cell(group, row, measurement.data.function, conductors[number])]
         cells.append(found_cell(group, row))
         cells += [limit_cell(group, row)] if limited else []

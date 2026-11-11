@@ -255,3 +255,11 @@ def test_compact_puts_every_function_of_an_element_into_one_table():
     assert "<br/>" in table.rows[2][3]
     assert "= 40 mΩ" in table.rows[0][-1] and "= 50 mΩ" in table.rows[1][-1]
     assert [plain(label) for label, _ in head.rows] == ["RLO"]
+
+
+def test_a_time_all_rows_share_is_said_once_above():
+    group = [rlo(n=1), rlo(n=2)]
+    for measurement in group:
+        measurement.local_time = T0
+    head, table = table_and_head(group)
+    assert head["Zeitpunkt"] == "01.03.2026 10:00:00" and "Zeitpunkt" not in table.headers
