@@ -22,6 +22,10 @@ class DeviceError(Exception):
     """The instrument could not be reached or answered with an error."""
 
 
+class Cancelled(DeviceError):
+    """The operator stopped the work before it was done; nothing is to be reported."""
+
+
 class DeviceBlocked(DeviceError):
     """The instrument is there but will not hand out its stored data right now."""
 
@@ -127,6 +131,10 @@ class MeterDriver(ABC):
 
     def unsubscribe_live(self) -> None:
         pass
+
+    def abort(self) -> None:
+        """Called from another thread: a command waiting for its answer ends at once with a
+        DeviceError. Only reading is ever cut short; the caller still closes the driver."""
 
     def read_texts(self) -> DeviceTexts:
         """The instrument's words for its codes. Slow: read when it is set up, not to measure."""

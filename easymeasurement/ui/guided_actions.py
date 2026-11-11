@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QMessageBox
 
 from ..campaign.plan import Plan
 from ..campaign.service import NO_INSTRUMENT, read_instrument
-from ..devices import Capability, DeviceError
+from ..devices import Cancelled, Capability, DeviceError
 from ..l10n import tr
 from .common import run_busy, selected_id, show_error
 from .guided_pages import ReasonOverlay
@@ -34,7 +34,9 @@ class GuidedActions:
 
         try:
             text = tr("Connecting to the instrument and setting the clock …")
-            start = run_busy(self, text, connect)
+            start = run_busy(self, text, connect, driver.abort)
+        except Cancelled:
+            return None
         except DeviceError as err:
             show_error(self, str(err))
             return None

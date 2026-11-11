@@ -120,6 +120,13 @@ class PrimeTransport:
             self._thread = threading.Thread(target=self._read_loop, daemon=True)
             self._thread.start()
 
+    def abort(self) -> None:
+        """Ends a command waiting for its reply at once, from any thread, as a lost link.
+        The connection itself is closed by whoever opened it."""
+        self.failure = self.failure or OSError("aborted")
+        self._replies.put(None)
+        self._lines.put(b"")
+
     def close(self) -> None:
         self._stop.set()
         if self._thread is not None:
@@ -169,6 +176,7 @@ class PrimeTransport:
                 line = self._lines.get(timeout=timeout_s)
             except queue.Empty:
                 raise DeviceError(tr("No answer to {command}.", command=command)) from None
+            self._check_link()
         code, _, data = line.decode("utf-8", "replace").partition(";")
         if code != "0":
             raise InstrumentRefused(

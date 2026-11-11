@@ -13,16 +13,18 @@ passes through as the instrument's code. Names are shown in the current language
 """
 from __future__ import annotations
 
+import re
+from functools import cache
 from xml.sax.saxutils import escape
 
 from ..l10n import in_language, tr
-from .notation import conductors, markup, plain
+from .notation import conductors, is_marked, markup, plain
 from .roles import ROLE_TEXT, Role, counts, role
 from .terms import Term, Vocabulary, VocabularyError, vocabulary
 
 __all__ = ["ROLE_TEXT", "Role", "Term", "Vocabulary", "VocabularyError", "conductors", "counts",
            "function_keys", "function_label", "function_markup", "function_symbol", "markup",
-           "outcome_text", "plain", "result_label", "result_markup", "result_name", "role", "setting_name",
+           "outcome_text", "plain", "result_label", "result_markup", "result_name", "symbols_marked", "role", "setting_name",
            "units", "vocabulary"]
 
 LABEL_SEPARATOR = " – "
@@ -77,6 +79,28 @@ def result_markup(key: str, stored: str = "") -> str:
     if term is not None and term.symbol:
         return markup(tr(term.symbol))
     return escape(result_label(key, stored))
+
+
+@cache
+def _written_symbols() -> tuple[re.Pattern, dict[str, str]]:
+    """Every symbol of the vocabulary as it appears in plain text, such as RLO or IΔN, with
+    its markup. One letter alone is too common a word to be taken for a symbol."""
+    found: dict[str, str] = {}
+    terms = [*vocabulary().results.values(), *vocabulary().functions.values()]
+    for word in (word for term in terms if term.symbol for word in term.symbol.split(" ")):
+        if is_marked(word) and len(plain(word)) > 1:
+            found.setdefault(plain(word), markup(word))
+    tokens = sorted(found, key=len, reverse=True)
+    pattern = re.compile(rf"(?<![\w])({'|'.join(map(re.escape, tokens))})(?![\w])")
+    return pattern, found
+
+
+def symbols_marked(text: str) -> str:
+    """Plain text, such as an instrument's name of a setting, with the symbols in it set as in
+    mathematics: `RLO - Polung` gets an italic R and a low LO."""
+    pattern, found = _written_symbols()
+    parts = pattern.split(text)
+    return "".join(found[part] if index % 2 else escape(part) for index, part in enumerate(parts))
 
 
 def result_name(key: str) -> str:

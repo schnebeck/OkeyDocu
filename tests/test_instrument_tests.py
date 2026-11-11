@@ -115,3 +115,32 @@ def test_an_empty_log_says_why(app, qtbot):
     log = InstrumentLogOverlay(app)
     qtbot.addWidget(log)
     assert log.hint.text() == tr(EMPTY) and not log.copy_button.isEnabled()
+
+
+class _SlowToConnect(_Instrument):
+    """Hangs while connecting until the window cancels."""
+
+    def __init__(self):
+        super().__init__()
+        import threading
+        self.stop = threading.Event()
+
+    def abort(self):
+        self.stop.set()
+
+    def open(self):
+        self.stop.wait(5)
+        raise DeviceError("abgebrochen")
+
+
+def test_a_test_that_waits_can_be_cancelled_and_keeps_nothing(app, qtbot, monkeypatch):
+    from easymeasurement.ui.instrument_test import InstrumentTestOverlay
+    monkeypatch.setattr(app.devices, "new_driver", lambda key, port="": _SlowToConnect())
+    overlay = InstrumentTestOverlay(app, "prime", "bt:00:11:22:33:44:55", "PRIME (Bluetooth)")
+    qtbot.addWidget(overlay)
+    assert overlay.cancel_button.isEnabled() and not overlay.busy.isHidden()
+    overlay.reject()
+    qtbot.waitUntil(lambda: not overlay.worker.isRunning(), timeout=3000)
+    qtbot.wait(20)
+    assert overlay.run is None and not overlay.accepted
+    assert app.service.instrument_history("TEST0001") == []

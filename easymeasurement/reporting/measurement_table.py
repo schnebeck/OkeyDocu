@@ -18,7 +18,7 @@ from xml.sax.saxutils import escape
 
 from ..l10n import N_, tr
 from ..model import Verdict, conductor_of
-from ..vocabulary import Role, counts, result_markup, role
+from ..vocabulary import Role, counts, result_markup, role, symbols_marked
 from ..vocabulary import conductors as low_numbers
 from .context import ReportMeasurement
 from .footnotes import Footnotes
@@ -92,8 +92,8 @@ class Columns:
     def stated(self) -> dict[str, list[str]]:
         """What all measurements share, by kind, each part marked up."""
         return {
-            SETTINGS: [f"{escape(n)}: {low_numbers(v)}" for n, v in self.shared_settings.items()
-                       if v],
+            SETTINGS: [f"{symbols_marked(n)}: {low_numbers(v)}"
+                       for n, v in self.shared_settings.items() if v],
             CONDITIONS: [f"{self.symbol(k)} = {escape(value_text(v))}"
                          for k, v in self.shared_conditions.items() if v],
             LIMITS: [f"{self.symbol(k)} {escape(v)}" for k, v in self.shared_limits.items() if v],
@@ -174,7 +174,7 @@ def group_nodes(group: list[ReportMeasurement], options: dict, notes: Footnotes,
     leading = [tr("No."), tr("Time")] + ([tr(POINT)] if named else [])
     leading += [tr(LOCATION)] if places else []
     leading += [tr(CONDUCTORS)] if any(conductors) else []
-    leading += columns.varying_settings
+    leading += [Markup(symbols_marked(name)) for name in columns.varying_settings]
     leading += [columns.symbol(k) for k in columns.varying_conditions]
     # The verdict speaks for itself and needs no title; every table has room for remarks,
     # so the blocks of a report look alike.

@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 from PySide6.QtCore import QThread, Signal
-from PySide6.QtWidgets import QLabel
+from PySide6.QtWidgets import QLabel, QProgressBar
 
 from ..devices import PREPARING, Capability, DeviceError, driver_info
 from ..l10n import N_, tr
@@ -41,14 +41,26 @@ class PrepareWorker(QThread):
     def __init__(self, driver, known_firmware: str | None, parent=None):
         super().__init__(parent)
         self.driver, self.known_firmware = driver, known_firmware
+        self.cancelled = False
+
+    def cancel(self) -> None:
+        """From the window: what waits for the instrument ends now, the next step not at all."""
+        self.cancelled = True
+        self.driver.abort()
+
+    def _go_on(self) -> None:
+        if self.cancelled:
+            raise DeviceError(tr("Cancelled."))
 
     def run(self) -> None:
         try:
             with self.driver:
+                self._go_on()
                 self.step.emit("identify", "running")
                 identity = self.driver.identify()
                 self.step.emit("identify", "done")
                 texts = None
+                self._go_on()
                 if (Capability.TEXTS in self.driver.capabilities
                         and identity.firmware != self.known_firmware):
                     self.step.emit("texts", "running")
@@ -78,6 +90,10 @@ class InstrumentPrepareOverlay(Overlay):
             self.lines[key] = QLabel()
             self.body.addWidget(self.lines[key])
             self._show_step(key, "waiting", text)
+        # Waiting for the instrument takes as long as it takes: the bar shows it is working.
+        self.busy = QProgressBar(minimum=0, maximum=0, textVisible=False)
+        self.body.addWidget(self.busy)
+        self.cancelling = False
         self.ok_button.setText(tr("Done"))
         self.cancel_button.setText(tr("Later"))
         self.start()
@@ -90,7 +106,9 @@ class InstrumentPrepareOverlay(Overlay):
     def start(self) -> None:
         self.ok_button.setText(tr("Done"))
         self.ok_button.setEnabled(False)
-        self.cancel_button.setEnabled(False)  # a transfer is not cut off halfway
+        self.cancel_button.setText(tr("Cancel"))
+        self.cancel_button.setEnabled(True)
+        self.busy.show()
         self.hint.clear()
         for key, _ in STEPS:
             self._show_step(key, "waiting")
@@ -103,6 +121,10 @@ class InstrumentPrepareOverlay(Overlay):
         self.worker.start()
 
     def _finished(self, identity, texts) -> None:
+        self.busy.hide()
+        if self.cancelling:
+            super().reject()
+            return
         if texts is not None:
             self.app.db.save_device_texts(self.driver_key, identity.firmware, texts.version,
                                           texts.texts)
@@ -112,13 +134,27 @@ class InstrumentPrepareOverlay(Overlay):
         self.cancel_button.hide()
 
     def _failed(self, message: str) -> None:
+        self.busy.hide()
+        if self.cancelling:
+            super().reject()
+            return
         for key, state in self.states.items():
             if state == "running":
                 self._show_step(key, "failed")
         self.hint.setText(message)
         self.ok_button.setText(tr("Try again"))
         self.ok_button.setEnabled(True)
-        self.cancel_button.setEnabled(True)
+        self.cancel_button.setText(tr("Later"))
+
+    def reject(self) -> None:
+        """While the instrument works, cancelling stops it first and leaves once it has."""
+        if self.worker is not None and self.worker.isRunning():
+            self.cancelling = True
+            self.cancel_button.setEnabled(False)
+            self.hint.setText(tr("Cancelling …"))
+            self.worker.cancel()
+            return
+        super().reject()
 
     def accept(self) -> None:
         if self.done:

@@ -35,6 +35,7 @@ from ..vocabulary import (
     outcome_text,
     result_markup,
     role,
+    symbols_marked,
 )
 from .common import AppContext
 from .measurement_detail import capture_text
@@ -110,7 +111,7 @@ def details_html(app: AppContext, row) -> str:
         (escape(tr("Inspector")), escape(data.operator)),
     ])
     words = setting_words(app.db)
-    settings = _rows([(escape(name), conductors(value)) for name, value, _ in (
+    settings = _rows([(symbols_marked(name), conductors(value)) for name, value, _ in (
         words.say(parameter.key, parameter.value) for parameter in data.parameters
         if parameter.key != CONDUCTOR)])
     remarks = _rows([(escape(tr("Remark")), escape(data.comment).replace("\n", "<br>")),

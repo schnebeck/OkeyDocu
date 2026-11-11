@@ -77,6 +77,11 @@ class ProfitestPrimeDriver(PushPrintMixin, MeterDriver):
             self._transport = None
             raise
 
+    def abort(self) -> None:
+        transport = self._transport
+        if transport is not None:
+            transport.abort()
+
     def close(self) -> None:
         self.unsubscribe_live()
         if self._transport is not None:

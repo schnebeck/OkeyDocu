@@ -17,7 +17,7 @@ from xml.sax.saxutils import escape
 from ..l10n import N_, tr
 from ..model import conductor_of
 from ..vocabulary import conductors as low_numbers
-from ..vocabulary import function_markup
+from ..vocabulary import function_markup, symbols_marked
 from .context import ReportMeasurement
 from .footnotes import Footnotes
 from .language import value_text
@@ -69,8 +69,8 @@ def _remark(columns: Columns, row: int, measurement, references: list[str]) -> M
     remark of the measurement and its photos, each on a line of its own."""
     found, settings = columns.found[row], columns.settings[row]
     parts = [escape(word(found[NOTE][0].quantity.raw))] if NOTE in found else []
-    parts += [escape(f"{name}: {settings[name]}") for name in columns.varying_settings
-              if name in settings]
+    parts += [f"{symbols_marked(name)}: {escape(settings[name])}"
+              for name in columns.varying_settings if name in settings]
     parts += [f"{columns.symbol(key)} = {escape(value_text(found[key][0].quantity.raw))}"
               for key in columns.varying_conditions if key in found]
     said = remark(measurement, references)

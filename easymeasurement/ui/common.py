@@ -26,7 +26,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.service import CampaignService
-from ..devices import MeterDriver, create_driver, is_simulated
+from ..devices import Cancelled, MeterDriver, create_driver, is_simulated
 from ..devices.simulator import SimulatedMeter
 from ..l10n import tr
 from ..model import Parameter, Verdict, conductor_of
@@ -189,15 +189,28 @@ class _Task(QThread):
             self.error = err
 
 
-def run_busy(parent, text: str, work: Callable[[], T]) -> T:
+def run_busy(parent, text: str, work: Callable[[], T],
+             cancel: Callable[[], None] | None = None) -> T:
     """Run slow work off the GUI thread, so the window keeps answering.
 
     `work` must not touch the database: its connection belongs to the GUI thread.
-    Errors come back here and are raised to the caller.
+    Errors come back here and are raised to the caller. With `cancel`, the operator may stop
+    the work: `cancel` cuts it short, and if it fails then, `Cancelled` is raised instead;
+    work that was done all the same keeps its result.
     """
     window = parent.window()
-    progress = QProgressDialog(text, "", 0, 0, window)
-    progress.setCancelButton(None)
+    progress = QProgressDialog(text, tr("Cancel"), 0, 0, window)
+    stopped = []
+    if cancel is None:
+        progress.setCancelButton(None)
+    else:
+        def stop() -> None:
+            stopped.append(True)
+            progress.setLabelText(tr("Cancelling …"))
+            cancel()
+
+        progress.canceled.disconnect()  # the dialog stays until the work has ended
+        progress.canceled.connect(stop)
     progress.setWindowTitle("EasyMeasurement")
     progress.setMinimumDuration(300)
     window.setEnabled(False)
@@ -207,8 +220,11 @@ def run_busy(parent, text: str, work: Callable[[], T]) -> T:
     task.start()
     loop.exec()
     task.wait()
+    cancelled = bool(stopped)  # read first: closing the dialog reports a cancel of its own
     progress.close()
     window.setEnabled(True)
+    if task.error is not None and cancelled:
+        raise Cancelled(tr("Cancelled.")) from task.error
     if task.error is not None:
         raise task.error
     return task.result

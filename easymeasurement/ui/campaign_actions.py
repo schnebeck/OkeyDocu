@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 from ..campaign.service import read_instrument
-from ..devices import DeviceError
+from ..devices import Cancelled, DeviceError
 from ..l10n import tr
 from .campaign_dialog import CampaignDialog
 from .campaign_tasks import CampaignTasks
@@ -65,7 +65,9 @@ class CampaignActions(CampaignTasks):
 
         try:
             text = tr("Connecting to the instrument and setting the clock …")
-            start = run_busy(self, text, connect)
+            start = run_busy(self, text, connect, driver.abort)
+        except Cancelled:
+            return
         except DeviceError as err:
             show_error(self, str(err))
             return

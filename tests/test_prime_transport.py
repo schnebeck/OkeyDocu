@@ -176,3 +176,26 @@ def test_time_comes_from_testdate_not_from_the_faulty_timestamp():
 
 def test_event_keeps_the_record_as_it_came():
     assert parse_event(event()).raw == event().decode()
+
+
+class _Silent(FakeInstrument):
+    """Takes commands and never answers them."""
+
+    def write(self, data):
+        self.sent.append(data.decode().strip())
+
+
+def test_cancelling_ends_a_command_waiting_for_its_answer_at_once():
+    import threading
+    import time
+
+    instrument = _Silent()
+    with PrimeTransport(instrument, timeout_s=30) as transport:
+        threading.Timer(0.1, transport.abort).start()
+        started = time.monotonic()
+        with pytest.raises(LinkLost):
+            transport.query("IDNXML:GET:ORDERNO")
+        assert time.monotonic() - started < 5
+        with pytest.raises(LinkLost):  # and nothing more is sent afterwards
+            transport.query("IDNXML:GET:ORDERNO")
+    assert instrument.sent == ["IDNXML:GET:ORDERNO"]

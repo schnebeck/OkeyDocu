@@ -174,3 +174,35 @@ def test_pairing_over_bluetooth_goes_straight_on_to_setting_up(app, qtbot, monke
     qtbot.addWidget(dialog)
     dialog.pairing_buttons["profitest-prime"].click()
     assert opened == [("profitest-prime", "bt:00:11:22:33:44:55")]
+
+
+class _SlowInstrument(_Instrument):
+    """Its texts take until the window cancels."""
+
+    def __init__(self):
+        super().__init__()
+        import threading
+        self.stop = threading.Event()
+
+    def abort(self):
+        self.stop.set()
+
+    def read_texts(self):
+        if not self.stop.wait(5):
+            return super().read_texts()
+        raise DeviceBlocked("aborted")
+
+
+def test_waiting_shows_it_works_and_can_be_cancelled(app, qtbot, monkeypatch):
+    instrument = _SlowInstrument()
+    monkeypatch.setattr(app.devices, "new_driver", lambda key, port="": instrument)
+    overlay = InstrumentPrepareOverlay(app, "profitest-prime", "bt:00:11:22:33:44:55")
+    qtbot.addWidget(overlay)
+    qtbot.waitUntil(lambda: overlay.states["texts"] == "running", timeout=3000)
+    assert not overlay.busy.isHidden() and overlay.cancel_button.isEnabled()
+    overlay.reject()
+    assert overlay.hint.text() == "Wird abgebrochen …"
+    qtbot.waitUntil(lambda: not overlay.worker.isRunning(), timeout=3000)
+    qtbot.wait(20)
+    assert overlay.busy.isHidden() and not overlay.accepted
+    assert app.db.device_text_firmware("profitest-prime") is None

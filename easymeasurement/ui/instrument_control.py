@@ -13,7 +13,7 @@ from contextlib import contextmanager
 from PySide6.QtWidgets import QInputDialog, QWidget
 
 from ..campaign.service import clock_needs_setting, measure_clock_offset, set_instrument_clock
-from ..devices import DeviceError
+from ..devices import Cancelled, DeviceError
 from ..l10n import tr
 from .common import AppContext, ask_clock_sync, run_busy, show_error
 
@@ -50,7 +50,9 @@ class InstrumentControl:
         try:
             with self.free():
                 text = tr("Fetching the readings from the instrument …")
-                stored = run_busy(self.owner, text, read)
+                stored = run_busy(self.owner, text, read, driver.abort)
+        except Cancelled:
+            return None
         except DeviceError as err:
             show_error(self.owner, str(err))
             return None
@@ -75,7 +77,8 @@ class InstrumentControl:
 
         try:
             with self.free():
-                offset = run_busy(self.owner, tr("Checking the instrument clock …"), measure)
+                offset = run_busy(self.owner, tr("Checking the instrument clock …"), measure,
+                                  driver.abort)
                 self.app.service.record_clock_check(campaign_id, offset)
                 if clock_needs_setting(offset, driver) and ask_clock_sync(self.owner, offset):
                     stored, before = run_busy(self.owner, tr("Setting the instrument clock …"),
@@ -83,6 +86,8 @@ class InstrumentControl:
                     self.app.service.file_measurements(campaign_id, stored)
                     self.app.service.record_clock_set(campaign_id, before)
                     offset = 0.0
+        except Cancelled:
+            return None
         except DeviceError as err:
             show_error(self.owner, str(err))
             return None

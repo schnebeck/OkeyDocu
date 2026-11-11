@@ -6,7 +6,7 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from .base import Capability, DeviceError, MeterDriver
+from .base import Cancelled, Capability, DeviceError, MeterDriver
 from .base import DeviceBlocked, DeviceTexts, FoundInstrument, LinkState, LiveReading
 from .base import SelectorPosition
 from .driver_info import PREPARING, DriverInfo, Pairing
@@ -21,6 +21,7 @@ from .registry import (
 )
 
 __all__ = [
+    "Cancelled",
     "Capability",
     "DeviceError",
     "MeterDriver",

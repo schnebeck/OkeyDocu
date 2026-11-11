@@ -12,7 +12,7 @@ from datetime import date
 
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QProgressBar, QPushButton
 
 from ..devices import Capability
 from ..devices.instrument_check import FAILED, NOTE, OK, Check, run_checks
@@ -65,11 +65,15 @@ class InstrumentTestOverlay(Overlay):
         row.addStretch(1)
         row.addWidget(self.copy_button)
         self.body.addLayout(row)
+        self.busy = QProgressBar(minimum=0, maximum=0, textVisible=False)
+        self.body.addWidget(self.busy)
         self.ok_button.setText(tr("Close"))
         self.ok_button.setEnabled(False)
-        self.cancel_button.hide()
+        self.cancel_button.setText(tr("Cancel"))
+        self.cancelling = False
         self.checks: list[Check] = []
         driver = app.devices.new_driver(driver_key, port)
+        self.driver = driver
         self.capabilities = driver.capabilities
         self.worker = TestWorker(driver, self)
         self.worker.checked.connect(self._checked)
@@ -82,6 +86,11 @@ class InstrumentTestOverlay(Overlay):
             f"{MARKS[c.state]}&nbsp;&nbsp;<b>{c.title}</b>: {c.detail}" for c in self.checks))
 
     def _finished(self, run) -> None:
+        self.busy.hide()
+        self.cancel_button.hide()
+        if self.cancelling:  # a test cut short says nothing about the instrument
+            super().reject()
+            return
         if run.identity is not None and Capability.TEXTS in self.capabilities:
             have = self.app.db.device_text_firmware(self.driver_key) == run.identity.firmware
             detail = tr("present") if have else tr("missing: “Set up …” transfers them")
@@ -99,8 +108,14 @@ class InstrumentTestOverlay(Overlay):
         QGuiApplication.clipboard().setText(run_text(self.run.checks, self.run.ready))
 
     def reject(self) -> None:
+        """While the test runs, cancelling ends what waits for the instrument, then leaves."""
         if not self.worker.isRunning():
             super().reject()
+            return
+        self.cancelling = True
+        self.cancel_button.setEnabled(False)
+        self.hint.setText(tr("Cancelling …"))
+        self.driver.abort()
 
     def _leave(self) -> None:
         self.worker.wait()

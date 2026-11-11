@@ -13,7 +13,7 @@ from xml.sax.saxutils import escape
 from ..campaign.photo_marks import ROLES
 from ..l10n import in_language, tr
 from ..model import conductor_of
-from ..vocabulary import conductors, function_markup
+from ..vocabulary import conductors, function_markup, symbols_marked
 from .context import VERDICT_TEXT, ReportStep
 from .footnotes import Footnotes
 from .measurement_table import Columns, group_nodes, limit_text, remark
@@ -59,7 +59,8 @@ def single(measurement, options: dict, notes: Footnotes) -> Footnoted:
         rows.append((tr("Conductors"), Markup(conductors(conductor_of(data.parameters)))))
     if data.location and options.get("location", True):
         rows.append((tr("Location in the equipment"), " / ".join(data.location[1:] or data.location)))
-    rows += [(tr(name), Markup(conductors(value))) for name, value in measurement.settings]
+    rows += [(Markup(symbols_marked(name)), Markup(conductors(value)))
+             for name, value in measurement.settings]
     for key in columns.results + list(columns.shared_conditions):
         result = columns.found[0][key][0]
         limit = limit_text(result)

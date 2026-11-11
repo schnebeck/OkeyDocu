@@ -78,3 +78,12 @@ def test_the_polarities_count_only_where_rlo_did_not_pass():
 
 def test_an_unknown_function_keeps_every_figure():
     assert role("TS9999", "rlo_plus", "1Ω") is Role.RESULT
+
+
+def test_symbols_inside_an_instruments_words_are_set_too():
+    from easymeasurement.vocabulary import symbols_marked
+
+    assert symbols_marked("RLO - Polung") == "<i>R</i><sub rise='30%'>LO</sub> - Polung"
+    assert symbols_marked("RCD - Faktor IΔN").endswith("<i>I</i><sub rise='30%'>ΔN</sub>")
+    assert symbols_marked("U - Typ & mehr") == "U - Typ &amp; mehr"
+    assert symbols_marked("RLOX") == "RLOX"
