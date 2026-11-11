@@ -190,13 +190,13 @@ def test_conductor_stands_with_the_reading(window, app):
     voltages(app)
     page = data_page(window, app)
     texts = {page.table.item(row, 6).text() for row in range(2)}
-    assert texts == {"L1-PE:  U 225V", "L1-L2:  U 390V"}
+    assert texts == {"L1-PE:  U 225\u202fV", "L1-L2:  U 390\u202fV"}
 
 
 def test_measurement_without_a_conductor_shows_only_its_values(window, app):
     two_places(app)
     page = data_page(window, app)
-    assert page.table.item(0, 6).text() == "RLO 0.21Ω"
+    assert page.table.item(0, 6).text() == "RLO 210\u202fmΩ"
 
 
 def test_running_campaign_shows_the_conductor(window, app):

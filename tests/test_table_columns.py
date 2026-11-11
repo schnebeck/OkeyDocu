@@ -48,11 +48,11 @@ def test_dates_sort_by_time_not_by_their_text(page):
 
 def test_values_sort_by_size_not_by_their_text(page):
     _menu(page, VALUES)["Nach „Messwerte“ aufsteigend sortieren"].trigger()
-    assert [text.split()[-1] for text in _column(page, VALUES)] == ["300kΩ", "2MΩ", "10MΩ"]
+    assert [text.split(" ", 1)[1] for text in _column(page, VALUES)] == ["300\u202fkΩ", "2\u202fMΩ", "10\u202fMΩ"]
     descending = _menu(page, VALUES)["Nach „Messwerte“ absteigend sortieren"]
     assert not descending.isChecked()
     descending.trigger()
-    assert [text.split()[-1] for text in _column(page, VALUES)] == ["10MΩ", "2MΩ", "300kΩ"]
+    assert [text.split(" ", 1)[1] for text in _column(page, VALUES)] == ["10\u202fMΩ", "2\u202fMΩ", "300\u202fkΩ"]
 
 
 def test_the_newest_reading_is_chosen_wherever_the_sorting_put_it(page):

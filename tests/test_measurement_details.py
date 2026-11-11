@@ -68,3 +68,15 @@ def test_the_view_opens_over_the_window(qtbot, app, asset):
     qtbot.addWidget(view)
     assert "<sub rise='30%'>LO</sub>" in view.text.text()
     assert "TS1285" in view.record.toPlainText()
+
+
+def test_a_row_shows_the_figures_that_count():
+    from easymeasurement.ui.readings import readings_line, stored_values
+
+    figures = [("rlo", "RLO", "0.21Ω"), ("rlo_plus", "RLO+", "0.21Ω"),
+               ("rlo_offset", "RLO-OFFSET", "0.04Ω"), ("rlo_minus", "RLO-", "---")]
+    with speaking("de"):
+        assert readings_line("rlo", "passed", figures) == \
+            "RLO 210 mΩ   RLO-Offset 40 mΩ"
+        assert "RLO+ 210 mΩ" in readings_line("rlo", "failed", figures)
+    assert stored_values("a\x1fA\x1f1V\x1eb\x1fB\x1f2V") == [("a", "A", "1V"), ("b", "B", "2V")]

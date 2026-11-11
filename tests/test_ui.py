@@ -81,7 +81,7 @@ def test_value_range_filter_understands_units(window, qtbot):
     page = window.measurements
     page.value_max.setText("1MΩ")
     qtbot.waitUntil(lambda: rows(window) == 1)
-    assert "500kΩ" in page.table.item(0, 6).text()
+    assert "500\u202fkΩ" in page.table.item(0, 6).text()
 
 
 def test_value_range_ignores_other_units(window, qtbot):

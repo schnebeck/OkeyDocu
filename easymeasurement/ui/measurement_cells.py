@@ -12,6 +12,7 @@ from ..campaign.service import LOCATION_SEPARATOR
 from ..l10n import N_, tr
 from ..model import conductor_of
 from .common import stored_parameters
+from .readings import readings_line, stored_values
 
 RECORD, UNIT = "\x1e", "\x1f"  # the separators the search query joins checklist values with
 
@@ -31,7 +32,8 @@ def values_text(row) -> str:
     A checklist says its answers first: they are what the row is about, the question
     only says which one.
     """
-    values = _checks(row["checks"]) or row["value_text"] or ""
+    figures = readings_line(row["function"], row["verdict"], stored_values(row["value_parts"]))
+    values = _checks(row["checks"]) or figures or row["value_text"] or ""
     conductor = conductor_of(stored_parameters(row))
     return f"{conductor}:  {values}" if conductor else values
 

@@ -30,9 +30,10 @@ from ..devices import MeterDriver, create_driver, is_simulated
 from ..devices.simulator import SimulatedMeter
 from ..l10n import tr
 from ..model import Parameter, Verdict, conductor_of
-from ..vocabulary import function_label, function_symbol, outcome_text, result_label
+from ..vocabulary import function_label, function_symbol
 from ..reporting.archive import ReportArchive
 from ..reporting.context import VERDICT_TEXT
+from .readings import readings_line
 from ..store import Database
 from .table_stretch import TitledStretch
 
@@ -229,10 +230,8 @@ def stored_parameters(row) -> list[Parameter]:
 
 def value_line(service, row) -> str:
     """One measurement in a line: which conductors, then what was read."""
-    values = "   ".join(
-        f"{result_label(v['key'], v['label'])} {outcome_text(v['raw'])}"
-        for v in service.values(row["id"])
-    )
+    values = readings_line(row["function"], row["verdict"],
+                           ((v["key"], v["label"], v["raw"]) for v in service.values(row["id"])))
     conductor = conductor_of(stored_parameters(row))
     return f"{conductor}:  {values}" if conductor else values
 

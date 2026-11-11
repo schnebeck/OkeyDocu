@@ -115,7 +115,7 @@ def test_a_measurement_chosen_elsewhere_highlights_its_link(timeline, case):
 def test_tooltip_of_a_mark_has_time_and_values(timeline, case):
     words = timeline._describe(Hit("mark", case[1][0]))
     assert "2026-03-01  10:00:00" in words
-    assert "0,12" in words
+    assert "120\u202fmΩ" in words
     assert "bestanden" in words
 
 

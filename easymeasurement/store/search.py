@@ -28,6 +28,9 @@ SELECT m.*, r.name AS run_name, r.kind AS run_kind, r.started_at AS run_started,
        cu.id AS customer_id, cu.name AS customer_name,
        (SELECT group_concat(v.label || ' ' || reading_text(v.raw), '   ') FROM measured_values v
         WHERE v.measurement_id = m.id) AS value_text,
+       (SELECT group_concat(f.key || char(31) || f.label || char(31) || f.raw, char(30))
+        FROM (SELECT v.key, v.label, v.raw FROM measured_values v WHERE v.measurement_id = m.id
+              ORDER BY v.position, v.id) f) AS value_parts,
        (SELECT v.base_value FROM measured_values v WHERE v.measurement_id = m.id
         ORDER BY v.position, v.id LIMIT 1) AS first_value,
        (SELECT group_concat(c.key || char(31) || reading_text(c.raw), char(30))
