@@ -38,9 +38,9 @@ Typ gelöscht, bekommen seine Elemente einen Ersatztyp, ihre Werte bleiben unsic
 Ein Merkmal kann Werte zur Auswahl anbieten (`choices`, eine je Zeile); das Elementformular zeigt es
 dann als Auswahlfeld, das auch andere Werte annimmt. `data/kinds.yaml` belegt übliche Normwerte vor,
 gemeinsam für alle Typen nach der Bezeichnung des Merkmals: Leitungstyp, Charakteristik, Querschnitt,
-Nennstrom, Bemessungsdifferenzstrom, Pole, Netzform, Schutzart, Schutzklasse. „Leiter je Pol“ zählt
-parallel geführte Leiter eines Pols, „Pole der Schutzeinrichtung“ sagt, ob ein-, zwei-, drei- oder
-vierpolig geschaltet wird.
+Nennstrom, Bemessungsdifferenzstrom, Pole, Netzform, Schutzart, Schutzklasse. „Adern der Leitung“
+zählt alle Adern eines Kabels wie die Aderanzahl des PROFITEST PRIME (NYM-J 5×2,5: 5, eine Einzelader:
+1), „Pole der Schutzeinrichtung“ sagt, ob ein-, zwei-, drei- oder vierpolig geschaltet wird.
 
 Jedes Element hat eine Prüfgrundlage (`basis`). Leer folgt es der des Elements darüber; das oberste
 braucht eine, das Formular sagt es, solange sie fehlt. Das Protokoll nennt sie im Titel („Prüfprotokoll

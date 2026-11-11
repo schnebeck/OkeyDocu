@@ -39,7 +39,7 @@ kinds:
                 {key: characteristic, label: Characteristic,
                  choices: [general, selective (S), short-time delayed (G)]},
                 Circuit breaker characteristic, Cable type,
-                {key: number_of_cores, label: Conductors per pole},
+                {key: number_of_cores, label: Cores of the cable},
                 "Cross-section|mm²", "Cable length|m"]}
   - {key: rcm, label: Residual current monitor, icon: rcm, interval: 6,
      features: [RCM type, Number of poles, "Rated residual current|mA", "Rated current|A",
@@ -48,7 +48,7 @@ kinds:
      features: [IMD type, "Nominal system voltage|V", "Measuring voltage|V",
                 "Measuring current|mA", "Warning value|kΩ", "Alarm value|kΩ"]}
   - {key: circuit, label: Circuit, icon: circuit, izytron: 236,
-     features: [Cable type, Characteristic, {key: number_of_cores, label: Conductors per pole},
+     features: [Cable type, Characteristic, {key: number_of_cores, label: Cores of the cable},
                 "Rated current|A", "Cross-section|mm²",
                 {key: number_of_poles, label: Poles of the protective device}, "Cable length|m"]}
   - {key: cable, label: Cable, icon: cable,
@@ -129,7 +129,7 @@ choices:
   Rated residual current: ["10", "30", "100", "300", "500", "1000"]
   RCD type: [AC, A, F, B, B+]
   Poles of the protective device: ["1", "2", "3", "4"]
-  Conductors per pole: ["1", "2", "3", "4"]
+  Cores of the cable: ["1", "2", "3", "4", "5", "6", "7", "8", "10"]
   Number of poles: ["1", "2", "3", "4"]
   Phases: ["1", "3"]
   Earthing system type: [TN-S, TN-C, TN-C-S, TT, IT]
