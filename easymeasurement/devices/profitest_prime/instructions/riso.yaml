@@ -8,7 +8,8 @@ settings:
 - Test voltage: 500 V
 - Limit: 1.00 MΩ
 - Test duration: AUTO
-- Conductor pair: choose to suit the measuring point (L1-PE … L1-L3)
+- Conductor pair: "L+N-PE: all live conductors together against PE; single pairs (L1-PE … L1-L3)
+    to locate a fault"
 warnings:
 - Measure only on de-energised parts of the installation.
 - Do not touch the test probes during the measurement.
@@ -17,8 +18,9 @@ warnings:
 - In installations without an RCD, N and PE must be separated.
 instructions:
 - First short-circuit the test probes. The instrument must show less than 1 kΩ.
+- For L+N-PE, bridge the live conductors, L and N; at a three-phase connection L1, L2, L3 and N.
 - Place probe 3(PE) on PE.
-- Place probe 1(L) on the live conductor.
+- Place probe 1(L) on the live conductor or on the bridge.
 - Press ON/START on the instrument and wait for a stable value.
 - Save the value with “Save Value”.
 source: Operating instructions, section 11.1.4
