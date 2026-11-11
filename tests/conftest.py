@@ -41,6 +41,13 @@ def no_real_instruments(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def own_thumbnails(monkeypatch):
+    """The thumbnail cache lives as long as the process; each test sees its own photos."""
+    from easymeasurement.ui import photo_shared
+    monkeypatch.setattr(photo_shared, "_shared", None)
+
+
+@pytest.fixture(autouse=True)
 def no_real_wallet(monkeypatch):
     """Tests must never touch the wallet of the person running them."""
     monkeypatch.setattr(KWalletKeyStore, "key", lambda self: b"test" * 8)

@@ -27,6 +27,7 @@ from .master_data import MasterDataPage
 from .measurement_overlays import ImportOverlay
 from .kinds_page import KindsPage
 from .measurement_search import MeasurementsPage
+from .photo_shared import shared_thumbs
 from .plan_editor import PlanEditorPage
 from .reports import ReportsPage
 from .settings_dialog import SettingsOverlay
@@ -39,6 +40,7 @@ class MainWindow(MainMenus, QMainWindow):
     def __init__(self, app: AppContext):
         super().__init__()
         self.app = app
+        shared_thumbs().viewer = app.service.view_of_file
         self.memory = ViewMemory()
         self.setWindowTitle("EasyMeasurement")
         self.resize(1360, 820)

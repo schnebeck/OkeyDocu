@@ -75,6 +75,7 @@ class PhotoNote:
     notes: list[str] = field(default_factory=list)
     marks: list = field(default_factory=list)
     role: str = ""
+    view: object = None  # how the photo is turned and cut; None shows it as it is
 
 
 @dataclass

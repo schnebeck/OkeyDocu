@@ -99,9 +99,11 @@ def _without(row: dict, *columns: str) -> dict:
 
 
 def _photo_notes(db, photo: dict) -> None:
-    """A photo's role and marks count where there are any, so older seals still hold."""
-    if not photo["role"]:
-        del photo["role"]
+    """A photo's role, marks, turn and cut count where there are any, so older seals still
+    hold."""
+    for column in ("role", "rotation", "crop"):
+        if not photo[column]:
+            del photo[column]
     marks = _rows(db, "SELECT number, x, y, w, h, text FROM photo_marks WHERE photo_id=?"
                       " ORDER BY number", photo["id"])
     if marks:

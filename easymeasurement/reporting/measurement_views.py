@@ -41,12 +41,12 @@ def remaining_photos(step: ReportStep, notes: Footnotes) -> list[tuple]:
             if str(path) in notes.shown:
                 continue
             notes.shown.add(str(path))
-            role, marks = m.photo_notes.get(str(path), ("", []))
+            role, marks, *view = m.photo_notes.get(str(path), ("", []))
             caption = f"{function_markup(m.data.function)} · {escape(when(m))}"
             if role:
                 caption = f"<b>{escape(tr(ROLES[role]))}:</b> {caption}"
             texts = [f"({mark.number}) {mark.text}" for mark in marks if mark.text]
-            items.append((path, Markup(caption), marks, role, texts))
+            items.append((path, Markup(caption), marks, role, texts, *view))
     return items
 
 

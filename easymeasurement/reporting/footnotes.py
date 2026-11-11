@@ -45,13 +45,14 @@ class Footnotes:
                 continue
             self.shown.add(str(path))
             self.count += 1
-            role, marks = measurement.photo_notes.get(str(path), ("", []))
+            role, marks, *view = measurement.photo_notes.get(str(path), ("", []))
             caption = f"[{self.count}] {function_markup(measurement.data.function, short=True)}"
             caption += f" · {escape(when(measurement))}"
             if role:
                 caption = f"<b>{escape(tr(ROLES[role]))}:</b> {caption}"
             noted = [mark for mark in marks if mark.text]
             taken.append(PhotoNote(path, self.count, Markup(caption),
-                                   [f"{mark.number}  {mark.text}" for mark in noted], marks, role))
+                                   [f"{mark.number}  {mark.text}" for mark in noted], marks, role,
+                                   view[0] if view else None))
             numbers.append((self.count, [mark.number for mark in noted]))
         return taken, references(numbers)

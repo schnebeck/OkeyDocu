@@ -144,10 +144,12 @@ def _draw_marks(image: PilImage.Image, marks) -> None:
         draw.text((left, top), str(mark.number), fill="white", font=font, anchor="mm")
 
 
-def _photo(path: Path, width: float, marks=()) -> Image | None:
-    """From the proxy: as it is without marks, so its bytes go into the file unchanged."""
+def _photo(path: Path, width: float, marks=(), view=None) -> Image | None:
+    """From the proxy: as it is without marks and view, so its bytes go into the file
+    unchanged; otherwise turned and cut as the view says, then marked."""
     proxy = make_proxy(path)
-    if proxy is not None and not marks:
+    plain = view is None or view.plain
+    if proxy is not None and not marks and plain:
         with PilImage.open(proxy) as header:
             ratio = header.height / header.width
         return Image(str(proxy), width=width, height=width * ratio)
@@ -158,6 +160,8 @@ def _photo(path: Path, width: float, marks=()) -> Image | None:
         image = reduced(path)
         if image is None:
             return None
+    if not plain:
+        image = view.apply(image)
     _draw_marks(image, marks)
     buffer = io.BytesIO()
     image.save(buffer, "JPEG", quality=QUALITY)
@@ -169,6 +173,7 @@ def _photos(items: list[tuple], width: float) -> list[Image | None]:
     """All photos of a block at once: decoding and scaling run beside each other on every core,
     as the imaging library lets go of the interpreter while it works."""
     def one(item: tuple) -> Image | None:
-        return _photo(item[0], width, item[2] if len(item) > 2 else ())
+        return _photo(item[0], width, item[2] if len(item) > 2 else (),
+                      item[5] if len(item) > 5 else None)
     with ThreadPoolExecutor(max_workers=os.cpu_count() or 2) as pool:
         return list(pool.map(one, items))

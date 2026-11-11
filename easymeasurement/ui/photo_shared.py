@@ -18,6 +18,7 @@ from PySide6.QtGui import QColor, QDrag, QImageReader, QPainter, QPixmap
 from PySide6.QtWidgets import QWidget
 
 from ..campaign.photo_proxies import fresh_proxy
+from .photo_viewing import viewed
 
 PHOTO_MIME = "application/x-easymeasurement-photo"
 DRAG_IMAGE_PX = 72
@@ -43,9 +44,10 @@ def missing_picture() -> QPixmap:
     return pixmap
 
 
-def read_thumbnail(path: str) -> QPixmap:
-    """Decode at the small size directly and honour the rotation stored in the file.
-    A fresh proxy is read instead of the original: it is upright already and far smaller."""
+def read_thumbnail(path: str, view=None) -> QPixmap:
+    """Decode at the small size directly and honour the rotation stored in the file, then
+    turn and cut it as the photo's view says. A fresh proxy is read instead of the original:
+    it is upright already and far smaller."""
     proxy = fresh_proxy(Path(path))
     reader = QImageReader(str(proxy) if proxy else path)
     reader.setAutoTransform(True)
@@ -55,7 +57,9 @@ def read_thumbnail(path: str) -> QPixmap:
             THUMB_EDGE_PX, THUMB_EDGE_PX, Qt.AspectRatioMode.KeepAspectRatio
         ))
     image = reader.read()
-    return QPixmap.fromImage(image) if not image.isNull() else missing_picture()
+    if image.isNull():
+        return missing_picture()
+    return QPixmap.fromImage(viewed(image, view))
 
 
 class ThumbCache(QObject):
@@ -69,6 +73,7 @@ class ThumbCache(QObject):
 
     def __init__(self):
         super().__init__()
+        self.viewer: Callable[[str], object] | None = None  # the view of a photo, by its path
         self._pixmaps: dict[str, QPixmap] = {}
         self._waiting: deque[str] = deque()
         self._paused = False
@@ -83,6 +88,10 @@ class ThumbCache(QObject):
             self._timer.start()
         return known
 
+    def forget(self, path) -> None:
+        """A photo shown another way from now on is read again on its next call."""
+        self._pixmaps.pop(str(path), None)
+
     def pause(self, paused: bool) -> None:
         """A held gesture goes first: one large file takes longer than a frame."""
         self._paused = paused
@@ -96,7 +105,7 @@ class ThumbCache(QObject):
 
     def _read_next(self) -> None:
         key = self._waiting.popleft()
-        self._pixmaps[key] = read_thumbnail(key)
+        self._pixmaps[key] = read_thumbnail(key, self.viewer(key) if self.viewer else None)
         if len(self._pixmaps) > MAX_KEPT:
             del self._pixmaps[next(iter(self._pixmaps))]  # the one read longest ago
         self.ready.emit(key)

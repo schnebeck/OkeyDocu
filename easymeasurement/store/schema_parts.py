@@ -113,6 +113,9 @@ CREATE TABLE photos (
     taken_at TEXT,
     time_source TEXT NOT NULL DEFAULT 'unknown',
     role TEXT NOT NULL DEFAULT '' CHECK (role IN ('', 'hint', 'defect')),
+    -- How it is shown: turned clockwise, then cut to "x y w h" in parts of the turned picture.
+    rotation INTEGER NOT NULL DEFAULT 0 CHECK (rotation IN (0, 90, 180, 270)),
+    crop TEXT NOT NULL DEFAULT '',
     UNIQUE (campaign_id, sha256)
 );
 

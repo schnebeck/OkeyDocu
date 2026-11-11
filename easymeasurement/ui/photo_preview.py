@@ -11,7 +11,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from PySide6.QtCore import QRectF, QSize, Qt
-from PySide6.QtGui import QIcon, QImageIOHandler, QImageReader, QPixmap
+from PySide6.QtGui import QIcon, QImage, QImageIOHandler, QImageReader, QPixmap
 from PySide6.QtWidgets import (
     QButtonGroup,
     QCheckBox,
@@ -25,19 +25,22 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.photo_marks import ROLES, PhotoMark
+from ..campaign.photo_view import PhotoView
 from ..l10n import tr
 from .common import AppContext
 from .growing_edit import GrowingEdit
 from .overlay import Overlay
 from .photo_canvas import MarkCanvas
+from .photo_shared import shared_thumbs
+from .photo_viewing import PhotoViewing, fitted, viewed
 
 LARGE_MARGIN_PX = 200  # the card's own heading and button row
 SIDE_PX = 320  # the column for role and marks
 SMALL_FOR_PRINT = 1000  # pixels along the long side; below, a photo prints coarse
 
 
-def read_large(path: Path, room: QSize) -> QPixmap:
-    """The picture upright and as large as `room` allows, without enlarging it."""
+def read_upright(path: Path, room: QSize) -> QImage:
+    """The picture upright and about as large as `room` needs, without enlarging it."""
     reader = QImageReader(str(path))
     reader.setAutoTransform(True)
     raw = reader.size()
@@ -48,14 +51,7 @@ def read_large(path: Path, room: QSize) -> QPixmap:
         factor = min(room.width() / upright.width(), room.height() / upright.height())
         if factor < 0.5:
             reader.setScaledSize(raw * (2 * factor))
-    image = reader.read()
-    if image.isNull():
-        return QPixmap()
-    if image.width() > room.width() or image.height() > room.height():
-        image = image.scaled(
-            room, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
-        )
-    return QPixmap.fromImage(image)
+    return reader.read()
 
 
 def _size_words(path: Path) -> str:
@@ -68,8 +64,8 @@ def _size_words(path: Path) -> str:
     return words
 
 
-class PhotoPreview(Overlay):
-    """With the photo's id, marks and role can be set while its campaign is open."""
+class PhotoPreview(PhotoViewing, Overlay):
+    """With the photo's id, marks, role and view can be set while its campaign is open."""
 
     def __init__(self, title: str, caption: str, path: Path, parent: QWidget,
                  app: AppContext | None = None, photo_id: int | None = None):
@@ -79,18 +75,29 @@ class PhotoPreview(Overlay):
         room = QSize(max(host.width() - 120 - side, 240),
                      max(host.height() - LARGE_MARGIN_PX, 180))
         super().__init__(title, parent, width=room.width() + 40 + side)
-        self.app, self.photo_id = app, photo_id
+        self.app, self.photo_id, self.path = app, photo_id, path
         self.editable = notes and app.db.one(
             "SELECT c.status FROM photos p JOIN campaigns c ON c.id = p.campaign_id"
             " WHERE p.id=?", photo_id)["status"] == "open"
-        self.canvas = MarkCanvas(read_large(path, room), self.editable)
+        self.view = app.service.photo_view(photo_id) if notes else PhotoView()
+        # Read large enough for either way up, so turning it loses nothing.
+        self.room = room
+        edge = max(room.width(), room.height())
+        self.source = read_upright(path, QSize(edge, edge))
+        shown = viewed(self.source, self.view) if not self.source.isNull() else self.source
+        self.canvas = MarkCanvas(fitted(shown, room) if not shown.isNull() else QPixmap(),
+                                 self.editable)
         self.rows: dict[int, GrowingEdit] = {}
         row = QHBoxLayout()
-        row.addWidget(self.canvas, 1)
+        picture = QVBoxLayout()
+        picture.addWidget(self.canvas, 1)
+        row.addLayout(picture, 1)
         if notes:
             row.addWidget(self._side(), 0)
             self.canvas.marks = app.service.photo_marks(photo_id)
             self._fill()
+            if self.editable:
+                picture.addLayout(self._view_tools())
         self.body.addLayout(row, 1)
         self.hint.setText("  ·  ".join(part for part in (caption, _size_words(path)) if part))
         self.ok_button.setText(tr("Apply") if self.editable else tr("Back"))
@@ -147,7 +154,9 @@ class PhotoPreview(Overlay):
         texts = {m.number: self.rows[m.number].toPlainText() for m in self.canvas.marks
                  if m.number in self.rows}
         while self.list.count():
-            self.list.takeAt(0).widget().deleteLater()
+            gone = self.list.takeAt(0).widget()
+            gone.hide()  # at once, not only when the event loop deletes it
+            gone.deleteLater()
         self.rows.clear()
         for number, mark in enumerate(self.canvas.marks, start=1):
             mark.text = texts.get(mark.number, mark.text)
@@ -185,6 +194,9 @@ class PhotoPreview(Overlay):
         return super().eventFilter(watched, event)
 
     def _add(self, box: QRectF) -> None:
+        if self.editable and self.cutting:
+            self._cut(box)
+            return
         self.marks()
         number = len(self.canvas.marks) + 1
         self.canvas.marks.append(PhotoMark(number, box.x(), box.y(), box.width(), box.height()))
@@ -210,5 +222,6 @@ class PhotoPreview(Overlay):
 
     def accept(self) -> None:
         if self.editable:
-            self.app.service.save_photo_notes(self.photo_id, self.role(), self.marks())
+            self.app.service.save_photo_notes(self.photo_id, self.role(), self.marks(), self.view)
+            shared_thumbs().forget(self.path)
         super().accept()

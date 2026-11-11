@@ -19,7 +19,7 @@ from .device_texts import DeviceTextsMixin
 from .master_data import MasterDataMixin
 from .schema import _SCHEMA
 
-SCHEMA_VERSION = 22
+SCHEMA_VERSION = 23
 
 
 class SchemaMismatch(Exception):

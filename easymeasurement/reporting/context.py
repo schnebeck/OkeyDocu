@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
 
+from ..campaign.photo_view import PhotoView
 from ..campaign.repeat import REPEAT
 from ..campaign.service import MANUAL, CampaignService
 from ..model import (
@@ -43,7 +44,7 @@ class ReportMeasurement:
     data: MeterMeasurement
     local_time: datetime
     photos: list[Path] = field(default_factory=list)
-    photo_notes: dict = field(default_factory=dict)  # path text: role and marks
+    photo_notes: dict = field(default_factory=dict)  # path text: role, marks and view
     manual: bool = False  # typed in, not read from an instrument
     edited: bool = False  # something other than the reading was overwritten
     attached: Attached = field(default_factory=Attached)
@@ -101,7 +102,8 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
         attached = sort_attached(service, service.attachments(campaign_id, measurement_id=row["id"]))
         notes = {
             str(service.photo_path(photo["campaign_id"], photo["file_name"])):
-                (photo["role"], service.photo_marks(photo["id"]))
+                (photo["role"], service.photo_marks(photo["id"]),
+                 PhotoView.stored(photo["rotation"], photo["crop"]))
             for photo in service.photos_of(row["id"])
         }
         data = service.load_measurement(row)

@@ -125,7 +125,7 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
 
     def footnoted(node: Footnoted, caption, lead: list) -> FootnotedFlowable:
         """The photos below the rows that name them; their marks' texts under each photo."""
-        items = [(note.path, note.caption, note.marks, note.role, note.notes)
+        items = [(note.path, note.caption, note.marks, note.role, note.notes, note.view)
                  for note in node.photos]
         if isinstance(node.body, Table):
             rows = [[text(c, cell) for c in row] for row in node.body.rows]
