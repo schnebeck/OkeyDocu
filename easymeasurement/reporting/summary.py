@@ -28,6 +28,8 @@ OVERVIEW = N_("Overview")
 DEFECTS = N_("Defects")
 NOTICES = N_("Notices")
 NO_DEFECTS = N_("No defects were found.")
+LEGEND = N_("✓ passed · ✗ failed · – not judged · [n] photo n of this report · symbols of"
+            " quantities after ISO 80000, the index names what was measured")
 ELEMENT = N_("Element")
 MEASUREMENTS = N_("Measurements")
 
@@ -84,4 +86,4 @@ def summary_nodes(values: dict) -> list[Node]:
     if hints:
         nodes += [Heading(tr(NOTICES), 3), Table([tr(ELEMENT), tr("Photo"), tr("Remark")], hints,
                                                  [], 2)]
-    return nodes
+    return nodes + [Paragraph(tr(LEGEND))]
