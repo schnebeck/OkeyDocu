@@ -54,11 +54,35 @@ def test_a_new_campaign_starts_with_the_customers_last_contact(app, press):
 def test_the_edit_overlay_takes_the_contact(app, window, press):
     campaign = app.service.create(press, "Prüfung", "Anna Prüfer")
     overlay = CampaignEditOverlay(app, app.service.campaign(campaign), window)
-    overlay.contact["department"].setText("Werkstatt")
-    overlay.contact["contact"].setText("Herr Beispiel")
-    overlay.contact["contact_email"].setText("beispiel@kunde.example ")
+    order = overlay.order
+    assert not order.expanded  # nothing but the contact person is given yet
+    order.fields["department"].setText("Werkstatt")
+    order.fields["contact"].setText("Herr Beispiel")
+    order.fields["contact_email"].setText("beispiel@kunde.example ")
+    order.fields["job_number"].setText(" V-0815")
     assert overlay._changed()
-    assert overlay.contact_values() == ("Werkstatt", "Herr Beispiel", "", "beispiel@kunde.example")
+    assert order.contact_values() == ("Werkstatt", "Herr Beispiel", "", "beispiel@kunde.example")
+    assert order.order_values() == ("", "V-0815")
+
+
+def test_the_order_opens_where_it_holds_something(app, window, press):
+    campaign = app.service.create(press, "Prüfung", "Anna Prüfer")
+    app.service.set_order(campaign, "", "V-0815")
+    overlay = CampaignEditOverlay(app, app.service.campaign(campaign), window)
+    assert overlay.order.expanded
+
+
+def test_a_new_campaign_asks_for_the_same_order_and_suggests_the_last_contact(app, window, press):
+    from easymeasurement.ui.campaign_dialog import CampaignDialog
+
+    first = app.service.create(press, "2026", "Anna Prüfer")
+    app.service.set_contact(first, "", "Frau Muster", "", "")
+    dialog = CampaignDialog(app, window)
+    dialog.asset.setCurrentIndex(dialog.asset.findData(press))
+    assert set(dialog.order.fields) == {"department", "contact", "contact_phone",
+                                        "contact_email", "cost_center", "job_number"}
+    assert dialog.order.fields["contact"].text() == "Frau Muster"
+    assert dialog.order.order_values() == ("", "")
 
 
 def test_the_letterhead_names_the_contact_only_where_there_is_one(app, press):
@@ -74,13 +98,15 @@ def test_the_letterhead_names_the_contact_only_where_there_is_one(app, press):
         "Department: Instandhaltung", "Contact: Frau Muster"]
 
 
-def test_the_cost_center_stands_with_the_contractor_and_is_not_carried_on(app, press):
+def test_cost_centre_and_job_number_stand_with_the_contractor_and_are_not_carried_on(app, press):
     app.db.save_company(name="Prüfdienst GmbH")
     first = app.service.create(press, "2026", "Anna Prüfer")
-    app.service.set_cost_center(first, " 4711 ")
+    app.service.set_order(first, " 4711 ", "V-0815")
     with speaking("de"):
         nodes = resolve(parse_template(default_template_text()), build_context(app.service, first))
     head = next(node for node in nodes if isinstance(node, Letterhead))
-    assert head.contractor == ["Prüfdienst GmbH", "Kostenstelle: 4711", "Prüfer: Anna Prüfer"]
+    assert head.contractor == ["Prüfdienst GmbH", "Kostenstelle: 4711", "Vorgangsnummer: V-0815",
+                               "Prüfer: Anna Prüfer"]
     second = app.service.create(press, "2027", "Anna Prüfer")
     assert app.service.campaign(second)["cost_center"] == ""
+    assert app.service.campaign(second)["job_number"] == ""

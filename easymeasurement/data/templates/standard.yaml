@@ -25,6 +25,7 @@ blocks:
       - "{{ company.street }}"
       - "{{ company.zip }} {{ company.city }}"
       - "Cost centre: {{ campaign.cost_center }}"
+      - "Job number: {{ campaign.job_number }}"
       - "Inspector: {{ campaign.tester }}"
     qr: true
     logo: true

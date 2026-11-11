@@ -47,6 +47,9 @@ class CampaignActions(CampaignTasks):
         else:
             self._start_free(asset, title, tester, user, instrument)
         created = self.app.db.one("SELECT max(id) AS id FROM campaigns")["id"] or 0
+        if created > newest:
+            self.app.service.set_contact(created, *dialog.order.contact_values())
+            self.app.service.set_order(created, *dialog.order.order_values())
         if follows and created > newest:
             self.app.service.mark_follow_up(created, follows)
         if dialog.repeat.isChecked() and dialog.previous is not None and created > newest:

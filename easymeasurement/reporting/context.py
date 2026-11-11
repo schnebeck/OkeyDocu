@@ -15,6 +15,8 @@ from pathlib import Path
 from ..campaign.photo_view import PhotoView
 from ..campaign.repeat import REPEAT
 from ..campaign.service import MANUAL, CampaignService
+from ..devices import is_simulated, setting_words
+from ..l10n import N_, in_language, tr
 from ..model import (
     SIGHT_CHECK_FUNCTION,
     MeterMeasurement,
@@ -22,14 +24,17 @@ from ..model import (
     Verdict,
     conductor_of,
 )
-from ..devices import is_simulated, setting_words
-from ..l10n import N_, in_language, tr
-from ..vocabulary import function_label as vocabulary_label
 from ..vocabulary import function_markup
 from .attached import Attached, places, sort_attached
+from .context_texts import (
+    campaign_signature,
+    clock_summary,
+    company_context,
+    date_text,
+    reference_day,
+)
+from .language import day
 from .levels import asset_features, structure_levels
-from .language import day, moment
-from .logo import LogoError, decode_logo
 from .measurement_words import said_settings
 from .nodes import Markup
 
@@ -165,12 +170,13 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
             "contact_phone": campaign["contact_phone"],
             "contact_email": campaign["contact_email"],
             "cost_center": campaign["cost_center"],
-            "signature": _signature(service.db, campaign),
+            "job_number": campaign["job_number"],
+            "signature": campaign_signature(service.db, campaign),
             "plan": campaign["plan_title"],
             "uuid": campaign["uuid"],
-            "started": _date_text(campaign["started_at"]),
+            "started": date_text(campaign["started_at"]),
             "date": day(datetime.fromisoformat(campaign["started_at"])),
-            "closed": _date_text(campaign["closed_at"]),
+            "closed": date_text(campaign["closed_at"]),
             "clock_offset_s": round(campaign["clock_offset_s"]),
             "clock_summary": clock_summary(
                 campaign, service.clock_checks(campaign_id),
@@ -184,9 +190,9 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
             "model": identity.model,
             "serial_no": identity.serial_no,
             "firmware": identity.firmware,
-            "calibrated_on": _day(identity.calibrated_on),
-            "recalibration_due": _day(identity.recalibration_due),
-            "overdue": identity.calibration_overdue(_reference_day(campaign)),
+            "calibrated_on": day(identity.calibrated_on),
+            "recalibration_due": day(identity.recalibration_due),
+            "overdue": identity.calibration_overdue(reference_day(campaign)),
         },
         "steps": steps,
         "report": {"date": day(date.today())},
@@ -196,62 +202,3 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
         "verdict_tone": {tr("Passed"): "passed", tr("Failed"): "failed"}.get(
             overall_verdict(steps), ""),
     }
-
-
-def company_context(company: dict[str, str]) -> dict:
-    """The firm's texts for placeholders; its logo apart, as image data for the letterhead."""
-    logo = company.get("logo", "")
-    try:
-        data = decode_logo(logo) if logo else None
-    except LogoError:
-        data = None
-    return {"company": {k: v for k, v in company.items() if k != "logo"}, "company_logo": data}
-
-
-def clock_summary(campaign, checks, offsets) -> str:
-    """Say which offset the times rest on, including any change along the way.
-
-    Empty while no time was corrected: a clock set before measuring leaves nothing to tell.
-    """
-    corrected = any(abs(offset or 0) >= 1 for offset in offsets)
-    if not (corrected or round(campaign["clock_offset_s"])
-            or any(check["kind"] == "manual" for check in checks)):
-        return ""
-    notes = []
-    for check in checks:
-        moment = _date_text(check["checked_at"])
-        if check["kind"] == "set":
-            notes.append(tr("set on {moment} (deviation before {offset} s)",
-                            moment=moment, offset=f"{check['offset_before_s']:+.0f}"))
-        elif check["kind"] == "manual":
-            notes.append(tr("offset set by hand to {offset} s on {moment}",
-                            moment=moment, offset=f"{check['offset_s']:+.0f}"))
-    offset = round(campaign["clock_offset_s"])
-    if offset:
-        notes.append(tr("offset {offset} s, the times below are corrected",
-                        offset=f"{offset:+d}"))
-    return "; ".join(notes)
-
-
-def _signature(db, campaign) -> bytes | None:
-    """A closed campaign keeps the signature of its day; a draft shows the inspector's own."""
-    if campaign["signature"] or campaign["status"] != "open" or campaign["user_id"] is None:
-        return campaign["signature"]
-    user = db.user(campaign["user_id"])
-    return user["signature"] if user else None
-
-
-def _reference_day(campaign) -> date:
-    return datetime.fromisoformat(campaign["started_at"]).date()
-
-
-def _day(value: date | None) -> str:
-    return day(value)
-
-
-def _date_text(value: str | None) -> str:
-    return moment(datetime.fromisoformat(value)) if value else "–"
-
-
-def function_label(key: str) -> str:
-    return vocabulary_label(key)

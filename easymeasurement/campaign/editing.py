@@ -17,6 +17,7 @@ from .records import EDITABLE_FIELDS, EDITABLE_VALUE_FIELDS, TEXT_FIELDS, _iso, 
 
 
 CONTACT_COLUMNS = ("department", "contact", "contact_phone", "contact_email")
+ORDER_COLUMNS = ("cost_center", "job_number")
 
 class EditingMixin:
     """Corrections to an open campaign, each leaving the trace it needs."""
@@ -92,12 +93,17 @@ class EditingMixin:
             *(value.strip() for value in values), campaign_id,
         )
 
-    def set_cost_center(self, campaign_id: int, cost_center: str) -> None:
-        """Booked to one job, so a new campaign starts without it."""
+    def set_order(self, campaign_id: int, *values: str) -> None:
+        """The contractor's own account and reference for this job, in the order of
+        `ORDER_COLUMNS`. Both belong to one job, so a new campaign starts without them."""
         if self.campaign(campaign_id)["status"] != "open":
             raise CampaignClosed(tr("The campaign is closed."))
-        self.db.execute("UPDATE campaigns SET cost_center=? WHERE id=?", cost_center.strip(),
-                        campaign_id)
+        if len(values) != len(ORDER_COLUMNS):
+            raise ValueError(tr("Expected: {columns}", columns=", ".join(ORDER_COLUMNS)))
+        self.db.execute(
+            f"UPDATE campaigns SET {', '.join(f'{c}=?' for c in ORDER_COLUMNS)} WHERE id=?",
+            *(value.strip() for value in values), campaign_id,
+        )
 
     def last_contact(self, asset_id: int, before: int | None = None):
         """Department and contact of the customer's latest other campaign that had them."""

@@ -14,9 +14,10 @@ from datetime import date, datetime, timedelta
 from PySide6.QtCore import QBuffer, QByteArray, QIODevice
 from PySide6.QtWidgets import QInputDialog, QMessageBox
 
-from ..model import MeterMeasurement, Quantity, ResultValue, Verdict
-from ..reporting.context import ReportMeasurement, ReportStep, company_context
 from ..l10n import day, in_language, moment, speaking, tr
+from ..model import MeterMeasurement, Quantity, ResultValue, Verdict
+from ..reporting.context import ReportMeasurement, ReportStep
+from ..reporting.context_texts import company_context
 from ..reporting.pdf import render_pdf
 from ..reporting.template import TemplateError, parse_template, resolve
 from ..reporting.template_model import dump_template
@@ -55,6 +56,7 @@ def sample_context(count: int) -> dict:
                      "uuid": "preview", "department": tr("Maintenance"),
                      "contact": tr("Ms Example"), "contact_phone": "0123 4567-89",
                      "contact_email": "example@customer.example", "cost_center": "4711",
+                     "job_number": "V-2026-0815",
                      "started": moment(start), "closed": moment(start + timedelta(hours=2)),
                      "date": day(start),
                      "clock_offset_s": 0,

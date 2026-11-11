@@ -45,7 +45,7 @@ class CampaignHeader(QWidget):
         fallback = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogDetailedView)
         self.edit_button.setIcon(QIcon.fromTheme("document-edit", fallback))
         self.edit_button.setAccessibleName(tr("Edit campaign"))
-        self.edit_button.setToolTip(tr("Change title and installation"))
+        self.edit_button.setToolTip(tr("Change title, installation and contact person"))
         self.edit_button.setAutoRaise(True)
         self.edit_button.clicked.connect(self.edit_requested)
         self.details = QLabel()

@@ -77,10 +77,13 @@ texts:
   "<b>Contractor</b>": "<b>Auftragnehmer</b>"
   own cost centre for this job: eigene Kostenstelle für diesen Auftrag
   Cost centre: Kostenstelle
+  Job number: Vorgangsnummer
+  own reference for this job: eigene Vorgangsnummer für diesen Auftrag
+  More about the order: Weitere Angaben zum Auftrag
   The title is missing.: Der Titel fehlt.
   "{count} measurements or files belong to parts of the previous installation that are not part of this one.": "{count} Messungen oder Dateien hängen an Teilen der bisherigen Anlage, die nicht zu dieser gehören."
   To the overview (Alt+Home): Zur Übersicht (Alt+Pos1)
-  Change title and installation: Titel und Anlage ändern
+  Change title, installation and contact person: Titel, Anlage und Ansprechpartner ändern
   Resume measuring: Messung fortsetzen
   Pause measuring: Messung unterbrechen
   Photos …: Fotos …

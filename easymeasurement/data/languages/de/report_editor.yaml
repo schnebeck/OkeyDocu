@@ -17,6 +17,7 @@ texts:
   "Customer: city": "Kunde: Ort"
   "Order: department": "Auftrag: Abteilung"
   "Order: cost centre": "Auftrag: Kostenstelle"
+  "Order: job number": "Auftrag: Vorgangsnummer"
   "Contact person: name": "Ansprechpartner: Name"
   "Contact person: direct line": "Ansprechpartner: Durchwahl"
   "Contact person: e-mail": "Ansprechpartner: E-Mail"

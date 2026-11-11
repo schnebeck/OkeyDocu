@@ -13,8 +13,10 @@ from datetime import date, datetime
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QLineEdit
 
+from ..campaign.editing import CONTACT_COLUMNS
 from ..devices import FoundInstrument, find_instruments
 from ..l10n import day, tr
+from .campaign_order import OrderFields
 from .common import AppContext
 from .kind_catalog import KindCatalog
 from .overlay import Overlay
@@ -85,7 +87,10 @@ class CampaignDialog(Overlay):
         form.addRow(tr("Test plan"), self.plan)
         form.addRow(tr("Title"), self.title)
         form.addRow(tr("Instrument"), self.source)
+        self.order = OrderFields(form, {})
+        self.asset.currentIndexChanged.connect(self._suggest_contact)
         self.body.addLayout(form)
+        self._suggest_contact()
         self._offer_repeat()
         self._update()
 
@@ -100,6 +105,12 @@ class CampaignDialog(Overlay):
                                    day=day(closed), count=count))
         self.repeat.setVisible(self.previous is not None)
         self.repeat.setChecked(self.previous is not None)
+
+    def _suggest_contact(self) -> None:
+        """The customer's last contact is the likeliest one to ask again."""
+        asset = self.asset.currentData()
+        previous = self.app.service.last_contact(asset) if asset is not None else None
+        self.order.fill(dict(previous) if previous else dict.fromkeys(CONTACT_COLUMNS, ""))
 
     def _repeat_toggled(self, on: bool) -> None:
         """A repeat inspection brings its own list; a plan beside it would lead elsewhere."""

@@ -73,7 +73,8 @@ CREATE TABLE campaigns (
     contact TEXT NOT NULL DEFAULT '',
     contact_phone TEXT NOT NULL DEFAULT '',
     contact_email TEXT NOT NULL DEFAULT '',
-    cost_center TEXT NOT NULL DEFAULT ''  -- the contractor's own account for this job
+    cost_center TEXT NOT NULL DEFAULT '',  -- the contractor's own account for this job
+    job_number TEXT NOT NULL DEFAULT ''  -- the contractor's own reference for this job
 );
 
 CREATE TABLE steps (

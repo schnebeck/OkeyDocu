@@ -1,5 +1,5 @@
 # EasyMeasurement - easymeasurement/ui/campaign_edit.py
-# What an open campaign is about: its title and installation, with the way to tester and plan.
+# What an open campaign is about: title, installation and order, with the way to tester and plan.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
@@ -8,18 +8,23 @@
 
 from __future__ import annotations
 
-from PySide6.QtWidgets import QComboBox, QFormLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton
+from PySide6.QtWidgets import (
+    QComboBox,
+    QFormLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+)
 
-from ..l10n import N_, tr
+from ..campaign.editing import CONTACT_COLUMNS, ORDER_COLUMNS
+from ..l10n import tr
 from .campaign_dialog import fill_assets
+from .campaign_order import OrderFields
 from .common import AppContext
 from .overlay import Overlay
 
 TESTER, PLAN = "tester", "plan"
-CONTACT_FIELDS = (("department", N_("Department"), N_("e.g. maintenance")),
-                  ("contact", N_("Contact person"), N_("e.g. Ms Sample")),
-                  ("contact_phone", N_("Extension"), N_("e.g. 0511 1234-56")),
-                  ("contact_email", N_("Email"), N_("name@customer.example")))
 
 
 class CampaignEditOverlay(Overlay):
@@ -48,17 +53,7 @@ class CampaignEditOverlay(Overlay):
         plan = campaign["plan_title"] if campaign["plan_key"] else tr("Without test plan")
         form.addRow(tr("Test plan"), self._link(plan, tr("Assign another …"), PLAN))
         # Both sides of the job, named as in the report's letterhead.
-        form.addRow(QLabel(tr("<b>Client</b>")))
-        self.contact = {}
-        for key, label, hint in CONTACT_FIELDS:
-            field = QLineEdit(campaign[key])
-            field.setPlaceholderText(tr(hint))
-            self.contact[key] = field
-            form.addRow(tr(label), field)
-        form.addRow(QLabel(tr("<b>Contractor</b>")))
-        self.cost_center = QLineEdit(campaign["cost_center"])
-        self.cost_center.setPlaceholderText(tr("own cost centre for this job"))
-        form.addRow(tr("Cost centre"), self.cost_center)
+        self.order = OrderFields(form, dict(campaign))
         self.body.addLayout(form)
         self._update()
 
@@ -80,14 +75,11 @@ class CampaignEditOverlay(Overlay):
         else:
             self.reject()
 
-    def contact_values(self) -> tuple[str, ...]:
-        return tuple(self.contact[key].text().strip() for key, _, _ in CONTACT_FIELDS)
-
     def _changed(self) -> bool:
         return (self.title.text().strip() != self.campaign["title"]
                 or self.asset.currentData() != self.campaign["asset_id"]
-                or self.contact_values() != tuple(self.campaign[k] for k, _, _ in CONTACT_FIELDS)
-                or self.cost_center.text().strip() != self.campaign["cost_center"])
+                or self.order.contact_values() != tuple(self.campaign[k] for k in CONTACT_COLUMNS)
+                or self.order.order_values() != tuple(self.campaign[k] for k in ORDER_COLUMNS))
 
     def first_field(self):
         return self.title

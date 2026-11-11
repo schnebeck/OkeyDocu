@@ -40,6 +40,7 @@ texts:
   "Phone: {{ campaign.contact_phone }}": "Teléfono: {{ campaign.contact_phone }}"
   "Department: {{ campaign.department }}": "Departamento: {{ campaign.department }}"
   "Cost centre: {{ campaign.cost_center }}": "Centro de coste: {{ campaign.cost_center }}"
+  "Job number: {{ campaign.job_number }}": "Número de expediente: {{ campaign.job_number }}"
   "Place, date": "Lugar, fecha"
   "Signature of inspector": "Firma del inspector"
   "No measurement.": "Sin medición."
