@@ -1,0 +1,81 @@
+# EasyMeasurement - compact template for test reports: one table per element.
+#
+# The "structure" block lists the measurements by the elements of the installation they were
+# taken at (order: place) or by what was measured (order: function). Each function at an
+# element is a block that states first what its measurements share.
+# Texts are English and appear in the language of the report.
+name: Standard report, compact
+blocks:
+  - type: letterhead
+    title: "Test report"
+    lines:
+      - "{{ campaign.title }}"
+      - "{{ asset.kind_text }}: {{ asset.name }}"
+      - "Tested on {{ campaign.date }}"
+    client:
+      - "{{ customer.name }}"
+      - "{{ customer.street }}"
+      - "{{ customer.zip }} {{ customer.city }}"
+      - "Department: {{ campaign.department }}"
+      - "Contact: {{ campaign.contact }}"
+      - "Phone: {{ campaign.contact_phone }}"
+      - "{{ campaign.contact_email }}"
+    contractor:
+      - "{{ company.name }}"
+      - "{{ company.street }}"
+      - "{{ company.zip }} {{ company.city }}"
+      - "Cost centre: {{ campaign.cost_center }}"
+      - "Inspector: {{ campaign.tester }}"
+    qr: true
+    logo: true
+  - type: fields
+    rows:
+      - ["{{ asset.kind_text }}", "{{ asset.name }}"]
+      - [Identifier, "{{ asset.identifier }}"]
+      - [Manufacturer, "{{ asset.manufacturer }}"]
+      - [Type, "{{ asset.type }}"]
+      - [Serial number, "{{ asset.serial_no }}"]
+      - [Remark, "{{ asset.comment }}"]
+    features: asset
+  - type: fields
+    rows:
+      - [Test plan, "{{ campaign.plan }}"]
+      - [Started, "{{ campaign.started }}"]
+      - [Completed, "{{ campaign.closed }}"]
+  - type: heading
+    when: device.model
+    level: 2
+    text: Test instrument
+  - type: fields
+    when: device.model
+    rows:
+      - [Type, "{{ device.manufacturer }} {{ device.model }}"]
+      - [Serial number, "{{ device.serial_no }}"]
+      - [Firmware, "{{ device.firmware }}"]
+      - [Calibrated on, "{{ device.calibrated_on }}"]
+      - [Recalibration due, "{{ device.recalibration_due }}"]
+      - [Instrument clock, "{{ campaign.clock_summary }}"]
+  - type: notice
+    when: device.overdue
+    text: "Recalibration of the test instrument was overdue at the time of testing ({{ device.recalibration_due }})."
+  - type: structure
+    order: place
+    layout: compact
+    many:
+      summary: true
+  - type: heading
+    when: places
+    level: 2
+    text: Notes and attachments
+  - type: attachments
+  - type: heading
+    level: 2
+    text: Result
+  - type: text
+    when: campaign.seal
+    text: "Record seal: {{ campaign.seal }}"
+  - type: signature
+    result: "Test result: {{ verdict }}"
+    labels: ["Place, date", "Signature of inspector"]
+    fills: ["{% if company.city %}{{ company.city }}, {% endif %}{{ report.date }}",
+            "{{ campaign.tester }}"]

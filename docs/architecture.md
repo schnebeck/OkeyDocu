@@ -120,7 +120,11 @@ Der Block `structure` ordnet die Messungen nach dem Strukturbaum der Anlage. Mit
 ist jedes Element mit Messungen ein Abschnitt mit seinen Merkmalen und darin je Messgröße ein
 Block; mit `order: function` steht jede Messgröße einmal, mit dem, was all ihre Elemente teilen,
 und darunter je Element nur noch, was davon abweicht. Schritte eines Plans ohne Messung folgen mit
-ihrer Begründung. Die Standardvorlage verwendet `order: place`.
+ihrer Begründung. Die Standardvorlage verwendet `order: place`. Mit `layout: compact` steht je Element
+eine einzige Tabelle über alle Messarten in der Reihenfolge der Messungen, mit Messart, Ergebnis,
+Grenzwert und Bemerkung; was die Messungen einer Messart am Element teilen, steht einmal darüber. Die
+Vorlage „Standardprotokoll, kompakt“ verwendet sie. Jedes Element zeigt unter seiner Überschrift, was
+es als Prüfobjekt ist: Kennung, Hersteller, Typ, Merkmale und seine Bemerkung.
 
 Am Fuß stehen Ort, Datum und Name schon auf den Linien (`fills` des Blocks `signature`): der Sitz
 der eigenen Firma, das Erstellungsdatum und der Prüfer, dessen hinterlegte Unterschrift den Namen

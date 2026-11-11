@@ -16,7 +16,7 @@ from .l10n import tr
 from .campaign.service import CampaignService
 from .paths import data_dir
 from .reporting.archive import ReportArchive
-from .reporting.template import default_template_text
+from .reporting.template import SHIPPED, shipped_template_text
 from .reporting.template_model import in_program_language
 from .store import Database, SchemaMismatch
 
@@ -27,7 +27,8 @@ def build_context():
     root = data_dir()
     db = Database(root / "easymeasurement.sqlite")
     if not db.templates():
-        db.save_template(tr("Standard report"), in_program_language(default_template_text()))
+        for file, name in SHIPPED.items():
+            db.save_template(tr(name), in_program_language(shipped_template_text(file)))
     service = CampaignService(db, root, KWalletKeyStore())
     service.seed_plans()
     return AppContext(db, service, ReportArchive(service))

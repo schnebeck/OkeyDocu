@@ -8,7 +8,8 @@
 
 """Every element of the installation that has measurements is a level of the report, in the
 order of the structure tree: the inspected installation first, then each element below it.
-A `structure` block lists them in one of two orders:
+A `structure` block lists them in one of two orders; ordered by place, `layout: compact` puts
+all measurements of an element into one table:
 
     place     each level, and within it every function measured there
     function  each function, and within it every level where it was measured
@@ -19,6 +20,7 @@ from __future__ import annotations
 
 from ..l10n import N_, tr
 from ..vocabulary import function_markup
+from .compact import compact_nodes
 from .context import ReportMeasurement
 from .levels import REMARK, Level
 from .measurement_table import Columns, group_nodes
@@ -75,6 +77,9 @@ def structure_nodes(block: dict, values: dict) -> list[Node]:
             nodes.append(_heading(level, 2))
             if level.card and block.get("features", True):
                 nodes.append(Fields(level.card))
+            if block.get("layout") == "compact":
+                nodes.extend(compact_nodes(level.measurements, notes))
+                continue
             for function, group in _by_function(level.measurements).items():
                 nodes.append(Heading(Markup(function_markup(function)), 3))
                 nodes.extend(group_nodes(group, options, notes, points=True))

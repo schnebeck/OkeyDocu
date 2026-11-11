@@ -131,7 +131,9 @@ def block_summary(block: dict) -> str:
         return plural(len(block.get("rows", ())), "{label} ({count} line)",
                       "{label} ({count} lines)", label=label)
     if block["type"] == "structure":
-        return f"{label}: {tr(ORDERS.get(block.get('order', 'place'), block.get('order', '')))}"
+        order = tr(ORDERS.get(block.get("order", "place"), block.get("order", "")))
+        compact = f", {tr('compact')}" if block.get("layout") == "compact" else ""
+        return f"{label}: {order}{compact}"
     if block["type"] == "letterhead":
         title = f"{label}: {block.get('title', '')}"
         return tr("{title} with QR code", title=title) if block.get("qr") else title

@@ -95,3 +95,5 @@ texts:
   "empty: lines to fill in by hand": "leer: Linien zum Ausfüllen von Hand"
   Written on the lines (separated by |): Auf den Linien (getrennt durch |)
   "Report: date": "Protokoll: Datum"
+  "Compact: one table for all measurements of an element": "Kompakt: eine Tabelle für alle Messungen eines Elements"
+  compact: kompakt

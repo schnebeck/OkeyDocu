@@ -129,3 +129,5 @@ texts:
   "Test point": "Prüfpunkt"
   "Tested on {{ campaign.date }}": "Prüfung vom {{ campaign.date }}"
   "Report created with EasyMeasurement": "Protokoll erstellt mit EasyMeasurement"
+  "Measurement": "Messung"
+  "Limit": "Grenzwert"

@@ -63,9 +63,15 @@ class TemplateError(Exception):
 # Loading ----------------------------------------------------------------
 
 
+SHIPPED = {"standard.yaml": N_("Standard report"), "compact.yaml": N_("Standard report, compact")}
+
+
+def shipped_template_text(file: str) -> str:
+    return (resources.files("easymeasurement") / "data" / "templates" / file).read_text("utf-8")
+
+
 def default_template_text() -> str:
-    source = resources.files("easymeasurement") / "data" / "templates" / "standard.yaml"
-    return source.read_text(encoding="utf-8")
+    return shipped_template_text("standard.yaml")
 
 
 def parse_template(text: str) -> dict:

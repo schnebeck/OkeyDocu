@@ -237,3 +237,20 @@ def test_an_element_says_what_it_is_and_how_it_was_measured(app):
     card = next(node for node in nodes if isinstance(node, Fields))
     assert card.rows == [("Kennung", "M-1"), ("Hersteller", "Muster"),
                          ("Bemerkung", "Messungen von links nach rechts")]
+
+
+def test_compact_puts_every_function_of_an_element_into_one_table():
+    from easymeasurement.reporting.compact import compact_nodes
+
+    three_phase = ReportMeasurement(MeterMeasurement("u3", "u3", T0, Verdict.PASSED, results=(
+        ResultValue("u_l1l2", "UL1L2", Quantity.parse("400V")),
+        ResultValue("u_l2l3", "UL2L3", Quantity.parse("401V")))), T0 + timedelta(minutes=9))
+    head, node = compact_nodes([rlo(n=1), rlo(offset="0.05Ω", n=2), three_phase], Footnotes())
+    table = node.body
+    assert [plain(h) for h in table.headers] == ["Nr.", "Zeitpunkt", "Messung", "Ergebnis",
+                                                 "Grenzwert", "", "Bemerkung"]
+    assert [plain(row[2]) for row in table.rows] == ["RLO", "RLO", "U3~"]
+    assert table.rows[0][4] == "< 1,00 Ω"
+    assert "<br/>" in table.rows[2][3]
+    assert "= 40 mΩ" in table.rows[0][-1] and "= 50 mΩ" in table.rows[1][-1]
+    assert [plain(label) for label, _ in head.rows] == ["RLO"]

@@ -1,6 +1,7 @@
 # EasyMeasurement - German texts: messages of the campaign, store, import and instrument parts.
 texts:
   Standard report: Standardprotokoll
+  Standard report, compact: Standardprotokoll, kompakt
   Outside every confirmed step: Außerhalb jedes bestätigten Messschritts
   Measuring function does not match the step: Messfunktion passt nicht zum Schritt
   "{name}: only pictures and PDF files can be attached.": "{name}: Nur Bilder und PDF lassen sich anhängen."

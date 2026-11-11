@@ -33,6 +33,17 @@ class TemplateStructureForm:
 
         order.currentIndexChanged.connect(order_changed)
         form.addRow(tr("Order"), order)
+        compact = QCheckBox(tr("Compact: one table for all measurements of an element"))
+        compact.setChecked(block.get("layout") == "compact")
+
+        def compact_changed(checked: bool) -> None:
+            block.pop("layout", None)
+            if checked:
+                block["layout"] = "compact"
+            self._changed()
+
+        compact.toggled.connect(compact_changed)
+        form.addRow(compact)
         features = QCheckBox(tr("Show what each element is: identifier, maker, features, remark"))
         features.setChecked(block.get("features", True))
 
@@ -50,3 +61,4 @@ class TemplateStructureForm:
         summary.toggled.connect(lambda v: (many.__setitem__("summary", v), self._changed()))
         form.addRow(summary)
         self.structure_order, self.structure_summary = order, summary
+        self.structure_compact = compact

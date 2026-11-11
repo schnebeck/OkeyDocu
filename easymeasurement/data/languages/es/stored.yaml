@@ -129,3 +129,5 @@ texts:
   "Test point": "Punto de ensayo"
   "Tested on {{ campaign.date }}": "Inspección del {{ campaign.date }}"
   "Report created with EasyMeasurement": "Informe creado con EasyMeasurement"
+  "Measurement": "Medición"
+  "Limit": "Límite"
