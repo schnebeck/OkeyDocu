@@ -9,7 +9,16 @@
 from __future__ import annotations
 
 from PySide6.QtCore import QObject, Qt, Signal
-from PySide6.QtWidgets import QAbstractItemView, QComboBox, QHeaderView, QTableWidgetItem
+from PySide6.QtGui import QColor, QPalette
+from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QComboBox,
+    QHeaderView,
+    QStyle,
+    QStyleOptionComboBox,
+    QStylePainter,
+    QTableWidgetItem,
+)
 
 from ..l10n import N_, tr
 from ..model import Verdict
@@ -20,7 +29,7 @@ from .common import make_table, verdict_item
 HEADERS = (N_("Reading"), N_("Value"), N_("Low"), N_("High"), N_("Verd."))
 LABEL, VALUE, LOWER, UPPER, VERDICT = range(len(HEADERS))
 _TEXT_COLUMNS = {LABEL: "label", LOWER: "lower_limit", UPPER: "upper_limit"}
-_FAILED_STYLE = "QComboBox { color: #c0392b; font-weight: bold; }"
+FAILED_COLOUR = QColor("#c0392b")
 SHOWN_ROWS = 8
 FINAL_TIP = N_("Reading, unit and time are fixed.")
 
@@ -42,14 +51,32 @@ class QuietCombo(QComboBox):
             event.ignore()
 
 
+class MarkCombo(QuietCombo):
+    """A short mark set in the middle of its field, so it keeps clear of frame and arrow. Only
+    the mark of a failure turns red; the frame stays as the style draws it."""
+
+    def paintEvent(self, event) -> None:
+        painter = QStylePainter(self)
+        option = QStyleOptionComboBox()
+        self.initStyleOption(option)
+        text = option.currentText
+        option.currentText = ""
+        painter.drawComplexControl(QStyle.ComplexControl.CC_ComboBox, option)
+        field = self.style().subControlRect(QStyle.ComplexControl.CC_ComboBox, option,
+                                            QStyle.SubControl.SC_ComboBoxEditField, self)
+        failed = self.currentData() == Verdict.FAILED.value
+        painter.setPen(FAILED_COLOUR if failed else option.palette.color(QPalette.ColorRole.ButtonText))
+        painter.drawText(field, Qt.AlignmentFlag.AlignCenter, text)
+
+
 # The usual marks of a test record, so a verdict fits a narrow column.
 SHORT_VERDICT = {Verdict.NOT_EVALUATED: "–", Verdict.PASSED: N_("pass"), Verdict.FAILED: N_("fail")}
 
 
 def verdict_combo(current: str, short: bool = False) -> QuietCombo:
-    box = QuietCombo()
+    box = MarkCombo() if short else QuietCombo()
     if short:
-        box.setMinimumContentsLength(5)
+        box.setMinimumContentsLength(7)
     for verdict in (Verdict.NOT_EVALUATED, Verdict.PASSED, Verdict.FAILED):
         box.addItem(tr(SHORT_VERDICT[verdict]) if short else tr(VERDICT_TEXT[verdict]), verdict.value)
         box.setItemData(box.count() - 1, tr(VERDICT_TEXT[verdict]), Qt.ItemDataRole.ToolTipRole)
@@ -60,7 +87,16 @@ def verdict_combo(current: str, short: bool = False) -> QuietCombo:
 
 
 def mark_failed(box: QComboBox) -> None:
-    box.setStyleSheet(_FAILED_STYLE if box.currentData() == Verdict.FAILED.value else "")
+    """A failed verdict in red and bold; the style keeps drawing the box itself."""
+    failed = box.currentData() == Verdict.FAILED.value
+    if not isinstance(box, MarkCombo):
+        palette = box.parentWidget().palette() if box.parentWidget() else QPalette()
+        if failed:
+            palette.setColor(QPalette.ColorRole.ButtonText, FAILED_COLOUR)
+        box.setPalette(palette)
+    font = box.font()
+    font.setBold(failed)
+    box.setFont(font)
 
 
 def _value_text(value) -> str:

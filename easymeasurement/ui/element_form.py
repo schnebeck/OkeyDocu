@@ -22,7 +22,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..l10n import N_, plural, tr
-from ..l10n.formats import pattern
+from .choice_box import feature_field, field_text
 from .common import AppContext, show_error
 from .kind_catalog import KindCatalog
 from .overlay import Overlay
@@ -31,29 +31,6 @@ TEXTS = {"name": N_("Designation"), "identifier": N_("Identifier"),
          "manufacturer": N_("Manufacturer"), "type": N_("Type designation"),
          "serial_no": N_("Serial number"), "comment": N_("Remark"), "basis": N_("Test basis")}
 AS_KIND = -1  # the interval spin box's value for "as the kind says"
-
-
-def feature_field(feature, value: str):
-    """A feature with choices offers them and still takes any other value."""
-    if not feature.choices:
-        return QLineEdit(value)
-    box = QComboBox(editable=True)
-    box.addItems([choice_text(choice) for choice in feature.choices])
-    box.setCurrentText(value)
-    return box
-
-
-def field_text(field) -> str:
-    return field.currentText() if isinstance(field, QComboBox) else field.text()
-
-
-def choice_text(choice: str) -> str:
-    """A number with the decimal sign of the language, a word in the language."""
-    try:
-        float(choice)
-    except ValueError:
-        return tr(choice)
-    return choice.replace(".", pattern("decimal"))
 
 
 def interval_text(months: int) -> str:

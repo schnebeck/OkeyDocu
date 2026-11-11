@@ -50,6 +50,9 @@ texts:
   Kind: Typ
   Features: Merkmale
   Empty features appear nowhere, not even in the report.: Leere Merkmale erscheinen nirgends, auch nicht im Protokoll.
+  (empty): (leer)
+  Own text …: Eigener Text …
+  choose or type: auswählen oder eingeben
   "Features: {kind}": "Merkmale: {kind}"
   "Kind: {interval}": "Typ: {interval}"
   The element needs a designation.: Das Element braucht eine Bezeichnung.

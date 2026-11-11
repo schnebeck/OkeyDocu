@@ -72,6 +72,21 @@ def test_a_feature_with_choices_offers_them_and_takes_another_value(qtbot, app, 
     assert stored["cable_length"] == "12"
 
 
+def test_a_choice_can_always_be_emptied_or_replaced_by_own_text(qtbot):
+    from easymeasurement.ui.choice_box import EMPTY, OWN, ChoiceBox
+
+    box = ChoiceBox(("B", "C"), "C")
+    qtbot.addWidget(box)
+    box.activated.emit(box.findData(EMPTY))
+    assert box.currentText() == ""
+    box.setCurrentIndex(box.findText("B"))
+    box.activated.emit(box.findData(OWN))
+    assert box.currentText() == ""
+    box.lineEdit().setText("Bx")
+    box.lineEdit().editingFinished.emit()
+    assert box.currentText() == "Bx" and box.findText("Bx") < 0
+
+
 def test_the_kind_editor_keeps_the_choices(qtbot):
     table = FeatureTable()
     qtbot.addWidget(table)
