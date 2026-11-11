@@ -24,6 +24,8 @@ from ..l10n import tr
 from ..store.kinds import Feature, slug
 
 KEY = Qt.ItemDataRole.UserRole
+COLUMNS = 3  # feature, unit, choices
+SEPARATOR = "; "
 
 
 class FeatureTable(QWidget):
@@ -33,8 +35,11 @@ class FeatureTable(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.table = QTableWidget(0, 2)
-        self.table.setHorizontalHeaderLabels([tr("Feature"), tr("Unit")])
+        self.table = QTableWidget(0, COLUMNS)
+        self.table.setHorizontalHeaderLabels([tr("Feature"), tr("Unit"), tr("Choices")])
+        self.table.horizontalHeaderItem(2).setToolTip(tr(
+            "Values offered for the feature, separated by semicolons; any other may still be"
+            " typed."))
         self.table.verticalHeader().hide()
         self.table.verticalHeader().setDefaultSectionSize(self.table.fontMetrics().height() + 10)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
@@ -42,6 +47,7 @@ class FeatureTable(QWidget):
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         self.table.itemChanged.connect(lambda _: self._changed())
         self.add_button = QPushButton(tr("Add feature"))
         self.add_button.clicked.connect(self.add)
@@ -81,12 +87,14 @@ class FeatureTable(QWidget):
         name.setData(KEY, feature.key)
         self.table.setItem(row, 0, name)
         self.table.setItem(row, 1, QTableWidgetItem(feature.unit))
+        self.table.setItem(row, 2, QTableWidgetItem(SEPARATOR.join(feature.choices)))
         return row
 
     def features(self) -> tuple[Feature, ...]:
         found, keys = [], set()
         for row in range(self.table.rowCount()):
             name, unit = self.table.item(row, 0), self.table.item(row, 1)
+            offered = self.table.item(row, 2)
             label = name.text().strip() if name else ""
             if not label:
                 continue
@@ -98,7 +106,9 @@ class FeatureTable(QWidget):
                 self._filling, was = True, self._filling
                 name.setData(KEY, key)
                 self._filling = was
-            found.append(Feature(key, label, unit.text().strip() if unit else ""))
+            choices = tuple(part.strip() for part in (offered.text() if offered else "").split(
+                SEPARATOR.strip()) if part.strip())
+            found.append(Feature(key, label, unit.text().strip() if unit else "", choices))
         return tuple(found)
 
     def add(self) -> None:
@@ -121,7 +131,7 @@ class FeatureTable(QWidget):
         if row < 0 or not 0 <= target < self.table.rowCount():
             return
         self._filling = True
-        for column in range(2):
+        for column in range(COLUMNS):
             upper, lower = self.table.takeItem(row, column), self.table.takeItem(target, column)
             self.table.setItem(row, column, lower)
             self.table.setItem(target, column, upper)

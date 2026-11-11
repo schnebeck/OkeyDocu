@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+import re
+
 import yaml
 
 from ..l10n import N_, in_language, plural, tr
@@ -52,6 +54,7 @@ PLACEHOLDERS = [
     (N_("Installation: kind"), "{{ asset.kind_text }}"),
     (N_("Installation: designation"), "{{ asset.name }}"),
     (N_("Installation: identifier"), "{{ asset.identifier }}"),
+    (N_("Installation: test basis"), "{{ asset.basis }}"),
     (N_("Campaign: title"), "{{ campaign.title }}"),
     (N_("Campaign: test plan"), "{{ campaign.plan }}"),
     (N_("Campaign: inspector"), "{{ campaign.tester }}"),
@@ -119,13 +122,22 @@ def new_block(kind: str) -> dict:
     return {"type": kind, **defaults[kind]}
 
 
+_LOGIC = re.compile(r"{%.*?%}")
+
+
+def readable(text: str) -> str:
+    """A template text for the outline: data fields by their names, no template logic."""
+    short = " ".join(_LOGIC.sub("", text).split())
+    for name, code in PLACEHOLDERS:
+        short = short.replace(code, f"[{tr(name)}]")
+    return short
+
+
 def block_summary(block: dict) -> str:
     label = tr(BLOCK_LABELS[block["type"]]) if block["type"] in BLOCK_LABELS else block["type"]
     text = block.get("text")
     if text:
-        short = " ".join(str(text).split())
-        for name, code in PLACEHOLDERS:
-            short = short.replace(code, f"[{tr(name)}]")
+        short = readable(str(text))
         if len(short) > SUMMARY_LENGTH:
             short = short[:SUMMARY_LENGTH].rstrip() + " …"
         return f"{label}: {short}"
@@ -137,7 +149,7 @@ def block_summary(block: dict) -> str:
         compact = f", {tr('compact')}" if block.get("layout") == "compact" else ""
         return f"{label}: {order}{compact}"
     if block["type"] == "letterhead":
-        title = f"{label}: {block.get('title', '')}"
+        title = f"{label}: {readable(str(block.get('title', '')))}"
         return tr("{title} with QR code", title=title) if block.get("qr") else title
     if block["type"] == "logo":
         if not block.get("image"):

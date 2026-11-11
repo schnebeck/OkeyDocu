@@ -60,3 +60,7 @@ texts:
   "Double-click: move here": "Doppelklick: hierhin verschieben"
   "Book the chosen measurement onto this element:": "Die gewählte Messung auf dieses Element buchen:"
   "Book the {count} chosen measurements onto this element:": "Die {count} gewählten Messungen auf dieses Element buchen:"
+  Test basis: Prüfgrundlage
+  The top element needs a test basis; those below follow it.: Das oberste Element braucht eine Prüfgrundlage; die Elemente darunter folgen ihr.
+  "as above: {basis}": "wie darüber: {basis}"
+  e.g. DIN VDE 0100-600: z. B. DIN VDE 0100-600

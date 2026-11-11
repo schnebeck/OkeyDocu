@@ -47,6 +47,7 @@ def sample_context(count: int) -> dict:
         "customer": {"name": tr("Sample customer Ltd"), "street": tr("Sample road 1"),
                      "zip": "12345", "city": tr("Sampletown")},
         "asset": {"name": tr("Sample installation"), "identifier": "A-001",
+                  "basis": "DIN VDE 0100-600",
                   "kind_text": tr("Installation"),
                   "features": [(tr("Earthing system type"), "TN-S"),
                                (tr("Rated current"), "63 A")]},

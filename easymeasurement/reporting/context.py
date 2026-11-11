@@ -155,6 +155,7 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
         **company_context(service.db.company()),
         "customer": dict(customer),
         "asset": {**dict(asset), "kind_text": service.db.kind_labels().get(asset["kind"], ""),
+                  "basis": service.db.test_basis(asset["id"])[1],
                   "features": asset_features(service.db, asset)},
         "campaign": {
             "title": campaign["title"],

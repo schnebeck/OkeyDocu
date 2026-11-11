@@ -35,6 +35,16 @@ unter Einstellungen → Strukturtypen änderbar (`ui/kinds_page.py`). Mitgeliefe
 `data/kinds.yaml`. Jeder Typ nennt seinen IZYTRON-Typcode für den Import und ein Prüfintervall. Merkmalswerte liegen
 gesammelt am Element (`features_json`); leere werden nicht gespeichert und nirgends gezeigt. Wird ein
 Typ gelöscht, bekommen seine Elemente einen Ersatztyp, ihre Werte bleiben unsichtbar erhalten.
+Ein Merkmal kann Werte zur Auswahl anbieten (`choices`, eine je Zeile); das Elementformular zeigt es
+dann als Auswahlfeld, das auch andere Werte annimmt. `data/kinds.yaml` belegt übliche Normwerte vor,
+gemeinsam für alle Typen nach der Bezeichnung des Merkmals: Leitungstyp, Charakteristik, Querschnitt,
+Nennstrom, Bemessungsdifferenzstrom, Pole, Netzform, Schutzart, Schutzklasse. „Leiter je Pol“ zählt
+parallel geführte Leiter eines Pols, „Pole der Schutzeinrichtung“ sagt, ob ein-, zwei-, drei- oder
+vierpolig geschaltet wird.
+
+Jedes Element hat eine Prüfgrundlage (`basis`). Leer folgt es der des Elements darüber; das oberste
+braucht eine, das Formular sagt es, solange sie fehlt. Das Protokoll nennt sie im Titel („Prüfprotokoll
+nach …“), ein Element mit einer eigenen, anderen in seiner Karte.
 Im Protokoll übersetzen die Sprachdateien Typen und Merkmale über ihren Schlüssel (`kinds`,
 `features`), nicht über den deutschen Namen: „Leiter“ ist als Typ eine Steigleiter, im Messwert ein
 Leiter. Selbst angelegte Typen und Merkmale bleiben deutsch.

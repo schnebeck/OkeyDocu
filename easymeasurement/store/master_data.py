@@ -49,13 +49,26 @@ class MasterDataMixin:
         )
 
     def update_asset(
-        self, asset_id: int, kind, name, identifier, manufacturer, type, serial_no, comment
+        self, asset_id: int, kind, name, identifier, manufacturer, type, serial_no, comment,
+        basis="",
     ) -> None:
         self.execute(
             "UPDATE assets SET kind=?, name=?, identifier=?, manufacturer=?, type=?, serial_no=?,"
-            " comment=? WHERE id=?",
-            kind, name, identifier, manufacturer, type, serial_no, comment, asset_id,
+            " comment=?, basis=? WHERE id=?",
+            kind, name, identifier, manufacturer, type, serial_no, comment, basis, asset_id,
         )
+
+    def test_basis(self, asset_id: int | None) -> tuple[str, str]:
+        """What the element is tested to: its own entry, and the one it follows, its own or
+        that of the nearest element above that has one."""
+        row = self.asset(asset_id) if asset_id is not None else None
+        own, seen = (row["basis"] if row else ""), set()
+        while row is not None and row["id"] not in seen:
+            if row["basis"]:
+                return own, row["basis"]
+            seen.add(row["id"])
+            row = self.asset(row["parent_id"]) if row["parent_id"] is not None else None
+        return own, ""
 
     def customers(self) -> list[sqlite3.Row]:
         return self.query("SELECT * FROM customers ORDER BY name COLLATE NOCASE")

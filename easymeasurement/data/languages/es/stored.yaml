@@ -140,3 +140,5 @@ texts:
   "Measurements": "Mediciones"
   "Photo": "Foto"
   "✓ passed · ✗ failed · – not judged · [n] photo n of this report · symbols of quantities after ISO 80000, the index names what was measured": "✓ correcto · ✗ incorrecto · – sin evaluar · [n] foto n de este informe · símbolos según ISO 80000, el subíndice indica la magnitud medida"
+  "Test report{% if asset.basis %} to {{ asset.basis }}{% endif %}": "Informe de ensayo{% if asset.basis %} según {{ asset.basis }}{% endif %}"
+  "Test basis": "Base de ensayo"

@@ -172,6 +172,8 @@ texts:
   Instead: Stattdessen
   Align: Ausrichten
   Drag the signature onto the line; the mouse wheel makes it larger or smaller.: Die Unterschrift auf die Linie ziehen; das Mausrad macht sie größer oder kleiner.
+  Choices: Auswahl
+  "Values offered for the feature, separated by semicolons; any other may still be typed.": "Werte, die das Merkmal zur Auswahl anbietet, durch Semikolon getrennt; andere lassen sich trotzdem eingeben."
 contexts:
   type code:
     none: keiner

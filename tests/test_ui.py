@@ -187,8 +187,9 @@ def test_an_element_shows_the_features_of_its_kind(window):
     form = page.element_form
     assert page.forms.currentWidget() is form
     assert form.features.title() == "Merkmale: Maschine"
-    form.feature_fields["rated_current"].setText("16")
-    form.feature_fields["rated_current"].editingFinished.emit()
+    field = form.feature_fields["rated_current"]  # one with choices, typed in all the same
+    field.setCurrentText("16")
+    field.lineEdit().editingFinished.emit()
     asset = page.tree.current_id()
     assert window.app.db.asset_features(asset) == {"rated_current": "16"}
 

@@ -7,7 +7,7 @@
 name: Standard report
 blocks:
   - type: letterhead
-    title: "Test report"
+    title: "Test report{% if asset.basis %} to {{ asset.basis }}{% endif %}"
     lines:
       - "{{ campaign.title }}"
       - "{{ asset.kind_text }}: {{ asset.name }}"

@@ -18,7 +18,8 @@ _ASSET_COLUMNS = """
     comment TEXT NOT NULL DEFAULT '',
     guid TEXT NOT NULL DEFAULT '',
     features_json TEXT NOT NULL DEFAULT '{}',
-    interval_months INTEGER  -- NULL: as its kind says
+    interval_months INTEGER,  -- NULL: as its kind says
+    basis TEXT NOT NULL DEFAULT ''  -- what it is tested to; empty: as the element above
 """
 
 # Kinds of structure elements and what can be noted about each, both editable.
@@ -39,6 +40,7 @@ CREATE TABLE kind_features (
     label TEXT NOT NULL,
     unit TEXT NOT NULL DEFAULT '',
     position INTEGER NOT NULL DEFAULT 0,
+    choices TEXT NOT NULL DEFAULT '',  -- values offered for it, one per line
     UNIQUE (kind, key)
 );
 """

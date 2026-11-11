@@ -27,6 +27,7 @@ class Feature:
     key: str
     label: str
     unit: str = ""
+    choices: tuple[str, ...] = ()  # values offered; any other may still be typed
 
 
 @dataclass(frozen=True)
@@ -45,7 +46,13 @@ def slug(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", folded).strip("_") or "feature"
 
 
-def _feature(spec: str) -> Feature:
+def _feature(spec) -> Feature:
+    """`Label|unit`, or a mapping with label, unit, choices and a key of its own, which keeps
+    values noted under an earlier label."""
+    if isinstance(spec, dict):
+        label = str(spec["label"])
+        return Feature(str(spec.get("key") or slug(label)), label, str(spec.get("unit", "")),
+                       tuple(str(choice) for choice in spec.get("choices", ())))
     label, _, unit = spec.partition("|")
     return Feature(slug(label), label.strip(), unit.strip())
 
@@ -54,10 +61,18 @@ def shipped_kinds() -> list[Kind]:
     raw = yaml.safe_load(
         (resources.files("easymeasurement") / "data" / "kinds.yaml").read_text(encoding="utf-8")
     )
+    shared = {label: tuple(str(choice) for choice in values)
+              for label, values in (raw.get("choices") or {}).items()}
+
+    def feature(spec) -> Feature:
+        found = _feature(spec)
+        if found.choices or found.label not in shared:
+            return found
+        return Feature(found.key, found.label, found.unit, shared[found.label])
+
     return [
         Kind(item["key"], item["label"], item.get("icon", FALLBACK_ICON), item.get("izytron"),
-             item.get("interval", 0),
-             tuple(_feature(spec) for spec in item.get("features", ())))
+             item.get("interval", 0), tuple(feature(spec) for spec in item.get("features", ())))
         for item in raw["kinds"]
     ]
 
@@ -94,7 +109,9 @@ class KindsMixin:
         features: dict[str, list[Feature]] = {}
         for row in self.query("SELECT * FROM kind_features ORDER BY position, id"):
             label = shown(names.get((row["kind"], row["key"])), row["label"])
-            features.setdefault(row["kind"], []).append(Feature(row["key"], label, row["unit"]))
+            choices = tuple(line for line in row["choices"].splitlines() if line.strip())
+            features.setdefault(row["kind"], []).append(
+                Feature(row["key"], label, row["unit"], choices))
         return [
             Kind(row["key"], shown(names.get(row["key"]), row["label"]), row["icon"],
                  row["izytron_type"], row["interval_months"],
@@ -136,9 +153,10 @@ class KindsMixin:
             connection.execute("DELETE FROM kind_features WHERE kind=?", (kind.key,))
             for number, feature in enumerate(kind.features):
                 connection.execute(
-                    "INSERT OR IGNORE INTO kind_features (kind, key, label, unit, position)"
-                    " VALUES (?, ?, ?, ?, ?)",
-                    (kind.key, feature.key, feature.label, feature.unit, number),
+                    "INSERT OR IGNORE INTO kind_features (kind, key, label, unit, position,"
+                    " choices) VALUES (?, ?, ?, ?, ?, ?)",
+                    (kind.key, feature.key, feature.label, feature.unit, number,
+                     "\n".join(feature.choices)),
                 )
 
     def _next_position(self) -> int:

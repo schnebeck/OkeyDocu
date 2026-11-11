@@ -22,14 +22,38 @@ from PySide6.QtWidgets import (
 )
 
 from ..l10n import N_, plural, tr
+from ..l10n.formats import pattern
 from .common import AppContext, show_error
 from .kind_catalog import KindCatalog
 from .overlay import Overlay
 
 TEXTS = {"name": N_("Designation"), "identifier": N_("Identifier"),
          "manufacturer": N_("Manufacturer"), "type": N_("Type designation"),
-         "serial_no": N_("Serial number"), "comment": N_("Remark")}
+         "serial_no": N_("Serial number"), "comment": N_("Remark"), "basis": N_("Test basis")}
 AS_KIND = -1  # the interval spin box's value for "as the kind says"
+
+
+def feature_field(feature, value: str):
+    """A feature with choices offers them and still takes any other value."""
+    if not feature.choices:
+        return QLineEdit(value)
+    box = QComboBox(editable=True)
+    box.addItems([choice_text(choice) for choice in feature.choices])
+    box.setCurrentText(value)
+    return box
+
+
+def field_text(field) -> str:
+    return field.currentText() if isinstance(field, QComboBox) else field.text()
+
+
+def choice_text(choice: str) -> str:
+    """A number with the decimal sign of the language, a word in the language."""
+    try:
+        float(choice)
+    except ValueError:
+        return tr(choice)
+    return choice.replace(".", pattern("decimal"))
 
 
 def interval_text(months: int) -> str:
@@ -60,8 +84,13 @@ class ElementForm(QWidget):
         form = QFormLayout()
         form.addRow(tr(TEXTS["name"]), self.fields["name"])
         form.addRow(tr("Kind"), self.kind)
-        for key in ("identifier", "manufacturer", "type", "serial_no", "comment"):
+        for key in ("identifier", "manufacturer", "type", "serial_no", "comment", "basis"):
             form.addRow(tr(TEXTS[key]), self.fields[key])
+        self.basis_hint = QLabel(tr("The top element needs a test basis; those below follow it."))
+        self.basis_hint.setStyleSheet("color: #c0392b;")
+        self.basis_hint.setWordWrap(True)
+        self.basis_hint.hide()
+        form.addRow("", self.basis_hint)
         repeat = QHBoxLayout()
         repeat.addWidget(self.interval)
         repeat.addWidget(self.interval_hint, 1)
@@ -70,7 +99,7 @@ class ElementForm(QWidget):
             field.editingFinished.connect(self._edited)
         self.features = QGroupBox(tr("Features"))
         self.feature_form = QFormLayout(self.features)
-        self.feature_fields: dict[str, QLineEdit] = {}
+        self.feature_fields: dict[str, QLineEdit | QComboBox] = {}
         hint = QLabel(tr("Empty features appear nowhere, not even in the report."))
         hint.setEnabled(False)
         hint.setWordWrap(True)
@@ -93,6 +122,7 @@ class ElementForm(QWidget):
         self.kind.setCurrentIndex(self.kind.findData(row["kind"]))
         own = row["interval_months"]
         self.interval.setValue(AS_KIND if own is None else own)
+        self._show_basis(row)
         self._show_features(row["kind"])
         self._hint()
 
@@ -103,8 +133,11 @@ class ElementForm(QWidget):
         kind = self.catalog.by_key.get(kind_key)
         values = self.app.db.asset_features(self.asset_id)
         for feature in kind.features if kind else ():
-            field = QLineEdit(values.get(feature.key, ""))
-            field.editingFinished.connect(self._edited)
+            field = feature_field(feature, values.get(feature.key, ""))
+            editor = field.lineEdit() if isinstance(field, QComboBox) else field
+            editor.editingFinished.connect(self._edited)
+            if isinstance(field, QComboBox):
+                field.activated.connect(lambda _: self._edited())
             self.feature_fields[feature.key] = field
             row = QHBoxLayout()
             row.addWidget(field, 1)
@@ -150,7 +183,7 @@ class ElementForm(QWidget):
             if values["name"] != stored["name"]:
                 self.app.service.rename_element(self.asset_id, values["name"])
         features = self.app.db.asset_features(self.asset_id)
-        typed = {key: field.text() for key, field in self.feature_fields.items()}
+        typed = {key: field_text(field) for key, field in self.feature_fields.items()}
         if any(features.get(k, "") != v.strip() for k, v in typed.items()):
             self.app.db.set_asset_features(self.asset_id, {**features, **typed})
             changed = True
@@ -159,8 +192,17 @@ class ElementForm(QWidget):
             self.app.db.set_asset_interval(self.asset_id, own)
             changed = True
         self._hint()
+        self._show_basis(self.app.db.asset(self.asset_id))
         if changed:
             self.changed.emit()
+
+    def _show_basis(self, row) -> None:
+        """An empty test basis follows the element above, which the field shows greyed."""
+        followed = self.app.db.test_basis(row["parent_id"])[1] if row["parent_id"] else ""
+        field = self.fields["basis"]
+        field.setPlaceholderText(tr("as above: {basis}", basis=followed) if followed else
+                                 tr("e.g. DIN VDE 0100-600"))
+        self.basis_hint.setVisible(row["parent_id"] is None and not row["basis"])
 
 
 class ElementOverlay(Overlay):

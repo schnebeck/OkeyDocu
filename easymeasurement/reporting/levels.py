@@ -30,13 +30,19 @@ def asset_features(db, asset) -> list[tuple[str, str]]:
 
 IDENTIFIER, MANUFACTURER, TYPE, REMARK = (N_("Identifier"), N_("Manufacturer"), N_("Type"),
                                            N_("Remark"))
+BASIS = N_("Test basis")
 
 
 def asset_card(db, asset) -> list[tuple[str, str]]:
-    """What the element is, as a test object: its identifier, maker and type, the features
-    noted on it and its remark, which may say how it was measured. Empty ones stay out."""
+    """What the element is, as a test object: its identifier, maker and type, a test basis of
+    its own, the features noted on it and its remark, which may say how it was measured.
+    Empty ones stay out."""
     known = [(tr(IDENTIFIER), asset["identifier"]), (tr(MANUFACTURER), asset["manufacturer"]),
              (tr(TYPE), asset["type"])]
+    # Only a test basis of its own, other than the one above, is news below the title.
+    above = db.test_basis(asset["parent_id"])[1] if asset["parent_id"] is not None else None
+    if above is not None and asset["basis"] and asset["basis"] != above:
+        known.append((tr(BASIS), asset["basis"]))
     rows = [(label, value) for label, value in known if value]
     return rows + asset_features(db, asset) + ([(tr(REMARK), asset["comment"])]
                                                if asset["comment"] else [])
