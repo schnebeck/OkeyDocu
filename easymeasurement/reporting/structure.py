@@ -31,7 +31,7 @@ NOT_MEASURED = N_("Not measured")
 NO_REASON = N_("no reason given")
 
 
-def _levels(values: dict) -> list[Level]:
+def report_levels(values: dict) -> list[Level]:
     """Without a stored structure, as in a preview, everything was taken at the installation."""
     if values.get("structure") is not None:
         return values["structure"]
@@ -52,7 +52,7 @@ def _heading(level: Level, depth: int) -> Heading:
 
 
 def structure_nodes(block: dict, values: dict) -> list[Node]:
-    levels = _levels(values)
+    levels = report_levels(values)
     notes = values["_footnotes"]
     options = block.get("many", {})
     nodes: list[Node] = []

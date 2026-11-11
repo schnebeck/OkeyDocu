@@ -35,6 +35,7 @@ from .logo import LogoError, decode_logo
 from .footnotes import Footnotes
 from .measurement_views import group_nodes, place_nodes, remaining_photos, scope, single
 from .structure import ORDERS, structure_nodes
+from .summary import SummaryPlace, summary_nodes
 from .nodes import (  # noqa: F401
     Fields,
     Heading,
@@ -87,7 +88,7 @@ def parse_template(text: str) -> dict:
 
 _KNOWN_BLOCKS = {
     "heading", "text", "notice", "fields", "steps", "measurements", "photos", "signature", "logo",
-    "attachments", "letterhead", "structure",
+    "attachments", "letterhead", "structure", "summary",
 }
 
 
@@ -102,6 +103,8 @@ def _validate(blocks: list, images: dict, nested: bool = False) -> None:
             _validate(block.get("blocks", []), images, nested=True)
         if kind == "structure" and nested:
             raise TemplateError(tr("The measurements by structure do not belong in a repetition."))
+        if kind == "summary" and nested:
+            raise TemplateError(tr("The summary does not belong in a repetition."))
         if kind == "structure" and block.get("order", "place") not in ORDERS:
             raise TemplateError(tr("Unknown order: {order}", order=repr(block.get("order"))))
         if kind == "logo":
@@ -141,6 +144,9 @@ def resolve(template: dict, context: dict) -> list[Node]:
     nodes: list[Node] = []
     values = {**context, "_images": template.get("images") or {}, "_footnotes": Footnotes()}
     _resolve_blocks(template["blocks"], values, nodes)
+    # A summary speaks of the whole report, so it is filled in once the rest is known.
+    nodes = [part for node in nodes
+             for part in (summary_nodes(values) if isinstance(node, SummaryPlace) else [node])]
     head = 0
     for index, node in enumerate(nodes):  # logos stand apart from the flow of the text
         if isinstance(node, Letterhead):
@@ -175,6 +181,8 @@ def _resolve_blocks(blocks: list[dict], values: dict, nodes: list[Node]) -> None
             nodes.extend(_resolve_measurements(block, values))
         elif kind == "structure":
             nodes.extend(structure_nodes(block, values))
+        elif kind == "summary":
+            nodes.append(SummaryPlace(block))
         elif kind == "photos":
             items = remaining_photos(scope(values), values["_footnotes"])
             if items:

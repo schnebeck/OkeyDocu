@@ -58,6 +58,10 @@ blocks:
   - type: notice
     when: device.overdue
     text: "Recalibration of the test instrument was overdue at the time of testing ({{ device.recalibration_due }})."
+  - type: heading
+    level: 2
+    text: Summary
+  - type: summary
   - type: structure
     order: place
     many:

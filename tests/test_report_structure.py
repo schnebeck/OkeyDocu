@@ -249,8 +249,9 @@ def test_compact_puts_every_function_of_an_element_into_one_table():
     table = node.body
     assert [plain(h) for h in table.headers] == ["Nr.", "Zeitpunkt", "Messung", "Ergebnis",
                                                  "Grenzwert", "", "Bemerkung"]
+    assert plain(compact_nodes([rlo(n=3)], Footnotes())[-1].body.rows[0][2]) == "RLO"
     assert [plain(row[2]) for row in table.rows] == ["RLO", "RLO", "U3~"]
-    assert table.rows[0][4] == "< 1,00 Ω"
+    assert plain(table.rows[0][4]) == "<\u202f1,00\u202fΩ"
     assert "<br/>" in table.rows[2][3]
     assert "= 40 mΩ" in table.rows[0][-1] and "= 50 mΩ" in table.rows[1][-1]
     assert [plain(label) for label, _ in head.rows] == ["RLO"]

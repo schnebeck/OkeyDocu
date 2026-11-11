@@ -13,7 +13,7 @@ from PySide6.QtWidgets import QTreeWidgetItem
 from ..reporting.template_model import block_summary, new_block
 
 
-TOP_ONLY = ("steps", "logo", "structure")  # blocks that never stand inside a repeat
+TOP_ONLY = ("steps", "logo", "structure", "summary")  # blocks that never stand inside a repeat
 
 
 class TemplateBlocks:

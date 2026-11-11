@@ -152,7 +152,8 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
             headings.append(text(node.text, heading[min(node.level, 3)]))
             title = node.text
             continue
-        following = next((n for n in nodes[index + 1:] if not isinstance(n, Heading)), None)
+        following = next((n for n in nodes[index + 1:] if not isinstance(n, (Heading, Fields))),
+                         None)
         if isinstance(node, Fields) and isinstance(following, (Table, Footnoted)):
             headings.append(fields(node))  # what a block or an element says stays with its table
             continue

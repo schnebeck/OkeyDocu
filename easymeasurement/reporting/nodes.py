@@ -21,7 +21,8 @@ class Markup(str):
     Every other text of a node is plain and escaped where it is drawn."""
 
     def plain(self) -> str:
-        return unescape(_TAG.sub("", self))
+        """The text without its tags, a line break kept as one."""
+        return unescape(_TAG.sub("", self.replace("<br/>", "\n")))
 
     def __html__(self) -> str:
         """Lets a template take it as it is, where everything else is escaped."""

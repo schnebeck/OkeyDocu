@@ -23,7 +23,6 @@ from .footnotes import Footnotes
 from .language import value_text
 from .measurement_table import (
     CONDITIONS,
-    CONDUCTORS,
     NOTE,
     SETTINGS,
     SHARED,
@@ -41,7 +40,7 @@ RESULT = N_("Result")
 LIMIT = N_("Limit")
 
 
-def _found(columns: Columns, row: int) -> Markup:
+def found_cell(columns: Columns, row: int) -> Markup:
     """The figures of a measurement; with more than one, each with its symbol on a line."""
     found = columns.found[row]
     keys = [key for key in columns.results if key in found and key not in (NOTE, QUESTION)]
@@ -51,10 +50,18 @@ def _found(columns: Columns, row: int) -> Markup:
                                for key in keys))
 
 
-def _limits(columns: Columns, row: int) -> str:
+def limit_cell(columns: Columns, row: int) -> Markup:
+    """Each limit on a line of its own, a lower one above an upper one, so the column stays
+    narrow."""
     found = columns.found[row]
-    return " ".join(filter(None, (limit_text(found[key][0]) for key in columns.results
-                                  if key in found)))
+    lines = []
+    for key in columns.results:
+        if key in found:
+            result = found[key][0]
+            lines += [value_text(limit) for limit in (result.lower_limit, result.upper_limit)
+                      if limit]
+            lines += [limit_text(result)] if result.setpoint else []
+    return Markup("<br/>".join(escape(line) for line in lines))
 
 
 def _remark(columns: Columns, row: int, measurement, references: list[str]) -> Markup:
@@ -71,11 +78,13 @@ def _remark(columns: Columns, row: int, measurement, references: list[str]) -> M
     return Markup("<br/>".join(parts))
 
 
-def _what(columns: Columns, row: int, function: str) -> Markup:
+def what_cell(columns: Columns, row: int, function: str, conductor: str = "") -> Markup:
+    """What was measured; between which conductors on a line below, or what a check asked."""
     found = columns.found[row]
     if QUESTION in found:
         return Markup(escape(word(found[QUESTION][0].quantity.raw)))
-    return Markup(function_markup(function, short=True))
+    what = function_markup(function, short=True)
+    return Markup(f"{what}<br/>{low_numbers(conductor)}" if conductor else what)
 
 
 def _head(groups: dict[str, Columns]) -> list[tuple[str, str]]:
@@ -95,8 +104,10 @@ def compact_nodes(measured: list[ReportMeasurement], notes: Footnotes) -> list[N
         groups.setdefault(measurement.data.function, []).append(measurement)
     columns = {function: Columns(group) for function, group in groups.items()}
     conductors = [conductor_of(m.data.parameters) for m in measured]
-    headers = [tr("No."), tr("Time"), tr(FUNCTION)] + ([tr(CONDUCTORS)] if any(conductors) else [])
-    headers += [tr(RESULT), tr(LIMIT), "", tr("Remark")]
+    headers = [tr("No."), tr("Time"), tr(FUNCTION)]
+    limited = any(limit_cell(columns[m.data.function], groups[m.data.function].index(m))
+                  for m in measured)
+    headers += [tr(RESULT)] + ([tr(LIMIT)] if limited else []) + ["", tr("Remark")]
     rows, photos, refs = [], [], []
     for number, measurement in enumerate(measured):
         group = columns[measurement.data.function]
@@ -105,10 +116,11 @@ def compact_nodes(measured: list[ReportMeasurement], notes: Footnotes) -> list[N
         refs.append(list(range(len(photos), len(photos) + len(taken))))
         photos += taken
         cells = [str(number + 1), measurement.local_time.strftime("%H:%M:%S") + marks(measurement),
-                 _what(group, row, measurement.data.function)]
-        cells += [Markup(low_numbers(conductors[number] or "–"))] if any(conductors) else []
-        cells += [_found(group, row), _limits(group, row), verdict_mark(measurement.data.verdict),
-                  _remark(group, row, measurement, references)]
+                 what_cell(group, row, measurement.data.function, conductors[number])]
+        cells.append(found_cell(group, row))
+        cells += [limit_cell(group, row)] if limited else []
+        cells += [verdict_mark(measurement.data.verdict), _remark(group, row, measurement,
+                                                                  references)]
         rows.append(cells)
     head = _head(columns)
     table = Table(headers, rows, [], len(headers) - 1)

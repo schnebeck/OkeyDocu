@@ -36,6 +36,7 @@ class Footnotes:
     def __init__(self):
         self.count = 0
         self.shown: set[str] = set()
+        self.numbers: dict[str, int] = {}  # the number each photo got, by its path
 
     def take(self, measurement) -> tuple[list[PhotoNote], list[str]]:
         """The measurement's photos not shown yet, and how its remark refers to them."""
@@ -45,6 +46,7 @@ class Footnotes:
                 continue
             self.shown.add(str(path))
             self.count += 1
+            self.numbers[str(path)] = self.count
             role, marks, *view = measurement.photo_notes.get(str(path), ("", []))
             caption = f"[{self.count}] {function_markup(measurement.data.function, short=True)}"
             caption += f" · {escape(when(measurement))}"

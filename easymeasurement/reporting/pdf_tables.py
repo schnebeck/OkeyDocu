@@ -32,6 +32,7 @@ def narrow_spaces(markup: str, size: float) -> str:
     return (markup.replace(KEPT_NARROW, f'<font size="{small}">\xa0</font>')
             .replace(BREAKING_NARROW, f'<font size="{small}"> </font>'))
 WIDEST_TEXT_MM = 70  # a longer text wraps rather than squeeze its neighbours
+WIDEST_WORD_MM = 22  # what a column of sentences needs at least, short of room
 
 
 class ContinuedTable(PdfTable):
@@ -73,13 +74,18 @@ def column_widths(headers: list[str], rows: list[list[str]], summary: list[list[
     padding = 12 + 2  # the cell's own padding, left and right, and a little air
 
     def measure(index: int) -> tuple[float, float]:
-        texts = [(plain(headers[index]), bold)] + [(plain(row[index]), regular) for row in rows] + [
+        cells = [(plain(headers[index]), bold)] + [(plain(row[index]), regular) for row in rows] + [
             (plain(row[index]), bold) for row in summary]
+        texts = [(line, font) for text, font in cells for line in text.split("\n")]
         whole = max(stringWidth(text, font, size) for text, font in texts)
         word = max(stringWidth(part, font, size) for text, font in texts
                    for part in ([text] if len(text) <= UNBROKEN else text.split() or [""]))
+        if whole > WIDEST_WORD_MM * mm * 2:  # a column of sentences may break a long word
+            sentences.add(index)
+            word = min(word, WIDEST_WORD_MM * mm)
         return min(whole, WIDEST_TEXT_MM * mm) + padding, word + padding
 
+    sentences: set[int] = set()
     wants = {i: measure(i) for i in range(len(headers))}
     room = usable
     wanted = sum(want for want, _ in wants.values())
@@ -89,7 +95,13 @@ def column_widths(headers: list[str], rows: list[list[str]], summary: list[list[
             share = {i: want for i, (want, _) in wants.items()}
             share[stretch] = room - others
             return [share[i] for i in range(len(headers))]
-    if wanted <= room:
+    short = sum(want for i, (want, _) in wants.items() if i not in sentences)
+    if wanted > room and sentences and room - short >= sum(wants[i][1] for i in sentences):
+        # Short of room, figures and words keep their width; sentences share what is left.
+        texts = sum(wants[i][0] for i in sentences)
+        share = {i: want if i not in sentences else want * (room - short) / texts
+                 for i, (want, _) in wants.items()}
+    elif wanted <= room:
         share = {i: want * room / wanted for i, (want, _) in wants.items()}
     else:
         give = sum(want - least for want, least in wants.values()) or 1
