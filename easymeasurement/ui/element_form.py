@@ -8,14 +8,16 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QComboBox,
     QFormLayout,
+    QFrame,
     QGroupBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QScrollArea,
     QSpinBox,
     QVBoxLayout,
     QWidget,
@@ -83,9 +85,26 @@ class ElementForm(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addLayout(form)
-        layout.addWidget(self.features)
-        layout.addWidget(hint)
-        layout.addStretch(1)
+        layout.addWidget(self._scrolled(self.features, hint), 1)
+
+    def _scrolled(self, *widgets: QWidget) -> QScrollArea:
+        """The features keep the height of their rows; where the room left below the fields
+        is too small for them, they scroll."""
+        inner = QWidget()
+        column = QVBoxLayout(inner)
+        column.setContentsMargins(0, 0, 0, 0)
+        for widget in widgets:
+            column.addWidget(widget)
+        column.addStretch(1)
+        area = QScrollArea()
+        area.setWidgetResizable(True)
+        area.setFrameShape(QFrame.Shape.NoFrame)
+        area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        area.setMinimumHeight(4 * self.fontMetrics().height() * 2)
+        area.viewport().setAutoFillBackground(False)
+        inner.setAutoFillBackground(False)
+        area.setWidget(inner)
+        return area
 
     def load(self, asset_id: int) -> None:
         self.asset_id = asset_id
