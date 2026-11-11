@@ -455,6 +455,13 @@ Datei ab. Ein Foto wird nie umgerechnet: Das Original bleibt der Beleg. Vergrö�
 Einzelheit dazu, deshalb gibt es keine Mindestauflösung durch Hochrechnen; die Fotoansicht nennt die
 Pixel und warnt unter 1000 an der langen Seite, dass das Foto im Protokoll grob wirkt.
 
+Drehen und Zuschneiden ändern das Original nicht. Ein Foto hat eine Ansicht
+(`campaign/photo_view.py`): eine Drehung um Vierteldrehungen im Uhrzeigersinn (`rotation`) und danach
+einen Ausschnitt des gedrehten Bilds (`crop`, als Bruchteile „x y Breite Höhe“). Die große Fotoansicht
+dreht und schneidet zu; Markierungen beziehen sich auf die Ansicht und werden beim Ändern umgerechnet,
+so dass sie auf derselben Stelle bleiben. Protokoll und Vorschaubilder zeigen das Foto durch seine
+Ansicht. Das Siegel nimmt Drehung und Ausschnitt nur auf, wo es sie gibt.
+
 Für Protokoll und Vorschaubilder gibt es Proxys (`campaign/photo_proxies.py`): verkleinerte, aufrecht
 gedrehte JPEG-Kopien mit höchstens 1400 Pixeln an der langen Seite im Ordner `proxies/` der Kampagne,
 benannt nach Original und Größe. Ein Proxy trägt die Änderungszeit seines Originals; weicht sie ab,
@@ -498,12 +505,17 @@ Elementen gibt es bewusst nicht: Erst eine Bauteilliste mit Historie gäbe ihr e
 
 ## Benutzer
 
-Ein Benutzer hat Titel, Name, Unterschrift und optional ein Zertifikat (`ui/users.py`). Vom Zertifikat
+Ein Benutzer hat Titel, Name, Unterschrift und optional ein Zertifikat (`ui/users.py`). Das Feld der
+Unterschrift steht für die Linie im Protokoll (`ui/signature_pad.py`): Gespeichert wird das ganze Feld im
+Format 4:1, die Linie liegt bei drei Vierteln seiner Höhe und ist im PNG vermerkt. Mit „Ausrichten“ wird
+die Unterschrift auf die Linie gezogen und mit dem Mausrad in der Größe angepasst; das Protokoll legt die
+Linie des Felds auf seine eigene, Unterlängen reichen darunter. Vom Zertifikat
 stehen nur Pfad, Inhaber und Ablaufdatum in der Datenbank, das Passwort wird nie gespeichert. Es dient
 nur zum Prüfen und Signieren. Wer schon Kampagnen hat, wird beim Entfernen nur ausgeblendet.
 
 Eine Kampagne verweist auf den Benutzer (`user_id`) und hält seinen Namen zusätzlich als Text fest
-(`tester`). Beim Abschluss kommt die Unterschrift als Kopie dazu, ihr Hash gehört zum Siegel. Spätere
+(`tester`). Beim Abschluss kommt die Unterschrift als Kopie dazu, ihr Hash gehört zum Siegel; ein Entwurf
+zeigt die aktuelle Unterschrift des Prüfers. Spätere
 Änderungen am Benutzer berühren den Datensatz deshalb nicht. Solange die Kampagne offen ist, lässt sich
 der Prüfer wechseln, auf Wunsch auch für die bisherigen Messungen. Das wird registriert, markiert im
 Protokoll aber keine Messung als geändert, weil es nichts über das Ergebnis sagt. Eine gepushte Messung
