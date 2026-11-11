@@ -223,3 +223,17 @@ def test_elements_side_by_side_follow_the_order_they_were_measured_in(app):
     assert places == ["Antrieb (Messpunkt)", "Zuleitung (Messpunkt)"]
     times = [row[1][:8] for node in nodes if hasattr(node, "body") for row in node.body.rows]
     assert times == ["10:05:00", "10:30:00", "10:10:00"]
+
+
+def test_an_element_says_what_it_is_and_how_it_was_measured(app):
+    db = app.db
+    customer = db.add_customer("Muster AG")
+    root = db.add_asset(customer, "machine", "Presse", identifier="M-1", manufacturer="Muster",
+                        comment="Messungen von links nach rechts")
+    campaign = app.service.create(root, "Prüfung", "Prüfer")
+    result = ResultValue("rlo", "RLO", Quantity.parse("0.10Ω"), Verdict.PASSED, "", "<1.00Ω")
+    app.service.add_measurement(campaign, "rlo", [result], T0, Verdict.PASSED, asset_id=root)
+    nodes = resolve({"blocks": [{"type": "structure"}]}, build_context(app.service, campaign))
+    card = next(node for node in nodes if isinstance(node, Fields))
+    assert card.rows == [("Kennung", "M-1"), ("Hersteller", "Muster"),
+                         ("Bemerkung", "Messungen von links nach rechts")]

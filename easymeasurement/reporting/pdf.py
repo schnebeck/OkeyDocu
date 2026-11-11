@@ -152,9 +152,9 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
             headings.append(text(node.text, heading[min(node.level, 3)]))
             title = node.text
             continue
-        following = nodes[index + 1] if index + 1 < len(nodes) else None
+        following = next((n for n in nodes[index + 1:] if not isinstance(n, Heading)), None)
         if isinstance(node, Fields) and isinstance(following, (Table, Footnoted)):
-            headings.append(fields(node))  # what a block shares stays with its table
+            headings.append(fields(node))  # what a block or an element says stays with its table
             continue
         if isinstance(node, TextNode):
             flowable = text(node.text)

@@ -33,7 +33,7 @@ class TemplateStructureForm:
 
         order.currentIndexChanged.connect(order_changed)
         form.addRow(tr("Order"), order)
-        features = QCheckBox(tr("Show the features of each element"))
+        features = QCheckBox(tr("Show what each element is: identifier, maker, features, remark"))
         features.setChecked(block.get("features", True))
 
         def features_changed(checked: bool) -> None:

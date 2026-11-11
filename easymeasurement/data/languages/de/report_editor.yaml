@@ -88,7 +88,7 @@ texts:
   By element of the installation: Nach Element der Anlage
   By measured quantity: Nach Messgröße
   Order: Anordnung
-  Show the features of each element: Merkmale jedes Elements zeigen
+  "Show what each element is: identifier, maker, features, remark": "Zeigen, was jedes Element ist: Kennung, Hersteller, Merkmale, Bemerkung"
   "Each element of the installation with measurements becomes a section. Every measured quantity in it first states what its measurements share: settings, conditions and limits.": "Jedes Element der Anlage mit Messungen wird ein Abschnitt. Jede Messgröße darin nennt zuerst, was ihre Messungen gemeinsam haben: Einstellungen, Bedingungen und Grenzwerte."
   The measurements by structure do not belong in a repetition.: Die Messungen nach Struktur gehören nicht in eine Wiederholung.
   "Unknown order: {order}": "Unbekannte Anordnung: {order}"

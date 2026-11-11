@@ -11,6 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from ..l10n import N_, tr
 from .language import UNIT_SPACE
 
 # Narrow spaces around the slash: kept before it, a line may break after it.
@@ -27,13 +28,28 @@ def asset_features(db, asset) -> list[tuple[str, str]]:
             for feature in (kind.features if kind else ()) if values.get(feature.key)]
 
 
+IDENTIFIER, MANUFACTURER, TYPE, REMARK = (N_("Identifier"), N_("Manufacturer"), N_("Type"),
+                                           N_("Remark"))
+
+
+def asset_card(db, asset) -> list[tuple[str, str]]:
+    """What the element is, as a test object: its identifier, maker and type, the features
+    noted on it and its remark, which may say how it was measured. Empty ones stay out."""
+    known = [(tr(IDENTIFIER), asset["identifier"]), (tr(MANUFACTURER), asset["manufacturer"]),
+             (tr(TYPE), asset["type"])]
+    rows = [(label, value) for label, value in known if value]
+    return rows + asset_features(db, asset) + ([(tr(REMARK), asset["comment"])]
+                                               if asset["comment"] else [])
+
+
 @dataclass
 class Level:
     asset_id: int | None
     title: str
     kind: str = ""
-    features: list[tuple[str, str]] = field(default_factory=list)
+    card: list[tuple[str, str]] = field(default_factory=list)
     measurements: list[ReportMeasurement] = field(default_factory=list)
+    remark: str = ""
 
 
 def structure_levels(service, root_id: int, measured: list[ReportMeasurement]) -> list[Level]:
@@ -63,8 +79,8 @@ def structure_levels(service, root_id: int, measured: list[ReportMeasurement]) -
         mine = by_place.pop(row["id"], [])
         if mine:
             levels.append(Level(row["id"], PATH.join(names) or row["name"],
-                                kinds.get(row["kind"], ""), asset_features(db, row),
-                                sorted(mine, key=lambda m: m.local_time)))
+                                kinds.get(row["kind"], ""), asset_card(db, row),
+                                sorted(mine, key=lambda m: m.local_time), row["comment"]))
         # Elements side by side follow in the order they were measured in.
         children = sorted(below.get(row["id"], ()),
                           key=lambda child: (first[child["id"]] is None,

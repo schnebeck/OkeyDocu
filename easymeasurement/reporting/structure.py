@@ -20,7 +20,7 @@ from __future__ import annotations
 from ..l10n import N_, tr
 from ..vocabulary import function_markup
 from .context import ReportMeasurement
-from .levels import Level
+from .levels import REMARK, Level
 from .measurement_table import Columns, group_nodes
 from .nodes import Fields, Heading, Markup, Node
 
@@ -67,12 +67,14 @@ def structure_nodes(block: dict, values: dict) -> list[Node]:
                 group = [m for m in level.measurements if m.data.function == function]
                 if group:
                     nodes.append(_heading(level, 3))
+                    if level.remark and block.get("features", True):
+                        nodes.append(Fields([(tr(REMARK), level.remark)]))
                     nodes.extend(group_nodes(group, options, notes, shared.stated(), points=True))
     else:
         for level in levels:
             nodes.append(_heading(level, 2))
-            if level.features and block.get("features", True):
-                nodes.append(Fields(level.features))
+            if level.card and block.get("features", True):
+                nodes.append(Fields(level.card))
             for function, group in _by_function(level.measurements).items():
                 nodes.append(Heading(Markup(function_markup(function)), 3))
                 nodes.extend(group_nodes(group, options, notes, points=True))
