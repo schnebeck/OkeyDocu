@@ -23,11 +23,11 @@ from easymeasurement.reporting.context import (
 )
 from easymeasurement.reporting.pdf import render_pdf
 from easymeasurement.reporting.sign import Pkcs12Signer
+from easymeasurement.reporting.nodes import Footnoted
 from easymeasurement.reporting.template import (
     Fields,
     Notice,
     Paragraph,
-    Table,
     TemplateError,
     default_template_text,
     parse_template,
@@ -71,23 +71,25 @@ def test_zero_measurements_can_be_hidden():
 
 def test_one_measurement_reads_like_a_form():
     (node,) = run(context(reading()))
-    assert isinstance(node, Fields)
-    assert ("RISO", "2,00\u202fMΩ  (Grenzwert >\u202f1,00\u202fMΩ)") in node.rows
+    assert isinstance(node, Footnoted) and isinstance(node.body, Fields)
+    assert ("<i>R</i><sub rise='30%'>ISO</sub>", "2,00\u202fMΩ  (Grenzwert >\u202f1,00\u202fMΩ)") in node.body.rows
 
 
-def test_many_measurements_become_a_table_with_summary():
-    (node,) = run(context(reading("2.00MΩ", n=1), reading("900kΩ", n=2), reading("5.00MΩ", n=3)))
-    assert isinstance(node, Table)
-    assert len(node.rows) == 3
-    assert node.summary[0][2] == "900\u202fkΩ"  # compared by value, not by text
-    assert node.summary[1][2] == "5,00\u202fMΩ"
+def test_many_measurements_become_a_block_with_a_table_and_summary():
+    head, node = run(context(reading("2.00MΩ", n=1), reading("900kΩ", n=2),
+                             reading("5.00MΩ", n=3)))
+    assert head.rows == [("Grenzwerte", "<i>R</i><sub rise='30%'>ISO</sub> &gt;\u202f1,00\u202fMΩ")]
+    table = node.body
+    assert len(table.rows) == 3
+    assert table.summary[0][2] == "900\u202fkΩ"  # compared by value, not by text
+    assert table.summary[1][2] == "5,00\u202fMΩ"
 
 
 def test_functions_in_one_step_are_counted_separately():
     nodes = run(context(reading(function="rcd_time", n=1), reading(function="rcd_current", n=2),
                         reading(function="rcd_current", n=3)))
     kinds = [type(n).__name__ for n in nodes]
-    assert kinds == ["Heading", "Fields", "Heading", "Table"]
+    assert kinds == ["Heading", "Footnoted", "Heading", "Fields", "Footnoted"]
 
 
 def test_simulated_data_is_stamped_on_the_report():
@@ -229,8 +231,8 @@ def test_photo_caption_names_its_measurement(tmp_path):
     block = {"type": "steps", "blocks": [{"type": "photos"}]}
     (node,) = resolve({"blocks": [block]}, context(measurement))
     assert isinstance(node, Photos)
-    assert node.items == [(tmp_path / "a.jpg", "RISO – Isolationswiderstand · 01.03.2026 10:00:00",
-                           [], "")]
+    assert node.items == [(tmp_path / "a.jpg", "<i>R</i><sub rise='30%'>ISO</sub>"
+                           " – Isolationswiderstand · 01.03.2026 10:00:00", [], "", [])]
 
 
 def test_a_defect_photo_says_so_and_names_its_marks(tmp_path):
@@ -246,9 +248,9 @@ def test_a_defect_photo_says_so_and_names_its_marks(tmp_path):
     block = {"type": "steps", "blocks": [{"type": "photos"}]}
     (node,) = resolve({"blocks": [block]}, context(measurement))
     assert isinstance(node, Photos)
-    _, caption, drawn, role = node.items[0]
-    assert caption.startswith("Mangel: RISO")
-    assert caption.endswith("\n(1) Isolierung angeschmort")
+    _, caption, drawn, role, texts = node.items[0]
+    assert caption.startswith("<b>Mangel:</b> <i>R</i>")
+    assert texts == ["(1) Isolierung angeschmort"]
     assert (drawn, role) == (marks, "defect")
 
 
@@ -256,10 +258,3 @@ def test_pdf_renders_into_memory():
     buffer = io.BytesIO()
     render_pdf(run(context(reading())), buffer)
     assert buffer.getvalue().startswith(b"%PDF")
-
-
-def test_measurement_block_outside_a_repeat_covers_the_campaign():
-    template = {"blocks": [{"type": "measurements"}]}
-    values = context(reading(n=1), reading(n=2))
-    (node,) = resolve(template, values)
-    assert isinstance(node, Table) and len(node.rows) == 2

@@ -12,7 +12,7 @@ from PySide6.QtCore import QMimeData, QPointF, Qt, QUrl
 from PySide6.QtGui import QDropEvent
 
 from easymeasurement.reporting.context import build_context as report_context
-from easymeasurement.reporting.nodes import Fields, Paragraph, Photos
+from easymeasurement.reporting.nodes import Fields, Footnoted, Photos
 from easymeasurement.reporting.template import parse_template, default_template_text, resolve
 from easymeasurement.ui.attachment_list import NoteOverlay
 
@@ -149,20 +149,23 @@ def test_notes_and_files_of_a_place_are_in_the_report(app, asset, pdf, image):
     assert photos[0][1] == "Prüfung allgemein"
 
 
+def remarks(app, campaign) -> list[str]:
+    tables = [node.body for node in nodes(app, campaign) if isinstance(node, Footnoted)]
+    return [row[-1] for table in tables for row in table.rows]
+
+
 def test_a_file_on_a_single_measurement_is_named(app, asset, pdf):
     campaign = app.service.create(asset, "Prüfung", "Prüfer")
     measurement = app.service.add_measurement(campaign, "rlo", [])
     app.service.add_attachment(campaign, pdf, measurement_id=measurement)
-    rows = [row for node in nodes(app, campaign) if isinstance(node, Fields) for row in node.rows]
-    assert ("Anhang", "Schaltplan.pdf") in rows
+    assert remarks(app, campaign) == ["Anhang Schaltplan.pdf"]
 
 
-def test_remarks_in_a_table_follow_it_by_number(app, asset):
+def test_a_remark_stands_in_the_row_of_its_measurement(app, asset):
     campaign = app.service.create(asset, "Prüfung", "Prüfer")
     app.service.add_measurement(campaign, "rlo", [])
     app.service.add_measurement(campaign, "rlo", [], comment="Klemme nachgezogen")
-    texts = [node.text for node in nodes(app, campaign) if isinstance(node, Paragraph)]
-    assert "Nr. 2: Klemme nachgezogen" in texts
+    assert remarks(app, campaign) == ["", "Klemme nachgezogen"]
 
 
 def test_a_photo_of_the_measurement_opens_large(shown, image, monkeypatch):

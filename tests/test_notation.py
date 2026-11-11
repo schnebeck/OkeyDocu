@@ -9,6 +9,7 @@
 from easymeasurement.l10n import speaking
 from easymeasurement.vocabulary import (
     Role,
+    conductors,
     counts,
     function_markup,
     markup,
@@ -20,15 +21,20 @@ from easymeasurement.vocabulary import (
 
 
 def test_the_letter_is_italic_and_the_index_upright_and_low():
-    assert markup("R_LO") == "<i>R</i><sub>LO</sub>"
-    assert markup("ΔR_LO") == "Δ<i>R</i><sub>LO</sub>"
-    assert markup("R_LO^+") == "<i>R</i><sub>LO</sub><sup>+</sup>"
-    assert markup("U_L1-L2") == "<i>U</i><sub>L1-L2</sub>"
+    assert markup("R_LO") == "<i>R</i><sub rise='30%'>LO</sub>"
+    assert markup("ΔR_LO") == "Δ<i>R</i><sub rise='30%'>LO</sub>"
+    assert markup("R_LO^+") == "<i>R</i><sub rise='30%'>LO</sub><sup>+</sup>"
+
+
+def test_outer_conductors_have_their_number_set_low_also_inside_an_index():
+    assert markup("U_L1-L2") == "<i>U</i><sub rise='30%'>L<sub rise='20%'>1</sub>-L<sub rise='20%'>2</sub></sub>"
+    assert conductors("L3-PE") == "L<sub rise='30%'>3</sub>-PE"
+    assert conductors("N-PE") == "N-PE" and conductors("PL1") == "PL1"
 
 
 def test_words_and_units_stay_upright():
-    assert markup("RCD U_IΔN") == "RCD <i>U</i><sub>IΔN</sub>"
-    assert markup("R_LO 25 A") == "<i>R</i><sub>LO</sub> 25 A"
+    assert markup("RCD U_IΔN") == "RCD <i>U</i><sub rise='30%'>IΔN</sub>"
+    assert markup("R_LO 25 A") == "<i>R</i><sub rise='30%'>LO</sub> 25 A"
     assert markup("U3~") == "U3~"
     assert markup("Rotating field") == "Rotating field"
     assert markup("a<b") == "a&lt;b"
@@ -44,9 +50,9 @@ def test_without_type_styles_the_symbol_still_reads():
 def test_symbols_of_the_vocabulary_follow_the_language():
     with speaking("de"):
         assert result_label("rlo") == "RLO"
-        assert result_markup("rlo") == "<i>R</i><sub>LO</sub>"
-        assert result_markup("i_clamp") == "<i>I</i><sub>Zange</sub>"
-        assert function_markup("riso") == "<i>R</i><sub>ISO</sub> – Isolationswiderstand"
+        assert result_markup("rlo") == "<i>R</i><sub rise='30%'>LO</sub>"
+        assert result_markup("i_clamp") == "<i>I</i><sub rise='30%'>Zange</sub>"
+        assert function_markup("riso") == "<i>R</i><sub rise='30%'>ISO</sub> – Isolationswiderstand"
         assert result_markup("unknown", "X<1") == "X&lt;1"
 
 

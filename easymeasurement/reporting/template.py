@@ -27,23 +27,20 @@ import jinja2
 import yaml
 from jinja2.sandbox import SandboxedEnvironment
 
-from .context import ReportMeasurement, function_label
+from ..vocabulary import function_markup
+from .context import ReportMeasurement
 from ..l10n import N_, tr
 from .language import pick
 from .logo import LogoError, decode_logo
-from .measurement_views import (  # noqa: F401
-    _many,
-    _marks,
-    _scope,
-    _single,
-    _step_photos,
-    place_nodes,
-)
+from .footnotes import Footnotes
+from .measurement_views import group_nodes, place_nodes, remaining_photos, scope, single
+from .structure import ORDERS, structure_nodes
 from .nodes import (  # noqa: F401
     Fields,
     Heading,
     Letterhead,
     Logo,
+    Markup,
     Node,
     Notice,
     Paragraph,
@@ -55,6 +52,8 @@ from .nodes import (  # noqa: F401
 DRAFT_NOTICE = N_("DRAFT – the inspection is still open, this report is not valid.")
 SIMULATED_NOTICE = N_("SIMULATED VALUES – not a valid test report.")
 _env = SandboxedEnvironment(undefined=jinja2.ChainableUndefined, autoescape=False)
+# Headings may hold symbols set as in mathematics: their data is escaped, markup kept.
+_marked = SandboxedEnvironment(undefined=jinja2.ChainableUndefined, autoescape=True)
 
 
 class TemplateError(Exception):
@@ -82,7 +81,7 @@ def parse_template(text: str) -> dict:
 
 _KNOWN_BLOCKS = {
     "heading", "text", "notice", "fields", "steps", "measurements", "photos", "signature", "logo",
-    "attachments", "letterhead",
+    "attachments", "letterhead", "structure",
 }
 
 
@@ -95,6 +94,10 @@ def _validate(blocks: list, images: dict, nested: bool = False) -> None:
             if nested:
                 raise TemplateError(tr("Repetitions cannot be nested."))
             _validate(block.get("blocks", []), images, nested=True)
+        if kind == "structure" and nested:
+            raise TemplateError(tr("The measurements by structure do not belong in a repetition."))
+        if kind == "structure" and block.get("order", "place") not in ORDERS:
+            raise TemplateError(tr("Unknown order: {order}", order=repr(block.get("order"))))
         if kind == "logo":
             if nested:
                 raise TemplateError(tr("A logo does not belong in a repetition."))
@@ -107,9 +110,9 @@ def _validate(blocks: list, images: dict, nested: bool = False) -> None:
 # Resolving --------------------------------------------------------------
 
 
-def _render(text: str, values: dict) -> str:
+def _render(text: str, values: dict, env=_env) -> str:
     try:
-        return _env.from_string(pick(text)).render(**values)
+        return env.from_string(pick(text)).render(**values)
     except jinja2.TemplateError as err:
         message = tr("Error in the placeholder {text}: {error}", text=repr(text), error=err)
         raise TemplateError(message) from err
@@ -130,7 +133,8 @@ def resolve(template: dict, context: dict) -> list[Node]:
     if context["campaign"].get("simulated"):
         warnings.append(Notice(tr(SIMULATED_NOTICE)))
     nodes: list[Node] = []
-    _resolve_blocks(template["blocks"], {**context, "_images": template.get("images") or {}}, nodes)
+    values = {**context, "_images": template.get("images") or {}, "_footnotes": Footnotes()}
+    _resolve_blocks(template["blocks"], values, nodes)
     head = 0
     for index, node in enumerate(nodes):  # logos stand apart from the flow of the text
         if isinstance(node, Letterhead):
@@ -146,7 +150,8 @@ def _resolve_blocks(blocks: list[dict], values: dict, nodes: list[Node]) -> None
             continue
         kind = block["type"]
         if kind == "heading":
-            nodes.append(Heading(_render(block["text"], values), int(block.get("level", 1))))
+            text = Markup(_render(block["text"], values, _marked))
+            nodes.append(Heading(text, int(block.get("level", 1))))
         elif kind == "text":
             nodes.append(Paragraph(_render(block["text"], values)))
         elif kind == "notice":
@@ -162,8 +167,10 @@ def _resolve_blocks(blocks: list[dict], values: dict, nodes: list[Node]) -> None
                 _resolve_blocks(block.get("blocks", []), {**values, "step": step}, nodes)
         elif kind == "measurements":
             nodes.extend(_resolve_measurements(block, values))
+        elif kind == "structure":
+            nodes.extend(structure_nodes(block, values))
         elif kind == "photos":
-            items = _step_photos(_scope(values))
+            items = remaining_photos(scope(values), values["_footnotes"])
             if items:
                 nodes.append(Photos(items))
         elif kind == "attachments":
@@ -173,6 +180,7 @@ def _resolve_blocks(blocks: list[dict], values: dict, nodes: list[Node]) -> None
                 [_render(label, values) for label in block.get("labels", ["Place, date", "Inspector"])],
                 values.get("campaign", {}).get("signature"),
                 _render(block.get("result", ""), values), values.get("verdict_tone", ""),
+                [_render(text, values).strip() for text in block.get("fills", [])],
             ))
         elif kind == "letterhead":
             nodes.append(Letterhead(
@@ -213,7 +221,7 @@ def _lines(texts: list[str], values: dict) -> list[str]:
 
 
 def _resolve_measurements(block: dict, values: dict) -> list[Node]:
-    step = _scope(values)
+    step = scope(values)
     wanted = block.get("function", "*")
     selected = [m for m in step.measurements if wanted in ("*", m.data.function)]
     if not selected:
@@ -227,11 +235,12 @@ def _resolve_measurements(block: dict, values: dict) -> list[Node]:
         groups.setdefault(measurement.data.function, []).append(measurement)
 
     nodes: list[Node] = []
+    notes = values["_footnotes"]
     for function, group in groups.items():
         if len(groups) > 1:
-            nodes.append(Heading(function_label(function), 3))
+            nodes.append(Heading(Markup(function_markup(function)), 3))
         if len(group) == 1:
-            nodes.append(_single(group[0], block.get("one", {})))
+            nodes.append(single(group[0], block.get("one", {}), notes))
         else:
-            nodes.extend(_many(group, block.get("many", {})))
+            nodes.extend(group_nodes(group, block.get("many", {}), notes))
     return nodes

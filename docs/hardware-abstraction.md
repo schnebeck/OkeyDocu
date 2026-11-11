@@ -42,10 +42,13 @@ quantities:
   resistance: {unit: Ω, name: Resistance}
   voltage: {unit: V, name: Voltage}
 results:
-  rlo: {symbol: RLO, quantity: resistance, name: Protective conductor resistance}
-  u_ln: {symbol: ULN, quantity: voltage, name: Line voltage L-N}
+  rlo: {symbol: R_LO, quantity: resistance, name: Protective conductor resistance}
+  rlo_plus: {symbol: R_LO^+, quantity: resistance, name: "Protective conductor resistance, positive"}
+  rlo_offset: {symbol: "R_LO,offset", quantity: resistance, name: Lead compensation}
+  u_ln: {symbol: U_L-N, quantity: voltage, name: Voltage L-N}
 functions:
-  rlo: {symbol: RLO, name: Protective conductor resistance}
+  rlo: {symbol: R_LO, name: Protective conductor resistance, conditions: [rlo_offset],
+        on_fail: [rlo_plus, rlo_minus, rlo_delta]}
 outcomes:
   right: {name: right}
 settings:
@@ -57,13 +60,25 @@ settings:
   kept as `raw` and is what reports print.
 - **Result**: one figure a function produces, with its symbol and quantity.
 - **Function**: a measuring function as the inspector chooses it; plans and the step editor list
-  these. Its label is `symbol – name`. It may list the results it produces (`results`).
+  these. Its label is `symbol – name`. It may list the results it produces (`results`), the
+  results that state the conditions of a measurement (`conditions`, such as the lead
+  compensation of RLO or the test voltage of RISO) and those that count only where the
+  measurement did not pass (`on_fail`, such as the two polarities of RLO). An instrument sends
+  its whole result block; `vocabulary/roles.py` tells from these lists, and from a figure without
+  a value, what each figure is. Reports show conditions with the settings and leave out what does
+  not count; the view "How it was measured" shows every figure with its role.
 - **Outcome**: the neutral word of a check without a number (rotating field `right`), stored as
   that word so a report can print it in any language.
 - **Setting**: a known setting of a function, such as the conductors a value was taken between.
 
+Symbols are written as in mathematics (`vocabulary/notation.py`): one letter for the quantity,
+`_` before its subscript and `^` before its superscript, as `R_LO`, `ΔR_LO`, `U_L1-L2` or
+`R_LO^+`. Following ISO 80000 the letter is set in italic and the index, numbers, units and words
+upright; the number of an outer conductor is set low as well, also inside an index. Where no type
+styles are possible, as in a table on screen, the symbol is written plainly (`RLO`, `UL1-L2`).
+
 Keys are stable: they are stored with every measurement. Names and symbols may change at any
-time, and a language may write a symbol its own way (`I_CLAMP` is `I_ZANGE` in German). Two
+time, and a language may write a symbol its own way (`I_clamp` is `I_Zange` in German). Two
 files may not define the same key, and a field the loader does not know is refused, so an
 unquoted comma in a name cannot go unnoticed.
 

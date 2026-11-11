@@ -139,13 +139,14 @@ def test_last_values_come_back_for_comparison(app, last):
 
 def test_the_report_groups_a_repeat_by_measurement_and_names_what_was_left_out(app, last):
     from easymeasurement.reporting.context import build_context
+    from easymeasurement.reporting.nodes import plain
     points = _points(app, last["again"])
     app.service.insert_imported(last["again"], _reading("n1", "L1-PE"), "device:x",
                                 datetime(2026, 5, 4, 9), None, None, None, last["cabinet"])
     app.service.skip_step(points["RISO/L2-PE"][0]["id"], "Anlage außer Betrieb")
     app.service.answer_step(points["Zugänglichkeit/"][0]["id"], "yes")
     steps = build_context(app.service, last["again"])["steps"]
-    shown = [(s.title, s.status, s.note, len(s.measurements)) for s in steps]
+    shown = [(plain(s.title), s.status, s.note, len(s.measurements)) for s in steps]
     assert ("Sichtprüfung der Betriebsmittel", "done", "", 1) in shown
     assert ("RISO · Presse / Schrank · L2-PE", "skipped", "Anlage außer Betrieb", 0) in shown
     assert ("RISO – Isolationswiderstand", "done", "", 1) in shown

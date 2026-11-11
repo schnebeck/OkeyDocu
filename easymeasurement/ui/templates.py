@@ -36,6 +36,7 @@ from .board import GutterSplitter
 from .common import AppContext
 from .template_blocks import TemplateBlocks
 from .template_data_forms import TemplateDataForms
+from .template_structure_form import TemplateStructureForm
 from .template_document import TemplateDocument
 from .template_forms import TemplateForms
 from .template_logo_form import TemplateLogoForm
@@ -44,7 +45,8 @@ _PREVIEW_DELAY_MS = 350
 
 
 class TemplatesPage(
-    TemplateDocument, TemplateBlocks, TemplateForms, TemplateDataForms, TemplateLogoForm, QWidget
+    TemplateDocument, TemplateBlocks, TemplateForms, TemplateDataForms, TemplateStructureForm,
+    TemplateLogoForm, QWidget
 ):
     def __init__(self, app: AppContext):
         super().__init__()

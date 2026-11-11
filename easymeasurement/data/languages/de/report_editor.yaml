@@ -82,3 +82,15 @@ texts:
   "Name:": "Name:"
   Delete template: Vorlage löschen
   "Delete “{name}”? Existing reports are not affected.": "„{name}“ löschen? Bestehende Protokolle bleiben davon unberührt."
+  # Measurements by structure
+  Measurements by structure: Messungen nach Struktur
+  By element of the installation: Nach Element der Anlage
+  By measured quantity: Nach Messgröße
+  Order: Anordnung
+  Show the features of each element: Merkmale jedes Elements zeigen
+  "Each element of the installation with measurements becomes a section. Every measured quantity in it first states what its measurements share: settings, conditions and limits.": "Jedes Element der Anlage mit Messungen wird ein Abschnitt. Jede Messgröße darin nennt zuerst, was ihre Messungen gemeinsam haben: Einstellungen, Bedingungen und Grenzwerte."
+  The measurements by structure do not belong in a repetition.: Die Messungen nach Struktur gehören nicht in eine Wiederholung.
+  "Unknown order: {order}": "Unbekannte Anordnung: {order}"
+  "empty: lines to fill in by hand": "leer: Linien zum Ausfüllen von Hand"
+  Written on the lines (separated by |): Auf den Linien (getrennt durch |)
+  "Report: date": "Protokoll: Datum"

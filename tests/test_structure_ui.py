@@ -163,6 +163,6 @@ def test_searching_the_structure_keeps_the_way_to_a_hit(shown):
 
 
 def test_features_reach_the_report(app, shown):
-    from easymeasurement.reporting.context import _features
+    from easymeasurement.reporting.levels import asset_features
     app.db.set_asset_features(shown["press"], {"rated_current": "16", "year_of_manufacture": ""})
-    assert _features(app.db, app.db.asset(shown["press"])) == [("Nennstrom", "16\u202fA")]
+    assert asset_features(app.db, app.db.asset(shown["press"])) == [("Nennstrom", "16\u202fA")]

@@ -9,22 +9,16 @@
 import pytest
 from PySide6.QtWidgets import QMessageBox
 
-from easymeasurement.__main__ import build_context
+from easymeasurement.reporting.nodes import Footnoted
 from easymeasurement.reporting.template import Paragraph, Table, parse_template, resolve
 from easymeasurement.reporting.template_model import BLOCK_LABELS, dump_template, new_block
-from easymeasurement.ui.main_window import MainWindow
 from easymeasurement.ui.template_document import sample_context
 
 
-@pytest.fixture
-def page(qtbot):
-    app = build_context()
-    main = MainWindow(app)
-    qtbot.addWidget(main)
-    main.open_page(main.templates)
-    yield main.templates
-    app.db.close()
 
+@pytest.fixture
+def page(template_page):
+    return template_page
 
 def repeat_path(page):
     index = next(i for i, b in enumerate(page.template["blocks"]) if b["type"] == "steps")
@@ -35,7 +29,7 @@ def stored(page):
     return parse_template(page.app.db.templates()[0]["body"])
 
 
-def test_standard_template_opens_as_blocks(page):
+def test_a_template_opens_as_blocks(page):
     assert page.tree.topLevelItemCount() > 5
     item = page.tree.topLevelItem(repeat_path(page)[0])
     assert item.childCount() == 3
@@ -160,6 +154,10 @@ def nodes(page, count):
     return resolve(parse_template(page.current_text()), sample_context(count))
 
 
+def first_table(found) -> Table:
+    return next(n.body for n in found if isinstance(n, Footnoted) and isinstance(n.body, Table))
+
+
 def test_zero_case_text_is_editable(page):
     measurement_block(page)
     page.none_text.setText("Entfällt.")
@@ -174,9 +172,9 @@ def test_zero_case_can_be_hidden(page):
 
 def test_summary_row_can_be_switched_off(page):
     measurement_block(page)
-    assert next(n for n in nodes(page, 4) if isinstance(n, Table)).summary
+    assert first_table(nodes(page, 4)).summary
     page.many_summary.setChecked(False)
-    assert not next(n for n in nodes(page, 4) if isinstance(n, Table)).summary
+    assert not first_table(nodes(page, 4)).summary
 
 
 def test_condition_is_chosen_from_a_list(page):

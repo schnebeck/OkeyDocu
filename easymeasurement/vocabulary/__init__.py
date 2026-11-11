@@ -16,11 +16,11 @@ from __future__ import annotations
 from xml.sax.saxutils import escape
 
 from ..l10n import in_language, tr
-from .notation import markup, plain
+from .notation import conductors, markup, plain
 from .roles import ROLE_TEXT, Role, counts, role
 from .terms import Term, Vocabulary, VocabularyError, vocabulary
 
-__all__ = ["ROLE_TEXT", "Role", "Term", "Vocabulary", "VocabularyError", "counts",
+__all__ = ["ROLE_TEXT", "Role", "Term", "Vocabulary", "VocabularyError", "conductors", "counts",
            "function_keys", "function_label", "function_markup", "function_symbol", "markup",
            "outcome_text", "plain", "result_label", "result_markup", "result_name", "role", "setting_name",
            "units", "vocabulary"]
@@ -50,13 +50,16 @@ def function_label(key: str) -> str:
     return plain(tr(term.symbol)) + LABEL_SEPARATOR + tr(term.name)
 
 
-def function_markup(key: str) -> str:
-    """As `function_label`, with the symbol in italic and its index set low."""
+def function_markup(key: str, short: bool = False) -> str:
+    """As `function_label`, with the symbol in italic and its index set low; `short` gives
+    the symbol alone, as `function_symbol` does."""
     term = vocabulary().functions.get(key)
     if term is None:
         return escape(key)
     if not term.symbol:
         return escape(tr(term.name))
+    if short:
+        return markup(tr(term.symbol))
     return markup(tr(term.symbol)) + escape(LABEL_SEPARATOR + tr(term.name))
 
 

@@ -157,7 +157,9 @@ def test_pages_and_reserve_are_stored(placed):
 
 def test_logo_never_goes_into_a_repeat(placed):
     assert not placed.into_button.isEnabled()
-    repeat = next(i for i, b in enumerate(placed.template["blocks"]) if b["type"] == "steps")
+    placed.add_block("steps")
+    repeat = placed.path()[0]
+    placed.add_block("text")
     placed._select((repeat, 0))
     placed.add_block("logo")
     assert len(placed.path()) == 1

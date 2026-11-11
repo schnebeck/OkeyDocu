@@ -101,7 +101,8 @@ def letterhead(node: Letterhead, usable: float, body: ParagraphStyle,
 def signature(node: SignatureLine, usable: float, cell: ParagraphStyle, body: ParagraphStyle,
               bold: str) -> PdfTable:
     """A line to sign over each label, with a gap between the lines; with a result, framed
-    together with it."""
+    together with it. What is known already, such as place, date and name, is written on the
+    lines; the stored signature takes the place of the name."""
     framed = bool(node.result)
     count = len(node.labels)
     room = usable - (14 * mm if framed else 0) - GAP_MM * mm * (count - 1)
@@ -114,7 +115,11 @@ def signature(node: SignatureLine, usable: float, cell: ParagraphStyle, body: Pa
             labels.append("")
         widths.append(width)
         last = index == count - 1
-        line.append(_signature_image(node.image, width) if last and node.image else "")
+        fill = node.fills[index] if index < len(node.fills) else ""
+        if last and node.image:  # a signature drawn by hand stands in for the name
+            line.append(_signature_image(node.image, width))
+        else:
+            line.append(Paragraph(escape(fill), body) if fill else "")
         labels.append(Paragraph(escape(label), cell))
     rows = [line, labels]
     style = [("VALIGN", (0, 0), (-1, 0), "BOTTOM"), ("BOTTOMPADDING", (0, 0), (-1, 0), 1),

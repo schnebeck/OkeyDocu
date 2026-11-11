@@ -84,10 +84,14 @@ class Parameter:
 CONDUCTOR = "conductor"
 
 
+def is_conductor(parameter: "Parameter") -> bool:
+    return parameter.key == CONDUCTOR or parameter.key.endswith("Leiter")
+
+
 def conductor_of(parameters) -> str:
     """Between which conductors a measurement was taken, such as L1-PE."""
     for parameter in parameters:
-        if parameter.key == CONDUCTOR or parameter.key.endswith("Leiter"):
+        if is_conductor(parameter):
             return parameter.value
     return ""
 

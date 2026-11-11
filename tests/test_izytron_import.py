@@ -22,7 +22,8 @@ from easymeasurement.model import (
     conductor_of,
 )
 from easymeasurement.reporting.context import ReportMeasurement, build_context
-from easymeasurement.reporting.template import _many
+from easymeasurement.reporting.footnotes import Footnotes
+from easymeasurement.reporting.measurement_table import group_nodes
 from easymeasurement.store import CampaignClosed
 
 from .izytron_helpers import build
@@ -212,10 +213,10 @@ def test_report_table_names_conductor_and_place(service, source):
     steps = build_context(service, result.campaign_id)["steps"]
     step = next(s for s in steps if s.function == "rlo")
     assert all(conductor_of(m.data.parameters) == "L1-PE" for m in step.measurements)
-    nodes = _many(step.measurements, {"summary": True})
-    assert nodes[0].headers[:4] == ["Nr.", "Zeitpunkt", "Messort", "Leiter"]
-    assert nodes[0].rows[0][3] == "L1-PE"
-    assert len(nodes[0].summary[0]) == len(nodes[0].headers)
+    table = group_nodes(step.measurements, {"summary": True}, Footnotes())[-1].body
+    assert table.headers[:4] == ["Nr.", "Zeitpunkt", "Messort", "Leiter"]
+    assert table.rows[0][3] == "L<sub rise='30%'>1</sub>-PE"
+    assert all(len(row) == len(table.headers) for row in table.summary)
 
 
 def conductor_group(*conductors):
@@ -232,13 +233,16 @@ def conductor_group(*conductors):
     ]
 
 
+def table_of(group):
+    return group_nodes(group, {"summary": True}, Footnotes())[-1].body
+
+
 def test_different_conductors_get_no_min_and_max():
-    table = _many(conductor_group("L1-PE", "L1-L2"), {"summary": True})[0]
-    assert table.summary == []
+    assert table_of(conductor_group("L1-PE", "L1-L2", "L1-PE")).summary == []
 
 
 def test_same_conductor_keeps_min_and_max():
-    table = _many(conductor_group("L1-PE", "L1-PE"), {"summary": True})[0]
+    table = table_of(conductor_group("L1-PE", "L1-PE", "L1-PE"))
     assert [row[0] for row in table.summary] == ["Min", "Max"]
 
 

@@ -17,6 +17,7 @@ from reportlab.platypus import CondPageBreak, Paragraph
 from reportlab.platypus import Table as PdfTable
 
 from ..l10n import tr
+from .nodes import Markup, plain
 
 UNBROKEN = 14  # characters; a value with its unit stays on one line
 WIDEST_TEXT_MM = 70  # a longer text wraps rather than squeeze its neighbours
@@ -45,7 +46,8 @@ class ContinuedTable(PdfTable):
 
 def caption_of(heading: str, style: ParagraphStyle) -> Paragraph:
     marker = escape(tr("continued"))
-    return Paragraph(f"{escape(heading)} <font size='8'>({marker})</font>", style)
+    title = heading if isinstance(heading, Markup) else escape(heading)
+    return Paragraph(f"{title} <font size='8'>({marker})</font>", style)
 
 
 def column_widths(headers: list[str], rows: list[list[str]], summary: list[list[str]],
@@ -57,8 +59,8 @@ def column_widths(headers: list[str], rows: list[list[str]], summary: list[list[
     padding = 12  # the cell's own padding, left and right
 
     def measure(index: int) -> tuple[float, float]:
-        texts = [(headers[index], bold)] + [(row[index], regular) for row in rows] + [
-            (row[index], bold) for row in summary]
+        texts = [(plain(headers[index]), bold)] + [(plain(row[index]), regular) for row in rows] + [
+            (plain(row[index]), bold) for row in summary]
         whole = max(stringWidth(text, font, size) for text, font in texts)
         word = max(stringWidth(part, font, size) for text, font in texts
                    for part in ([text] if len(text) <= UNBROKEN else text.split() or [""]))

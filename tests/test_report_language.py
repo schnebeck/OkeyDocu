@@ -12,7 +12,14 @@ from easymeasurement.model import Quantity, ResultValue, Verdict
 from easymeasurement.reporting.context import build_context
 from easymeasurement.l10n import tr
 from easymeasurement.reporting.language import day, languages, moment, speaking, value_text
-from easymeasurement.reporting.nodes import Fields, Heading, Letterhead, SignatureLine
+from easymeasurement.reporting.nodes import (
+    Fields,
+    Footnoted,
+    Heading,
+    Letterhead,
+    SignatureLine,
+    plain,
+)
 from easymeasurement.reporting.template import default_template_text, parse_template, resolve
 
 
@@ -32,9 +39,13 @@ def texts(app, campaign, code, template=None):
     found = []
     for node in nodes:
         if isinstance(node, Heading):
-            found.append(node.text)
+            found.append(plain(node.text))
         elif isinstance(node, Fields):
             found += [text for row in node.rows for text in row]
+        elif isinstance(node, Footnoted) and isinstance(node.body, Fields):
+            found += [text for row in node.body.rows for text in row]
+        elif isinstance(node, Footnoted):
+            found += [*node.body.headers, *(text for row in node.body.rows for text in row)]
         elif isinstance(node, Letterhead):
             found += [node.title, *node.lines, *node.client, *node.contractor]
         elif isinstance(node, SignatureLine):

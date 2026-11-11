@@ -21,25 +21,22 @@ from ..model import (
     Verdict,
     conductor_of,
 )
-from ..devices import is_simulated
+from ..devices import is_simulated, setting_words
 from ..l10n import N_, in_language, tr
 from ..vocabulary import function_label as vocabulary_label
+from ..vocabulary import function_markup
 from .attached import Attached, places, sort_attached
-from .language import UNIT_SPACE, day, moment
+from .levels import asset_features, structure_levels
+from .language import day, moment
 from .logo import LogoError, decode_logo
+from .measurement_words import said_settings
+from .nodes import Markup
 
 VERDICT_TEXT = {
     Verdict.PASSED: N_("passed"),
     Verdict.FAILED: N_("failed"),
     Verdict.NOT_EVALUATED: N_("not evaluated"),
 }
-
-def _features(db, asset) -> list[tuple[str, str]]:
-    """The features noted on the element, in the order of its kind; empty ones stay out."""
-    kind, values = db.kind(asset["kind"]), db.asset_features(asset["id"])
-    return [(feature.label, f"{values[feature.key]}{UNIT_SPACE}{feature.unit}".strip())
-            for feature in (kind.features if kind else ()) if values.get(feature.key)]
-
 
 @dataclass
 class ReportMeasurement:
@@ -50,6 +47,9 @@ class ReportMeasurement:
     manual: bool = False  # typed in, not read from an instrument
     edited: bool = False  # something other than the reading was overwritten
     attached: Attached = field(default_factory=Attached)
+    settings: list[tuple[str, str]] = field(default_factory=list)  # name and value, in words
+    place_id: int | None = None  # the element of the installation it was taken at
+    point: str = ""  # the step of the plan it was taken for
 
 
 @dataclass
@@ -95,6 +95,7 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
     asset = service.db.asset(campaign["asset_id"])
     customer = service.db.customer(asset["customer_id"])
     identity = service.identity(campaign_id)
+    words = setting_words(service.db)
 
     def load(row) -> ReportMeasurement:
         attached = sort_attached(service, service.attachments(campaign_id, measurement_id=row["id"]))
@@ -103,8 +104,9 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
                 (photo["role"], service.photo_marks(photo["id"]))
             for photo in service.photos_of(row["id"])
         }
+        data = service.load_measurement(row)
         return ReportMeasurement(
-            service.load_measurement(row),
+            data,
             datetime.fromisoformat(row["local_time"]),
             service.photo_paths(row["id"]) + attached.images,
             notes,
@@ -112,6 +114,8 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
             # Who measured is registered, but it says nothing about the result.
             edited=any(c["field"] != "operator" for c in service.measurement_changes(row["id"])),
             attached=attached,
+            settings=said_settings(words, data.parameters),
+            place_id=row["asset_id"],
         )
 
     steps = []
@@ -133,19 +137,23 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
         title = in_language(plan_step.title)
         if repeat:
             title = _point_title(service, plan_step, title)
+        for measurement in measured:
+            measurement.point = title
         steps.append(ReportStep(title, plan_step.function, row["status"], row["note"], measured))
 
     # Without a plan, measurements are simply grouped by what was measured.
     for row in service.open_measurements(campaign_id):
         loose.setdefault(row["function"], []).append(load(row))
     for function, measured in loose.items():
-        steps.append(ReportStep(function_label(function), function, "done", "", measured))
+        title = Markup(function_markup(function))
+        steps.append(ReportStep(title, function, "done", "", measured))
 
+    measured = [m for step in steps for m in step.measurements]
     return {
         **company_context(service.db.company()),
         "customer": dict(customer),
         "asset": {**dict(asset), "kind_text": service.db.kind_labels().get(asset["kind"], ""),
-                  "features": _features(service.db, asset)},
+                  "features": asset_features(service.db, asset)},
         "campaign": {
             "title": campaign["title"],
             "tester": campaign["tester"],
@@ -177,6 +185,8 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
             "overdue": identity.calibration_overdue(_reference_day(campaign)),
         },
         "steps": steps,
+        "report": {"date": day(date.today())},
+        "structure": structure_levels(service, campaign["asset_id"], measured),
         "places": places(service, campaign_id),
         "verdict": overall_verdict(steps),
         "verdict_tone": {tr("Passed"): "passed", tr("Failed"): "failed"}.get(

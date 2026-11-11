@@ -13,6 +13,9 @@ from PySide6.QtWidgets import QTreeWidgetItem
 from ..reporting.template_model import block_summary, new_block
 
 
+TOP_ONLY = ("steps", "logo", "structure")  # blocks that never stand inside a repeat
+
+
 class TemplateBlocks:
     """A block sits at the top level or inside a repeat, so a path has one or two parts."""
 
@@ -61,7 +64,7 @@ class TemplateBlocks:
         if path is None:
             self.template["blocks"].append(block)
             target = (len(self.template["blocks"]) - 1,)
-        elif kind in ("steps", "logo"):  # neither may sit inside a repeat
+        elif kind in TOP_ONLY:  # none of them may sit inside a repeat
             self.template["blocks"].insert(path[0] + 1, block)
             target = (path[0] + 1,)
         elif len(path) == 1 and self._block(path)["type"] == "steps":
@@ -97,7 +100,7 @@ class TemplateBlocks:
 
     def move_into(self) -> None:
         path = self.path()
-        if path is None or len(path) != 1 or self._block(path)["type"] in ("steps", "logo"):
+        if path is None or len(path) != 1 or self._block(path)["type"] in TOP_ONLY:
             return
         repeat = self._steps_before(path[0])
         if repeat is None:
@@ -151,7 +154,7 @@ class TemplateBlocks:
         self.remove_button.setEnabled(selected)
         top = selected and len(path) == 1
         self.into_button.setEnabled(
-            bool(top) and self._block(path)["type"] not in ("steps", "logo")
+            bool(top) and self._block(path)["type"] not in TOP_ONLY
             and self._steps_before(path[0]) is not None
         )
         self.out_button.setEnabled(selected and len(path) == 2)

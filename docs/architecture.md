@@ -102,6 +102,30 @@ Messungen verschiedener Funktionen teilen sich keine Tabelle, weil ihre Spalten 
 zusammenpassen; jede Funktion wird für sich gezählt. Der Min/Max-Vergleich läuft über
 `base_value`, angezeigt wird der Originaltext.
 
+Ein Messblock nennt zuerst, was seine Messungen gemeinsam haben: Einstellungen des Messgeräts,
+Messbedingungen wie den R_LO-Offset und Grenzwerte. Die Tabelle darunter zeigt je Messung nur, was
+sich unterscheidet, und was gemessen wurde (`reporting/measurement_table.py`). Werte, die nur bei
+nicht bestandener Messung zählen, bekommen nur dann eine Spalte. Messwerte stehen als Zahl und
+Einheit mit Vorsatz in Tausenderstufen (p, n, µ, m, k, M, G, T), etwa `220 mΩ`; dabei wird nur
+das Komma verschoben, nie gerundet. Formelzeichen sind kursiv mit aufrechtem, tiefgestelltem Index.
+
+Bemerkungen gehören in die Zeile ihrer Messung: Kommentar, Notizen, Anhänge und Verweise auf Fotos
+stehen untereinander in der Spalte „Bemerkung“. Fotos sind durch das Protokoll nummeriert (`[3]`);
+die Bemerkung verweist darauf, mit Hinweisnummer, wenn das Foto markiert ist („siehe Hinweis 1 in
+[3]“). Das PDF setzt jedes Foto wie eine Fußnote auf die Seite der Zeile, die es nennt, mit der
+Liste der Hinweise darunter: höchstens drei nebeneinander und zwei Reihen je Seite
+(`reporting/pdf_photos.py`).
+
+Der Block `structure` ordnet die Messungen nach dem Strukturbaum der Anlage. Mit `order: place`
+ist jedes Element mit Messungen ein Abschnitt mit seinen Merkmalen und darin je Messgröße ein
+Block; mit `order: function` steht jede Messgröße einmal, mit dem, was all ihre Elemente teilen,
+und darunter je Element nur noch, was davon abweicht. Schritte eines Plans ohne Messung folgen mit
+ihrer Begründung. Die Standardvorlage verwendet `order: place`.
+
+Am Fuß stehen Ort, Datum und Name schon auf den Linien (`fills` des Blocks `signature`): der Sitz
+der eigenen Firma, das Erstellungsdatum und der Prüfer, dessen hinterlegte Unterschrift den Namen
+ersetzt. Die digitale Signatur kommt danach.
+
 `resolve()` wandelt Vorlage und Daten in Dokumentknoten um, `render_pdf()` macht daraus das PDF.
 Platzhalter laufen in einer Jinja-Sandbox, damit eine Vorlage nicht an Programminterna kommt.
 

@@ -96,3 +96,9 @@ def window(qtbot, app):
 @pytest.fixture
 def asset(app):
     return app.db.add_asset(app.db.add_customer("Muster AG"), "installation", "Halle")
+
+
+@pytest.fixture
+def template_page(qtbot):
+    from .template_page import open_template_page
+    yield from open_template_page(qtbot)

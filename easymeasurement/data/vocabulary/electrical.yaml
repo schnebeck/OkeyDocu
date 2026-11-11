@@ -42,8 +42,8 @@ results:
   f: {symbol: f, quantity: frequency, name: Frequency}
   rotation: {symbol: Rotating field, quantity: direction, name: Phase sequence}
   rlo: {symbol: R_LO, quantity: resistance, name: Protective conductor resistance}
-  rlo_plus: {symbol: R_LO+, quantity: resistance, name: "Protective conductor resistance, positive"}
-  rlo_minus: {symbol: R_LO−, quantity: resistance, name: "Protective conductor resistance, negative"}
+  rlo_plus: {symbol: R_LO^+, quantity: resistance, name: "Protective conductor resistance, positive"}
+  rlo_minus: {symbol: R_LO^−, quantity: resistance, name: "Protective conductor resistance, negative"}
   rlo_delta: {symbol: ΔR_LO, quantity: resistance, name: Difference of the polarities}
   rlo_offset: {symbol: "R_LO,offset", quantity: resistance, name: Lead compensation}
   riso: {symbol: R_ISO, quantity: resistance, name: Insulation resistance}

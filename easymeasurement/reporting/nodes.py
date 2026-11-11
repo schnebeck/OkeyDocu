@@ -8,7 +8,28 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
+from html import unescape
+from pathlib import Path
+
+_TAG = re.compile(r"<[^>]+>")
+
+
+class Markup(str):
+    """Text with the inline tags <i>, <b>, <sub> and <sup>, its other characters escaped.
+    Every other text of a node is plain and escaped where it is drawn."""
+
+    def plain(self) -> str:
+        return unescape(_TAG.sub("", self))
+
+    def __html__(self) -> str:
+        """Lets a template take it as it is, where everything else is escaped."""
+        return str(self)
+
+
+def plain(text: str) -> str:
+    return text.plain() if isinstance(text, Markup) else text
 
 
 @dataclass
@@ -45,11 +66,34 @@ class Photos:
 
 
 @dataclass
+class PhotoNote:
+    """A photo a measurement refers to by its number, with the texts of its marks."""
+
+    path: Path
+    number: int
+    caption: str
+    notes: list[str] = field(default_factory=list)
+    marks: list = field(default_factory=list)
+    role: str = ""
+
+
+@dataclass
+class Footnoted:
+    """A table or field list and the photos its rows refer to: the PDF sets each photo on the
+    page of the first row that names it. `refs` holds, row by row, indices into `photos`."""
+
+    body: "Table | Fields"
+    photos: list[PhotoNote]
+    refs: list[list[int]]
+
+
+@dataclass
 class SignatureLine:
     labels: list[str]
     image: bytes | None = None  # stands over the last label
     result: str = ""  # framed above the lines where given
     tone: str = ""  # "passed" or "failed" colours the result
+    fills: list[str] = field(default_factory=list)  # written on the lines, such as place and date
 
 
 @dataclass
@@ -76,5 +120,5 @@ class Logo:
     reserve: bool = True
 
 
-Node = (Heading | Paragraph | Notice | Fields | Table | Photos | SignatureLine | Logo
-        | Letterhead)
+Node = (Heading | Paragraph | Notice | Fields | Table | Photos | Footnoted | SignatureLine
+        | Logo | Letterhead)

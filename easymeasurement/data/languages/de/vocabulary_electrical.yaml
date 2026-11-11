@@ -59,7 +59,6 @@ texts:
   # Roles of results
   Measuring condition: Messbedingung
   Only if not passed: Nur bei nicht bestanden
-  Not measured: Nicht gemessen
   # Outcomes and settings
   clockwise: rechts
   anticlockwise: links

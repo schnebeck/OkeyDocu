@@ -1,5 +1,5 @@
 # EasyMeasurement - easymeasurement/reporting/measurement_views.py
-# Presents measurements as document nodes: fields for one, a table for several.
+# Presents measurements as document nodes: fields for one, a block with a table for several.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
@@ -8,19 +8,22 @@
 
 from __future__ import annotations
 
+from xml.sax.saxutils import escape
+
 from ..campaign.photo_marks import ROLES
-from ..l10n import N_, in_language, tr
+from ..l10n import in_language, tr
 from ..model import conductor_of
-from ..vocabulary import outcome_text, result_label
-from .context import VERDICT_TEXT, ReportMeasurement, ReportStep, function_label
-from .language import moment, value_text
-from .nodes import Fields, Node, Paragraph, Photos, Table
+from ..vocabulary import conductors, function_markup
+from .context import VERDICT_TEXT, ReportStep
+from .footnotes import Footnotes
+from .measurement_table import Columns, group_nodes, limit_text, remark
+from .measurement_words import when, word
+from .nodes import Fields, Footnoted, Markup, Node, Photos
 
-LOCATION = N_("Measuring location")
-CONDUCTORS = N_("Conductors")
+__all__ = ["group_nodes", "place_nodes", "remaining_photos", "scope", "single"]
 
 
-def _scope(values: dict) -> ReportStep:
+def scope(values: dict) -> ReportStep:
     """Inside a repeat a block sees its step; outside it, the whole campaign."""
     step = values.get("step")
     if step is not None:
@@ -29,82 +32,48 @@ def _scope(values: dict) -> ReportStep:
     return ReportStep("", "", "done", "", everything)
 
 
-def _step_photos(step: ReportStep) -> list[tuple]:
-    """Each photo names its measurement, so it can be traced like any other value.
-
-    A defect or a hint says so first; the texts of the marks follow by their numbers.
-    """
+def remaining_photos(step: ReportStep, notes: Footnotes) -> list[tuple]:
+    """Photos no measurement has shown yet. Each names its measurement, so it can be traced
+    like any other value; a defect or a hint says so first, the texts of the marks follow."""
     items = []
     for m in step.measurements:
         for path in m.photos:
+            if str(path) in notes.shown:
+                continue
+            notes.shown.add(str(path))
             role, marks = m.photo_notes.get(str(path), ("", []))
-            caption = f"{function_label(m.data.function)} · {_time(m)}"
+            caption = f"{function_markup(m.data.function)} · {escape(when(m))}"
             if role:
-                caption = f"{tr(ROLES[role])}: {caption}"
+                caption = f"<b>{escape(tr(ROLES[role]))}:</b> {caption}"
             texts = [f"({mark.number}) {mark.text}" for mark in marks if mark.text]
-            if texts:
-                caption += "".join(f"\n{text}" for text in texts)
-            items.append((path, caption, marks, role))
+            items.append((path, Markup(caption), marks, role, texts))
     return items
 
 
-def _marks(measurement: ReportMeasurement) -> str:
-    """A record must not look measured or untouched if it is not."""
-    marks = [tr(text) for flag, text in ((measurement.manual, N_("manual")),
-                                         (measurement.edited, N_("changed"))) if flag]
-    return f" ({', '.join(marks)})" if marks else ""
-
-
-def _word(text: str) -> str:
-    """A reading in the protocol's language: neutral words such as yes or right are
-    translated, numbers get its decimal sign."""
-    return value_text(in_language(outcome_text(text)))
-
-
-def _time(measurement: ReportMeasurement) -> str:
-    return moment(measurement.local_time, seconds=True) + _marks(measurement)
-
-
-def _limit(result) -> str:
-    setpoint = f"{tr('expected')} {_word(result.setpoint)}" if result.setpoint else ""
-    limits = (value_text(result.lower_limit), value_text(result.upper_limit), setpoint)
-    return " ".join(part for part in limits if part)
-
-
-def _single(measurement: ReportMeasurement, options: dict) -> Fields:
+def single(measurement, options: dict, notes: Footnotes) -> Footnoted:
+    """One measurement reads like a form; its photos follow it."""
     data = measurement.data
-    rows = [(tr("Time"), _time(measurement))]
+    columns = Columns([measurement])
+    rows = [(tr("Time"), when(measurement))]
     if conductor_of(data.parameters):
-        rows.append((tr("Conductors"), conductor_of(data.parameters)))
+        rows.append((tr("Conductors"), Markup(conductors(conductor_of(data.parameters)))))
     if data.location and options.get("location", True):
-        where = " / ".join(data.location[1:] or data.location)
-        rows.append((tr("Location in the equipment"), where))
-    for result in data.results:
-        limit = _limit(result)
-        shown = _word(result.quantity.raw)
-        label = result_label(result.key, result.label)
-        rows.append((label, f"{shown}  ({tr('limit')} {limit})" if limit else shown))
-    if measurement.photos:
-        rows.append((tr("Photos"), str(len(measurement.photos))))
+        rows.append((tr("Location in the equipment"), " / ".join(data.location[1:] or data.location)))
+    rows += [(tr(name), Markup(conductors(value))) for name, value in measurement.settings]
+    for key in columns.results + list(columns.shared_conditions):
+        result = columns.found[0][key][0]
+        limit = limit_text(result)
+        shown = word(result.quantity.raw)
+        rows.append((columns.symbol(key), f"{shown}  ({tr('limit')} {limit})" if limit else shown))
     if data.results:
         rows.append((tr("Verdict"), tr(VERDICT_TEXT[data.verdict])))
-    if data.comment:
-        rows.append((tr("Comment"), data.comment))
-    rows += [(tr("Note"), note) for note in measurement.attached.notes]
-    rows += [(tr("Attachment"), name) for name in measurement.attached.documents]
-    return Fields(rows)
-
-
-def _numbered_notes(group: list[ReportMeasurement]) -> list[Node]:
-    """A table has no room for text, so notes and attachments follow it by row number."""
-    lines = []
-    for number, measurement in enumerate(group, 1):
-        texts = [*measurement.attached.notes,
-                 *(f"{tr('Attachment')} {d}" for d in measurement.attached.documents)]
-        if measurement.data.comment:
-            texts.insert(0, measurement.data.comment)
-        lines += [f"{tr('No.')} {number}: {text}" for text in texts]
-    return [Paragraph(line) for line in lines]
+    photos, references = notes.take(measurement)
+    said = remark(measurement, references)
+    if said:
+        rows.append((tr("Remark"), said))
+    refs = [[] for _ in rows]
+    refs[-1] = list(range(len(photos)))
+    return Footnoted(Fields(rows), photos, refs)
 
 
 def place_nodes(places: list) -> list[Node]:
@@ -114,62 +83,3 @@ def place_nodes(places: list) -> list[Node]:
              for p in places for name in p.attached.documents]
     images = [(path, in_language(p.name)) for p in places for path in p.attached.images]
     return ([Fields(rows)] if rows else []) + ([Photos(images)] if images else [])
-
-
-def _columns(group: list[ReportMeasurement]) -> list[tuple[str, str]]:
-    columns: dict[str, str] = {}
-    for measurement in group:
-        for result in measurement.data.results:
-            columns.setdefault(result.key, result_label(result.key, result.label))
-    return list(columns.items())
-
-
-def _many(group: list[ReportMeasurement], options: dict) -> list[Node]:
-    columns = _columns(group)
-    details = _details(group)
-    headers = [tr("No."), tr("Time"), *(tr(d) for d in details),
-               *(label for _, label in columns), tr("Verdict")]
-    rows = []
-    for number, measurement in enumerate(group, 1):
-        cells = [str(number), measurement.local_time.strftime("%H:%M:%S") + _marks(measurement)]
-        cells += [texts[number - 1] or "–" for texts in details.values()]
-        for key, _ in columns:
-            result = measurement.data.result(key)
-            cells.append(_word(result.quantity.raw) if result else "–")
-        cells.append(tr(VERDICT_TEXT[measurement.data.verdict]))
-        rows.append(cells)
-    # L1-PE and L1-L2 are different quantities, so their extremes say nothing.
-    comparable = len(set(details.get(CONDUCTORS, ()))) <= 1
-    wanted = options.get("summary", True) and comparable
-    summary = _summary(group, columns, len(details)) if wanted else []
-    return [Table(headers, rows, summary), *_numbered_notes(group)]
-
-
-def _details(group: list[ReportMeasurement]) -> dict[str, list[str]]:
-    """Where each row was measured, as far as the rows differ in that."""
-    details = {}
-    places = [m.data.location[-1] if m.data.location else "" for m in group]
-    if len(set(places)) > 1:
-        details[LOCATION] = places
-    conductors = [conductor_of(m.data.parameters) for m in group]
-    if any(conductors):
-        details[CONDUCTORS] = conductors
-    return details
-
-
-def _summary(
-    group: list[ReportMeasurement], columns: list[tuple[str, str]], details: int = 0
-) -> list[list[str]]:
-    """Min and max rows. Shows the instrument's own text, so nothing is reformatted."""
-    lines = []
-    for label, pick in ((N_("Min"), min), (N_("Max"), max)):
-        cells = [tr(label), "", *[""] * details]
-        for key, _ in columns:
-            found = [m.data.result(key) for m in group]
-            numeric = [r for r in found if r and r.quantity.base_value is not None]
-            cells.append(
-                _word(pick(numeric, key=lambda r: r.quantity.base_value).quantity.raw)
-                if numeric else "–"
-            )
-        lines.append([*cells, ""])
-    return lines

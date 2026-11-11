@@ -11,6 +11,9 @@ from __future__ import annotations
 import yaml
 
 from ..l10n import N_, in_language, plural, tr
+from .structure import ORDERS
+
+FILLED_PLACE = "{% if company.city %}{{ company.city }}, {% endif %}{{ report.date }}"
 
 BLOCK_LABELS = {
     "heading": N_("Heading"),
@@ -19,6 +22,7 @@ BLOCK_LABELS = {
     "fields": N_("Field list"),
     "steps": N_("Repeat for each step"),
     "measurements": N_("Measurements (0 / 1 / n)"),
+    "structure": N_("Measurements by structure"),
     "photos": N_("Photos"),
     "attachments": N_("Notes and attachments on places"),
     "signature": N_("Signature line"),
@@ -63,6 +67,7 @@ PLACEHOLDERS = [
     (N_("Step: title"), "{{ step.title }}"),
     (N_("Step: reason"), "{{ step.note }}"),
     (N_("Overall result"), "{{ verdict }}"),
+    (N_("Report: date"), "{{ report.date }}"),
 ]
 
 CONDITIONS = [
@@ -83,10 +88,12 @@ def new_block(kind: str) -> dict:
         "steps": {"blocks": []},
         "measurements": {"none": {"text": tr("Not measured.")}, "one": {},
                          "many": {"summary": True}},
+        "structure": {"order": "place", "many": {"summary": True}},
         "photos": {},
         "attachments": {},
         "signature": {"result": tr("Test result: {{ verdict }}"),
-                      "labels": [tr("Place, date"), tr("Signature {{ campaign.tester }}")]},
+                      "labels": [tr("Place, date"), tr("Signature of inspector")],
+                      "fills": [FILLED_PLACE, "{{ campaign.tester }}"]},
         "letterhead": {
             "title": tr("Test report"),
             "lines": ["{{ campaign.title }}", tr("Tested on {{ campaign.started }}")],
@@ -122,6 +129,8 @@ def block_summary(block: dict) -> str:
     if block["type"] == "fields":
         return plural(len(block.get("rows", ())), "{label} ({count} line)",
                       "{label} ({count} lines)", label=label)
+    if block["type"] == "structure":
+        return f"{label}: {tr(ORDERS.get(block.get('order', 'place'), block.get('order', '')))}"
     if block["type"] == "letterhead":
         title = f"{label}: {block.get('title', '')}"
         return tr("{title} with QR code", title=title) if block.get("qr") else title

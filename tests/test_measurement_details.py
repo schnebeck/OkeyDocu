@@ -42,7 +42,7 @@ def test_every_figure_says_what_it_stands_for(app, asset):
     row = app.db.one("SELECT * FROM measurements WHERE id=?", pushed(app, asset))
     with speaking("en"):
         html = details_html(app, row)
-    assert "<i>R</i><sub>LO</sub>" in html
+    assert "<i>R</i><sub rise='30%'>LO</sub>" in html
     assert "Measuring condition" in html
     assert "Only if not passed</td><td style='padding-right:14px'>no" in html
     assert "220 mΩ" not in html and "210 mΩ" in html
@@ -66,5 +66,5 @@ def test_the_view_opens_over_the_window(qtbot, app, asset):
     measurement = pushed(app, asset)
     view = MeasurementDetails(app, measurement)
     qtbot.addWidget(view)
-    assert "<sub>LO</sub>" in view.text.text()
+    assert "<sub rise='30%'>LO</sub>" in view.text.text()
     assert "TS1285" in view.record.toPlainText()

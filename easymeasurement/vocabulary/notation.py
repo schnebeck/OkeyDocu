@@ -15,6 +15,8 @@ stay upright like anything else that is no symbol.
 
 `plain` gives the symbol for places without type styles, such as a table on screen;
 `markup` gives it with the tags `<i>`, `<sub>` and `<sup>` that both the report and Qt read.
+The number of an outer conductor is set low as well, also inside an index: U_L1-L2 has
+L₁ and L₂ in its subscript.
 """
 from __future__ import annotations
 
@@ -23,6 +25,7 @@ from dataclasses import dataclass
 from xml.sax.saxutils import escape
 
 _SYMBOL = re.compile(r"^(Δ?)([A-Za-zΑ-Ωα-ω])(?:_([^\s^_]+))?(?:\^(\S+))?$")
+_LINE = re.compile(r"(?<![A-Za-z])L([1-3])")  # the number of an outer conductor
 
 
 @dataclass(frozen=True)
@@ -68,14 +71,27 @@ def plain(symbol: str) -> str:
                    for part in parts(symbol))
 
 
+# Lowered by a share of the font size: less than the usual half, so an index, and the number
+# of a conductor inside it, stays within the line of a table.
+LOW = "<sub rise='30%'>"
+LOWER = "<sub rise='20%'>"
+
+
+def conductors(text: str, low: str = LOW) -> str:
+    """Text with the numbers of the outer conductors set low, as L₁-PE."""
+    return _LINE.sub(lambda match: f"L{low}{match.group(1)}</sub>", escape(text))
+
+
 def markup(symbol: str) -> str:
     pieces = []
     for part in parts(symbol):
-        text = escape(part.text)
+        text = conductors(part.text, LOWER) if part.position == "sub" else escape(part.text)
         if part.italic:
             text = f"<i>{text}</i>"
-        if part.position:
-            text = f"<{part.position}>{text}</{part.position}>"
+        if part.position == "sub":
+            text = f"{LOW}{text}</sub>"
+        elif part.position:
+            text = f"<sup>{text}</sup>"
         pieces.append(text)
     return "".join(pieces)
 

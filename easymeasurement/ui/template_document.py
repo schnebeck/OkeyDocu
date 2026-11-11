@@ -62,6 +62,7 @@ def sample_context(count: int) -> dict:
                    "serial_no": "0001", "firmware": "1.0", "calibrated_on": day(date(2026, 1, 1)),
                    "recalibration_due": day(date(2027, 1, 1)), "overdue": False},
         "steps": [step],
+        "report": {"date": day(start.date())},
         "verdict": tr("Passed") if count else tr("Not completely tested"),
     }
 

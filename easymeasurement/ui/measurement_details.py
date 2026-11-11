@@ -27,7 +27,15 @@ from ..l10n import N_, moment, tr
 from ..model import CONDUCTOR, Verdict, conductor_of
 from ..reporting.context import VERDICT_TEXT
 from ..reporting.language import value_text
-from ..vocabulary import ROLE_TEXT, counts, function_markup, outcome_text, result_markup, role
+from ..vocabulary import (
+    ROLE_TEXT,
+    conductors,
+    counts,
+    function_markup,
+    outcome_text,
+    result_markup,
+    role,
+)
 from .common import AppContext
 from .measurement_detail import capture_text
 from .overlay import Overlay
@@ -90,7 +98,7 @@ def details_html(app: AppContext, row) -> str:
     where = _rows([
         (escape(tr("Element")), escape(element)),
         (escape(tr("Location in the equipment")), escape(location if location != element else "")),
-        (escape(tr("Conductors")), escape(conductor_of(data.parameters))),
+        (escape(tr("Conductors")), conductors(conductor_of(data.parameters))),
     ])
     instrument = row["device_time"] and datetime.fromisoformat(row["device_time"])
     how = _rows([
@@ -102,7 +110,7 @@ def details_html(app: AppContext, row) -> str:
         (escape(tr("Inspector")), escape(data.operator)),
     ])
     words = setting_words(app.db)
-    settings = _rows([(escape(name), escape(value)) for name, value, _ in (
+    settings = _rows([(escape(name), conductors(value)) for name, value, _ in (
         words.say(parameter.key, parameter.value) for parameter in data.parameters
         if parameter.key != CONDUCTOR)])
     remarks = _rows([(escape(tr("Remark")), escape(data.comment).replace("\n", "<br>")),

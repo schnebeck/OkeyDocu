@@ -13,7 +13,7 @@ import pytest
 from easymeasurement.devices.simulator import SimulatedMeter
 from easymeasurement.model import Quantity, ResultValue
 from easymeasurement.reporting.context import build_context as report_context
-from easymeasurement.reporting.template import _marks
+from easymeasurement.reporting.measurement_words import marks as _marks
 from easymeasurement.store import ReadingIsFinal
 
 

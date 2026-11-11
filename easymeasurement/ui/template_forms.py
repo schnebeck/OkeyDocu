@@ -23,6 +23,9 @@ from ..l10n import tr
 from ..reporting.template_model import BLOCK_LABELS, CONDITIONS, PLACEHOLDERS
 
 
+FILL_SEPARATOR = " | "  # place and date hold a comma themselves
+
+
 class TemplateForms:
     """Each block type finds its form by name, as `_form_` and the type."""
 
@@ -157,6 +160,16 @@ class TemplateForms:
 
         field.textChanged.connect(changed)
         form.addRow(tr("Fields (separated by commas)"), field)
+        fills = QLineEdit(FILL_SEPARATOR.join(block.get("fills", [])))
+        fills.setPlaceholderText(tr("empty: lines to fill in by hand"))
+
+        def fills_changed(text: str) -> None:
+            block["fills"] = [part.strip() for part in text.split(FILL_SEPARATOR.strip())]
+            self._changed()
+
+        fills.textChanged.connect(fills_changed)
+        form.addRow(tr("Written on the lines (separated by |)"), fills)
+        form.addRow("", self._placeholder_box(fills.insert))
 
     def _condition_row(self, block: dict, form: QFormLayout) -> None:
         box = QComboBox()

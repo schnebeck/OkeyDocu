@@ -21,6 +21,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.pdfmetrics import registerFontFamily
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.platypus import Image
@@ -39,12 +40,21 @@ _SIGNATURE_HEIGHT = 15 * mm
 
 
 def _register_fonts() -> tuple[str, str]:
-    """The reports need Ω, Δ and ², which reportlab's built-in fonts lack."""
+    """The reports need Ω, Δ and ², which reportlab's built-in fonts lack. Symbols of
+    quantities are set in italic; without the oblique faces they stay upright."""
     for folder in _FONT_DIRS:
         regular, bold = Path(folder, "DejaVuSans.ttf"), Path(folder, "DejaVuSans-Bold.ttf")
         if regular.exists() and bold.exists():
             pdfmetrics.registerFont(TTFont("Report", str(regular)))
             pdfmetrics.registerFont(TTFont("Report-Bold", str(bold)))
+            faces = {"italic": "Report", "boldItalic": "Report-Bold"}
+            for face, name, file in (("italic", "Report-Italic", "DejaVuSans-Oblique.ttf"),
+                                     ("boldItalic", "Report-BoldItalic",
+                                      "DejaVuSans-BoldOblique.ttf")):
+                if Path(folder, file).exists():
+                    pdfmetrics.registerFont(TTFont(name, str(Path(folder, file))))
+                    faces[face] = name
+            registerFontFamily("Report", normal="Report", bold="Report-Bold", **faces)
             return "Report", "Report-Bold"
     raise RuntimeError(tr("The font DejaVu Sans is missing (package fonts-dejavu-core)."))
 
@@ -69,9 +79,9 @@ class _NumberedCanvas(pdf_canvas.Canvas):
             self.__dict__.update(state)
             self.setFont(self.font, 7.5)
             self.setFillColor(colors.HexColor("#5b6670"))
-            self.drawString(18 * mm, 10 * mm, self.footer)
+            self.drawString(18 * mm + 6, 10 * mm, self.footer)  # where the text of the page starts
             page = tr("Page {page} of {total}", page=self._pageNumber, total=total)
-            self.drawRightString(A4[0] - 18 * mm, 10 * mm, page)
+            self.drawRightString(A4[0] - 18 * mm - 6, 10 * mm, page)
             super().showPage()
         super().save()
 
