@@ -12,7 +12,6 @@ from PySide6.QtCore import QTimer, Signal
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QAbstractItemView,
-    QCheckBox,
     QFrame,
     QLineEdit,
     QSizePolicy,
@@ -45,11 +44,10 @@ class CampaignValues(CampaignPoints, MeasurementView):
         self.point_id: int | None = None
         self.unplaced = False  # only what is booked onto no element
         self.step_id: int | None = None
+        self.in_plan = False  # a plan is being run: readings typed by hand go to its step
         self.manual_action, self.manual_button = self._action(
             tr("Reading by hand …"), tr("By hand …"), self._enter_by_hand
         )
-        self.only_step = QCheckBox(tr("Only this step"))
-        self.only_step.toggled.connect(lambda: self.refresh())
         # Made after the others, the button came last; it belongs first, always in one place.
         self.actions_row.removeWidget(self.manual_button)
         self.actions_row.insertWidget(0, self.manual_button)
@@ -63,8 +61,6 @@ class CampaignValues(CampaignPoints, MeasurementView):
         # The filter sits with what it narrows; in the tools it would push them aside.
         self.head.row.addWidget(self.common, 1)
         self.head.row.addStretch(0)  # keeps the right end in place while `common` is hidden
-        self.head.row.addWidget(self.only_step)
-        self.head.row.addSpacing(12)
         self.head.row.addWidget(self.count)
         # Row actions live in the row's context menu and on keys; the bar keeps entering
         # by hand and a filter, so nothing in it stands grey most of the time.
@@ -97,17 +93,13 @@ class CampaignValues(CampaignPoints, MeasurementView):
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.refresh()
 
-    def show_campaign(self, campaign_id: int, with_steps: bool = False, by_step: bool = False) -> None:
+    def show_campaign(self, campaign_id: int) -> None:
         if campaign_id != self.campaign_id:
             self.find.blockSignals(True)
             self.find.clear()  # a filter belongs to the campaign it was typed for
             self.find.blockSignals(False)
         self.campaign_id = campaign_id
         self.point_id, self.unplaced = None, False
-        self.only_step.blockSignals(True)
-        self.only_step.setChecked(by_step)
-        self.only_step.blockSignals(False)
-        self.only_step.setVisible(with_steps)
         self.refresh()
 
     def show_point(self, asset_id: int | None) -> None:
@@ -120,8 +112,6 @@ class CampaignValues(CampaignPoints, MeasurementView):
 
     def show_step(self, step_id: int | None) -> None:
         self.step_id = step_id
-        if self.only_step.isChecked():
-            self.refresh()
 
     def select_measurement(self, measurement_id: int) -> None:
         """A step of a folded run opens the run first, so the step can be seen."""
@@ -147,11 +137,9 @@ class CampaignValues(CampaignPoints, MeasurementView):
     def current_filter(self) -> MeasurementFilter | None:
         if self.campaign_id is None:
             return None
-        narrowed = self.only_step.isChecked() and self.step_id is not None
         return MeasurementFilter(
             text=self.find.text().strip(),
             campaign_id=self.campaign_id, point_id=self.point_id, unplaced=self.unplaced,
-            step_id=self.step_id if narrowed else None,
         )
 
     def _show_detail(self) -> None:
@@ -207,7 +195,7 @@ class CampaignValues(CampaignPoints, MeasurementView):
                 dialog.taken_at(), Verdict(dialog.verdict.currentData()),
                 dialog.comment.toPlainText().strip(),
                 dialog.location.text().strip(),
-                step_id=self.step_id if self.only_step.isChecked() else None,
+                step_id=self.step_id if self.in_plan else None,
                 asset_id=self.point_id,
             )
             self._after_change()

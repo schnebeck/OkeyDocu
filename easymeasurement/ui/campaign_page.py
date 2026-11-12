@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import QLabel, QPushButton, QStackedWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QLabel, QStackedWidget, QVBoxLayout, QWidget
 
 from ..l10n import tr
 from .board import EDGE, GUTTER, Board, GutterSplitter
@@ -21,6 +21,7 @@ from .campaign_header import CampaignHeader
 from .campaign_list import CampaignList
 from .campaign_photos import CampaignPhotos
 from .campaign_places import CampaignPlaces
+from .campaign_plans import CampaignPlans
 from .campaign_reports import CampaignReports
 from .campaign_values import CampaignValues
 from .campaign_views import FreeRunView
@@ -38,7 +39,7 @@ from .status_badges import ClockBadge, LinkBadge
 
 
 class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPhotos,
-                   CampaignPlaces, CampaignChecks, QWidget):
+                   CampaignPlaces, CampaignPlans, CampaignChecks, QWidget):
     """Choosing a campaign only shows it. The instrument stays with the one measuring."""
 
     changed = Signal()
@@ -78,14 +79,8 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.place = PlacePanel(app)
         self.place_files = self.place.files
         self.asset_section = self.side.add(tr("Location"), self.place, grows=False)
-        self.plan_add_button = QPushButton(tr("Assign test plan …"))
-        self.plan_add_button.clicked.connect(self.assign_plan)
-        plan_box = QWidget()
-        plan_layout = QVBoxLayout(plan_box)
-        plan_layout.setContentsMargins(0, 0, 0, 0)
-        plan_layout.addWidget(self.guided.steps, 1)
-        plan_layout.addWidget(self.plan_add_button)
-        self.plan_section = self.side.add(tr("Test plan"), plan_box)
+        self._build_plans()
+        self.plan_section = self.side.add(tr("Test plans"), self.plan_list)
         self.loose_section = self.side.add(tr("Not assigned"), self.guided.open_box)
         self.detail_section = self.side.add(tr("Measurement"), self.values.detail, grows=False)
         self._build_photos()
@@ -98,7 +93,6 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
 
         self.work = GutterSplitter(Qt.Orientation.Vertical, objectName="campaign-panes",
                                    width=GUTTER // 2)
-        self.work.addWidget(self.guided)
         # The structure and what was measured on it, side by side like folders and files.
         self.board = Board("campaign-board", self.structure_panel, self.values,
                            head=self.values.head)
@@ -106,17 +100,19 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.board.splitter.setSizes([320, 900])
         self.work.addWidget(self.board)
         self.work.addWidget(self.timeline)
-        # The table is what all of this is for, the step only tells how to get there.
         self.work.setStretchFactor(0, 1)
-        self.work.setStretchFactor(1, 2)
-        self.work.setStretchFactor(2, 0)
-        self.work.setSizes([300, 460, 190])
+        self.work.setStretchFactor(1, 0)
+        self.work.setSizes([760, 190])
+        # A plan being run takes the place of structure and table.
+        self.middle = QStackedWidget()
+        self.middle.addWidget(self.work)
+        self.middle.addWidget(self.plan_run)
         centre = QWidget()
         centre_layout = QVBoxLayout(centre)
         centre_layout.setContentsMargins(0, 0, 0, 0)
         centre_layout.addWidget(self.header)
         centre_layout.addWidget(self.free)
-        centre_layout.addWidget(self.work, 1)
+        centre_layout.addWidget(self.middle, 1)
         self.running = GutterSplitter(objectName="campaign")
         self.running.addWidget(centre)
         self.running.addWidget(self.side)
@@ -167,7 +163,7 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.place.properties_requested.connect(self._edit_element)
         self.place_files.changed.connect(self.changed)
         self._connect_photos()
-        self.guided.started.connect(self.enter)
+        self.guided.started.connect(self._started)
         self.guided.changed.connect(self._data_changed)
         self.guided.step_shown.connect(self.values.show_step)
         self.guided.loose_counted.connect(self._show_loose)

@@ -160,6 +160,8 @@ def test_plan_can_be_assigned_to_an_open_campaign(window, app, asset, monkeypatc
     window.campaign.assign_action.trigger()
     assert len(app.service.steps(campaign)) == 5
     assert window.campaign.plan_section.isVisible()
+    assert window.campaign.current_work() is not window.guided  # assigned, not yet run
+    window.campaign.plan_list.run_button.click()
     assert window.campaign.current_work() is window.guided
 
 

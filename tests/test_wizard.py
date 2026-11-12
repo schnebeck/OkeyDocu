@@ -34,6 +34,7 @@ def page(window, app, asset):
     campaign = app.service.create(asset, "T", "Anna", PLAN)
     window.campaign.refresh()
     window.campaign.enter(campaign)
+    window.campaign.run_plan(app.service.plan_blocks(campaign)[0])
     return window.guided
 
 

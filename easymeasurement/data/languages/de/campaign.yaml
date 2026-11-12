@@ -1,5 +1,24 @@
 # EasyMeasurement - German texts: campaigns, guided measuring and the main window.
 texts:
+  End test plan: Messplan beenden
+  End plan: Plan beenden
+  "{done} of {total} done": "{done} von {total} erledigt"
+  done: erledigt
+  "Its {count} step goes with it.": "Sein {count} Schritt geht mit."
+  "Its {count} steps go with it.": "Seine {count} Schritte gehen mit."
+  Remove test plan: Messplan entfernen
+  "Remove “{title}” from the campaign?": "„{title}“ aus der Kampagne entfernen?"
+  Run: Ausführen
+  "{count} measurement or answer booked on them is deleted.": "{count} darauf gebuchte Messung oder Antwort wird gelöscht."
+  "{count} measurements and answers booked on them are deleted.": "{count} darauf gebuchte Messungen und Antworten werden gelöscht."
+  This cannot be undone.: Das lässt sich nicht rückgängig machen.
+  Continue: Fortsetzen
+  Pause plan: Plan unterbrechen
+  "Closes the plan; everything stays, and it goes on at the first open step": "Schließt den Plan; alles bleibt erhalten, weiter geht es am ersten offenen Schritt"
+  End plan …: Plan beenden …
+  "The steps still open count as skipped, with a reason that appears in the report": "Die noch offenen Schritte gelten als ausgelassen, mit einem Grund, der im Protokoll erscheint"
+  Enters a reading by hand into the step shown: Trägt einen Messwert von Hand in den gezeigten Schritt ein
+  "Test plan: {title}": "Messplan: {title}"
   Connecting to the instrument and setting the clock …: Verbinde mit dem Messgerät und stelle die Uhr …
   "{state}, measuring for “{title}”": "{state}, misst für „{title}“"
   Disconnecting from the instrument …: Trenne vom Messgerät …
@@ -117,7 +136,6 @@ texts:
   CHANGED OR MISSING: VERÄNDERT ODER FEHLT
   Reading by hand …: Messwert von Hand …
   By hand …: Von Hand …
-  Only this step: Nur dieser Schritt
   Move to …: Verschieben nach …
   Filter readings …: Messwerte filtern …
   "<b>Now measure on the instrument and press the share key.</b> Each value appears here at once and is saved.": "<b>Jetzt am Messgerät messen und den Teilen-Knopf drücken.</b> Jeder Wert erscheint sofort hier und ist gespeichert."

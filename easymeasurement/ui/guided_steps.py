@@ -53,6 +53,12 @@ class GuidedSteps:
             self.steps.setCurrentRow(keep if 0 <= keep < len(rows) else first_open)
         self._show_step()
 
+    def select_step(self, step_id: int) -> None:
+        for row in range(self.steps.count()):
+            if self.steps.item(row).data(ROW_ID) == step_id:
+                self.steps.setCurrentRow(row)
+                return
+
     def _step(self):
         item = self.steps.currentItem()
         if item is None:

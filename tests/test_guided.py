@@ -60,7 +60,8 @@ def test_wrong_rotary_position_ends_up_in_the_open_list(page):
     page.simulate_function.setCurrentIndex(page.simulate_function.findData("zloop"))
     page.simulate_button.click()
     page.fetch_button.click()
-    assert shown(page) == 0
+    step = page.app.service.steps(page.campaign_id)[0]
+    assert page.app.service.measurements(page.campaign_id, step["id"]) == []
     assert page.open_table.rowCount() == 1
     assert "passt nicht" in page.open_table.item(0, 3).text()
 

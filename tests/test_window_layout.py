@@ -138,28 +138,6 @@ def test_a_pinned_list_comes_back_pinned_with_its_width(qtbot, app):
     assert not again.campaign.list.isVisible()
 
 
-def test_the_guided_area_keeps_its_height_though_it_starts_hidden(qtbot, app, monkeypatch):
-    """The area is hidden at the start and gets its stored height once it appears."""
-    window = MainWindow(app)
-    qtbot.addWidget(window)
-    window.show()
-    window.resize(1360, 900)
-    with_asset(window, app)
-    start(window, monkeypatch, plan_title(window), simulated=True)
-    campaign = window.campaign.campaign_id
-    total = sum(window.campaign.work.sizes())
-    drag(window.campaign.work, [total - 150, 150])
-    window.campaign.pause()
-    again = reopened(qtbot, app, window)
-    again.resize(1360, 900)
-    again.campaign.refresh()
-    again.campaign.enter(campaign)
-    QApplication.processEvents()
-    sizes = again.campaign.work.sizes()
-    assert abs(sizes[1] - 150) <= 30
-    again.campaign.shut_down()
-
-
 def test_folded_sections_stay_folded(qtbot, app, monkeypatch):
     window = MainWindow(app)
     qtbot.addWidget(window)

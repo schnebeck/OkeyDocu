@@ -585,6 +585,16 @@ dem Drehschalter und dem letzten Messwert. Für eine Funktion ohne Anleitung sag
 
 Eine Kampagne bekommt beim Start einen Plan, weitere kommen über „Messplan zuweisen" dazu. Jeder Punkt
 wird dabei als Kopie in `steps` festgehalten, ein korrigierter Plan ändert also keine Kampagne.
+Die Schritte einer Zuweisung liegen nebeneinander und tragen ihren Titel; so bleibt jede Zuweisung
+ein Plan für sich (`campaign/plan_blocks.py`), auch wenn derselbe Plan zweimal zugewiesen ist.
+
+Die Kampagne zeigt immer Struktur und Messungen. Ihre Pläne stehen in der Seitenleiste unter
+„Messpläne“ mit ihrem Fortschritt (`ui/plan_list.py`). „Ausführen“ legt den Plan an die Stelle von
+Struktur und Tabelle (`ui/plan_run.py`); eine mit Plan gestartete Kampagne beginnt gleich damit.
+„Plan unterbrechen“ lässt alles stehen, ein Schritt im Messen wartet danach wieder auf seinen Aufbau;
+„Fortsetzen“ geht am ersten offenen Schritt weiter. „Plan beenden“ fragt nach einem Grund, mit dem
+jeder noch offene Schritt als ausgelassen gilt. „Entfernen“ nennt, was mitgeht, und löscht nach
+Rückfrage die Schritte mit allen darauf gebuchten Messungen und Antworten.
 
 Der Wizard (`ui/guided.py`) zeigt einen Punkt nach dem anderen mit Fortschritt, Zurück und Weiter.
 Die erwartete Antwort geht sofort weiter, jede andere wartet auf einen freiwilligen Kommentar.

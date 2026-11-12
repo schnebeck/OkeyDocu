@@ -39,6 +39,7 @@ def _clear(layout: QLayout) -> None:
     while layout.count():
         widget = layout.takeAt(0).widget()
         if widget is not None:
+            widget.hide()  # gone at once; deleting waits for the event loop
             widget.deleteLater()
 
 

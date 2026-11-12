@@ -12,7 +12,6 @@ from html import escape
 
 from PySide6.QtWidgets import QMenu, QWidget
 
-from ..campaign.repeat import REPEAT
 from ..campaign.service import NO_INSTRUMENT
 from ..l10n import tr
 from .campaign_list import count_text
@@ -49,17 +48,14 @@ class CampaignDisplay:
             f"{escape(customer['name'])}  ·  {escape(asset['name'])}  ·  {tester}"
             f"  ·  {escape(plan)}"
         )
-        # A repeat inspection is filled in any order, it is no plan to be led through.
-        has_plan = bool(campaign["plan_key"]) and campaign["plan_key"] != REPEAT
-        working = self._plan_is_worked_on(campaign)
-        self.values.show_campaign(campaign_id, with_steps=has_plan, by_step=working)
-        self.guided.show_campaign(campaign_id if has_plan else None)
+        self.values.show_campaign(campaign_id)
+        self.guided.show_campaign(campaign_id if self._has_plans(campaign) else None)
         self.structure.show_root(campaign["asset_id"], campaign_id, campaign["status"] == "open")
         self.structure.select(self.place_targets.get(campaign_id) or campaign["asset_id"])
         self._show_place(self.place_targets.get(campaign_id))
         self.reports.show_campaign(campaign_id)
         self._show_photos(campaign_id)
-        self.plan_section.setVisible(has_plan)
+        self._show_plans(campaign)
         self.report_section.setVisible(campaign["status"] != "open")
         self.pages.setCurrentWidget(self.running)
         self.window().setWindowTitle(f"{campaign['title']} – EasyMeasurement")
@@ -122,12 +118,6 @@ class CampaignDisplay:
     def _campaign_menu(self, campaign_id: int, position) -> None:
         self.campaign_menu(campaign_id).exec(position)
 
-    def _plan_is_worked_on(self, campaign) -> bool:
-        """With an instrument that takes the connection, without one it is always so."""
-        if campaign["plan_key"] in ("", REPEAT) or campaign["status"] != "open":
-            return False
-        return campaign["driver"] in NO_INSTRUMENT or self.live_id == campaign["id"]
-
     def _show_loose(self, count: int) -> None:
         self.loose_section.setVisible(count > 0)
         self.loose_section.set_count(count)
@@ -138,8 +128,7 @@ class CampaignDisplay:
         instrument = is_open and campaign["driver"] not in NO_INSTRUMENT
         here = self.session is not None and self.live_id == self.campaign_id
         reachable = instrument and (self.session is None or here)
-        guided = bool(campaign) and self._plan_is_worked_on(campaign)
-        self.guided.setVisible(guided)
+        guided = bool(campaign) and self.running_block() is not None
         manual = is_open and not instrument and not guided
         self.free.setVisible(manual or (here and not guided))
         if manual:
@@ -157,7 +146,6 @@ class CampaignDisplay:
         self.delete_action.setEnabled(bool(campaign))
         self.header.edit_button.setVisible(is_open)
         self.assign_action.setEnabled(is_open)
-        self.plan_add_button.setVisible(is_open)
         self.report_action.setEnabled(bool(campaign) and not is_open)
         self.photos_action.setEnabled(is_open)
         self.fetch_action.setEnabled(reachable)
