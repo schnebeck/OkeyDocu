@@ -180,3 +180,14 @@ def test_a_figure_few_rows_have_joins_their_remark():
     _, table = table_and_head(group)
     assert [plain(h) for h in table.headers] == ["Nr.", "Zeitpunkt", "RLO", "", "Bemerkung"]
     assert plain(table.rows[2][-1]) == "ΔRLO = 90 mΩ"
+
+
+def test_a_setting_is_named_without_the_group_the_instrument_puts_before_it():
+    from easymeasurement.reporting.measurement_words import _without_group
+
+    named = [("RCD - Typ", "B"), ("RCD - Nennstrom", "63 A"), ("RISO/RLO Messdauer", "AUTO")]
+    assert _without_group(named) == [("Typ", "B"), ("Nennstrom", "63 A"),
+                                     ("RISO/RLO Messdauer", "AUTO")]
+    twice = [("RCD - Typ", "B"), ("Netz - Typ", "TN"), ("RCD - Faktor", "1x")]
+    assert _without_group(twice) == [("RCD\xa0-\xa0Typ", "B"), ("Netz\xa0-\xa0Typ", "TN"),
+                                     ("Faktor", "1x")]

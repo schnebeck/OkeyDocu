@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+from math import sqrt
 from xml.sax.saxutils import escape
 
 from reportlab.lib.styles import ParagraphStyle
@@ -72,12 +73,15 @@ def column_widths(headers: list[str], rows: list[list[str]], summary: list[list[
     takes whatever room the others leave, as long as it keeps at least its longest word."""
     regular, bold = fonts
     padding = 12 + 2  # the cell's own padding, left and right, and a little air
+    volume: dict[int, float] = {}  # all the text of a column, laid end to end
 
     def measure(index: int) -> tuple[float, float]:
         cells = [(plain(headers[index]), bold)] + [(plain(row[index]), regular) for row in rows] + [
             (plain(row[index]), bold) for row in summary]
         texts = [(line, font) for text, font in cells for line in text.split("\n")]
-        whole = max(stringWidth(text, font, size) for text, font in texts)
+        widths = [stringWidth(text, font, size) for text, font in texts]
+        volume[index] = sum(widths)
+        whole = max(widths)
         word = max(stringWidth(part, font, size) for text, font in texts
                    for part in ([text] if len(text) <= UNBROKEN else text.split() or [""]))
         if whole > WIDEST_WORD_MM * mm * 2:  # a column of sentences may break a long word
@@ -97,10 +101,11 @@ def column_widths(headers: list[str], rows: list[list[str]], summary: list[list[
             return [share[i] for i in range(len(headers))]
     short = sum(want for i, (want, _) in wants.items() if i not in sentences)
     if wanted > room and sentences and room - short >= sum(wants[i][1] for i in sentences):
-        # Short of room, figures and words keep their width; sentences share what is left.
-        texts = sum(wants[i][0] for i in sentences)
-        share = {i: want if i not in sentences else want * (room - short) / texts
-                 for i, (want, _) in wants.items()}
+        # Short of room, figures and words keep their width; sentences share what is left, the
+        # more text a column holds the more, so that together they need the fewest lines.
+        weight = {i: sqrt(volume[i]) or 1 for i in sentences}
+        share = {i: want for i, (want, _) in wants.items() if i not in sentences}
+        share.update(_shared_out(room - short, weight, {i: wants[i] for i in sentences}))
     elif wanted <= room:
         share = {i: want * room / wanted for i, (want, _) in wants.items()}
     else:
@@ -108,3 +113,28 @@ def column_widths(headers: list[str], rows: list[list[str]], summary: list[list[
         factor = min((wanted - room) / give, 1)
         share = {i: want - (want - least) * factor for i, (want, least) in wants.items()}
     return [share[i] for i in range(len(headers))]
+
+
+def _shared_out(room: float, weight: dict[int, float], wants: dict[int, tuple]) -> dict[int, float]:
+    """`room` shared by weight; a column never gets more than it wants or less than its longest
+    word, and what one gives up goes to the others."""
+    share: dict[int, float] = {}
+    open_ = dict(weight)
+    for _ in range(len(weight)):  # each round settles at least one column or ends
+        total = sum(open_.values())
+        left = room - sum(share.values())
+        settled = {}
+        for i, w in open_.items():
+            want, least = wants[i]
+            fair = left * w / total
+            if fair > want or fair < least:
+                settled[i] = min(max(fair, least), want)
+        if not settled:
+            share.update({i: left * w / total for i, w in open_.items()})
+            return share
+        share.update(settled)
+        for i in settled:
+            del open_[i]
+        if not open_:
+            return share
+    return share

@@ -8,10 +8,14 @@
 
 from __future__ import annotations
 
+import re
+
 from ..l10n import N_, in_language, tr
 from ..model import is_conductor
 from ..vocabulary import outcome_text
 from .language import moment, value_text
+
+GROUP = re.compile(r"^[A-Z][A-Za-z0-9]{0,7} - ")  # a short group name before the setting
 
 
 def marks(measurement) -> str:
@@ -56,4 +60,14 @@ def said_settings(words, parameters) -> list[tuple[str, str]]:
         name, value, said = words.say(parameter.key, parameter.value)
         if not is_conductor(parameter) and said:
             found.append((name, value))
-    return found
+    return _without_group(found)
+
+
+def _without_group(found: list[tuple[str, str]]) -> list[tuple[str, str]]:
+    """An instrument may name a setting with the group it belongs to, as in "RCD - Type". The
+    measurement already says which function it is, so the group is left out; a name that would
+    then stand twice, as the type of the RCD and of the mains, keeps its group, held to its
+    name by spaces that do not break."""
+    short = [GROUP.sub("", name) for name, _ in found]
+    return [(full.replace(" - ", "\xa0-\xa0") if short.count(name) > 1 else name, value)
+            for (full, value), name in zip(found, short)]
