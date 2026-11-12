@@ -1,678 +1,686 @@
-# Architektur
+# Architecture
 
-## Datenmodell
+## Data model
 
-    customers ─< assets (Baum aus Elementen, Typ aus asset_kinds) ─ kind_features
+    customers ─< assets (tree of elements, kind from asset_kinds) ─ kind_features
                    └─< campaigns ─< measurements ─< measured_values
                           └─< reports
 
-| Begriff | Bedeutung |
+| Term | Meaning |
 |---|---|
-| Kampagne | Ein Prüftermin an einer Anlage. Sie ist die Einheit, aus der ein Protokoll entsteht. |
-| Messung | Ein Vorgang mit Zeitpunkt, Funktion und Bewertung. Sie hat 0 bis n Messwerte. |
-| Messwert | `kind` ist `number`, `text` oder `photo`. |
+| Campaign | One inspection appointment at an installation. It is the unit from which a report is made. |
+| Measurement | One operation with a point in time, a function and a verdict. It has 0 to n measured values. |
+| Measured value | `kind` is `number`, `text` or `photo`. |
 
-Zahlen werden doppelt gespeichert: `raw` ist der Text des Messgeräts und wird unverändert
-gedruckt, `base_value` und `base_unit` dienen zum Vergleichen und Filtern (`2.05MΩ` wird
-2050000 Ω). Ein Wertefilter bleibt innerhalb seiner Einheit.
+Numbers are stored twice: `raw` is the text of the instrument and is printed unchanged,
+`base_value` and `base_unit` serve for comparing and filtering (`2.05MΩ` becomes
+2050000 Ω). A value filter stays within its unit.
 
-Jede Gerätemessung behält ihre Herkunft: Datensatz des Geräts (`raw_data`), Seriennummer,
-Firmware, Eingangszeit am PC mit Zeitzone. Die GUID eines Geräts kommt datenbankweit nur einmal vor.
+Every instrument measurement keeps its origin: the record of the instrument (`raw_data`), serial number,
+firmware, time of arrival at the PC with time zone. The GUID of an instrument occurs only once in the
+whole database.
 
-Das Programm migriert keine Datenbanken. Es legt eine neue Datenbank im aktuellen Schema an und
-weist jede andere Schemaversion beim Start ab. Eine nötige Umstellung läuft vorher mit einem externen
-Werkzeug.
+The program does not migrate databases. It creates a new database in the current schema and
+rejects any other schema version at start. A required conversion runs beforehand with an external
+tool.
 
-Ein Foto hängt als Messwert an der Messung, zu der es gehört. Lässt es sich nicht eindeutig
-zuordnen, wird es eine eigene Messung mit der Funktion `foto`. Solche Fotos fließen nicht in das
-Gesamtergebnis ein.
+A photo is attached as a measured value to the measurement it belongs to. If it cannot be assigned
+unambiguously, it becomes a measurement of its own with the function `foto`. Such photos do not count
+towards the overall result.
 
-## Struktur
+## Structure
 
-Die Struktur eines Kunden ist ein Baum beliebiger Tiefe (`assets`), frei verschachtelbar wie bei
-IZYTRON. Die Typen der Elemente stehen in `asset_kinds`, ihre Merkmale in `kind_features`; beides ist
-unter Einstellungen → Strukturtypen änderbar (`ui/kinds_page.py`). Mitgeliefert werden die Typen aus
-`data/kinds.yaml`. Jeder Typ nennt seinen IZYTRON-Typcode für den Import und ein Prüfintervall. Merkmalswerte liegen
-gesammelt am Element (`features_json`); leere werden nicht gespeichert und nirgends gezeigt. Wird ein
-Typ gelöscht, bekommen seine Elemente einen Ersatztyp, ihre Werte bleiben unsichtbar erhalten.
-Ein Merkmal kann eine Auswahlliste anbieten (`kind_features.choice_list`); das Elementformular zeigt
-es dann als Auswahlfeld, das auch andere Werte annimmt. Eine Auswahlliste ist eine kleine Tabelle in
-der Datenbank: Werte sind Zeilen (`choice_values`), Eigenschaften Spalten (`choice_attributes`), ein
-Fakt eine Zelle (`choice_facts`). Ein Wert trägt dazu einen Hilfetext, eine Kennlinie
-(`breaker 3 5`: Bereich der unverzögerten Auslösung in Vielfachen von Iₙ), ein eigenes Bild, etwa
-die Kennlinie aus einem Datenblatt, und die geeigneten Messfunktionen mit Hinweis
-(`choice_methods`). Mehrere Merkmale teilen sich eine Liste, „Zuleitung“ etwa die der Leitungstypen.
-Eine neue Datenbank beginnt mit `data/choice_lists.yaml`, `data/kinds.yaml` ordnet die Merkmale den
-Listen zu; bearbeitet werden sie unter Einstellungen → Auswahllisten (`ui/choice_lists_page.py`).
-Mitgelieferte Texte stehen englisch in der Datenbank und werden über die Kataloge übersetzt; die
-Fakten sind mit je zwei unabhängigen Quellen geprüft.
+The structure of a customer is a tree of any depth (`assets`), freely nestable as in
+IZYTRON. The kinds of the elements are in `asset_kinds`, their features in `kind_features`; both can be
+changed under Settings → Structure kinds (`ui/kinds_page.py`). The kinds from `data/kinds.yaml` are
+supplied. Every kind names its IZYTRON kind code for the import and a test interval. Feature values are
+collected at the element (`features_json`); empty ones are not stored and are shown nowhere. When a
+kind is deleted, its elements get a substitute kind, and their values stay stored invisibly.
+A feature can offer a choice list (`kind_features.choice_list`); the element form then shows
+it as a choice field that also accepts other values. A choice list is a small table in
+the database: values are rows (`choice_values`), properties are columns (`choice_attributes`), a
+fact is a cell (`choice_facts`). A value also carries a help text, a characteristic curve
+(`breaker 3 5`: range of instantaneous tripping in multiples of Iₙ), an image of its own, such as
+the characteristic curve from a data sheet, and the suitable measuring functions with a hint
+(`choice_methods`). Several features share one list, “Supply cable” for example that of the cable types.
+A new database starts with `data/choice_lists.yaml`, `data/kinds.yaml` assigns the features to the
+lists; they are edited under Settings → Choice lists (`ui/choice_lists_page.py`).
+Supplied texts are stored in English in the database and translated through the catalogues; the
+facts are checked against two independent sources each.
 
-Der Tooltip eines Werts (`ui/choice_tips.py`) nennt nur die Eigenschaften, in denen sich die Werte
-der Liste unterscheiden: Bei B, C, D entfällt „Leitungsschutzschalter“, neben Sicherungen steht es
-da. Eine Kennlinie wird für das Element gezeichnet: Sein Nennstrom macht aus Vielfachen Ampere, seine
-Netzform mit dem Nennstrom ergibt die geforderte Abschaltzeit, an der Iₐ markiert ist. Der Tooltip
-selbst ist ein allgemeines Bauteil (`ui/rich_tip.py`) für Text, Tabelle und Bilder, das jedes
-Widget über `install_tip` nutzen kann. F1 im Auswahlfeld stellt alle Werte der Liste in diesen
-Eigenschaften nebeneinander, der gewählte fett; das Feld nimmt die Taste vor dem Kürzel des
-Fensters. Die Netzform steht meist an der Maschine oder Einspeisung:
-Fehlt sie am Element, gilt die des nächsten Elements darüber (`ui/suited_methods.py`).
+The tooltip of a value (`ui/choice_tips.py`) names only the properties in which the values
+of the list differ: for B, C, D “Circuit breaker” is left out, next to fuses it is
+there. A characteristic curve is drawn for the element: its rated current turns multiples into amperes, its
+system type together with the rated current gives the required disconnection time, at which Iₐ is marked. The tooltip
+itself is a general component (`ui/rich_tip.py`) for text, table and images that any
+widget can use through `install_tip`. F1 in the choice field sets all values of the list side by side in these
+properties, the chosen one in bold; the field takes the key before the shortcut of the
+window. The system type is usually given at the machine or supply:
+if it is missing at the element, the one of the next element above applies (`ui/suited_methods.py`).
 
-In der Kampagne zeigt die Seitenleiste das gewählte Element (`ui/place_panel.py`) mit denselben
-Tooltips an seinen Merkmalen. Darunter stehen die geeigneten Messungen, gesammelt aus den Werten
-aller Merkmale; der Tooltip einer Messung nennt die Werte, die sie verlangen, mit ihren Hinweisen.
-So sieht man an einer fremden Maschine, was sich an einem Element messen lässt. „Adern der Leitung“ zählt alle Adern eines Kabels wie die
-Aderanzahl des PROFITEST PRIME (NYM-J 5×2,5: 5, eine Einzelader: 1), „Pole der Schutzeinrichtung“
-sagt, ob ein-, zwei-, drei- oder vierpolig geschaltet wird.
+In the campaign the side panel shows the chosen element (`ui/place_panel.py`) with the same
+tooltips at its features. Below it are the suitable measurements, collected from the values
+of all features; the tooltip of a measurement names the values that call for it, with their hints.
+So at an unfamiliar machine one sees what can be measured at an element. “Cores of the cable” counts all cores of a cable like the
+core count of the PROFITEST PRIME (NYM-J 5×2.5: 5, a single core: 1), “Poles of the protective device”
+states whether one, two, three or four poles are switched.
 
-Jedes Element hat eine Prüfgrundlage (`basis`). Leer folgt es der des Elements darüber; das oberste
-braucht eine, das Formular sagt es, solange sie fehlt. Das Protokoll nennt sie im Titel („Prüfprotokoll
-nach …“), ein Element mit einer eigenen, anderen in seiner Karte.
-Im Protokoll übersetzen die Sprachdateien Typen und Merkmale über ihren Schlüssel (`kinds`,
-`features`), nicht über den deutschen Namen: „Leiter“ ist als Typ eine Steigleiter, im Messwert ein
-Leiter. Selbst angelegte Typen und Merkmale bleiben deutsch.
+Every element has a test basis (`basis`). When empty, it follows that of the element above; the top
+one needs one, and the form says so as long as it is missing. The report names it in the title (“Test report
+to …”), and an element with a different one of its own names it in its card.
+In the report the language files translate kinds and features through their key (`kinds`,
+`features`), not through the German name: the German word “Leiter” is a ladder as a kind and a
+conductor in a measured value. Kinds and features created by the user stay German.
 
-Eine Messung hängt an einem Element (`asset_id`), ihr Ort im Protokoll ist der Pfad dorthin. Umbuchen,
-Umbenennen und Verschieben schreiben diesen Pfad in offenen Kampagnen nach (`campaign/structure.py`);
-versiegelte Messungen bleiben, wo sie sind, und ein Element, an dem sie hängen, lässt sich nicht
-löschen. Ein Push des Geräts bringt keinen Ort mit, er landet beim im Baum gewählten Element. Ein Abruf
-aus dem Gerätespeicher bringt den Gerätepfad mit; fehlende Elemente entstehen dabei als Messpunkte.
+A measurement is attached to an element (`asset_id`); its location in the report is the path to it. Rebooking,
+renaming and moving rewrite this path in open campaigns (`campaign/structure.py`);
+sealed measurements stay where they are, and an element they are attached to cannot be
+deleted. A push of the instrument brings no location; it lands at the element chosen in the tree. A fetch
+from the instrument memory brings the instrument path; missing elements are created as measuring points.
 
-Fällig wird eine Prüfung, wenn seit dem Abschluss der letzten Kampagne an einem Element dessen
-Intervall (eigenes oder das des Typs) abgelaufen ist, 30 Tage im Voraus. Eine abgeschlossene Kampagne
-mit Mängeln wartet auf eine Nachprüfung, bis eine Kampagne über `follows_id` auf sie verweist
-(`campaign/due.py`). Beides zeigt die Übersicht unter „Fällig“.
+An inspection becomes due when, since the closing of the last campaign at an element, its
+interval (its own or that of the kind) has run out, 30 days in advance. A closed campaign
+with defects waits for a follow-up until a campaign refers to it through `follows_id`
+(`campaign/due.py`). The overview shows both under “Due”.
 
-## Was an einer Messung feststeht
+## What is fixed about a measurement
 
-Messwert, Einheit und Zeitstempel sind endgültig. Das erzwingen Datenbank-Trigger, nicht nur die
-Oberfläche. Der Versatz der Geräteuhr darf `local_time` neu berechnen, `device_time` bleibt.
+Measured value, unit and timestamp are final. Database triggers enforce this, not only the
+user interface. The offset of the instrument clock may recompute `local_time`; `device_time` stays.
 
-Überschreibbar sind Funktion, Messort, Prüfer, Kommentar und Bewertung, je Messwert Bezeichnung,
-Grenzen und Bewertung (`EDITABLE_FIELDS`). Texte zu korrigieren und doppelte Messungen zu löschen ist
-Alltag und hinterlässt keinen Vermerk. Von einer gelöschten Messung bleibt nur die Kennung, damit sie
-beim Abruf nicht zurückkommt. Änderungen an Funktion, Bewertung und Grenzwerten stehen dagegen mit
-altem und neuem Wert in `measurement_log`, das sich nur fortschreiben lässt. Im Protokoll sind
-solche Messungen als „geändert" und von Hand erfasste als „manuell" gekennzeichnet.
+Function, measuring location, inspector, comment and verdict can be overwritten, and per measured value
+designation, limits and verdict (`EDITABLE_FIELDS`). Correcting texts and deleting duplicate measurements is
+everyday work and leaves no note. Of a deleted measurement only the identifier remains, so that it
+does not come back on a fetch. Changes to function, verdict and limits, in contrast, are recorded with
+old and new value in `measurement_log`, which can only be appended to. In the report
+such measurements are marked “changed” and those entered by hand “manual”.
 
-## Offen und abgeschlossen
+## Open and closed
 
-Eine Kampagne ist offen, auch nach einem Import, und lässt sich überarbeiten. Ein Protokoll entsteht
-erst aus einer abgeschlossenen Kampagne, also spätestens dann ist sie geschlossen. Vorher zeigt ein
-Entwurf (`drafts/entwurf.pdf`, mit Hinweis „ENTWURF“, nicht archiviert), wie es aussähe.
-„Bestätigen“ schließt ab, versiegelt, legt das PDF ab und signiert in einem Schritt. Das Zertifikat
-wird vorher geprüft; scheitert danach etwas, bleibt der Datensatz versiegelt und das Protokoll lässt
-sich unter „Protokolle“ nachholen.
+A campaign is open, also after an import, and can be revised. A report is made
+only from a closed campaign, so at that point at the latest it is closed. Before that a
+draft (`drafts/entwurf.pdf`, with the notice “DRAFT”, not archived) shows what it would look like.
+“Confirm” closes, seals, files the PDF and signs in one step. The certificate
+is checked beforehand; if something fails after that, the record stays sealed and the report can
+be made later under “Reports”.
 
-Der Abschluss versiegelt den Datensatz (`campaign/seal.py`): Über alle Inhalte wird eine SHA-256-
-Summe gebildet und mit einem Schlüssel aus KWallet beglaubigt (HMAC). Jedes Siegel enthält das
-vorherige. Stammdaten gehören nicht dazu, ein umbenannter Kunde ist keine Manipulation. Vor jedem
-Protokoll und jeder Signatur wird geprüft; ein veränderter Datensatz wird abgewiesen.
+Closing seals the record (`campaign/seal.py`): a SHA-256 sum is formed over all contents
+and authenticated with a key from KWallet (HMAC). Every seal contains the
+previous one. Master data are not part of it; a renamed customer is no manipulation. Before every
+report and every signature the seal is checked; a modified record is rejected.
 
-Grenzen: Wer den Schlüssel hat, kann ein Siegel fälschen. Das Verschwinden der neuesten Kampagne
-fällt in der Kette nicht auf. Deshalb steht das Siegel im Protokoll: Ein signiertes Protokoll
-verankert es außerhalb dieses Rechners. Geht der Schlüssel verloren, lassen sich die Daten weiter
-gegen die Summe prüfen, die Echtheit aber nicht mehr.
+Limits: whoever has the key can forge a seal. The disappearance of the latest campaign
+does not show in the chain. That is why the seal is printed in the report: a signed report
+anchors it outside this computer. If the key is lost, the data can still be checked
+against the sum, but their authenticity cannot.
 
-## Abgeschlossene Kampagnen
+## Closed campaigns
 
-Datenbank-Trigger verhindern jede Änderung an Messungen, Messwerten und Schritten einer
-abgeschlossenen Kampagne, auch am Programm vorbei. Protokolle entstehen nur aus abgeschlossenen
-Kampagnen. Eine Signatur erzeugt einen neuen Archiveintrag, das Original bleibt erhalten.
+Database triggers prevent any change to measurements, measured values and steps of a
+closed campaign, also when bypassing the program. Reports are made only from closed
+campaigns. A signature creates a new archive entry; the original is kept.
 
-## Das 0/1/n-Problem in Vorlagen
+## The 0/1/n problem in templates
 
-Eine Vorlage ist eine Liste von Blöcken. Ein `measurements`-Block legt nicht fest, wie viele
-Messungen es gibt, sondern beschreibt drei Darstellungen, zwischen denen die Daten entscheiden:
+A template is a list of blocks. A `measurements` block does not fix how many
+measurements there are, but describes three presentations between which the data decide:
 
-| Daten | Darstellung |
+| Data | Presentation |
 |---|---|
-| 0 | Satz mit Begründung, oder der Block entfällt (`none: {hide: true}`) |
-| 1 | Formular mit Bezeichnung und Wert |
-| n | Tabelle mit Min- und Max-Zeile |
+| 0 | Sentence with a reason, or the block is left out (`none: {hide: true}`) |
+| 1 | Form with designation and value |
+| n | Table with min and max row |
 
-Messungen verschiedener Funktionen teilen sich keine Tabelle, weil ihre Spalten nicht
-zusammenpassen; jede Funktion wird für sich gezählt. Der Min/Max-Vergleich läuft über
-`base_value`, angezeigt wird der Originaltext.
+Measurements of different functions do not share a table, because their columns do not
+fit together; each function is counted on its own. The min/max comparison runs over
+`base_value`; the original text is shown.
 
-Ein Messblock nennt zuerst, was seine Messungen gemeinsam haben: Einstellungen des Messgeräts,
-Messbedingungen wie den R_LO-Offset und Grenzwerte. Die Tabelle darunter zeigt je Messung nur, was
-sich unterscheidet, und was gemessen wurde (`reporting/measurement_table.py`). Werte, die nur bei
-nicht bestandener Messung zählen, bekommen nur dann eine Spalte. Messwerte stehen als Zahl und
-Einheit mit Vorsatz in Tausenderstufen (p, n, µ, m, k, M, G, T), etwa `220 mΩ`; dabei wird nur
-das Komma verschoben, nie gerundet. Formelzeichen sind kursiv mit aufrechtem, tiefgestelltem Index.
+A measurement block first names what its measurements have in common: settings of the instrument,
+measuring conditions such as the R_LO offset, and limits. The table below shows per measurement only what
+differs, and what was measured (`reporting/measurement_table.py`). Values that only count for a
+failed measurement get a column only in that case. Measured values are shown as number and
+unit with a prefix in steps of a thousand (p, n, µ, m, k, M, G, T), such as `220 mΩ`; only
+the decimal point is moved, never rounded. Quantity symbols are italic with an upright subscript index.
 
-Bemerkungen gehören in die Zeile ihrer Messung: Kommentar, Notizen, Anhänge und Verweise auf Fotos
-stehen untereinander in der Spalte „Bemerkung“. Fotos sind durch das Protokoll nummeriert (`[3]`);
-die Bemerkung verweist darauf, mit Hinweisnummer, wenn das Foto markiert ist („siehe Hinweis 1 in
-[3]“). Das PDF setzt jedes Foto wie eine Fußnote auf die Seite der Zeile, die es nennt, mit der
-Liste der Hinweise darunter: höchstens drei nebeneinander und zwei Reihen je Seite
+Remarks belong in the row of their measurement: comment, notes, attachments and references to photos
+are listed one below the other in the column “Remark”. Photos are numbered through the report (`[3]`);
+the remark refers to them, with the notice number if the photo is marked (“see note 1 in
+[3]”). The PDF places every photo like a footnote on the page of the row that names it, with the
+list of notices below: at most three side by side and two rows per page
 (`reporting/pdf_photos.py`).
 
-Der Block `structure` ordnet die Messungen nach dem Strukturbaum der Anlage. Mit `order: place`
-ist jedes Element mit Messungen ein Abschnitt mit seinen Merkmalen und darin je Messgröße ein
-Block; mit `order: function` steht jede Messgröße einmal, mit dem, was all ihre Elemente teilen,
-und darunter je Element nur noch, was davon abweicht. Schritte eines Plans ohne Messung folgen mit
-ihrer Begründung. Die Standardvorlage verwendet `order: place`. Mit `layout: compact` steht je Element
-eine einzige Tabelle über alle Messarten in der Reihenfolge der Messungen, mit Messart, Ergebnis,
-Grenzwert und Bemerkung; was die Messungen einer Messart am Element teilen, steht einmal darüber. Die
-Vorlage „Standardprotokoll, kompakt“ verwendet sie. Jedes Element zeigt unter seiner Überschrift, was
-es als Prüfobjekt ist: Kennung, Hersteller, Typ, Merkmale und seine Bemerkung.
+The block `structure` orders the measurements along the structure tree of the installation. With `order: place`
+every element with measurements is a section with its features and within it one block per measured
+quantity; with `order: function` every measured quantity appears once, with what all its elements share,
+and below it per element only what differs from that. Steps of a plan without a measurement follow with
+their reason. The standard template uses `order: place`. With `layout: compact` every element has
+a single table over all measurement types in the order of the measurements, with measurement type, result,
+limit and remark; what the measurements of one measurement type share at the element is stated once above it. The
+template “Standard report, compact” uses it. Every element shows below its heading what
+it is as a test object: identifier, manufacturer, type, features and its remark.
 
-Am Fuß stehen Ort, Datum und Name schon auf den Linien (`fills` des Blocks `signature`): der Sitz
-der eigenen Firma, das Erstellungsdatum und der Prüfer, dessen hinterlegte Unterschrift den Namen
-ersetzt. Die digitale Signatur kommt danach.
+At the foot, location, date and name are already on the lines (`fills` of the block `signature`): the seat
+of the own company, the creation date and the inspector, whose stored signature replaces the
+name. The digital signature comes after that.
 
-`resolve()` wandelt Vorlage und Daten in Dokumentknoten um, `render_pdf()` macht daraus das PDF.
-Platzhalter laufen in einer Jinja-Sandbox, damit eine Vorlage nicht an Programminterna kommt.
+`resolve()` turns template and data into document nodes, `render_pdf()` makes the PDF from them.
+Placeholders run in a Jinja sandbox, so that a template cannot reach program internals.
 
-Die Protokollsprache ist unabhängig von der Programmsprache und wird mit dem Protokoll gespeichert.
-`reporting/language.py` hält sie während der Erzeugung; jeder Text wird über sein deutsches
-Original in `data/languages/<code>.yaml` nachgeschlagen, Fehlendes bleibt deutsch. Messwerte
-werden nie gerundet, nur Dezimalzeichen und Abstand folgen der Sprache. Notizen und Anhänge an
-Messungen stehen bei ihnen, solche an Orten im Block `attachments`.
+The report language is independent of the program language and is stored with the report.
+`reporting/language.py` holds it during generation; every text is looked up through its German
+original in `data/languages/<code>.yaml`, and anything missing stays German. Measured values
+are never rounded; only the decimal separator and spacing follow the language. Notes and attachments on
+measurements are shown with them, those on locations in the block `attachments`.
 
-Das Gesamtergebnis übertreibt nicht: Ein ausgelassener oder leerer Schritt ergibt „Nicht
-vollständig geprüft“, nie „Bestanden“.
+The overall result does not overstate: a skipped or empty step gives “Not completely
+tested”, never “Passed”.
 
-## Sprachen
+## Languages
 
-Alle Texte stehen englisch im Code und werden beim Anzeigen nachgeschlagen: `tr("Serial number
-{serial}", serial=…)`, gezählt mit `plural()`, Modulkonstanten mit `N_()` markiert und dort übersetzt,
-wo sie erscheinen (`easymeasurement/l10n/`). Jede Sprache hat einen Ordner unter `data/languages/<code>/`:
-`language.yaml` mit Namen und Formaten für Datum, Zeit und Dezimalzeichen, daneben Katalogdateien je
-Bereich mit `texts` (Englisch → Sprache) und `contexts` für ein englisches Wort, das zwei Übersetzungen
-braucht. Ein Text darf in mehreren Dateien stehen, aber nur mit derselben Übersetzung.
+All texts are in English in the code and are looked up when shown: `tr("Serial number
+{serial}", serial=…)`, counted with `plural()`, module constants marked with `N_()` and translated where
+they appear (`easymeasurement/l10n/`). Every language has a folder under `data/languages/<code>/`:
+`language.yaml` with names and formats for date, time and decimal separator, next to it catalogue files per
+area with `texts` (English → language) and `contexts` for an English word that needs two
+translations. A text may appear in several files, but only with the same translation.
 
-Die Programmsprache wird unter „Einstellungen → Sprache“ gewählt und gilt ab dem nächsten Start;
-„Wie das System“ übernimmt bei jedem Start die Systemsprache. Der Hinweis darunter erscheint in der
-gerade gewählten Sprache. Angeboten werden nur Sprachen mit `program: true`; die übrigen dienen
-Protokollen. `speaking()` setzt für einen Thread eine andere Sprache, etwa für ein Protokoll, dessen
-Sprache mit der Programmsprache vorbelegt ist.
+The program language is chosen under “Settings → Language” and applies from the next start;
+“As the system” takes the system language at every start. The notice below it appears in the
+language currently chosen. Only languages with `program: true` are offered; the others serve
+reports. `speaking()` sets a different language for one thread, for example for a report whose
+language is preset to the program language.
 
-Gespeicherte Wörter (Schritttitel, Vorlagenzeilen, Ergebnisnamen) können in jeder Katalogsprache
-geschrieben sein. `in_language()` erkennt sie über die Kataloge wieder und gibt sie in der aktuellen
-Sprache aus; Unbekanntes bleibt, wie es ist. Diese Wörter stehen in `stored*.yaml`. So liest sich eine
-deutsch geschriebene Vorlage auch als englisches Protokoll. Die mitgelieferte Standardvorlage ist
-englisch und wird beim Anlegen der Datenbank in der Programmsprache abgelegt.
+Stored words (step titles, template lines, result names) can be written in any catalogue
+language. `in_language()` recognises them through the catalogues and returns them in the current
+language; anything unknown stays as it is. These words are in `stored*.yaml`. So a template
+written in German also reads as an English report. The supplied standard template is
+English and is stored in the program language when the database is created.
 
-Strukturtypen und Merkmale kommen englisch aus `data/kinds.yaml`. Beim Lesen aus der Datenbank
-erscheinen sie in der aktuellen Sprache, solange ihr Name einer der mitgelieferten ist, in welcher
-Sprache auch immer; erkannt wird er über den Schlüssel, damit „Leiter“ die Leiter bleibt. Ein
-umbenannter Typ behält seinen Namen.
+Structure kinds and features come in English from `data/kinds.yaml`. When read from the database
+they appear in the current language as long as their name is one of the supplied ones, in whatever
+language; it is recognised through the key, so that “Leiter” stays the ladder. A
+renamed kind keeps its name.
 
-Mitgelieferte Messpläne (`data/plans/`) und die Messanleitungen der Treiber sind englisch. Beim
-Laden übersetzt `campaign/plan_language.py` ihre Texte (Titel, Einstellungen, Warnungen, Schritte,
-Quelle, Anschlussbild) in die Programmsprache; die deutschen Fassungen stehen in
-`data/languages/de/instructions.yaml`. Schlüssel, Funktionen, Buchsen und Klemmen-IDs bleiben
-unübersetzt. Ein selbst geschriebener Plan bleibt in der Sprache, in der er geschrieben wurde.
-Eine Kampagne speichert ihre Schritte in der Sprache beim Start; Protokolle in einer anderen
-Sprache finden den Titel über die Kataloge wieder.
+Supplied test plans (`data/plans/`) and the measurement instructions of the drivers are English. On
+loading, `campaign/plan_language.py` translates their texts (title, settings, warnings, steps,
+source, connection diagram) into the program language; the German versions are in
+`data/languages/de/instructions.yaml`. Keys, functions, sockets and terminal IDs stay
+untranslated. A self-written plan stays in the language in which it was written.
+A campaign stores its steps in the language at its start; reports in a different
+language find the title again through the catalogues.
 
-`tests/test_l10n.py` verlangt für jeden markierten Text und jedes Wort der mitgelieferten Pläne und
-Anleitungen einen deutschen Eintrag mit denselben Platzhaltern und meldet Einträge, die nichts
-benutzt.
+`tests/test_l10n.py` requires, for every marked text and every word of the supplied plans and
+instructions, a German entry with the same placeholders, and reports entries that nothing
+uses.
 
-## Messgeräte-Abstraktion
+## Instrument abstraction
 
-Drei Schichten: Treiber, Mapping, Vokabular. Ausführlich und mit dem Beispiel eines
-Schallpegelmessers in [hardware-abstraction.md](hardware-abstraction.md).
+Three layers: driver, mapping, vocabulary. In detail and with the example of a
+sound level meter in [hardware-abstraction.md](hardware-abstraction.md).
 
-`devices/base.py` definiert `MeterDriver`: `identify()`, `read_clock()`, `read_measurements()`
-und optional `subscribe_live()`. Die Schnittstelle liest nur. Sie kann weder eine Messung
-starten noch Geräteeinstellungen ändern, denn das tut der Prüfer am Gerät. Ein neues Messgerät
-ist ein neuer Treiber in `devices/registry.py`; die Anwendung bleibt unverändert. Die Codes des
-Geräts kennt nur sein Mapping (`devices/profitest_prime/mapping.py`); Funktionen, Ergebnisse,
-Größen, Ergebniswörter und Einstellungen heißen in der App nach ihrem Vokabular
+`devices/base.py` defines `MeterDriver`: `identify()`, `read_clock()`, `read_measurements()`
+and optionally `subscribe_live()`. The interface only reads. It can neither start a measurement
+nor change instrument settings, because the inspector does that at the instrument. A new instrument
+is a new driver in `devices/registry.py`; the application stays unchanged. Only its mapping knows the codes of the
+instrument (`devices/profitest_prime/mapping.py`); functions, results,
+quantities, result words and settings are named in the app after their vocabulary
 (`easymeasurement/vocabulary/`, `data/vocabulary/*.yaml`).
 
-Beim Start einer Kampagne mit Gerät werden die Geräteidentität, der Uhrenversatz und die schon
-vorhandenen Messungen festgehalten. Abgerufen wird danach nur, was neu ist, mit korrigierter Zeit.
+When a campaign starts with an instrument, the instrument identity, the clock offset and the measurements
+already present are recorded. After that only what is new is fetched, with corrected time.
 
 ### PROFITEST PRIME
 
-USB-CDC mit 115200 8N1 oder Bluetooth über einen RFCOMM-Socket (Kanal 1). Der Prüfer wählt nur das
-Gerät, Ports und Adressen zeigt die App nicht. `discovery.py` findet es über die USB-Kennung
-(1CD7:0117) und unter den gekoppelten Geräten von BlueZ; ein gekoppeltes Gerät steht auch dann in der
-Liste, wenn es gerade aus ist. Intern heißt der Port `/dev/ttyACM0` oder `bt:<Adresse>`.
+USB CDC at 115200 8N1 or Bluetooth over an RFCOMM socket (channel 1). The inspector only chooses the
+instrument; the app does not show ports and addresses. `discovery.py` finds it through the USB ID
+(1CD7:0117) and among the paired devices of BlueZ; a paired instrument is also in the
+list when it is switched off. Internally the port is called `/dev/ttyACM0` or `bt:<address>`.
 
-Einmalig richtet der Dialog unter „Einstellungen" die Bluetooth-Kopplung ein. `pairing.py` steuert dafür
-`bluetoothctl` mit einem Agenten für die PIN. Die PIN wird nicht gespeichert.
+Once, the dialog under “Settings” sets up the Bluetooth pairing. For this `pairing.py` drives
+`bluetoothctl` with an agent for the PIN. The PIN is not stored.
 
-Eine Kampagne startet in jeder Schalterstellung, in der sich die Uhr stellen lässt. Der
-Gerätespeicher wird dabei nicht gelesen, weil das per Bluetooth 15 s dauert und die Stellung Setup braucht.
-Stattdessen trennt die Zeit Alt und Neu: Neu ist, was ab `stored_since` liegt.
+A campaign starts in every switch position in which the clock can be set. The
+instrument memory is not read in doing so, because over Bluetooth that takes 15 s and needs the position Setup.
+Instead time separates old and new: new is what lies from `stored_since` on.
 
-Gerätezugriffe laufen über `run_busy()` außerhalb des GUI-Threads. Die Datenbankverbindung gehört
-dem GUI-Thread, deshalb lesen die Worker nur vom Gerät und das Ablegen folgt danach.
+Instrument accesses run through `run_busy()` outside the GUI thread. The database connection belongs to
+the GUI thread, so the workers only read from the instrument and storing follows afterwards.
 
-**Gerätetexte:** Messungen behalten die TS-Codes, die das Gerät sendet, für Messgrößen und
-Einstellungen, wie IZYTRON auch (dort mit Vorsatz `PROFITEST_`). Die Wörter dazu stehen in der
-Übersetzungsdatei des Geräts (`DATABASEXML:GET:TRANSLATIONFILE`, 12 Sprachen, etwa eine Minute per
-Bluetooth). Beim Einrichten über „Einstellungen → Messgeräte“, über Bluetooth nach dem Koppeln oder per
-USB mit „Einrichten …“, prüft das Programm den Stand und überträgt, was fehlt
-(`ui/instrument_prepare.py`, Tabellen `device_texts` und `device_text_sets`). Die Texte gelten für die
-Firmware, mit der sie gelesen wurden; findet ein Kampagnenstart eine andere Firmware, kommt derselbe
-Abgleich mit Wartefenster. Angezeigt werden Einstellungen in Worten, etwa „RLO - Polung: Automatische
-Umpolung“; ohne Texte bleibt der Code. Der IZYTRON-Import schlüsselt Einstellungen ebenso nach Code,
-Leiterbezüge neutral als `conductor`. Die Herstellertexte gehören zu den lokalen Daten, nie ins Repo.
+**Instrument texts:** measurements keep the TS codes the instrument sends for measured quantities and
+settings, as IZYTRON does too (there with the prefix `PROFITEST_`). The words for them are in the
+translation file of the instrument (`DATABASEXML:GET:TRANSLATIONFILE`, 12 languages, about one minute over
+Bluetooth). When setting up through “Settings → Instruments”, over Bluetooth after pairing or over
+USB with “Set up …”, the program checks what is present and transfers what is missing
+(`ui/instrument_prepare.py`, tables `device_texts` and `device_text_sets`). The texts apply to the
+firmware with which they were read; if a campaign start finds a different firmware, the same
+comparison follows with a waiting window. Settings are shown in words, such as “RLO - Polung: Automatische
+Umpolung”; without texts the code stays. The IZYTRON import keys settings by code in the same way,
+conductor references neutrally as `conductor`. The manufacturer texts belong to the local data, never into the repo.
 
-**Test und Geräteprotokoll:** „Einstellungen → Messgeräte → Testen …“ verbindet kurz und prüft
-Verbindung, Gerätekennung, Kalibrierung, Uhr, Drehrad, An- und Abmelden von Push/Print und die
-Gerätetexte (`devices/instrument_check.py`, `ui/instrument_test.py`). Gestellt und gemessen wird dabei
-nichts; eine abweichende Uhr oder eine überfällige Kalibrierung ist ein Hinweis, kein Fehler. Jeder Lauf
-bleibt in `instrument_tests`. „Geräteprotokoll …“ zeigt je Seriennummer den Lebenslauf aus diesen Läufen
-und den Kampagnen, in denen das Gerät benutzt wurde, mit Firmware, Kalibrierung und der Abweichung der
-Uhr, wie sie vor dem Stellen gefunden wurde (`campaign/instrument_history.py`, `ui/instrument_log.py`).
-Das Protokoll braucht keine Verbindung.
+**Test and instrument log:** “Settings → Instruments → Test …” connects briefly and checks
+connection, instrument ID, calibration, clock, rotary switch, subscribing to and unsubscribing from Push/Print and the
+instrument texts (`devices/instrument_check.py`, `ui/instrument_test.py`). Nothing is set or measured
+in doing so; a deviating clock or an overdue calibration is a notice, not an error. Every run
+stays in `instrument_tests`. “Instrument log …” shows per serial number the history from these runs
+and the campaigns in which the instrument was used, with firmware, calibration and the deviation of the
+clock as found before setting it (`campaign/instrument_history.py`, `ui/instrument_log.py`).
+The log needs no connection.
 
-`transport.py` führt eine feste Liste erlaubter Befehle: Lesebefehle, die drei Befehle des
-Push-Modus und die Abfrage des Drehschalters. Alles andere wird vor dem Senden abgewiesen, weil Schreibbefehle den Geräteinhalt
-ersetzen und ein unbekannter Befehl eine Messung mit echter Prüfspannung auslösen könnte.
+`transport.py` keeps a fixed list of allowed commands: read commands, the three commands of the
+push mode and the query of the rotary switch. Everything else is rejected before sending, because write commands replace the
+instrument contents and an unknown command could trigger a measurement with real test voltage.
 
-Ein Lesethread besitzt die Verbindung und trennt Antworten von unaufgeforderten Events. Befehle
-laufen einzeln, Antworten werden über das Befehlsecho zugeordnet. Befehle ohne XML-Form antworten mit
-einer Textzeile ohne Echo.
+A reader thread owns the connection and separates replies from unsolicited events. Commands
+run one at a time; replies are matched through the command echo. Commands without an XML form reply with
+a text line without echo.
 
-**Drehschalter:** `read_selector()` liefert Stellung und mögliche Funktionen. Gefragt wird nur an
-festen Punkten: beim Einrichten eines Schritts und auf Knopfdruck, nie laufend und nie während eines
-Schritts im Messen. Das Gerät schreibt ein Event stückweise, und nichts hält eine Antwort davon ab,
-mitten hineinzugeraten.
+**Rotary switch:** `read_selector()` returns the position and the possible functions. It is queried only at
+fixed points: when a step is set up and at the press of a button, never continuously and never during a
+step that is measuring. The instrument writes an event piece by piece, and nothing keeps a reply from
+landing in the middle of it.
 
-**Push/Print:** `subscribe_live()` schaltet den Modus ein. Je Speichern-Druck kommt ein Event, die
-Messung geht zuerst an den Callback, danach die Quittung. Ein Push bleibt nicht im Gerätespeicher,
-der Empfänger hat also die einzige Kopie. Deshalb wird auch ein unlesbarer Datensatz unverändert
-als Funktion `unreadable` ausgeliefert. Der Treiber verlässt den Modus beim Schließen, beim
-Programmende und nach einem Absturz beim nächsten Verbinden. Reißt die Verbindung ab, meldet er das
-und verbindet sich neu, aber nur mit demselben Gerät. Die Callbacks laufen auf einem eigenen Thread.
-Abmelden kann sich nur die Schnittstelle, die sich angemeldet hat. Gelingt das nicht oder kommt die
-Verbindung über einen anderen Weg zurück, bittet die App, das Gerät aus- und wieder einzuschalten.
+**Push/Print:** `subscribe_live()` switches the mode on. Every press of Save produces one event; the
+measurement goes to the callback first, the acknowledgement after that. A push does not stay in the instrument memory,
+so the receiver has the only copy. That is why even an unreadable record is delivered unchanged
+as the function `unreadable`. The driver leaves the mode on closing, at
+program exit, and after a crash on the next connect. If the connection breaks, it reports this
+and reconnects, but only to the same instrument. The callbacks run on a thread of their own.
+Only the interface that subscribed can unsubscribe. If that fails, or the
+connection comes back by another route, the app asks to switch the instrument off and on again.
 
-- Gespeicherte Messungen werden auf Anforderung abgerufen, nicht fortlaufend: Das Gerät zeigt
-  währenddessen einen eigenen Bildschirm. Es gibt sie nur mit dem Drehschalter auf Setup frei,
-  sonst kommt Fehler 402.
-- Die Gerätecodes (`TSnnnn`) in `mapping.py` folgen der Übersetzungsdatei des Geräts. Unbekannte
-  Codes bleiben als Code erhalten und werden beim Anzeigen aus den Gerätetexten benannt.
-- Das Gerät hat nur eine Spannungsfunktion. Bringt sie Außenleiterspannungen mit, gilt sie als
-  Drehfeldmessung `u3`. Das Drehfeld selbst steht in `VERIFICATION` und wird als neutrales Wort
-  gespeichert (`right`, `left`), damit Protokolle in jeder Sprache möglich bleiben.
-- Das Gerät schreibt das Ohm-Zeichen U+2126, nicht das griechische Omega. `Quantity.parse`
-  vereinheitlicht die Einheit, `raw` behält das Original.
-- `passed` zählt nur neben einem Grenzwert. Reine Informationswerte wie die Netzspannung kommen
-  auch in bestandenen Messungen mit `passed="false"`.
+- Stored measurements are fetched on request, not continuously: the instrument shows
+  a screen of its own meanwhile. It releases them only with the rotary switch at Setup;
+  otherwise error 402 comes.
+- The instrument codes (`TSnnnn`) in `mapping.py` follow the translation file of the instrument. Unknown
+  codes are kept as code and named from the instrument texts when shown.
+- The instrument has only one voltage function. If it brings line-to-line voltages, it counts as
+  phase sequence measurement `u3`. The phase sequence itself is in `VERIFICATION` and is stored as a neutral word
+  (`right`, `left`), so that reports in any language stay possible.
+- The instrument writes the ohm sign U+2126, not the Greek omega. `Quantity.parse`
+  normalises the unit; `raw` keeps the original.
+- `passed` only counts next to a limit. Pure information values such as the mains voltage come
+  with `passed="false"` even in passed measurements.
 
-## Import aus IZYTRON
+## Import from IZYTRON
 
-`importing/izytron.py` liest eine Kopie der IZYTRON-Datenbank nur lesend und legt einen Prüftag als
-abgeschlossene Kampagne an, mit Anlagenbaum, Messungen und Sichtprüfung. Den Versatz der Geräteuhr
-an jenem Tag nennt der Aufruf, er hängt vom Datum ab. Zeiten aus Sichtprüfungen sind schon Ortszeit.
-Abteilung und Ansprechpartner kommen mit: die Abteilung der Anlage (`Abstract_Device.Department`),
-sonst die des Ansprechpartners, und der erste aktive Ansprechpartner des Kunden (`Contact`) mit
-Telefon, ersatzweise Mobilnummer, und E-Mail. Die Kostenstelle, die IZYTRON je Prüfobjekt führt,
-gehört dem Kunden; sie wird nicht übernommen, weil die Kostenstelle einer Kampagne die eigene ist.
+`importing/izytron.py` reads a copy of the IZYTRON database read-only and creates one test day as a
+closed campaign, with installation tree, measurements and visual inspection. The offset of the instrument clock
+on that day is given by the call; it depends on the date. Times from visual inspections are already local time.
+Department and contact person come along: the department of the installation (`Abstract_Device.Department`),
+otherwise that of the contact person, and the first active contact person of the customer (`Contact`) with
+phone, as a substitute mobile number, and e-mail. The cost centre that IZYTRON keeps per test object
+belongs to the customer; it is not taken over, because the cost centre of a campaign is the own one.
 
     python -m easymeasurement.importing.izytron KOPIE.sqlite --offset -120
 
-## Geräteuhr
+## Instrument clock
 
-Die Uhr des Messgeräts hat keine Zeitzone, keine Sommerzeit und geht etwa 35 s im Monat nach.
-Deshalb stellt `CampaignService.start()` sie vor jeder Kampagne auf die Laptopzeit, ohne Rückfrage.
-Das Ziel ist, dass es keinen Versatz gibt. Die Laptopzeit muss dafür stimmen, also per NTP laufen.
+The clock of the instrument has no time zone and no daylight saving time, and loses about 35 s per month.
+That is why `CampaignService.start()` sets it to the laptop time before every campaign, without asking.
+The aim is that there is no offset. For this the laptop time must be right, that is, run via NTP.
 
-Das Stellen wird nachgeprüft: Bleibt eine Abweichung ab 3 s, startet die Kampagne nicht.
+Setting is verified: if a deviation of 3 s or more remains, the campaign does not start.
 
-Im Normalfall gibt es deshalb keinen Versatz, und die Oberfläche zeigt nichts zur Uhr: Die
-Statusanzeige erscheint nur bei ungeprüfter oder abweichender Uhr, die Protokollzeile „Geräteuhr“
-nur, wenn ein Versatz Zeiten tatsächlich korrigiert hat. „Messgerät → Uhr stellen …“ prüft und stellt
-nach Rückfrage, in jeder Stellung des Drehrads. Ein Push bleibt nicht im Gerätespeicher; lief die
-Verbindung seit dem Start der Kampagne ohne Unterbrechung, liegt dort nichts mit der alten Zeit, und
-die Uhr wird direkt gestellt. Nach einem Abbruch, einer Pause oder einem Neustart des Programms holt
-sie vorher ab, was im Gerät gespeichert ist; dieser Abruf braucht die Stellung Setup. Der Versatz bleibt als Absicherung erhalten. `clock_checks` hält jede Prüfung fest, jede Messung
-speichert ihren Versatz (`clock_offset_s`) neben `device_time` und `local_time`. Gebraucht wird er
-für Geräte ohne stellbare Uhr, bei einer Abweichung während der Kampagne und für Messungen eines
-früheren Tages, deren Versatz sich von Hand angeben lässt. Wird die Uhr während einer Kampagne
-gestellt, fragt die App vorher und holt erst die Messungen vom Gerät, die noch die alte Zeit tragen.
+In the normal case there is therefore no offset, and the user interface shows nothing about the clock: the
+status display appears only for an unchecked or deviating clock, the report line “Instrument clock”
+only when an offset has actually corrected times. “Instrument → Set clock …” checks and sets
+after asking, in any position of the rotary switch. A push does not stay in the instrument memory; if the
+connection has run without interruption since the start of the campaign, nothing with the old time is there, and
+the clock is set directly. After an abort, a pause or a restart of the program it first fetches
+what is stored in the instrument; this fetch needs the position Setup. The offset is kept as a safeguard. `clock_checks` records every check, every measurement
+stores its offset (`clock_offset_s`) next to `device_time` and `local_time`. It is needed
+for instruments without a settable clock, for a deviation during the campaign and for measurements of an
+earlier day, whose offset can be given by hand. If the clock is set during a campaign,
+the app asks beforehand and first fetches the measurements from the instrument that still carry the old time.
 
-## Messkampagne
+## Measurement campaign
 
-Das Hauptfenster ist nach der Arbeit geordnet, nicht nach Datenarten. In der Mitte steht die
-gewählte Kampagne (`ui/campaign_page.py`) mit ihren Messwerten, rechts einklappbar Ort, Messplan,
-gewählte Messung, Fotos und Protokolle (`ui/side_panel.py`). Bereiche ohne Inhalt schrumpfen dort
-auf eine graue Zeile, die sagt, was hier erscheinen würde; nur offene Bereiche mit Inhalt bekommen
-freie Höhe.
+The main window is ordered by the work, not by kinds of data. In the middle is the
+chosen campaign (`ui/campaign_page.py`) with its measured values, on the right, collapsible, location, test plan,
+chosen measurement, photos and reports (`ui/side_panel.py`). Sections without content shrink there
+to a grey line that says what would appear there; only open sections with content get
+free height.
 
-Die Liste aller Kampagnen (`ui/campaign_list.py`) liegt nicht dauerhaft neben der Arbeit. Sie fährt
-als Schublade (`ui/edge_drawer.py`) über den Inhalt, sobald die Maus den linken Fensterrand
-berührt, und verschwindet wieder, wenn die Maus sie verlässt; F9 klappt sie ebenso aus. Im
-maximierten Fenster genügt es, die Maus an den Bildschirmrand zu schieben. Die Maus wird dafür
-regelmäßig abgefragt, nicht verfolgt, damit kein Widget seine Bewegungen melden muss. „Ansicht →
-Kampagnenliste anheften“ stellt sie fest neben die Seiten; ihre Breite bleibt dann über
-den Neustart erhalten. Zur Übersicht führt der Knopf mit dem Haus vor dem Titel.
+The list of all campaigns (`ui/campaign_list.py`) does not lie permanently next to the work. It slides
+in as a drawer (`ui/edge_drawer.py`) over the content as soon as the mouse touches the left window edge,
+and disappears again when the mouse leaves it; F9 slides it out as well. In the
+maximised window it is enough to push the mouse to the screen edge. For this the mouse is
+polled at intervals, not tracked, so that no widget has to report its movements. “View →
+Pin campaign list” puts it fixed next to the pages; its width is then kept across
+a restart. The button with the house before the title leads to the overview.
 
-Links neben den Messwerten steht die Struktur der Anlage wie Ordner im Dateimanager
-(`ui/structure_tree.py`): Zeilen der Tabelle auf ein Element ziehen bucht sie um, Kontextmenü, F2,
-Entf und Einfg arbeiten am Baum. Ohne Maus bucht „Verschieben nach …“ im Kontextmenü einer Zeile
-(`ui/move_overlay.py`). Die Zahl je Element ist „diese Prüfung / letzte Prüfung“. Baum und Tabelle
-stehen in einem gezeichneten Rahmen (`ui/board.py`): oben über die ganze Breite die Zeile mit dem,
-was alle Zeilen gemeinsam haben, und der Anzahl, darunter je eine Werkzeugleiste gleicher Höhe,
-dann die Kopfzeilen von Baum und Tabelle auf einer Linie. Die Werkzeugleiste der Tabelle hält nur
-„Von Hand …“ und ein Filterfeld; Bearbeiten, Foto, Verschieben und Löschen einer Zeile stehen in
-ihrem Kontextmenü und auf F2 und Entf, so steht nichts dauerhaft ausgegraut im Bild. Erklärende
-Sätze stehen als Tooltip: am Kopf „Struktur“ und am Hinweis über dem Rahmen, dessen fetter Teil
-sichtbar bleibt. Zwischen den Hauptblöcken des Fensters liegen 8 px Fensterhintergrund; eine
-gespeicherte Splitter-Stellung ändert daran nichts.
+To the left of the measured values is the structure of the installation like folders in a file manager
+(`ui/structure_tree.py`): dragging rows of the table onto an element rebooks them; context menu, F2,
+Del and Ins work on the tree. Without a mouse, “Move to …” in the context menu of a row rebooks
+(`ui/move_overlay.py`). The number per element is “this inspection / last inspection”. Tree and table
+are in a drawn frame (`ui/board.py`): at the top across the full width the line with what
+all rows have in common, and the count, below it one toolbar of equal height each,
+then the header rows of tree and table on one line. The toolbar of the table holds only
+“By hand …” and a filter field; edit, photo, move and delete of a row are in
+its context menu and on F2 and Del, so nothing stands permanently greyed out in the picture. Explanatory
+sentences are tooltips: at the header “Structure” and at the hint above the frame, whose bold part
+stays visible. Between the main blocks of the window lie 8 px of window background; a
+stored splitter position does not change that.
 
-Messfunktion, Messung und Prüfablauf sind drei Ebenen. Die Messfunktion sagt, was gemessen wird
-(RISO, RLO). Eine Messung ist ein Ergebnis, ein Messwert oder die Antwort auf eine Frage. Ein
-Prüfablauf (Tabelle `runs`, `campaign/runs.py`) ist eine benannte Folge solcher Schritte, etwa eine
-Sichtprüfung nach Fragenkatalog: Die Messung zeigt mit `run_id` auf ihn und nennt in `step_name`
-ihren Schritt („Zugänglichkeit“). Der IZYTRON-Import legt für jede am PC erfasste Prüfung einen
-Prüfablauf an, Messungen vom Gerät bleiben einzeln. In der Tabelle steht ein Prüfablauf als eine
-Zeile mit Name, Zahl der Schritte und Mängeln (`ui/measurement_runs.py`); ein Klick auf die Zeit
-klappt die Schritte darunter auf. Beim Sortieren bleiben sie unter ihrem Kopf, gleich nach welcher
-Spalte und in welcher Richtung. Wer die Zeile verschiebt, verschiebt alle Schritte. Im Siegel
-stehen Prüfablauf und Schrittname nur, wo es sie gibt, sodass ältere Siegel gültig bleiben.
+Measuring function, measurement and test run are three levels. The measuring function says what is measured
+(RISO, RLO). A measurement is a result, a measured value or the answer to a question. A
+test run (table `runs`, `campaign/runs.py`) is a named sequence of such steps, for example a
+visual inspection by questionnaire: the measurement points to it with `run_id` and names in `step_name`
+its step (“Accessibility”). The IZYTRON import creates a test run for every inspection entered at the PC;
+measurements from the instrument stay single. In the table a test run is one
+row with name, number of steps and defects (`ui/measurement_runs.py`); a click on the time
+folds the steps open below it. When sorting they stay below their head, whatever the
+column and whatever the direction. Moving the row moves all steps. In the seal,
+test run and step name appear only where they exist, so that older seals stay valid.
 
-Die Oberfläche spricht von Messungen und Prüfungen, nicht von Funktionen: Gemessen werden
-Messgrößen mit Wert, Einheit und Grenzen, zusammen bewertet. Die Spalte „Bezeichnung“ nennt die
-Messgröße (RISO) oder bei einer Prüfung den Schritt (Zugänglichkeit). Intern bleibt der Schlüssel
-`function`, weil Gerät und Protokoll nach ihm unterscheiden.
+The user interface speaks of measurements and inspections, not of functions: what is measured are
+measured quantities with value, unit and limits, assessed together. The column “Designation” names the
+measured quantity (RISO) or, for an inspection, the step (Accessibility). Internally the key stays
+`function`, because instrument and report distinguish by it.
 
-Eine Wiederholungsprüfung (`campaign/repeat.py`, `campaign/repeat_checks.py`) macht aus der letzten
-bestätigten Kampagne derselben Anlage eine Liste offener Punkte. Sie liegen als Schritte mit dem
-Plan-Schlüssel `repeat` in der Kampagne und tragen Element, Bezeichnung, Grenzen und Einstellungen
-der damaligen Messung, deren Herkunft, Hinweis und Bemerkung, aber keinen Messwert. Die Liste wird
-in beliebiger Reihenfolge gefüllt, es gibt keinen geführten Ablauf: Jede Messung, die ankommt, nach
-Push&Print, von Hand oder durch Umbuchen, nimmt den offenen Punkt am selben Element mit derselben
-Bezeichnung; mehrere solche Punkte trennt der Leiter (L1-PE, …). Weicht eine Grenze oder Einstellung
-vom letzten Mal ab, verlangt das Bestätigen eine Begründung; das Programm stellt am Gerät nichts ein,
-es prüft nur, was ankam. Ein Punkt lässt sich mit Begründung auslassen. Bestätigt werden kann, sobald
-kein Punkt mehr offen ist. Offene Punkte stehen grau in der Tabelle (`ui/campaign_points.py`), der
-Strukturbaum zeigt mit „jetzt / letztes Mal“, wo noch etwas fehlt. Gewählt zeigt ein Punkt in der
-Seitenleiste (`ui/repeat_point.py`), was zu messen ist, den Hinweis vom letzten Mal zum Übernehmen,
-Bearbeiten oder Verwerfen, die Bemerkung von damals und die Fotos der damaligen Messung; neue
-Messwerte landen dann bei seinem Element. Unter einer Messung, die einen Punkt genommen hat, stehen
-erst danach die Werte vom letzten Mal, mit Hinweis bei deutlicher Änderung (`ui/repeat_compare.py`).
+A repeat inspection (`campaign/repeat.py`, `campaign/repeat_checks.py`) turns the last
+confirmed campaign of the same installation into a list of open points. They lie as steps with the
+plan key `repeat` in the campaign and carry element, designation, limits and settings
+of the measurement back then, its origin, hint and remark, but no measured value. The list is
+filled in any order; there is no guided sequence: every measurement that arrives, by
+Push&Print, by hand or by rebooking, takes the open point at the same element with the same
+designation; several such points are separated by the conductor (L1-PE, …). If a limit or setting
+differs from last time, confirming requires a reason; the program sets nothing at the instrument,
+it only checks what arrived. A point can be skipped with a reason. Confirming is possible as soon as
+no point is open any more. Open points are grey in the table (`ui/campaign_points.py`), the
+structure tree shows with “now / last time” where something is still missing. When chosen, a point shows in the
+side panel (`ui/repeat_point.py`) what is to be measured, the hint from last time to take over,
+edit or discard, the remark from back then and the photos of the measurement back then; new
+measured values then land at its element. Below a measurement that has taken a point, the
+values from last time appear only after that, with a notice on a marked change (`ui/repeat_compare.py`).
 
-Jede Messung hat neben der Bemerkung, die im Protokoll steht, einen Hinweis zur Durchführung. Er
-bleibt intern und kommt bei der nächsten Wiederholung als Hinweis zum Punkt wieder.
+Besides the remark that appears in the report, every measurement has a hint on how it was carried out. It
+stays internal and comes back at the next repeat as the hint for the point.
 
-In der Messung-Box steht statt eines langen Pfades das gebuchte Element mit Symbol, darüber klein
-und von links gekürzt der Weg dorthin (`ui/place_line.py`). Der Stift daneben bucht die Messung um,
-der Name zeigt das Element im Baum. Nur eine Messung ohne Element zeigt den freien Messort-Text.
+In the measurement box, instead of a long path, the booked element is shown with its icon, above it small
+and shortened from the left the way to it (`ui/place_line.py`). The pen next to it rebooks the measurement,
+the name shows the element in the tree. Only a measurement without an element shows the free location text.
 
-Overlays, die etwas ändern, haben „Übernehmen“ und „Abbrechen“; erst „Übernehmen“ speichert. So
-auch die Eigenschaften eines Elements, deren Formular in den Stammdaten dagegen jedes fertige Feld
-gleich ablegt. Listen, in denen jede Änderung ihren eigenen Dialog hat, schließen mit „Zurück“.
+Overlays that change something have “Apply” and “Cancel”; only “Apply” saves. This
+also holds for the properties of an element, whose form in the master data, in contrast, stores every finished field
+at once. Lists in which every change has its own dialog close with “Back”.
 
-Unter den Knöpfen im Kopf steht, was bis zur Bestätigung bleibt (`ui/campaign_checks.py`):
-Messungen ohne Ort, Mängel und offene Punkte, oder „bereit zum Bestätigen“. „ohne Ort“ springt zu
-diesen Messungen, „Mängel“ von Mangel zu Mangel; die offenen Punkte nennt der Tooltip.
+Below the buttons in the header is what remains until confirmation (`ui/campaign_checks.py`):
+measurements without location, defects and open points, or “ready to confirm”. “without location” jumps to
+these measurements, “defects” from defect to defect; the tooltip names the open points.
 
-Die Spalten der Messwerttabelle verwaltet `ui/table_columns.py`: Ziehen an der Überschrift ordnet
-sie an, ein Klick sortiert. Das Kontextmenü der Überschrift sortiert nach der angeklickten Spalte
-und blendet Spalten ein und aus. Zeit, Fotozahl und Messwert sortieren nach ihrem Wert statt nach
-dem Text, Messwerte erst nach Funktion, dann nach Größe. Eine Spalte, deren Wert in allen Zeilen
-gleich ist, weicht der Zeile über der Tabelle, solange „Gleiche Werte über der Tabelle nennen“ an
-ist; von Hand ausgeblendete Spalten bleiben in jedem Fall weg. Anordnung, Sortierung und Auswahl
-gelten je Ansicht und bleiben für den nächsten Start. Jede Zeile beginnt mit einem Zeichen für ihre
-Bewertung (`ui/verdict_marks.py`), das sich in Form und Farbe unterscheidet, auch wenn die Spalte
-„Bewertung“ als gemeinsamer Wert oben steht. Bei Prüffragen steht die Antwort vor der Frage
-(`ui/measurement_cells.py`), etwa „nein – Sind vollständige Schaltungsunterlagen vorhanden?“.
+The columns of the measured value table are managed by `ui/table_columns.py`: dragging at the header arranges
+them, a click sorts. The context menu of the header sorts by the clicked column
+and shows and hides columns. Time, photo count and measured value sort by their value instead of by
+the text, measured values first by function, then by magnitude. A column whose value is the same in all rows
+gives way to the line above the table as long as “Name equal values above the table” is
+on; columns hidden by hand stay away in any case. Arrangement, sorting and selection
+apply per view and are kept for the next start. Every row begins with a mark for its
+verdict (`ui/verdict_marks.py`) that differs in shape and colour, even when the column
+“Verdict” is shown above as a common value. For inspection questions the answer stands before the question
+(`ui/measurement_cells.py`), such as “no – Is complete circuit documentation available?”.
 
-Mit Messplan stehen über den Messwerten Anschlussbild und Anleitung des Schritts, ohne Plan nur der
-Hinweis auf das, was als Nächstes zu tun ist. Die Anleitung zur eingestellten Messfunktion holt ohne
-Plan „Hilfe → Anleitung zur Messung“ (F1). Verbindung, Geräteuhr und Stand der Kampagne stehen in
-der Statusleiste, also immer im Blick.
+With a test plan, connection diagram and instructions of the step are above the measured values; without a plan only the
+hint on what to do next. Without a plan, “Help → Measurement instructions” (F1) fetches the instructions for the
+measuring function set. Connection, instrument clock and state of the campaign are in
+the status bar, so always in view.
 
-Ohne gewählte Kampagne steht in der Mitte die Übersicht (`ui/dashboard.py`): offene und
-abgeschlossene Messungen getrennt als Karten mit ihrem nächsten Schritt, eine Suche über alle und
-Kacheln zu Stammdaten, Messplänen, Vorlagen, Archiv, Benutzern und Messgerät. Die Reihenfolge folgt
-den Daten (Beginn, letzte Messung, Abschluss, letztes Protokoll); die Kampagne, für die gerade
-gemessen wird, steht immer vorn. Das Programm startet dort, „Übersicht“ (Alt+Pos1) führt zurück,
-ohne eine laufende Messung zu unterbrechen.
+Without a chosen campaign the middle shows the overview (`ui/dashboard.py`): open and
+closed measurements separately as cards with their next step, a search over all of them and
+tiles for master data, test plans, templates, archive, users and instrument. The order follows
+the data (start, last measurement, closing, last report); the campaign for which
+measuring is going on is always in front. The program starts there; “Overview” (Alt+Home) leads back
+without interrupting a running measurement.
 
-Titel und Anlage einer offenen Kampagne ändert „Kampagne bearbeiten …“ (`ui/campaign_edit.py`). Die
-Anlage darf nur wechseln, wenn danach keine Messung und keine Datei an einem Ort außerhalb der neuen
-Anlage hängt (`misplaced` in `campaign/editing.py`); zur übergeordneten Anlage geht es also immer.
-Ansprechpartner und Auftrag fragen „Neue Kampagne“ und „Kampagne bearbeiten“ gleich ab
-(`ui/campaign_order.py`): Der Ansprechpartner steht sichtbar, Abteilung, Durchwahl, E-Mail,
-Kostenstelle und Vorgangsnummer klappen darunter auf. Eine neue Kampagne schlägt den letzten
-Kontakt des Kunden vor; Kostenstelle und Vorgangsnummer gehören zu einem Auftrag und beginnen
-leer.
-Ein Rechtsklick in der Kampagnenliste bietet an, was mit der Kampagne gerade möglich ist.
-Eine Kampagne wird nach Rückfrage gelöscht; ihr Ordner mit Fotos, Dateien und Protokollen kommt
-in den Papierkorb. Bei einer versiegelten bleibt ein Eintrag in `deleted_campaigns` mit ihrem Siegel
-und einem HMAC aus demselben Schlüssel. Die Siegelprüfung der nächsten Kampagne erkennt ihn an. Der
-Trigger `campaign_no_delete` lässt eine versiegelte Kampagne nur mit diesem Eintrag gehen, wer am
-Programm vorbei löscht, bricht also weiter die Kette.
-Das Änderungsprotokoll bleibt beim Löschen stehen; da SQLite IDs gelöschter Zeilen neu vergibt,
-gehört ein Eintrag nur zu der Messung, deren `device_uid` und Kampagne er trägt.
+Title and installation of an open campaign are changed by “Edit campaign …” (`ui/campaign_edit.py`). The
+installation may only change if afterwards no measurement and no file is attached to a location outside the new
+installation (`misplaced` in `campaign/editing.py`); moving to the parent installation is therefore always possible.
+“New campaign” and “Edit campaign” ask for contact person and order in the same way
+(`ui/campaign_order.py`): the contact person is visible; department, extension, e-mail,
+cost centre and order number fold open below. A new campaign proposes the last
+contact of the customer; cost centre and order number belong to one order and start
+empty.
+A right click in the campaign list offers what is currently possible with the campaign.
+A campaign is deleted after asking; its folder with photos, files and reports goes
+to the trash. For a sealed one an entry remains in `deleted_campaigns` with its seal
+and an HMAC from the same key. The seal check of the next campaign accepts it. The
+trigger `campaign_no_delete` lets a sealed campaign go only with this entry, so whoever deletes
+bypassing the program still breaks the chain.
+The change log stays on deletion; since SQLite reassigns IDs of deleted rows,
+an entry belongs only to the measurement whose `device_uid` and campaign it carries.
 
-Was nicht zur einzelnen Kampagne gehört, öffnet ein eigenes Fenster neben ihr: Stammdaten, Vorlagen,
-Protokollarchiv und die Suche über alle Messwerte. Knöpfe und Menüs teilen sich dieselben `QAction`,
-damit sie nie etwas Unterschiedliches anbieten.
+What does not belong to the single campaign opens a window of its own next to it: master data, templates,
+report archive and the search over all measured values. Buttons and menus share the same `QAction`,
+so that they never offer something different.
 
-Fenstergrößen, Trennlinien, eingeklappte Bereiche und ausgeblendete Leisten bleiben über einen
-Neustart erhalten (`ui/view_memory.py`). Trennlinien werden beim Ziehen gespeichert, nicht beim
-Beenden: Dann ist etwa der Bereich des geführten Schritts oft gar nicht sichtbar und käme ohne Platz
-zurück.
+Window sizes, splitters, collapsed sections and hidden bars are kept across a
+restart (`ui/view_memory.py`). Splitters are stored while dragging, not on
+exit: at that point, for example, the section of the guided step is often not visible at all and would come back without space.
 
-**Ansehen und Messen sind getrennt.** Ein Klick in der Liste zeigt eine Kampagne, ohne das Messgerät
-anzufassen. Erst „Messung fortsetzen" oder ein Doppelklick gibt ihr das Gerät. Das Fenster merkt sich
-deshalb zwei Kampagnen: die angezeigte (`campaign_id`) und die messende (`live_id`). Wer während einer
-Messung eine andere Kampagne ansieht, unterbricht nichts. Jede Lesung trägt die Kampagne, zu der ihre
-Sitzung gehört, und landet dort, was auch immer gerade zu sehen ist. Geräteaktionen sind gesperrt,
-solange das Gerät für eine andere Kampagne misst.
+**Viewing and measuring are separate.** A click in the list shows a campaign without touching the
+instrument. Only “Resume measuring” or a double click gives it the instrument. The window therefore
+remembers two campaigns: the one shown (`campaign_id`) and the one measuring (`live_id`). Whoever views another
+campaign during a measurement interrupts nothing. Every reading carries the campaign to which its
+session belongs and lands there, whatever is currently shown. Instrument actions are locked
+as long as the instrument is measuring for another campaign.
 
-Solange eine Kampagne misst, hält `LiveSession` das Messgerät im Push-Modus und verbindet neu, wenn es
-verschwindet. Ein Push geht zuerst in `CampaignService.receive()`, das ihn sofort speichert, dem
-aktiven Schritt zuordnet oder offen lässt. Die Verbindung ist exklusiv: Für das Nachholen vom Gerät
-und die Uhrprüfung tritt die Sitzung kurz zur Seite (`ui/instrument_control.py`). Vor dem Abschluss
-wird sie getrennt, damit keine Lesung auf einen geschlossenen Datensatz trifft.
+As long as a campaign is measuring, `LiveSession` keeps the instrument in push mode and reconnects when it
+disappears. A push goes first into `CampaignService.receive()`, which stores it at once, assigns it to the
+active step or leaves it open. The connection is exclusive: for fetching from the instrument
+and the clock check the session briefly steps aside (`ui/instrument_control.py`). Before closing
+it is disconnected, so that no reading hits a closed record.
 
-## Fotos und Anlagen
+## Photos and attachments
 
-Ein Foto ist kein Messwert, sondern steht in der eigenen Tabelle `photos`. Seine Aufnahmezeit bleibt
-unverändert, `placement` sagt, was über seine Zuordnung entscheidet:
+A photo is not a measured value but is in its own table `photos`. Its capture time stays
+unchanged; `placement` says what decides its assignment:
 
-- `timeline`: Es gehört zur nächstliegenden Messung. Eine Verschiebung (`photo_shift_s`) bewegt alle
-  Fotos, eine Lücke (`photo_gaps`) alles ab ihrem Zeitpunkt.
-- `pinned`: Ein Mensch hat es einer Messung zugeordnet, die Zeitleiste lässt es in Ruhe.
-- `stack`: Es liegt ohne Zuordnung auf dem Stapel, die Datei bleibt erhalten.
+- `timeline`: it belongs to the nearest measurement. A shift (`photo_shift_s`) moves all
+  photos, a gap (`photo_gaps`) everything from its point in time on.
+- `pinned`: a person has assigned it to a measurement; the timeline leaves it alone.
+- `stack`: it lies on the stack without assignment; the file is kept.
 
-Die Zeitleiste (`ui/photo_timeline.py`) zeigt Messungen und Fotos auf einer Zeitachse wie im Videoschnitt.
-Eine Linie verbindet jedes Foto mit seiner Messung. Ein Foto seitlich zu ziehen verschiebt alle, es nach
-oben auf eine Messung zu ziehen ordnet nur dieses fest zu. Die Spur unter dem Zeiger entscheidet, was
-beim Loslassen passiert, und die Hinweiszeile sagt es vorher. Fotos lassen sich auch auf eine Tabellenzeile
-ziehen. Die Zeitleiste ist ein Werkzeug zum Zuordnen: Sie steht unter der Tabelle, solange sie gebraucht
-wird. „Fotos zuordnen“ im Kopf der Kampagne (F7) blendet sie ein, „Schließen“ in ihrer Leiste wieder aus;
-nach einem Import öffnet sie sich von selbst. Eine Laufleiste unter den Spuren folgt Zoom und Verschieben.
-Der Stapel steht in der Seitenleiste.
+The timeline (`ui/photo_timeline.py`) shows measurements and photos on a time axis as in video editing.
+A line connects every photo with its measurement. Dragging a photo sideways shifts all of them, dragging it
+upwards onto a measurement assigns only this one firmly. The track under the pointer decides what
+happens on release, and the hint line says so beforehand. Photos can also be dragged onto a table row.
+The timeline is a tool for assigning: it is below the table as long as it is needed.
+“Assign photos” in the header of the campaign (F7) shows it, “Close” in its bar hides it again;
+after an import it opens by itself. A scroll bar below the tracks follows zoom and panning.
+The stack is in the side panel.
 
-Die Bilddateien liegen nicht in der Datenbank, sondern unverändert im Ordner der Kampagne
-(`campaigns/<uuid>/photos/`), benannt nach dem Anfang ihrer SHA-256-Prüfsumme. Die Tabelle `photos`
-führt Dateiname, Prüfsumme, Aufnahmezeit und Zuordnung; das Siegel deckt über die Prüfsumme auch die
-Datei ab. Ein Foto wird nie umgerechnet: Das Original bleibt der Beleg. Vergrößern brächte keine
-Einzelheit dazu, deshalb gibt es keine Mindestauflösung durch Hochrechnen; die Fotoansicht nennt die
-Pixel und warnt unter 1000 an der langen Seite, dass das Foto im Protokoll grob wirkt.
+The image files are not in the database but unchanged in the folder of the campaign
+(`campaigns/<uuid>/photos/`), named after the beginning of their SHA-256 checksum. The table `photos`
+keeps file name, checksum, capture time and assignment; through the checksum the seal also covers the
+file. A photo is never converted: the original remains the evidence. Enlarging would add no
+detail, so there is no minimum resolution by upscaling; the photo view names the
+pixels and warns below 1000 on the long side that the photo looks coarse in the report.
 
-Drehen und Zuschneiden ändern das Original nicht. Ein Foto hat eine Ansicht
-(`campaign/photo_view.py`): eine Drehung um Vierteldrehungen im Uhrzeigersinn (`rotation`) und danach
-einen Ausschnitt des gedrehten Bilds (`crop`, als Bruchteile „x y Breite Höhe“). Die große Fotoansicht
-dreht und schneidet zu; Markierungen beziehen sich auf die Ansicht und werden beim Ändern umgerechnet,
-so dass sie auf derselben Stelle bleiben. Protokoll und Vorschaubilder zeigen das Foto durch seine
-Ansicht. Das Siegel nimmt Drehung und Ausschnitt nur auf, wo es sie gibt.
+Rotating and cropping do not change the original. A photo has a view
+(`campaign/photo_view.py`): a rotation by quarter turns clockwise (`rotation`) and after that
+a section of the rotated image (`crop`, as fractions “x y width height”). The large photo view
+rotates and crops; marks refer to the view and are converted on a change,
+so that they stay on the same spot. Report and thumbnails show the photo through its
+view. The seal includes rotation and crop only where they exist.
 
-Für Protokoll und Vorschaubilder gibt es Proxys (`campaign/photo_proxies.py`): verkleinerte, aufrecht
-gedrehte JPEG-Kopien mit höchstens 1400 Pixeln an der langen Seite im Ordner `proxies/` der Kampagne,
-benannt nach Original und Größe. Ein Proxy trägt die Änderungszeit seines Originals; weicht sie ab,
-entsteht er neu, so bleiben Proxy und Original im Gleichlauf. Beim Öffnen einer Kampagne und nach
-einem Import entstehen fehlende Proxys im Hintergrund auf allen Kernen bis auf einen; die Statuszeile
-zählt mit, und „Entwurf ansehen“ wartet, bis alle fertig sind. Vor jedem Protokoll räumt das Programm
-Proxys ohne Original, solche anderer Größe und Reste abgebrochener Schreibvorgänge weg; ein gelöschtes
-Foto nimmt seinen Proxy mit. Ohne Markierungen geht der Proxy unverändert in die PDF, mit Markierungen
-wird er bemalt und neu kodiert. Proxys gehören nicht zum Siegel und lassen sich jederzeit löschen. Das
-Protokoll wird neben dem Fenster gezeichnet, das dabei bedienbar bleibt.
+For report and thumbnails there are proxies (`campaign/photo_proxies.py`): reduced, upright
+rotated JPEG copies with at most 1400 pixels on the long side in the folder `proxies/` of the campaign,
+named after original and size. A proxy carries the modification time of its original; if it differs,
+it is created again, so proxy and original stay in step. When a campaign is opened and after
+an import, missing proxies are created in the background on all cores but one; the status line
+counts along, and “View draft” waits until all are finished. Before every report the program removes
+proxies without an original, those of a different size and remains of aborted writes; a deleted
+photo takes its proxy with it. Without marks the proxy goes into the PDF unchanged, with marks
+it is painted on and encoded again. Proxies are not part of the seal and can be deleted at any time. The
+report is drawn beside the window, which stays usable meanwhile.
 
-Aus den Fotos der gewählten Messung in der Seitenleiste (`ui/photo_gallery.py`) lässt sich ein Foto
-auf eine andere Zeile der Tabelle ziehen. Es gehört dann nur noch zu jener Messung, eine Mehrfach-
-zuordnung gibt es nicht. Das Kreuz in der Ecke jedes Vorschaubildes löst das Foto von der Messung, solange
-die Kampagne offen ist: Es kommt zu den nicht zugeordneten Fotos, Datei, Markierungen und Einstufung
-bleiben erhalten. Löschen geht nur dort. Beide Arten stehen im Abschnitt „Fotos“ der Seitenleiste
-als Reiter „Messung“ und „Nicht zugeordnet“ (`ui/photo_tabs.py`); wer ein Foto beim Ziehen über
-einen Reiter hält, öffnet ihn. Auf dem Reiter „Messung“ abgelegt, gehört es zur gewählten Messung. Solange Fotos keiner Messung gehören, stehen der Abschnitt und der
-Reiter in Orange, die Prüfzeile im Kopf meldet „n Fotos nicht zugeordnet“ und führt per Klick
-dorthin, und „Bestätigen“ weist darauf hin, dass sie im Protokoll fehlen.
+From the photos of the chosen measurement in the side panel (`ui/photo_gallery.py`) a photo can be
+dragged onto another row of the table. It then belongs only to that measurement; there is no multiple
+assignment. The cross in the corner of every thumbnail detaches the photo from the measurement as long as
+the campaign is open: it goes to the unassigned photos; file, marks and role
+are kept. Deleting is possible only there. Both kinds are in the section “Photos” of the side panel
+as tabs “Measurement” and “Unassigned” (`ui/photo_tabs.py`); holding a photo over
+a tab while dragging opens it. Dropped on the tab “Measurement”, it belongs to the chosen measurement. As long as photos belong to no measurement, the section and the
+tab are orange, the check line in the header reports “n photos not assigned” and leads there with a click,
+and “Confirm” points out that they are missing in the report.
 
-Die Fotoansicht (`ui/photo_preview.py`, `ui/photo_canvas.py`) nimmt nummerierte Markierungen auf: Ein
-Rechteck über das Foto gezogen ergibt einen Bereich mit Nummer, der Text daneben erklärt ihn. Ein Klick
-auf eine Zeile hebt ihren Bereich hervor; mit „Alle zeigen“ aus bleiben die Markierungen verborgen,
-bis ihre Zeile gewählt wird. Daneben steht, als was das Foto ins Protokoll geht: Dokumentation,
-Hinweis oder Mangel. Markierungen (Tabelle `photo_marks`, in Anteilen des aufrecht gedrehten Bildes)
-und Einstufung (`photos.role`) werden erst mit „Übernehmen“ gespeichert. Das Protokoll zeichnet die
-Rahmen mit ihren Nummern ins Foto und setzt die Einstufung und die Texte unter das Bild; ein Mangel
-steht dort in Rot. Im Siegel stehen beide nur, wo es sie gibt, sodass ältere Siegel gültig bleiben.
+The photo view (`ui/photo_preview.py`, `ui/photo_canvas.py`) takes numbered marks: a
+rectangle dragged over the photo gives an area with a number, and the text next to it explains it. A click
+on a row highlights its area; with “Show all” off the marks stay hidden
+until their row is chosen. Next to it is what the photo goes into the report as: Documentation,
+Notice or Defect. Marks (table `photo_marks`, in fractions of the upright rotated image)
+and role (`photos.role`) are stored only with “Apply”. The report draws the
+frames with their numbers into the photo and puts the role and the texts below the image; a defect
+is shown there in red. In the seal both appear only where they exist, so that older seals stay valid.
 
-Anlagen (`attachments`) sind Kommentare, Bilder und PDFs an einer Messung oder einem Ort. Sie gehören
-immer zu einer Kampagne, damit ein Datensatz in sich vollständig bleibt. Entfernen löst sie von Messung
-und Ort, Löschen beendet sie samt Datei. Fotos, Lücken, Anlagen und ihre Dateien gehören zum Siegel.
+Attachments (`attachments`) are comments, images and PDFs on a measurement or a location. They always belong
+to a campaign, so that a record stays complete in itself. Removing detaches them from measurement
+and location; deleting ends them together with the file. Photos, gaps, attachments and their files are part of the seal.
 
-Dateien und Notizen der letzten bestätigten Prüfung derselben Anlage stehen in einer neuen Kampagne
-grau mit Datum beim jeweiligen Element (`campaign/carry_over.py`, `ui/place_files.py`). Was damals an
-einer Messung des Elements hing, gilt als am Element; was an der Kampagne selbst hing, als an der
-Anlage. „Übernehmen“ kopiert den Eintrag in die offene Kampagne, die abgeschlossene bleibt unverändert
-und versiegelt. Übernommenes erscheint nicht mehr als Angebot. Eine kampagnenunabhängige Ablage an
-Elementen gibt es bewusst nicht: Erst eine Bauteilliste mit Historie gäbe ihr einen Sinn.
+Files and notes of the last confirmed inspection of the same installation appear in a new campaign
+grey with date at the respective element (`campaign/carry_over.py`, `ui/place_files.py`). What was then attached to
+a measurement of the element counts as at the element; what was attached to the campaign itself, as at the
+installation. “Take over” copies the entry into the open campaign; the closed one stays unchanged
+and sealed. What has been taken over no longer appears as an offer. Storage at elements independent of
+campaigns deliberately does not exist: only a parts list with history would give it a purpose.
 
-## Benutzer
+## Users
 
-Ein Benutzer hat Titel, Name, Unterschrift und optional ein Zertifikat (`ui/users.py`). Das Feld der
-Unterschrift steht für die Linie im Protokoll (`ui/signature_pad.py`): Gespeichert wird das ganze Feld im
-Format 4:1, die Linie liegt bei drei Vierteln seiner Höhe und ist im PNG vermerkt. Mit „Ausrichten“ wird
-die Unterschrift auf die Linie gezogen und mit dem Mausrad in der Größe angepasst; das Protokoll legt die
-Linie des Felds auf seine eigene, Unterlängen reichen darunter. Vom Zertifikat
-stehen nur Pfad, Inhaber und Ablaufdatum in der Datenbank, das Passwort wird nie gespeichert. Es dient
-nur zum Prüfen und Signieren. Wer schon Kampagnen hat, wird beim Entfernen nur ausgeblendet.
+A user has title, name, signature and optionally a certificate (`ui/users.py`). The field of the
+signature stands for the line in the report (`ui/signature_pad.py`): the whole field is stored in the
+format 4:1; the line lies at three quarters of its height and is recorded in the PNG. With “Align”
+the signature is pulled onto the line and resized with the mouse wheel; the report puts the
+line of the field onto its own, and descenders reach below it. Of the certificate
+only path, holder and expiry date are in the database; the password is never stored. It serves
+only for checking and signing. A user who already has campaigns is only hidden on removal.
 
-Eine Kampagne verweist auf den Benutzer (`user_id`) und hält seinen Namen zusätzlich als Text fest
-(`tester`). Beim Abschluss kommt die Unterschrift als Kopie dazu, ihr Hash gehört zum Siegel; ein Entwurf
-zeigt die aktuelle Unterschrift des Prüfers. Spätere
-Änderungen am Benutzer berühren den Datensatz deshalb nicht. Solange die Kampagne offen ist, lässt sich
-der Prüfer wechseln, auf Wunsch auch für die bisherigen Messungen. Das wird registriert, markiert im
-Protokoll aber keine Messung als geändert, weil es nichts über das Ergebnis sagt. Eine gepushte Messung
-nennt den Prüfer der Kampagne, der Text des Geräts bleibt in `raw_data` erhalten.
+A campaign refers to the user (`user_id`) and additionally records the name as text
+(`tester`). On closing, the signature is added as a copy, and its hash is part of the seal; a draft
+shows the current signature of the inspector. Later
+changes to the user therefore do not touch the record. As long as the campaign is open, the
+inspector can be changed, on request also for the measurements so far. This is recorded, but does not mark any
+measurement as changed in the report, because it says nothing about the result. A pushed measurement
+names the inspector of the campaign; the text of the instrument stays in `raw_data`.
 
-## Eingaben
+## Inputs
 
-Eingaben sind Überlagerungen, keine eigenen Fenster (`ui/overlay.py`). Die Karte liegt über dem
-abgedunkelten Fenster und wird wie ein Dialog mit `exec()` benutzt. Die Arbeit dahinter bleibt sichtbar
-und läuft weiter, ein Messwert kommt auch währenddessen an. Enter bestätigt, Esc bricht ab, ein Klick
-daneben tut nichts. Ein grauer Hauptknopf erklärt sich selbst: Links daneben steht, was noch fehlt.
-Überlagerungen lassen sich schachteln, zum Beispiel „Neu …" beim Prüfer im Kampagnenstart.
+Inputs are overlays, not windows of their own (`ui/overlay.py`). The card lies over the
+dimmed window and is used like a dialog with `exec()`. The work behind it stays visible
+and goes on; a measured value arrives during this too. Enter confirms, Esc cancels, a click
+beside it does nothing. A grey main button explains itself: to its left is what is still missing.
+Overlays can be nested, for example “New …” at the inspector in the campaign start.
 
-## Messpläne und Wizard
+## Test plans and wizard
 
-Ein Messplan ist eine Folge von Punkten: `check` (Frage mit Ja, Nein oder Überspringen), `measure`
-(Messung) und `note` (Hinweis). Pläne liegen als YAML in der Tabelle `plans` und werden unter
-Einstellungen → Messpläne bearbeitet (`ui/plan_editor.py`). Änderungen speichern sich selbst. Der Testlauf
-(`ui/plan_test_run.py`) zeigt den Plan im Wizard mit einem simulierten Gerät in einer Wegwerf-Datenbank.
+A test plan is a sequence of points: `check` (question with yes, no or skip), `measure`
+(measurement) and `note` (hint). Plans are stored as YAML in the table `plans` and are edited under
+Settings → Test plans (`ui/plan_editor.py`). Changes save themselves. The test run
+(`ui/plan_test_run.py`) shows the plan in the wizard with a simulated instrument in a throwaway database.
 
-Die Anleitung je Messbereich gehört zum Messgerät und liegt bei seinem Treiber
-(`devices/profitest_prime/instructions/`), eine Datei je Messfunktion: Drehschalter,
-Einstellungen, Warnungen, Anschlussbild, Vorgehen und der Betrieb des Prüflings (`dut`). Ein Messpunkt
-übernimmt sie über seine Funktion. Dieselbe Anleitung zeigt die freie Messung auf Wunsch und folgt dort
-dem Drehschalter und dem letzten Messwert. Für eine Funktion ohne Anleitung sagt die App das, sie zeigt nie etwas Fremdes.
+The instructions per measuring range belong to the instrument and lie with its driver
+(`devices/profitest_prime/instructions/`), one file per measuring function: rotary switch,
+settings, warnings, connection diagram, procedure and the operation of the device under test (`dut`). A measuring point
+takes them over through its function. The free measurement shows the same instructions on request and there follows
+the rotary switch and the last measured value. For a function without instructions the app says so; it never shows anything unrelated.
 
-Eine Kampagne bekommt beim Start einen Plan, weitere kommen über „Messplan zuweisen" dazu. Jeder Punkt
-wird dabei als Kopie in `steps` festgehalten, ein korrigierter Plan ändert also keine Kampagne.
-Die Schritte einer Zuweisung liegen nebeneinander und tragen ihren Titel; so bleibt jede Zuweisung
-ein Plan für sich (`campaign/plan_blocks.py`), auch wenn derselbe Plan zweimal zugewiesen ist.
+A campaign gets a plan at its start; more are added through “Assign test plan”. Every point
+is recorded as a copy in `steps`, so a corrected plan does not change any campaign.
+The steps of one assignment lie next to each other and carry its title; so every assignment stays
+a plan of its own (`campaign/plan_blocks.py`), even if the same plan is assigned twice.
 
-Die Kampagne zeigt immer Struktur und Messungen. Ihre Pläne stehen in der Seitenleiste unter
-„Messpläne“ mit ihrem Fortschritt (`ui/plan_list.py`). „Ausführen“ legt den Plan an die Stelle von
-Struktur und Tabelle (`ui/plan_run.py`); eine mit Plan gestartete Kampagne beginnt gleich damit.
-„Plan unterbrechen“ lässt alles stehen, ein Schritt im Messen wartet danach wieder auf seinen Aufbau;
-„Fortsetzen“ geht am ersten offenen Schritt weiter. „Plan beenden“ fragt nach einem Grund, mit dem
-jeder noch offene Schritt als ausgelassen gilt. „Entfernen“ nennt, was mitgeht, und löscht nach
-Rückfrage die Schritte mit allen darauf gebuchten Messungen und Antworten.
+The campaign always shows structure and measurements. Its plans are in the side panel under
+“Test plans” with their progress (`ui/plan_list.py`). “Run” puts the plan in the place of
+structure and table (`ui/plan_run.py`); a campaign started with a plan begins with it straight away.
+“Pause plan” leaves everything as it is; a step that is measuring then waits for its setup again;
+“Continue” goes on at the first open step. “End plan” asks for a reason with which
+every step still open counts as skipped. “Remove” names what goes with it and, after
+asking, deletes the steps with all measurements and answers booked on them.
 
-Der Wizard (`ui/guided.py`) zeigt einen Punkt nach dem anderen mit Fortschritt, Zurück und Weiter.
-Die erwartete Antwort geht sofort weiter, jede andere wartet auf einen freiwilligen Kommentar.
-Überspringen braucht eine Begründung. J, N und S antworten ohne Maus. Eine Antwort wird wie ein Messwert
-gespeichert (`visual_inspection`), steht also in der Tabelle und im Protokoll. Antwortet man neu,
-ersetzt das die alte Antwort. Im Protokoll bilden Antworten eine Tabelle, Hinweise erscheinen dort nicht.
+The wizard (`ui/guided.py`) shows one point after the other with progress, Back and Next.
+The expected answer goes on at once; any other waits for an optional comment.
+Skipping needs a reason. Y, N and S answer without the mouse. An answer is stored like a measured value
+(`visual_inspection`), so it appears in the table and in the report. Answering again
+replaces the old answer. In the report, answers form a table; hints do not appear there.
 
-Ein Messpunkt läuft so: Aufbau im Anschlussbild anklicken, Einstellungen bestätigen, messen, Weiter.
-Mit Live-Verbindung ist jeder Wert schon da, ohne sie holt Weiter den Gerätespeicher ab. Ein Messwert
-wird dem aktiven Schritt zugeordnet, wenn die Funktion passt, sonst steht er unter „Nicht zugeordnet".
-Ohne Gerät gibt man Werte von Hand ein, sie landen im gezeigten Schritt.
+A measuring point runs like this: click the setup in the connection diagram, confirm the settings, measure, Next.
+With a live connection every value is already there; without it, Next fetches the instrument memory. A measured value
+is assigned to the active step if the function fits; otherwise it is listed under “Not assigned”.
+Without an instrument, values are entered by hand; they land in the step shown.
 
-Der mitgelieferte Plan ist ein Entwurf (`released: false`). Seine Anschlussangaben stammen aus der
-Bedienungsanleitung, Grenzwerte und Reihenfolge sind Vorschläge.
+Two drafts are supplied (`released: false`). “Machine – electrical inspection” measures; its
+connection data come from the operating instructions, limits and order are proposals.
+“Visual inspection to DIN VDE 0100-600” asks for the items of inspection (Besichtigen) (6.4.2.2 and 6.4.2.3 a–p),
+in its own words and checked per item against at least two independent sources; every question names
+its clause. Yes means in order, No is a defect, skipping needs a reason, as with
+a sequence of the instrument.
+
+An imported sequence, for example a visual inspection from IZYTRON, becomes a draft plan in the own database
+through the context menu of the table, “Take over as test plan” (`campaign/runs.py`): every question
+an inspection question, every measurement a measuring step of its function.
 
 ### Simulator
 
-`devices/simulator.py` ist ein vollwertiger Treiber: Er liefert Zufallswerte, gelegentlich außerhalb
-der Grenzwerte, und hat einen zufälligen Uhrenversatz. Mit der Messfunktion lässt sich auch ein
-falsch stehender Drehschalter nachstellen. Seine Beschreibung trägt `simulated=True`; daran, nicht
-am Schlüssel, erkennt die Anwendung Simulationen. Protokolle aus Simulationen tragen einen Hinweis
-und lassen sich nicht signieren.
+`devices/simulator.py` is a full driver: it delivers random values, occasionally outside
+the limits, and has a random clock offset. With the measuring function a
+wrongly set rotary switch can also be reproduced. Its description carries `simulated=True`; by this, not
+by the key, the application recognises simulations. Reports from simulations carry a notice
+and cannot be signed.
 
-## Vorlageneditor
+## Template editor
 
-Die Vorlagen-Seite zeigt eine Vorlage als Blockliste mit Eigenschaften und Live-Vorschau für 0, 1
-und 4 Messungen. Daten werden aus einer Liste eingefügt, Anzeigebedingungen ausgewählt. Der Reiter
-„Quelltext“ zeigt dieselbe Vorlage als YAML; Änderungen dort gelten auch im Aufbau.
+The templates page shows a template as a block list with properties and a live preview for 0, 1
+and 4 measurements. Data are inserted from a list, display conditions are chosen. The tab
+“Source” shows the same template as YAML; changes there also apply in the layout.
 
-### Briefkopf und Abschluss
+### Letterhead and closing
 
-Der Block „Briefkopf“ eröffnet das Protokoll: ein QR-Code mit der Kennung der Prüfung (ihre UUID,
-dieselbe wie in der Fußzeile), daneben Titel und Zeilen darunter, darunter ein Rahmen mit
-Auftraggeber und Auftragnehmer. Jede Zeile darf Datenfelder enthalten; eine Zeile, deren Datenfelder alle leer sind, entfällt
-samt Beschriftung, etwa „Telefon:“ ohne Nummer. Abteilung, Ansprechpartner, Durchwahl und E-Mail
-gehören zur Kampagne, nicht zum Kunden: Der Ansprechpartner wechselt mit dem Auftrag. Er steht unter
-„Kampagne bearbeiten …“; eine neue Kampagne übernimmt den der letzten Kampagne desselben Kunden.
-Im Briefkopf erscheint er unter der Anschrift des Kunden. Die eigene Kostenstelle ist ebenfalls ein
-Wert der Kampagne und steht beim Auftragnehmer; sie wird nicht in die nächste Kampagne übernommen. Die eigene
-Firma steht einmal zentral unter Einstellungen → Firma (Tabelle `company`, eine Zeile): Name,
-Anschrift, Telefon, E-Mail, Internet und Logo. Vorlagen greifen über die Datenfelder `company.*`
-darauf zu, der Briefkopf setzt das Logo rechts neben den Titel. Ein Logo-Block mit eigenem Bild
-bleibt für Vorlagen, die ein anderes Bild brauchen. Warnhinweise wie „Entwurf“ stehen direkt
-unter dem Briefkopf. Die Unterschriftszeile kann darüber gerahmt das Ergebnis tragen, grün bei
-bestanden, rot bei nicht bestanden; ihre Felder dürfen Datenfelder enthalten, etwa den Namen des
-Prüfers.
+The block “Letterhead” opens the report: a QR code with the identifier of the inspection (its UUID,
+the same as in the footer), next to it title and lines below, below that a frame with
+client and contractor. Every line may contain data fields; a line whose data fields are all empty is left out
+together with its label, such as “Phone:” without a number. Department, contact person, extension and e-mail
+belong to the campaign, not to the customer: the contact person changes with the order. It is set under
+“Edit campaign …”; a new campaign takes over that of the last campaign of the same customer.
+In the letterhead it appears below the address of the customer. The own cost centre is also a
+value of the campaign and appears with the contractor; it is not carried over into the next campaign. The own
+company is set once centrally under Settings → Company (table `company`, one row): name,
+address, phone, e-mail, website and logo. Templates access it through the data fields `company.*`;
+the letterhead sets the logo to the right of the title. A logo block with an image of its own
+remains for templates that need a different image. Warning notices such as “DRAFT” are directly
+below the letterhead. The signature line can carry the result framed above it, green for
+passed, red for failed; its fields may contain data fields, such as the name of the
+inspector.
 
-### Seitenumbruch
+### Page break
 
-Überschriften bleiben bei dem, was folgt. Vor einer Tabelle beginnt eine neue Seite, wenn Kopfzeile
-und erste Zeilen nicht mehr passen, vor einer Fotozeile, wenn eine Bildreihe nicht mehr passt. Läuft
-eine Tabelle über eine Seite, beginnt die nächste Seite mit der Überschrift und „(Fortsetzung)“, dann
-der Kopfzeile. Absätze lassen keine einzelne Zeile am Seitenende oder -anfang zurück. Spaltenbreiten
-richten sich nach dem Inhalt: Jede Spalte bekommt mindestens ihr längstes Wort, kurze Werte samt
-Einheit bleiben auf einer Zeile, bei Platzmangel geben nur Spalten mit langen Texten nach. Zwischen
-Zahl und Einheit steht ein schmales geschütztes Leerzeichen.
+Headings stay with what follows. Before a table a new page begins if the header row
+and the first rows no longer fit, before a photo row if one row of images no longer fits. If
+a table runs over a page, the next page begins with the heading and “(continued)”, then
+the header row. Paragraphs leave no single line at the end or beginning of a page. Column widths
+follow the content: every column gets at least its longest word, short values together with their
+unit stay on one line, and when space is short only columns with long texts give way. Between
+number and unit there is a narrow no-break space.
 
 ### Logo
 
-Der Block „Logo“ steht außerhalb des Textflusses und wird über Koordinaten in Millimetern auf die
-Seite gesetzt, auf der ersten oder auf jeder Seite. Verschoben und skaliert wird auf einer
-Seitenminiatur, über Zahlenfelder oder mit Schnellpositionen; das Seitenverhältnis bleibt erhalten.
+The block “Logo” stands outside the text flow and is placed on the page by coordinates in millimetres,
+on the first or on every page. It is moved and scaled on a
+page thumbnail, through number fields or with quick positions; the aspect ratio is kept.
 
-Das Bild wird in die Vorlage eingebettet (`images:` am Ende des YAML, Schlüssel aus dem Inhalt) und
-beim Import auf höchstens 1000 Pixel Kantenlänge verkleinert. Eine Vorlage bleibt so ohne Zusatzdateien
-vollständig, und ein archiviertes Protokoll behält das Logo, das damals galt. SVG-Dateien werden beim
-Import in ein transparentes Bitmap umgewandelt.
+The image is embedded into the template (`images:` at the end of the YAML, key from the content) and
+reduced on import to at most 1000 pixels edge length. So a template stays complete without extra files,
+and an archived report keeps the logo that applied then. SVG files are converted on
+import into a transparent bitmap.
 
-Liegt ein Logo am oberen oder unteren Seitenrand, weicht der Text aus. Das lässt sich abschalten;
-ein Logo in der Seitenmitte verdrängt keinen Text.
+If a logo is at the top or bottom page margin, the text gives way. This can be switched off;
+a logo in the middle of the page does not displace any text.
 
-## Signatur
+## Signature
 
-Signiert wird als PAdES mit einem X.509-Zertifikat aus einer PKCS#12-Datei. Das kann auch ein
-S/MIME-Zertifikat sein, zum Beispiel aus Thunderbird oder Kleopatra exportiert. Die Datei bleibt, wo
-sie ist. Das Programm merkt sich nur ihren Pfad in `settings.ini`; Schlüssel und Passwort werden
-nirgends gespeichert. Vor dem Signieren zeigt ein Dialog Name, E-Mail, Aussteller und Gültigkeit.
-Abgelaufene Zertifikate und reine Verschlüsselungszertifikate werden abgewiesen.
+Signing is done as PAdES with an X.509 certificate from a PKCS#12 file. This can also be an
+S/MIME certificate, for example exported from Thunderbird or Kleopatra. The file stays where
+it is. The program only remembers its path in `settings.ini`; key and password are stored
+nowhere. Before signing, a dialog shows name, e-mail, issuer and validity.
+Expired certificates and pure encryption certificates are rejected.
 
-Ein E-Mail-Zertifikat ergibt eine technisch gültige Signatur. Ob ein PDF-Programm sie als
-vertrauenswürdig anzeigt, hängt davon ab, ob es dem Aussteller vertraut.
+An e-mail certificate gives a technically valid signature. Whether a PDF program shows it as
+trustworthy depends on whether it trusts the issuer.
