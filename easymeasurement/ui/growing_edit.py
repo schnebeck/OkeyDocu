@@ -26,6 +26,8 @@ class GrowingEdit(QPlainTextEdit):
         self.setTabChangesFocus(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        # Wrapping is laid out after the text changes; the layout tells when the lines change.
+        self.document().documentLayout().documentSizeChanged.connect(lambda _: self._fit())
         self.textChanged.connect(self._fit)
         self._fit()
 
@@ -40,10 +42,13 @@ class GrowingEdit(QPlainTextEdit):
             Qt.ScrollBarPolicy.ScrollBarAsNeeded if lines > MAX_LINES
             else Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
-        margins = self.contentsMargins()
-        frame = 2 * self.frameWidth() if self.frameShape() != QFrame.Shape.NoFrame else 0
-        padding = 2 * round(self.document().documentMargin()) + margins.top() + margins.bottom()
-        self.setFixedHeight(shown * self.fontMetrics().lineSpacing() + padding + frame)
+        # Frame, style margins and viewport margins: whatever the field has around its text.
+        around = self.height() - self.viewport().height() if self.viewport().height() else (
+            2 * self.frameWidth() if self.frameShape() != QFrame.Shape.NoFrame else 0)
+        padding = 2 * round(self.document().documentMargin())
+        height = shown * self.fontMetrics().lineSpacing() + padding + around
+        if height != self.maximumHeight():
+            self.setFixedHeight(height)
 
     def resizeEvent(self, event) -> None:
         super().resizeEvent(event)

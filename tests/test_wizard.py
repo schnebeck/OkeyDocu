@@ -233,3 +233,18 @@ def test_field_stops_growing(qtbot):
     QApplication.processEvents()
     assert field.height() == tall
 
+
+
+def test_field_grows_while_one_long_line_wraps(qtbot):
+    """Typed without Enter, a long text wraps; every wrapped line stays in view."""
+    field = GrowingEdit()
+    qtbot.addWidget(field)
+    field.resize(160, field.height())
+    field.show()
+    one_line = field.height()
+    qtbot.keyClicks(field, "Das Schutzorgan muss trennen, damit der Test gelingt")
+    QApplication.processEvents()
+    assert field.height() > one_line
+    lines = round(field.document().documentLayout().documentSize().height())
+    assert lines > 1
+    assert field.viewport().height() >= lines * field.fontMetrics().lineSpacing()

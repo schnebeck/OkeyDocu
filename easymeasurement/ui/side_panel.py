@@ -128,13 +128,16 @@ class SidePanel(QScrollArea):
     def _share_room(self) -> None:
         """Only open sections with something to show grow; the others keep to their content.
 
-        A stretch factor alone would not do: Qt still hands free room to any section with
-        an expanding child, such as a stretch at the end of its form.
+        Free room goes by stretch: to the growing sections, or to the space at the end while
+        none grows. A section is never capped at its size hint, which assumes a wider column
+        and so fewer lines of wrapped text than the panel shows; its height follows its width.
         """
+        growing = False
         for index, section in enumerate(self.sections):
             grows = section.grows and section.expanded and not section.empty
+            growing = growing or grows
             self.column.setStretch(index, 1 if grows else 0)
-            section.setSizePolicy(
-                QSizePolicy.Policy.Preferred,
-                QSizePolicy.Policy.Preferred if grows else QSizePolicy.Policy.Maximum,
-            )
+            policy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+            policy.setHeightForWidth(True)
+            section.setSizePolicy(policy)
+        self.column.setStretch(len(self.sections), 0 if growing else 1)
