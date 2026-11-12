@@ -95,17 +95,22 @@ def catalog(code: str) -> Catalog:
                    texts, contexts)
 
 
+@cache
+def _heads() -> tuple[tuple[str, dict], ...]:
+    """Code and head of every language folder, read once like the catalogues."""
+    return tuple((entry.name, _read(entry / LANGUAGE_FILE))
+                 for entry in sorted(folder().iterdir(), key=lambda e: e.name)
+                 if entry.is_dir() and (entry / LANGUAGE_FILE).is_file())
+
+
 def available(program: bool = False) -> dict[str, str]:
     """Code and own name of every language the program knows, the source first. With
     `program`, only those its user interface is translated into (`program: true`); the others
     serve reports."""
     found = {SOURCE: SOURCE_NAME}
-    for entry in sorted(folder().iterdir(), key=lambda e: e.name):
-        if not (entry.is_dir() and (entry / LANGUAGE_FILE).is_file()):
-            continue
-        head = _read(entry / LANGUAGE_FILE)
+    for code, head in _heads():
         if head.get("program") or not program:
-            found[entry.name] = str(head.get("name", entry.name))
+            found[code] = str(head.get("name", code))
     return found
 
 

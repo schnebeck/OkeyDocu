@@ -150,6 +150,20 @@ def test_a_language_names_itself(code):
     assert l10n.available()[code] == catalog(code).name
 
 
+def test_telling_a_translation_reads_no_file(monkeypatch):
+    """Kinds and features ask this for every label, so it answers from what was read once."""
+    import importlib
+    catalogs = importlib.import_module("easymeasurement.l10n.catalog")
+    l10n.available()
+
+    def no_file(entry):
+        raise AssertionError(f"read {entry}")
+
+    monkeypatch.setattr(catalogs, "_read", no_file)
+    assert l10n.is_translation("Verteiler", "Distribution board")
+    assert "de" in l10n.available(program=True)
+
+
 def test_the_program_offers_only_languages_its_interface_speaks(qtbot, tmp_path, monkeypatch):
     from easymeasurement.ui import language_choice
     from PySide6.QtCore import QSettings
