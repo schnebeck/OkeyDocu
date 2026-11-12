@@ -30,6 +30,7 @@ kinds:
      izytron: 232, interval: 48,
      features: [Board type, IP rating, Material, Installation method, Protection class,
                 Earthing system type, "Cable length|m"]}
+  - {key: field, label: Field (+EXT), icon: element}
   - {key: construction_distributor, label: Construction site distribution board,
      icon: construction_distributor, interval: 3,
      features: [Material number, Insulation class, Year of manufacture, Phases, Number of poles,
