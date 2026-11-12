@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 
 from ..campaign.service import full_name
 from ..l10n import day, tr
-from .campaign_list import CampaignDelegate
+from .campaign_items import CampaignDelegate
 from .common import ROW_ID, AppContext
 from .overlay import Overlay
 from .user_form import UserForm

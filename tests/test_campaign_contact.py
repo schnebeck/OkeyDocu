@@ -56,6 +56,10 @@ def test_the_edit_overlay_takes_the_contact(app, window, press):
     overlay = CampaignEditOverlay(app, app.service.campaign(campaign), window)
     order = overlay.order
     assert not order.expanded  # nothing but the contact person is given yet
+    # The order is known by its number, so that stays in view with the contact person.
+    assert order.form.isRowVisible(order.fields["job_number"])
+    assert order.form.isRowVisible(order.fields["contact"])
+    assert not order.form.isRowVisible(order.fields["cost_center"])
     order.fields["department"].setText("Werkstatt")
     order.fields["contact"].setText("Herr Beispiel")
     order.fields["contact_email"].setText("beispiel@kunde.example ")
@@ -67,7 +71,7 @@ def test_the_edit_overlay_takes_the_contact(app, window, press):
 
 def test_the_order_opens_where_it_holds_something(app, window, press):
     campaign = app.service.create(press, "Prüfung", "Anna Prüfer")
-    app.service.set_order(campaign, "", "V-0815")
+    app.service.set_order(campaign, "4711", "")
     overlay = CampaignEditOverlay(app, app.service.campaign(campaign), window)
     assert overlay.order.expanded
 

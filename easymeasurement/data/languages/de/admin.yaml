@@ -81,6 +81,9 @@ texts:
   Edit structure kinds and their features: Strukturtypen und ihre Merkmale bearbeiten
   Choose or create a customer on the left.: Links einen Kunden wählen oder anlegen.
   Element: Element
+  Orders: Aufträge
+  No campaign has been run on this element yet.: An diesem Element lief noch keine Kampagne.
+  "Double-click: show the campaign": "Doppelklick: Kampagne zeigen"
   Customer: Kunde
   Delete: Löschen
   "Delete the customer “{name}”?": "Den Kunden „{name}“ löschen?"

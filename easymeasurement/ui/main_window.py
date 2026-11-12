@@ -83,6 +83,8 @@ class MainWindow(MainMenus, QMainWindow):
         self.kinds.changed.connect(self.campaign.refresh)
         self.kinds.changed.connect(self.master_data.refresh)
         self.master_data.kinds_requested.connect(lambda: self.open_page(self.kinds))
+        self.master_data.orders.open_requested.connect(self._show_order)
+        self.master_data.orders.new_requested.connect(self._new_order)
         self.choice_lists.changed.connect(self.kinds.refresh)
         self.choice_lists.changed.connect(self.master_data.refresh)
 
@@ -113,6 +115,19 @@ class MainWindow(MainMenus, QMainWindow):
             self.measurements.refresh()
         if self.reports.isVisible():
             self.reports.refresh()
+        if self.master_data.isVisible():
+            self.master_data.orders.reload()
+
+    def _show_order(self, campaign_id: int) -> None:
+        """An order chosen in the master data comes up in the main window."""
+        self.raise_()
+        self.activateWindow()
+        self.campaign.show_campaign(campaign_id)
+
+    def _new_order(self, asset_id: int) -> None:
+        self.raise_()
+        self.activateWindow()
+        self.campaign.new_campaign(asset_id=asset_id)
 
     def _open_tile(self, key: str) -> None:
         if key == USERS:

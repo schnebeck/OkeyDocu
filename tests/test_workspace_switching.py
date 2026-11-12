@@ -31,7 +31,7 @@ def test_interrupting_keeps_the_campaign_and_stays_on_it(window, app, monkeypatc
     assert page.campaign_id == campaign
     assert page.current_work() is None
     assert page.header.resume_button.isVisible()
-    assert "Prüfung Halle" in page.list.running.child(0).text(0)
+    assert "Prüfung Halle" in page.list.items[campaign].text(0)
 
 
 def test_a_campaign_can_be_resumed(window, app, monkeypatch):

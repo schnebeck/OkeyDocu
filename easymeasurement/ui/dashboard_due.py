@@ -15,7 +15,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 
 from ..l10n import day, plural, tr
-from .campaign_list import heading
+from .campaign_items import heading
 from .common import AppContext
 from .dashboard_card import ALERT, CARD_STYLE, TODO
 from .kind_catalog import KindCatalog

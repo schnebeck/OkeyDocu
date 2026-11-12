@@ -1,5 +1,6 @@
 # EasyMeasurement - easymeasurement/ui/master_data.py
-# Customers on the left, the structure of the chosen one in the middle, the chosen thing on the right.
+# Customers on the left, the structure of the chosen one in the middle, the chosen thing on the
+# right, an element with the orders run against it.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
@@ -25,8 +26,9 @@ from PySide6.QtWidgets import (
 )
 
 from ..l10n import N_, tr
+from .asset_orders import AssetOrders
 from .board import Board, GutterSplitter
-from .campaign_list import heading
+from .campaign_items import heading
 from .common import ROW_ID, AppContext, show_error
 from .element_form import ElementForm
 from .kind_catalog import CUSTOMER_ICON, element_icon
@@ -88,6 +90,9 @@ class MasterDataPage(QWidget):
         right_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.addWidget(self.form_title)
         right_layout.addWidget(self.forms, 1)
+        self.orders = AssetOrders(app)
+        self.orders.hide()
+        right_layout.addWidget(self.orders)
 
         splitter = GutterSplitter(objectName="master-data")
         for pane in (left, Board("master-data-structure", self.structure), right):
@@ -138,10 +143,13 @@ class MasterDataPage(QWidget):
         self._element_chosen(None)
 
     def _element_chosen(self, asset_id) -> None:
-        if asset_id is not None and self.app.db.asset(asset_id) is not None:
+        element = asset_id is not None and self.app.db.asset(asset_id) is not None
+        self.orders.setVisible(element)
+        if element:
             self.element_form.load(asset_id)
             self.forms.setCurrentWidget(self.element_form)
             self.form_title.setText(tr("Element"))
+            self.orders.show_asset(asset_id)
         elif self.customer_id() is not None:
             self.customer_form.load(self.customer_id())
             self.forms.setCurrentWidget(self.customer_form)

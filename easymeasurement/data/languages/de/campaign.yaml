@@ -97,6 +97,9 @@ texts:
   own cost centre for this job: eigene Kostenstelle für diesen Auftrag
   Cost centre: Kostenstelle
   Job number: Vorgangsnummer
+  Job {number}: Vorgang {number}
+  Next order …: Folgeauftrag …
+  A new order on the same installation that repeats this one, with its contact person: Ein neuer Auftrag an derselben Anlage, der diesen wiederholt, mit seinem Ansprechpartner
   own reference for this job: eigene Vorgangsnummer für diesen Auftrag
   More about the order: Weitere Angaben zum Auftrag
   The title is missing.: Der Titel fehlt.

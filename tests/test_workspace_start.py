@@ -41,8 +41,7 @@ def test_creating_an_asset_enables_the_start(window, app):
 
 def test_an_empty_list_shows_no_groups(window, app):
     with_asset(window, app)
-    assert window.campaign.list.running.isHidden()
-    assert window.campaign.list.closed.isHidden()
+    assert window.campaign.list.tree.topLevelItemCount() == 0
 
 
 # After starting --------------------------------------------------------------

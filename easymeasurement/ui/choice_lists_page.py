@@ -25,7 +25,7 @@ from ..l10n import in_language, tr
 from ..store.choice_lists import ChoiceList
 from ..store.kinds import slug
 from .board import GutterSplitter
-from .campaign_list import heading
+from .campaign_items import heading
 from .choice_table import ChoiceTable
 from .choice_value_form import ValueForm
 from .common import ROW_ID, AppContext

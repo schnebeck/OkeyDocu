@@ -14,7 +14,7 @@ from PySide6.QtCore import QFile
 from PySide6.QtWidgets import QMessageBox
 
 from ..l10n import N_, plural, tr
-from .campaign_list import count_text
+from .campaign_items import count_text
 from .common import AppContext
 
 

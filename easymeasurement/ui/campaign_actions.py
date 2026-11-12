@@ -24,9 +24,13 @@ class CampaignActions(CampaignTasks):
 
     # Starting ------------------------------------------------------------
 
-    def new_campaign(self, asset_id: int = 0, title: str = "", follows: int = 0) -> None:
-        """`asset_id` and `title` fill the dialog in; `follows` marks a follow-up inspection."""
-        dialog = CampaignDialog(self.app, self, plans=self.guided.plans)
+    def new_campaign(self, asset_id: int = 0, title: str = "", follows: int = 0,
+                     repeat_of: int = 0) -> None:
+        """`asset_id` and `title` fill the dialog in; `follows` marks a follow-up inspection;
+        `repeat_of` is the order the new one repeats, on its installation."""
+        dialog = CampaignDialog(self.app, self, plans=self.guided.plans, repeat_of=repeat_of)
+        if repeat_of:
+            asset_id = self.app.service.campaign(repeat_of)["asset_id"]
         if asset_id:
             dialog.asset.setCurrentIndex(max(dialog.asset.findData(asset_id), 0))
         if title:

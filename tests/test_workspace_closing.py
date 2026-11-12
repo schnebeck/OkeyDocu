@@ -152,12 +152,12 @@ def finished_campaign(window, app, monkeypatch):
     return campaign
 
 
-def test_closed_campaigns_are_listed_beside_the_open_ones(window, app, monkeypatch):
-    finished_campaign(window, app, monkeypatch)
-    listing = window.campaign.list
-    assert not listing.closed.isHidden()
-    assert "Prüfung Halle" in listing.closed.child(0).text(0)
-    assert listing.running.isHidden()
+def test_closed_campaigns_stay_listed_under_their_installation(window, app, monkeypatch):
+    campaign = finished_campaign(window, app, monkeypatch)
+    item = window.campaign.list.items[campaign]
+    assert "Prüfung Halle" in item.text(0)
+    assert item.parent().text(0) == "Halle 1"
+    assert item.parent().parent().text(0) == "Muster AG"
 
 
 def test_closed_campaign_shows_its_values_at_once(window, app, monkeypatch):
@@ -200,9 +200,9 @@ def test_closing_without_a_key_is_said_out_loud(window, app, monkeypatch):
     errors = []
     monkeypatch.setattr("easymeasurement.ui.campaign_confirm.show_error", lambda _, t: errors.append(t))
     monkeypatch.setattr(app.service, "seal_key", lambda: None)
-    finished_campaign(window, app, monkeypatch)
+    campaign = finished_campaign(window, app, monkeypatch)
     assert "KWallet" in errors[0]
-    assert "ohne Schlüssel" in window.campaign.list.closed.child(0).text(0)
+    assert "ohne Schlüssel" in window.campaign.list.items[campaign].text(0)
 
 
 def test_closing_with_a_key_stays_quiet(window, app, monkeypatch):
@@ -219,7 +219,7 @@ def test_manipulated_campaign_is_marked_in_the_list(window, app, monkeypatch):
     connection.execute("UPDATE campaigns SET title='Fälschung' WHERE id=?", (campaign,))
     connection.commit()
     window.campaign.refresh()
-    assert "VERÄNDERT" in window.campaign.list.closed.child(0).text(0)
+    assert "VERÄNDERT" in window.campaign.list.items[campaign].text(0)
 
 
 def test_the_filed_protocol_opens_from_the_notice(window, app, monkeypatch):

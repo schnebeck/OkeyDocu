@@ -24,7 +24,7 @@ from PySide6.QtWidgets import (
 
 from ..campaign.seal import SealState
 from ..l10n import N_, tr
-from .campaign_list import heading
+from .campaign_items import heading
 from .common import AppContext
 from .dashboard_card import CARD_WIDTH, SHOW, CampaignCard
 from .dashboard_due import DueSection

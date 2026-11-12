@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..l10n import tr
-from .campaign_list import heading
+from .campaign_items import heading
 
 
 class CampaignHeader(QWidget):

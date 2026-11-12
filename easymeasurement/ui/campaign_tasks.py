@@ -31,6 +31,9 @@ class CampaignTasks:
         self.finish_action = self._action(tr("Confirm report …"), self.finish)
         self.delete_action = self._action(tr("Delete campaign …"), self.delete_campaign)
         self.report_action = self._action(tr("Create report …"), self.make_report)
+        self.next_order_action = self._action(tr("Next order …"), self.next_order)
+        self.next_order_action.setToolTip(tr("A new order on the same installation that repeats"
+                                             " this one, with its contact person"))
         self.photos_action = self._action(tr("Import photos …"), self.import_photos)
         # The timeline is a tool for placing photos: shown on asking, gone once they are placed.
         self.timeline_action = QAction(tr("Assign photos"), self, checkable=True, shortcut="F7")
@@ -48,6 +51,11 @@ class CampaignTasks:
         action = QAction(text, self)
         action.triggered.connect(lambda: slot())
         return action
+
+    def next_order(self) -> None:
+        campaign = self._campaign()
+        if campaign is not None and campaign["status"] != "open":
+            self.new_campaign(repeat_of=campaign["id"])
 
     def assign_plan(self) -> None:
         overlay = AssignPlanOverlay(self.app.service.plans(), self)

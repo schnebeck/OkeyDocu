@@ -26,7 +26,7 @@ from PySide6.QtWidgets import (
 from ..campaign.records import NO_INSTRUMENT
 from ..campaign.service import CampaignSummary
 from ..l10n import N_, day, tr
-from .campaign_list import count_text
+from .campaign_items import count_text
 
 CARD_STYLE = """
 QFrame#card { background: palette(base); border: 1px solid palette(mid); border-radius: 6px; }

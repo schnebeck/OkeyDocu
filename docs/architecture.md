@@ -351,6 +351,16 @@ polled at intervals, not tracked, so that no widget has to report its movements.
 Pin campaign list” puts it fixed next to the pages; its width is then kept across
 a restart. The button with the house before the title leads to the overview.
 
+A customer's installation exists once, with its structure; every campaign against it is an order
+of its own, with its job number and contact person. The list therefore stands as a tree: customers
+by name, below each the installations campaigns were run on (by their place, so a campaign on a
+part of an installation names its path), and below those the orders, the open ones first, then
+the newest. An order shows its title, its job number and contact person, and when it was started
+with how many measurements (`ui/campaign_items.py`). Folded customers and installations stay
+folded across a refresh until one of their orders is shown. In the master data, an element
+lists the orders run on it below its form (`ui/asset_orders.py`); a double click shows one in the
+main window, and “New campaign …” starts one on that element.
+
 To the left of the measured values is the structure of the installation like folders in a file manager
 (`ui/structure_tree.py`): dragging rows of the table onto an element rebooks them; context menu, F2,
 Del and Ins work on the tree. Without a mouse, “Move to …” in the context menu of a row rebooks
@@ -440,10 +450,13 @@ Title and installation of an open campaign are changed by “Edit campaign …�
 installation may only change if afterwards no measurement and no file is attached to a location outside the new
 installation (`misplaced` in `campaign/editing.py`); moving to the parent installation is therefore always possible.
 “New campaign” and “Edit campaign” ask for contact person and order in the same way
-(`ui/campaign_order.py`): the contact person is visible; department, extension, e-mail,
-cost centre and order number fold open below. A new campaign proposes the last
-contact of the customer; cost centre and order number belong to one order and start
-empty.
+(`ui/campaign_order.py`): job number and contact person are visible; department, extension,
+e-mail and cost centre fold open below. A new campaign proposes the last contact of the customer;
+cost centre and job number belong to one order and start empty. The header of the campaign names
+customer, installation, job number and contact person.
+“Next order …” in the context menu of a confirmed campaign (and in the menu “Campaign”) starts a new
+order on the same installation that repeats exactly this one, not just the last one confirmed,
+and takes over its contact person; its job number starts empty.
 A right click in the campaign list offers what is currently possible with the campaign.
 A campaign is deleted after asking; its folder with photos, files and reports goes
 to the trash. For a sealed one an entry remains in `deleted_campaigns` with its seal

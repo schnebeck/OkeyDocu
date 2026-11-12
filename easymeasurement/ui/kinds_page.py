@@ -28,7 +28,7 @@ from PySide6.QtWidgets import (
 from ..l10n import plural, tr
 from ..store.kinds import Kind
 from .board import GutterSplitter
-from .campaign_list import heading
+from .campaign_items import heading
 from .common import ROW_ID, AppContext
 from .kind_catalog import KindCatalog, element_icon, icon_names, icon_text
 from .kind_features import FeatureTable

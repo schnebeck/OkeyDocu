@@ -14,7 +14,7 @@ from PySide6.QtWidgets import QMenu, QWidget
 
 from ..campaign.service import NO_INSTRUMENT
 from ..l10n import tr
-from .campaign_list import count_text
+from .campaign_items import SEPARATOR, count_text, order_line
 from .dashboard_card import MAKE_REPORT, OPEN_REPORT, RESUME
 from .report_signing import open_report
 
@@ -44,10 +44,9 @@ class CampaignDisplay:
         tester = escape(campaign["tester"]) or tr("Inspector missing")
         if campaign["status"] == "open":
             tester = f'<a href="tester">{tester}</a>'
-        self.header.details.setText(
-            f"{escape(customer['name'])}  ·  {escape(asset['name'])}  ·  {tester}"
-            f"  ·  {escape(plan)}"
-        )
+        order = escape(order_line(campaign))
+        parts = (escape(customer["name"]), escape(asset["name"]), order, tester, escape(plan))
+        self.header.details.setText(SEPARATOR.join(part for part in parts if part))
         self.values.show_campaign(campaign_id)
         self.guided.show_campaign(campaign_id if self._has_plans(campaign) else None)
         self.structure.show_root(campaign["asset_id"], campaign_id, campaign["status"] == "open")
@@ -94,6 +93,7 @@ class CampaignDisplay:
             [self.resume_action, self.pause_action],
             [self.edit_action, self.tester_action, self.assign_action],
             [self.draft_action, self.finish_action, self.report_action],
+            [self.next_order_action],
             [self.delete_action],
         ]
         result = []
@@ -147,6 +147,7 @@ class CampaignDisplay:
         self.header.edit_button.setVisible(is_open)
         self.assign_action.setEnabled(is_open)
         self.report_action.setEnabled(bool(campaign) and not is_open)
+        self.next_order_action.setEnabled(bool(campaign) and not is_open)
         self.photos_action.setEnabled(is_open)
         self.fetch_action.setEnabled(reachable)
         self.clock_action.setEnabled(reachable)

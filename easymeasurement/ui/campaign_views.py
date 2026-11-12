@@ -26,7 +26,7 @@ from ..campaign.service import IMPORTED
 from ..devices import Capability
 from ..devices.simulator import SIMULATED_FUNCTIONS
 from ..l10n import N_, tr
-from .campaign_list import count_text
+from .campaign_items import count_text
 from .common import AppContext, function_short
 from .instruction_panel import InstructionPanel
 from .overlay import Overlay

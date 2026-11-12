@@ -54,9 +54,12 @@ class CampaignDialog(Overlay):
     with one key.
     """
 
-    def __init__(self, app: AppContext, parent=None, plans: list | None = None):
+    def __init__(self, app: AppContext, parent=None, plans: list | None = None,
+                 repeat_of: int = 0):
         super().__init__(tr("New campaign"), parent)
         self.app = app
+        # The order to repeat; without one, the last confirmed of the installation is offered.
+        self.repeat_of = app.service.campaign(repeat_of) if repeat_of else None
         self.ok_button.setText(tr("Start campaign"))
         self.plan = QComboBox()
         for plan in plans or ():
@@ -97,7 +100,9 @@ class CampaignDialog(Overlay):
     def _offer_repeat(self) -> None:
         """An inspection without a single point leaves nothing to repeat."""
         asset = self.asset.currentData()
-        self.previous = self.app.service.last_closed(asset) if asset is not None else None
+        self.previous = self._chosen_order(asset)
+        if self.previous is None and asset is not None:
+            self.previous = self.app.service.last_closed(asset)
         count = 0
         if self.previous is not None:
             count = self.app.db.one("SELECT count(*) FROM measurements WHERE campaign_id=?",
@@ -112,10 +117,20 @@ class CampaignDialog(Overlay):
         self.repeat.setChecked(self.previous is not None)
 
     def _suggest_contact(self) -> None:
-        """The customer's last contact is the likeliest one to ask again."""
+        """The contact of the order repeated, or else the customer's last one: the likeliest
+        to ask again."""
         asset = self.asset.currentData()
-        previous = self.app.service.last_contact(asset) if asset is not None else None
+        previous = self._chosen_order(asset)
+        if previous is None and asset is not None:
+            previous = self.app.service.last_contact(asset)
+        if previous is not None:
+            previous = {key: previous[key] for key in CONTACT_COLUMNS}
         self.order.fill(dict(previous) if previous else dict.fromkeys(CONTACT_COLUMNS, ""))
+
+    def _chosen_order(self, asset):
+        """The order to repeat, while its installation is the one chosen."""
+        chosen = self.repeat_of
+        return chosen if chosen is not None and chosen["asset_id"] == asset else None
 
     def _repeat_toggled(self, on: bool) -> None:
         """A repeat inspection brings its own list; a plan beside it would lead elsewhere."""
