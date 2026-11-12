@@ -17,8 +17,9 @@ from dataclasses import dataclass
 from html import escape
 
 from PySide6.QtCore import QEvent, QObject, QPoint, Qt, QTimer
-from PySide6.QtGui import QCursor, QGuiApplication, QPixmap
+from PySide6.QtGui import QCursor, QGuiApplication, QPixmap, QTextDocument
 from PySide6.QtWidgets import QFrame, QLabel, QToolTip, QVBoxLayout, QWidget
+from shiboken6 import isValid
 
 SHOWN_MS = 30_000  # long enough to read a few paragraphs and a drawing
 TEXT_CHARS = 70  # widest line of text, in average characters
@@ -31,6 +32,7 @@ class Tip:
     text: str = ""  # paragraphs, separated by empty lines
     pictures: tuple[QPixmap, ...] = ()
     lines: tuple[str, ...] = ()  # a list below the pictures, such as suited methods
+    lines_title: str = ""
 
     def html(self) -> str:
         cells = "".join(f"<tr><td style='padding-right:10px'>{escape(name)}:</td>"
@@ -62,11 +64,12 @@ class TipWindow(QFrame):
         height the window does not know before it is shown."""
         texts = [tip.html()]
         if tip.lines:
-            texts.append("<br>".join(f"• {escape(line)}" for line in tip.lines))
+            heading = f"<b>{escape(tip.lines_title)}</b><br>" if tip.lines_title else ""
+            texts.append(heading + "<br>".join(f"• {escape(line)}" for line in tip.lines))
         labels = [self._label(text) for text in texts]
         sizes = [picture.deviceIndependentSize().toSize() for picture in tip.pictures]
         widest = self.fontMetrics().averageCharWidth() * TEXT_CHARS
-        width = max([min(label.sizeHint().width(), widest) for label in labels]
+        width = max([min(self._natural_width(label), widest) for label in labels]
                     + [size.width() for size in sizes])
         for label in labels:
             label.setFixedSize(width, label.heightForWidth(width))
@@ -90,6 +93,15 @@ class TipWindow(QFrame):
         self.hide_timer.start()
 
     @staticmethod
+    def _natural_width(label: QLabel) -> int:
+        """As wide as the text runs without wrapping; a wrapping label offers less."""
+        document = QTextDocument()
+        document.setDefaultFont(label.font())
+        document.setDocumentMargin(0)
+        document.setHtml(label.text())
+        return int(document.idealWidth()) + 1
+
+    @staticmethod
     def _label(html: str) -> QLabel:
         label = QLabel(html)
         label.setTextFormat(Qt.TextFormat.RichText)
@@ -110,11 +122,13 @@ def show_tip(tip: Tip, where: QPoint) -> TipWindow:
 
 
 def hide_tip() -> None:
+    """The window is let go before it hides: hiding moves the mouse over other widgets, whose
+    filters call here again. Qt may have deleted it already while the application ends."""
     global _window
-    if _window is not None:
-        _window.hide()
-        _window.deleteLater()
-        _window = None
+    window, _window = _window, None
+    if window is not None and isValid(window):
+        window.hide()
+        window.deleteLater()
 
 
 class _TipFilter(QObject):
@@ -144,7 +158,7 @@ def install_tip(widget: QWidget, provider: Provider) -> None:
 
 
 def showing() -> bool:
-    return _window is not None and _window.isVisible()
+    return _window is not None and isValid(_window) and _window.isVisible()
 
 
 def cursor_tip(tip: Tip) -> None:

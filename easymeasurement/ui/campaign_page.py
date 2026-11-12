@@ -32,7 +32,8 @@ from .instrument_control import InstrumentControl
 from .live_session import LiveSession
 from .photo_tabs import PhotoTabs
 from .side_panel import SidePanel
-from .structure_panel import PlacePanel, StructurePanel
+from .place_panel import PlacePanel
+from .structure_panel import StructurePanel
 from .status_badges import ClockBadge, LinkBadge
 
 

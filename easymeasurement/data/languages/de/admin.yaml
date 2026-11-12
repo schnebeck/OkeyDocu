@@ -174,7 +174,7 @@ texts:
   Drag the signature onto the line; the mouse wheel makes it larger or smaller.: Die Unterschrift auf die Linie ziehen; das Mausrad macht sie größer oder kleiner.
   Choice list: Auswahlliste
   "The list whose values the feature offers; any other may still be typed. The lists are edited under Settings → Choice lists.": "Die Liste, deren Werte das Merkmal anbietet; andere lassen sich trotzdem eingeben. Die Listen bearbeitet man unter Einstellungen → Auswahllisten."
-  "Suited measurements:": "Geeignete Messungen:"
+  Suited measurements: Geeignete Messungen
   "{amperes} A": "{amperes} A"
   "{times} × Iₙ": "{times} × Iₙ"
   "Iₐ = {current} at {seconds} s": "Iₐ = {current} bei {seconds} s"

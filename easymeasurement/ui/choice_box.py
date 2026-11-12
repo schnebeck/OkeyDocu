@@ -20,24 +20,13 @@ from PySide6.QtCore import QPoint, Qt
 from PySide6.QtWidgets import QComboBox, QLineEdit
 
 from ..l10n import N_, tr
-from ..l10n.catalog import source_of
-from ..l10n.formats import pattern
 from ..store.choice_lists import ChoiceList
-from .choice_tips import Context, list_tip, value_tip
+from .choice_tips import Context, choice_text, list_tip, text_tip
 from .rich_tip import Tip, install_tip
 
 EMPTY, OWN = "empty", "own"
 LABELS = {EMPTY: N_("(empty)"), OWN: N_("Own text …")}
 VALUE = Qt.ItemDataRole.UserRole + 1  # the value as the list holds it
-
-
-def choice_text(choice: str) -> str:
-    """A number with the decimal sign of the language, a word in the language."""
-    try:
-        float(choice)
-    except ValueError:
-        return tr(choice)
-    return choice.replace(".", pattern("decimal"))
 
 
 class ChoiceBox(QComboBox):
@@ -65,25 +54,10 @@ class ChoiceBox(QComboBox):
         install_tip(self, lambda _: self.tip(self.currentText()))
         install_tip(self.view().viewport(), self._row_tip)
 
-    def held(self, text: str) -> str | None:
-        """The value of the list the text stands for, shown in any language or as stored."""
-        text = text.strip()
-        for row in range(self.count()):
-            value = self.itemData(row, VALUE)
-            if value is not None and text in (value, self.itemText(row)):
-                return value
-        source = source_of(text)
-        return source if source in self.list.offered else None
-
     def tip(self, text: str) -> Tip | None:
         if not text.strip():
             return list_tip(self.list)
-        value = self.held(text)
-        entry = self.list.entry(value) if value is not None else None
-        if entry is None:
-            return None
-        return value_tip(self.list, entry, choice_text(value),
-                         self.context() if self.context else None)
+        return text_tip(self.list, text, self.context() if self.context else None)
 
     def _row_tip(self, where: QPoint) -> Tip | None:
         value = self.view().indexAt(where).data(VALUE)

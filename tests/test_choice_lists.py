@@ -59,7 +59,7 @@ def test_the_field_tells_the_value_it_holds_with_its_curve(qtbot, app):
         assert ("Abschaltzeit", "höchstens 0,4 s") in tip.rows and not tip.pictures
         tip = box.tip("C")
         assert ("Schutzeinrichtung", "Leitungsschutzschalter") in tip.rows
-        assert len(tip.pictures) == 1 and tip.lines[0] == "Geeignete Messungen:"
+        assert len(tip.pictures) == 1 and tip.lines_title == "Geeignete Messungen"
         assert box.tip("NH 63") is None
         assert box.tip("").title == "Charakteristik"
 

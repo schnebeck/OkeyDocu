@@ -19,6 +19,8 @@ from collections.abc import Callable, Mapping
 from PySide6.QtGui import QPixmap
 
 from ..l10n import in_language, tr
+from ..l10n.catalog import source_of
+from ..l10n.formats import pattern
 from ..store.choice_lists import ChoiceList, ChoiceValue
 from ..vocabulary import function_label
 from .curve_picture import curve_picture, parse_curve
@@ -29,6 +31,25 @@ RATED = "rated_current"
 EARTHING = "earthing_system_type"
 FINAL_LIMIT_A = 63
 REQUIRED_S = {("TN", True): 0.4, ("TN", False): 5.0, ("TT", True): 0.2, ("TT", False): 1.0}
+
+
+def choice_text(choice: str) -> str:
+    """A number with the decimal sign of the language, a word in the language."""
+    try:
+        float(choice)
+    except ValueError:
+        return tr(choice)
+    return choice.replace(".", pattern("decimal"))
+
+
+def held_value(chosen: ChoiceList, text: str) -> str | None:
+    """The value of the list a text stands for, as stored or as shown in any language."""
+    text = text.strip()
+    for value in chosen.offered:
+        if text in (value, choice_text(value)):
+            return value
+    source = source_of(text)
+    return source if source in chosen.offered else None
 
 
 def _number(text: str) -> float | None:
@@ -65,10 +86,19 @@ def value_tip(chosen: ChoiceList, entry: ChoiceValue, shown: str,
     lines = tuple(function_label(method.function)
                   + (f": {in_language(method.note)}" if method.note else "")
                   for method in entry.methods)
-    if lines:
-        lines = (tr("Suited measurements:"), *lines)
     title = f"{in_language(chosen.label)}: {shown}" if chosen.label else shown
-    return Tip(title, rows, in_language(entry.help), pictures(entry, context or {}), lines)
+    return Tip(title, rows, in_language(entry.help), pictures(entry, context or {}), lines,
+               tr("Suited measurements") if lines else "")
+
+
+def text_tip(chosen: ChoiceList, text: str,
+             context: Mapping[str, str] | None = None) -> Tip | None:
+    """The tip of the value a text stands for; none for a text the list does not hold."""
+    value = held_value(chosen, text)
+    entry = chosen.entry(value) if value is not None else None
+    if entry is None:
+        return None
+    return value_tip(chosen, entry, choice_text(value), context)
 
 
 def list_tip(chosen: ChoiceList) -> Tip | None:

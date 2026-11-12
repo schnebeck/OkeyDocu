@@ -9,12 +9,14 @@
 from datetime import datetime
 
 import pytest
+from PySide6.QtCore import QPoint
 
 from easymeasurement.model import Quantity, ResultValue, Verdict
 from easymeasurement.ui.campaign_dialog import CampaignDialog
 from easymeasurement.ui.kind_removal import RemoveKindOverlay
 from easymeasurement.ui.structure_cleanup import CleanupOverlay
 from easymeasurement.ui.structure_tree import UNPLACED
+from easymeasurement.ui.suited_methods import context_of
 
 
 @pytest.fixture
@@ -82,7 +84,25 @@ def test_the_side_panel_names_the_chosen_element(shown, app):
     page = shown["page"]
     page.structure.select(shown["cabinet"])
     assert page.place.kind.text() == "Verteiler"
-    assert "IP54" in page.place.details.text() and "Material" not in page.place.details.text()
+    texts = page.place.detail_texts()
+    assert "IP54" in texts and "Material" not in texts
+
+
+def test_the_side_panel_tells_a_value_and_what_suits_measuring_it(shown, app):
+    app.db.set_asset_features(shown["cabinet"], {"earthing_system_type": "TT"})
+    circuit = app.service.add_element(shown["cabinet"], "circuit", "Stromkreis 1")
+    app.db.set_asset_features(circuit, {"characteristic": "B", "rated_current": "16"})
+    page = shown["page"]
+    page.show_campaign(shown["campaign"])
+    page.structure.select(circuit)
+    place = page.place
+    assert context_of(app.db, circuit, {})["earthing_system_type"] == "TT"
+    shown_value = place.grid.itemAtPosition(0, 1).widget()
+    assert shown_value.text() == "B"
+    tip = next(c for c in shown_value.children() if hasattr(c, "provider")).provider(QPoint())
+    assert tip.title.endswith(": B") and tip.pictures
+    assert any(text.startswith("• ") and "Schleifenimpedanz" in text
+               for text in place.suited_texts())
 
 
 def test_cleanup_lists_only_empty_branches(shown, app):

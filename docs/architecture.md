@@ -52,7 +52,13 @@ der Liste unterscheiden: Bei B, C, D entfällt „Leitungsschutzschalter“, neb
 da. Eine Kennlinie wird für das Element gezeichnet: Sein Nennstrom macht aus Vielfachen Ampere, seine
 Netzform mit dem Nennstrom ergibt die geforderte Abschaltzeit, an der Iₐ markiert ist. Der Tooltip
 selbst ist ein allgemeines Bauteil (`ui/rich_tip.py`) für Text, Tabelle und Bilder, das jedes
-Widget über `install_tip` nutzen kann. „Adern der Leitung“ zählt alle Adern eines Kabels wie die
+Widget über `install_tip` nutzen kann. Die Netzform steht meist an der Maschine oder Einspeisung:
+Fehlt sie am Element, gilt die des nächsten Elements darüber (`ui/suited_methods.py`).
+
+In der Kampagne zeigt die Seitenleiste das gewählte Element (`ui/place_panel.py`) mit denselben
+Tooltips an seinen Merkmalen. Darunter stehen die geeigneten Messungen, gesammelt aus den Werten
+aller Merkmale; der Tooltip einer Messung nennt die Werte, die sie verlangen, mit ihren Hinweisen.
+So sieht man an einer fremden Maschine, was sich an einem Element messen lässt. „Adern der Leitung“ zählt alle Adern eines Kabels wie die
 Aderanzahl des PROFITEST PRIME (NYM-J 5×2,5: 5, eine Einzelader: 1), „Pole der Schutzeinrichtung“
 sagt, ob ein-, zwei-, drei- oder vierpolig geschaltet wird.
 

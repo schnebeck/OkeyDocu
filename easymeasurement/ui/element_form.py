@@ -28,6 +28,7 @@ from .choice_box import feature_field, field_text
 from .common import AppContext, show_error
 from .kind_catalog import KindCatalog
 from .overlay import Overlay
+from .suited_methods import context_of
 
 TEXTS = {"name": N_("Designation"), "identifier": N_("Identifier"),
          "manufacturer": N_("Manufacturer"), "type": N_("Type designation"),
@@ -131,7 +132,7 @@ class ElementForm(QWidget):
         values = self.app.db.asset_features(self.asset_id)
         lists = self.app.db.choice_lists()
         for feature in kind.features if kind else ():
-            field = feature_field(feature, values.get(feature.key, ""), lists, self._typed)
+            field = feature_field(feature, values.get(feature.key, ""), lists, self._context)
             editor = field.lineEdit() if isinstance(field, QComboBox) else field
             editor.editingFinished.connect(self._edited)
             if isinstance(field, QComboBox):
@@ -149,6 +150,10 @@ class ElementForm(QWidget):
     def _typed(self) -> dict[str, str]:
         """The features as they stand in the fields, saved or not."""
         return {key: field_text(field) for key, field in self.feature_fields.items()}
+
+    def _context(self) -> dict[str, str]:
+        """What the tips draw from: the fields, and from above what the element does not tell."""
+        return context_of(self.app.db, self.asset_id, self._typed())
 
     def _edited(self) -> None:
         if self.live:
