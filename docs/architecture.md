@@ -337,9 +337,11 @@ the app asks beforehand and first fetches the measurements from the instrument t
 
 The main window is ordered by the work, not by kinds of data. In the middle is the
 chosen campaign (`ui/campaign_page.py`) with its measured values, on the right, collapsible, location, test plan,
-chosen measurement, photos and reports (`ui/side_panel.py`). Sections without content shrink there
-to a grey line that says what would appear there; only open sections with content get
-free height.
+chosen measurement, its readings, its files, photos and reports (`ui/side_panel.py`). The editor of the
+measurement hands its table of readings and its attachments to sections of their own
+(`ui/campaign_detail.py`), whose headings count what they hold; for an open point, a run or no row they
+stay hidden. Sections without content shrink there to a grey line that says what would appear there;
+only open sections with content get free height.
 
 The list of all campaigns (`ui/campaign_list.py`) does not lie permanently next to the work. It slides
 in as a drawer (`ui/edge_drawer.py`) over the content as soon as the mouse touches the left window edge,
@@ -395,7 +397,9 @@ measured values then land at its element. Below a measurement that has taken a p
 values from last time appear only after that, with a notice on a marked change (`ui/repeat_compare.py`).
 
 Besides the remark that appears in the report, every measurement has a hint on how it was carried out. It
-stays internal and comes back at the next repeat as the hint for the point.
+comes back at the next repeat as the hint for the point. The report shows it only beneath the
+measurement's photos marked as a notice, before the texts of their marks, and in the remark of the
+notices table (`reporting/footnotes.py`, `photo_texts`).
 
 In the measurement box, instead of a long path, the booked element is shown with its icon, above it small
 and shortened from the left the way to it (`ui/place_line.py`). The pen next to it rebooks the measurement,
