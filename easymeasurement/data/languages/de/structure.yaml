@@ -28,8 +28,7 @@ texts:
   Measurements not yet assigned to an element. Drag them onto an element to assign them.: Messungen, die noch keinem Element zugeordnet sind. Auf ein Element ziehen, um sie zuzuordnen.
   "Identifier: {identifier}": "Kennung: {identifier}"
   "Last inspection: {before} measurements here, this inspection: {now}": "Letzte Prüfung: {before} Messungen hier, diese Prüfung: {now}"
-  "{count} measurement below": "{count} Messung darunter"
-  "{count} measurements below": "{count} Messungen darunter"
+  "{total} in this branch: {here} here, {below} below": "{total} in diesem Zweig: {here} hier, {below} darunter"
   Drag measurements from the table onto an element to book them there. New measurements go to the chosen element.: Messungen aus der Tabelle auf ein Element ziehen, um sie dort zu buchen. Neue Messungen landen beim gewählten Element.
   "+ Element": "+ Element"
   Create an element below the chosen one (Ins): Ein Element unter dem gewählten anlegen (Einfg)

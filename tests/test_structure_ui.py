@@ -41,6 +41,8 @@ def test_the_tree_shows_kinds_counts_and_what_has_no_place(shown):
     tree = shown["page"].structure
     cabinet = tree.items[shown["cabinet"]]
     assert cabinet.text(1) == "2" and not cabinet.icon(0).isNull()
+    press = tree.items[shown["press"]]
+    assert press.text(1) == "2" and press.toolTip(1) == "2 in diesem Zweig: 0 hier, 2 darunter"
     tree.select(UNPLACED)
     assert shown["page"].values.table.rowCount() == 1
 

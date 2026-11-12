@@ -14,13 +14,18 @@ from PySide6.QtWidgets import QAbstractItemView, QHeaderView, QTreeWidget, QTree
 
 from ..campaign.service import StructureError
 from ..store import CampaignClosed
-from ..l10n import plural, tr
+from ..l10n import tr
 from .common import ROW_ID, AppContext, show_error
 from .dashboard_card import TODO
 from .kind_catalog import UNPLACED_ICON, KindCatalog, element_icon
 from .structure_drop import UNPLACED, StructureDrop
 
 __all__ = ["UNPLACED", "StructureTree"]
+
+
+def _count_text(now: int, then: int) -> str:
+    """Measurements of this campaign, beside those of the last one where it had any."""
+    return f"{now} / {then}" if then else (str(now) if now else "")
 
 
 class StructureTree(StructureDrop, QTreeWidget):
@@ -105,7 +110,7 @@ class StructureTree(StructureDrop, QTreeWidget):
             top = self._item(row, catalog, counts, before)
             self.addTopLevelItem(top)
             self._add(top, row["id"], below, catalog, counts, before)
-            self._dim(top, counts)
+            self._dim(top, counts, before)
         if counts.get(None):
             loose = QTreeWidgetItem([tr("No location"), str(counts[None])])
             loose.setIcon(0, element_icon(UNPLACED_ICON))
@@ -125,8 +130,7 @@ class StructureTree(StructureDrop, QTreeWidget):
 
     def _item(self, row, catalog: KindCatalog, counts, before) -> QTreeWidgetItem:
         now, then = counts.get(row["id"], 0), before.get(row["id"], 0)
-        count = f"{now} / {then}" if then else (str(now) if now else "")
-        item = QTreeWidgetItem([row["name"], count])
+        item = QTreeWidgetItem([row["name"], _count_text(now, then)])
         item.setIcon(0, catalog.icon(row["kind"]))
         item.setData(0, ROW_ID, row["id"])
         item.setTextAlignment(1, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
@@ -144,19 +148,24 @@ class StructureTree(StructureDrop, QTreeWidget):
         self.items[row["id"]] = item
         return item
 
-    def _dim(self, item: QTreeWidgetItem, counts) -> int:
-        """Branches without a measurement in this campaign step back; returns the branch total."""
-        total = counts.get(item.data(0, ROW_ID), 0) + sum(
-            self._dim(item.child(i), counts) for i in range(item.childCount())
-        )
-        if self.campaign_id is not None and not total:
+    def _dim(self, item: QTreeWidgetItem, counts, before) -> tuple[int, int]:
+        """Returns the branch totals of this campaign and the last one. An element with others
+        below counts its whole branch; branches without a measurement step back."""
+        asset_id = item.data(0, ROW_ID)
+        below = [self._dim(item.child(i), counts, before) for i in range(item.childCount())]
+        here, then_here = counts.get(asset_id, 0), before.get(asset_id, 0)
+        now = here + sum(n for n, _ in below)
+        then = then_here + sum(t for _, t in below)
+        if self.campaign_id is not None and not now:
             grey = QBrush(self.palette().color(QPalette.ColorGroup.Disabled,
                                                QPalette.ColorRole.Text))
             item.setForeground(0, grey)
-        if item.data(0, ROW_ID) in self.items and total and not counts.get(item.data(0, ROW_ID)):
-            item.setToolTip(1, plural(total, "{count} measurement below",
-                                      "{count} measurements below"))
-        return total
+        if asset_id in self.items and below:
+            item.setText(1, _count_text(now, then))
+            item.setForeground(1, QBrush(QColor(TODO)) if now < then else QBrush())
+            item.setToolTip(1, tr("{total} in this branch: {here} here, {below} below",
+                                  total=now, here=here, below=now - here) if now else "")
+        return now, then
 
     # Reading -------------------------------------------------------------
 
