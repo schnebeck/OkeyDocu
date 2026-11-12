@@ -53,7 +53,6 @@ blocks:
       - [Firmware, "{{ device.firmware }}"]
       - [Calibrated on, "{{ device.calibrated_on }}"]
       - [Recalibration due, "{{ device.recalibration_due }}"]
-      - [Instrument clock, "{{ campaign.clock_summary }}"]
   - type: notice
     when: device.overdue
     text: "Recalibration of the test instrument was overdue at the time of testing ({{ device.recalibration_due }})."

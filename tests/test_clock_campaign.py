@@ -14,6 +14,7 @@ from easymeasurement.campaign.service import CLOCK_TOLERANCE_S, ClockState, cloc
 from easymeasurement.devices.base import DeviceError
 from easymeasurement.devices.simulator import SimulatedMeter
 from easymeasurement.reporting.context import build_context
+from easymeasurement.reporting.template_loading import SHIPPED, shipped_template_text
 from easymeasurement.store import CampaignClosed
 
 from .clock_helpers import HOUR, open_campaign
@@ -200,3 +201,9 @@ def test_old_campaign_without_checks_is_unknown(service, asset_id, plan):
     campaign = open_campaign(service, asset_id, plan, SimulatedMeter())
     service.db.execute("DELETE FROM clock_checks WHERE campaign_id=?", campaign)
     assert service.clock_status(campaign).state is ClockState.UNKNOWN
+
+
+@pytest.mark.parametrize("file", sorted(SHIPPED))
+def test_the_shipped_reports_leave_the_clock_out(file):
+    """Kept as a data field for templates of their own; the instrument is set before measuring."""
+    assert "clock_summary" not in shipped_template_text(file)
