@@ -19,6 +19,8 @@ from ..vocabulary import function_markup
 from .measurement_words import when
 from .nodes import Markup, PhotoNote
 
+NUMBERED = "{number}  {text}"  # a mark's text beneath its photo
+
 
 def references(photos: list[tuple[int, list[int]]]) -> list[str]:
     """`see [3], [4]` for photos as they are, `see note 1 in [5]` for marks in one."""
@@ -30,6 +32,14 @@ def references(photos: list[tuple[int, list[int]]]) -> list[str]:
             found.append(plural(len(notes), "see note {notes} in [{number}]",
                                 "see notes {notes} in [{number}]", notes=listed, number=number))
     return found
+
+
+def photo_texts(measurement, role: str, marks: list, form: str) -> list[str]:
+    """The lines beneath a photo: the texts of its marks, each written by `form` from its
+    number and text; a notice puts the measurement's hint before them."""
+    texts = [form.format(number=mark.number, text=mark.text) for mark in marks if mark.text]
+    hint = measurement.hint if role == "hint" else ""
+    return [*hint.splitlines(), *texts]
 
 
 class Footnotes:
@@ -54,7 +64,7 @@ class Footnotes:
                 caption = f"<b>{escape(tr(ROLES[role]))}:</b> {caption}"
             noted = [mark for mark in marks if mark.text]
             taken.append(PhotoNote(path, self.count, Markup(caption),
-                                   [f"{mark.number}  {mark.text}" for mark in noted], marks, role,
+                                   photo_texts(measurement, role, marks, NUMBERED), marks, role,
                                    view[0] if view else None))
             numbers.append((self.count, [mark.number for mark in noted]))
         return taken, references(numbers)

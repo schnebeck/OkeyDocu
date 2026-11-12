@@ -56,6 +56,7 @@ class ReportMeasurement:
     settings: list[tuple[str, str]] = field(default_factory=list)  # name and value, in words
     place_id: int | None = None  # the element of the installation it was taken at
     point: str = ""  # the step of the plan it was taken for
+    hint: str = ""  # how to measure here; printed beneath its photos marked as a notice
 
 
 @dataclass
@@ -123,6 +124,7 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
             attached=attached,
             settings=said_settings(words, data.parameters),
             place_id=row["asset_id"],
+            hint=row["hint"],
         )
 
     steps = []

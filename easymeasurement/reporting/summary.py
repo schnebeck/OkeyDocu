@@ -19,7 +19,7 @@ from ..campaign.photo_marks import ROLES
 from ..l10n import N_, tr
 from ..model import Verdict
 from .compact import found_cell, limit_cell, what_cell
-from .footnotes import Footnotes, references
+from .footnotes import NUMBERED, Footnotes, photo_texts, references
 from .measurement_remarks import remark
 from .measurement_table import Columns, verdict_mark
 from .nodes import Heading, Markup, Node, Paragraph, Table
@@ -56,7 +56,7 @@ def _photos(measured, role: str, notes: Footnotes) -> list[tuple]:
         for path in measurement.photos:
             own, marks, *_ = measurement.photo_notes.get(str(path), ("", []))
             if own == role and str(path) in notes.numbers:
-                texts = [f"{mark.number}  {mark.text}" for mark in marks if mark.text]
+                texts = photo_texts(measurement, own, marks, NUMBERED)
                 found.append((notes.numbers[str(path)], "\n".join(texts)))
     return found
 

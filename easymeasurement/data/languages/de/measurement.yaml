@@ -27,11 +27,10 @@ texts:
   "Marked as “changed” in the report: {fields}.": "Im Protokoll als „geändert“ vermerkt: {fields}."
   Text correction, not marked in the report.: Textkorrektur, ohne Vermerk im Protokoll.
   The campaign is completed. The measurement can only be read.: Die Kampagne ist abgeschlossen. Die Messung lässt sich nur lesen.
-  How to measure here (internal): Wie hier zu messen ist (intern)
   Where it was measured: Wo gemessen wurde
   Remark on the measurement: Bemerkung zur Messung
   No measurement selected.: Keine Messung gewählt.
-  How to measure here. Stays internal and appears again at the repeat inspection, not in the report.: Wie hier zu messen ist. Bleibt intern und erscheint bei der Wiederholungsprüfung wieder, nicht im Protokoll.
+  How to measure here. Appears again at the repeat inspection; the report shows it beneath the measurement's photos marked as a notice.: "Wie hier zu messen ist. Erscheint bei der Wiederholungsprüfung wieder; das Protokoll zeigt ihn unter den Fotos der Messung, die als Hinweis markiert sind."
   Note on this measurement: Notiz zu dieser Messung
   Remark: Bemerkung
   Hint: Hinweis

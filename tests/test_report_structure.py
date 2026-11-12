@@ -71,6 +71,17 @@ def test_a_remark_names_the_notes_in_its_photo(tmp_path):
     assert node.photos[0].notes == ["1  Klemme"]
 
 
+def test_the_hint_stands_beneath_the_photos_marked_as_a_notice(tmp_path):
+    measured = rlo(n=1)
+    measured.hint = "Abdeckung links\nSchlüssel beim Hausmeister"
+    for name, role in (("a.jpg", "hint"), ("b.jpg", "")):
+        measured.photos.append(tmp_path / name)
+        measured.photo_notes[str(tmp_path / name)] = (role, [PhotoMark(1, .1, .1, .2, .2, "PE")])
+    notice, plain_photo = group_nodes([measured], {}, Footnotes())[-1].photos
+    assert notice.notes == ["Abdeckung links", "Schlüssel beim Hausmeister", "1  PE"]
+    assert plain_photo.notes == ["1  PE"]
+
+
 @pytest.fixture
 def tree(app):
     db = app.db
@@ -97,6 +108,12 @@ def test_levels_follow_the_structure_tree(app, tree):
         "Schrank (Verteiler)", "RLO – Schutzleiterwiderstand",
         "Schrank\u202f/\u2009Tür (Messpunkt)", "RLO – Schutzleiterwiderstand",
     ]
+
+
+def test_the_report_takes_the_hint_of_each_measurement(app, tree):
+    app.db.execute("UPDATE measurements SET hint='hinter der Tür'")
+    measured = [m for step in build_context(app.service, tree)["steps"] for m in step.measurements]
+    assert {m.hint for m in measured} == {"hinter der Tür"}
 
 
 def test_by_function_the_shared_limit_is_said_once(app, tree):
