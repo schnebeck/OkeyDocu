@@ -145,10 +145,11 @@ lists:
         methods: *breaker_methods
       E:
         facts: {Protective device: Selective main circuit breaker (SLS),
-                Instantaneous trip: "5 to 6.25 × Iₙ, delayed", Use: Main circuits}
+                Instantaneous trip: "5 to 6.25 × Iₙ, delayed", Disconnecting current Iₐ: "5 × Iₙ",
+                Use: Main circuits}
         help: >-
           Selective main circuit breaker: its short-circuit release trips with a delay, so the
-          circuit breakers behind it disconnect first.
+          circuit breakers behind it disconnect first. The PROFITEST takes Iₐ = 5 × Iₙ.
         methods: *breaker_methods
       G:
         facts: {Protective device: "Circuit breaker, older or maker-specific",

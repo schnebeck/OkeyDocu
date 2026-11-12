@@ -139,7 +139,7 @@ texts:
   "Older installations, today C": "Ältere Anlagen, heute C"
   "Partial-range fuse for motors: it breaks short circuits only, a motor protection relay has to guard against overload. Iₐ comes from the manufacturer's characteristic.": "Teilbereichssicherung für Motoren: Sie unterbricht nur Kurzschlüsse, gegen Überlast muss ein Motorschutzrelais schützen. Iₐ ergibt sich aus der Kennlinie des Herstellers."
   "Selective main circuit breaker (SLS)": "Selektiver Hauptleitungsschutzschalter (SLS)"
-  "Selective main circuit breaker: its short-circuit release trips with a delay, so the circuit breakers behind it disconnect first.": "Selektiver Hauptleitungsschutzschalter: Seine Kurzschlussauslösung löst verzögert aus, sodass die nachgeschalteten Leitungsschutzschalter zuerst abschalten."
+  "Selective main circuit breaker: its short-circuit release trips with a delay, so the circuit breakers behind it disconnect first. The PROFITEST takes Iₐ = 5 × Iₙ.": "Selektiver Hauptleitungsschutzschalter: Seine Kurzschlussauslösung löst verzögert aus, sodass die nachgeschalteten Leitungsschutzschalter zuerst abschalten. Der PROFITEST rechnet mit Iₐ = 5 × Iₙ."
   Semiconductors: Halbleiter
   Short-circuit current between the lines and voltage drop: Kurzschlussstrom zwischen den Außenleitern und Spannungsfall
   "Where an RCD of type AC or A protects the circuit too: does not trip it": "Wo zusätzlich ein RCD vom Typ AC oder A schützt: löst ihn nicht aus"
