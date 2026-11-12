@@ -71,3 +71,63 @@ texts:
   "Circuit behind the RCD (live)": "Stromkreis hinter dem RCD (unter Spannung)"
   "Line conductor": "Außenleiter"
   "Machine – electrical inspection": "Maschine – elektrische Prüfung"
+  Visual inspection to DIN VDE 0100-600: Sichtprüfung nach DIN VDE 0100-600
+  "DIN VDE 0100-600, 6.4.2.2": "DIN VDE 0100-600, 6.4.2.2"
+  "DIN VDE 0100-600, 6.4.2.3": "DIN VDE 0100-600, 6.4.2.3"
+  "DIN VDE 0100-600, 6.4.2.3 a)": "DIN VDE 0100-600, 6.4.2.3 a)"
+  "DIN VDE 0100-600, 6.4.2.3 b)": "DIN VDE 0100-600, 6.4.2.3 b)"
+  "DIN VDE 0100-600, 6.4.2.3 c)": "DIN VDE 0100-600, 6.4.2.3 c)"
+  "DIN VDE 0100-600, 6.4.2.3 d)": "DIN VDE 0100-600, 6.4.2.3 d)"
+  "DIN VDE 0100-600, 6.4.2.3 e)": "DIN VDE 0100-600, 6.4.2.3 e)"
+  "DIN VDE 0100-600, 6.4.2.3 f)": "DIN VDE 0100-600, 6.4.2.3 f)"
+  "DIN VDE 0100-600, 6.4.2.3 g)": "DIN VDE 0100-600, 6.4.2.3 g)"
+  "DIN VDE 0100-600, 6.4.2.3 h)": "DIN VDE 0100-600, 6.4.2.3 h)"
+  "DIN VDE 0100-600, 6.4.2.3 i)": "DIN VDE 0100-600, 6.4.2.3 i)"
+  "DIN VDE 0100-600, 6.4.2.3 j)": "DIN VDE 0100-600, 6.4.2.3 j)"
+  "DIN VDE 0100-600, 6.4.2.3 k)": "DIN VDE 0100-600, 6.4.2.3 k)"
+  "DIN VDE 0100-600, 6.4.2.3 l)": "DIN VDE 0100-600, 6.4.2.3 l)"
+  "DIN VDE 0100-600, 6.4.2.3 m)": "DIN VDE 0100-600, 6.4.2.3 m)"
+  "DIN VDE 0100-600, 6.4.2.3 n)": "DIN VDE 0100-600, 6.4.2.3 n)"
+  "DIN VDE 0100-600, 6.4.2.3 o)": "DIN VDE 0100-600, 6.4.2.3 o)"
+  "DIN VDE 0100-600, 6.4.2.3 p)": "DIN VDE 0100-600, 6.4.2.3 p)"
+  "IEC 60364-6:2006, 61.2 h)": "IEC 60364-6:2006, 61.2 h)"
+  Documentation: Dokumentation
+  Are diagrams, warning notices and the other required information available?: Liegen Schaltpläne, Warnhinweise und die übrigen nötigen Angaben zur Anlage vor?
+  Circuit labelling: Kennzeichnung der Stromkreise
+  Are circuits, protective devices, switches and terminals clearly labelled?: Sind Stromkreise, Schutzeinrichtungen, Schalter und Klemmen eindeutig beschriftet?
+  N and PE identification: Kennzeichnung N und PE
+  Are neutral and protective conductors correctly identified throughout?: Sind Neutral- und Schutzleiter richtig und durchgehend gekennzeichnet?
+  Equipment conformity: Normgerechte Betriebsmittel
+  "Does the fixed equipment comply with its product standards (marking, certification, maker's data)?": "Entsprechen die fest installierten Betriebsmittel ihren Produktnormen (Aufschrift, Prüfzeichen, Herstellerangaben)?"
+  No visible damage: Keine Schäden
+  Is the equipment free of visible damage that impairs safety?: Sind die Betriebsmittel frei von sichtbaren Schäden, die die Sicherheit mindern?
+  Protection against electric shock: Schutz gegen elektrischen Schlag
+  Is the intended protective measure, basic and fault protection, fully implemented?: Ist die vorgesehene Schutzmaßnahme, Basis- und Fehlerschutz, vollständig umgesetzt?
+  Exposed parts earthed: Körper geerdet
+  Are all exposed-conductive-parts connected to the earthing arrangement?: Sind alle Körper an die Erdungsanlage angeschlossen?
+  Earthing and bonding: Erdung und Potentialausgleich
+  Are earthing, protective conductors and protective bonding suitably chosen and connected to the main earthing terminal?: Sind Erdungsanlage, Schutzleiter und Schutzpotentialausgleich passend ausgewählt und an der Haupterdungsschiene angeschlossen?
+  Conductor sizing: Leiterquerschnitt
+  Do cables, lines and busbars suit the current-carrying capacity and the voltage drop?: Passen Kabel, Leitungen und Stromschienen zu Strombelastbarkeit und Spannungsfall?
+  Protective devices: Schutzeinrichtungen
+  Are protective and monitoring devices correctly chosen, set and coordinated?: Sind Schutz- und Überwachungseinrichtungen richtig ausgewählt, eingestellt und aufeinander abgestimmt?
+  Surge protection: Überspannungsschutz
+  Are the required surge protective devices suitably selected, located and installed?: Sind die geforderten Überspannungs-Schutzeinrichtungen passend ausgewählt, platziert und eingebaut?
+  Isolation and switching: Trennen und Schalten
+  Are suitable isolating and switching devices present and correctly placed?: Sind geeignete Trenn- und Schaltgeräte vorhanden und richtig angeordnet?
+  Single-pole devices: Einpolige Schalt- und Schutzeinrichtungen
+  Are single-pole switching and protective devices in line conductors only?: Liegen einpolige Schalt- und Schutzeinrichtungen nur im Außenleiter?
+  External influences: Äußere Einflüsse
+  Are equipment and measures suitable for the surroundings and the mechanical stress, such as by their IP rating?: Sind Betriebsmittel und Schutzmaßnahmen für Umgebung und mechanische Beanspruchung geeignet, etwa nach ihrer IP-Schutzart?
+  Fire barriers: Brandschutz
+  Are fire barriers in place, and is there protection against thermal effects?: Sind Brandabschottungen vorhanden, und ist gegen thermische Auswirkungen geschützt?
+  Connections: Leiterverbindungen
+  Are all cable and conductor terminations properly made and secure?: Sind alle Kabel- und Leiteranschlüsse fachgerecht ausgeführt und fest?
+  Wiring systems: Leitungsverlegung
+  Are wiring systems suitably selected, routed and fixed?: Sind Kabel- und Leitungsanlagen passend ausgewählt, verlegt und befestigt?
+  Accessibility: Zugänglichkeit
+  Is the equipment easy to reach for operation, identification and maintenance?: Sind die Betriebsmittel für Bedienung, Kennzeichnung und Wartung gut erreichbar?
+  EMC measures: EMV-Maßnahmen
+  Are the planned measures against electromagnetic disturbances implemented?: Sind die vorgesehenen Maßnahmen gegen elektromagnetische Störungen umgesetzt?
+  Special locations: Besondere Räume und Anlagen
+  Are the additional requirements for special installations and locations (part 7) met?: Sind die Zusatzanforderungen für Betriebsstätten, Räume und Anlagen besonderer Art (Gruppe 700) erfüllt?

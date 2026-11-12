@@ -1,5 +1,9 @@
 # EasyMeasurement - German texts: measurements, their values, runs and repeat inspections.
 texts:
+  Take over as test plan: Als Messplan übernehmen
+  The sequence becomes a draft test plan with the same questions and measurements: Die Sequenz wird ein Messplan-Entwurf mit denselben Fragen und Messungen
+  Test plan created: Messplan angelegt
+  "“{title}” is now among the test plans, as a draft. It can be checked and released under Settings → Test plans and assigned to any campaign.": "„{title}“ steht jetzt als Entwurf unter den Messplänen. Unter Einstellungen → Messpläne lässt er sich prüfen und freigeben und jeder Kampagne zuweisen."
   Customer: Kunde
   Installation: Anlage
   Campaign: Kampagne

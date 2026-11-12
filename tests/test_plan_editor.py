@@ -9,7 +9,7 @@
 import pytest
 from PySide6.QtWidgets import QMessageBox
 
-from easymeasurement.campaign.plan import parse_plan
+from easymeasurement.campaign.plan import load_plans, parse_plan
 from easymeasurement.devices import SelectorPosition
 from easymeasurement.l10n import tr
 from easymeasurement.ui.campaign_views import AssignPlanOverlay
@@ -32,7 +32,7 @@ def stored(app, editor):
 
 
 def test_seeded_plan_is_listed(editor):
-    assert editor.plans.count() == 1
+    assert editor.plans.count() == len(load_plans())
     assert editor.steps.count() == 5
 
 
@@ -43,7 +43,7 @@ def test_a_shipped_plan_is_titled_in_the_language_of_the_program(editor):
 
 def test_new_plan_is_saved_at_once(app, editor):
     editor.new_plan()
-    assert editor.plans.count() == 2
+    assert editor.plans.count() == len(load_plans()) + 1
     assert editor.title.text() == "Neuer Messplan"
     assert stored(app, editor).steps == ()
 
@@ -99,23 +99,26 @@ def test_changing_plans_saves_the_one_left(app, editor):
 
 
 def test_copy_is_a_draft_of_its_own(app, editor):
+    shipped = len(app.db.plans())
     editor.released.setChecked(True)
     editor.copy_plan()
     assert "(Kopie)" in editor.title.text()
     assert not editor.released.isChecked()
-    assert len(app.db.plans()) == 2
+    assert len(app.db.plans()) == shipped + 1
 
 
 def test_deleting_asks_first(app, editor):
+    shipped = len(app.db.plans())
     editor.delete_button.click()  # the default answer in tests is no
-    assert len(app.db.plans()) == 1
+    assert len(app.db.plans()) == shipped
 
 
 def test_deleting_after_confirmation(app, editor, monkeypatch):
     monkeypatch.setattr(QMessageBox, "question", lambda *_: QMessageBox.StandardButton.Yes)
+    key = editor.data["key"]
     editor.delete_button.click()
-    assert app.db.plans() == []
-    assert editor.steps.count() == 0
+    assert key not in {row["key"] for row in app.db.plans()}
+    assert len(app.db.plans()) == len(load_plans()) - 1
 
 
 def test_an_empty_plan_cannot_be_tried(editor):

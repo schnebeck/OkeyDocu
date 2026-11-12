@@ -85,3 +85,25 @@ def test_without_any_plan_left_the_campaign_has_none(service, campaign):
         service.remove_plan(campaign, block)
     row = service.campaign(campaign)
     assert (row["plan_key"], row["plan_title"]) == ("", "")
+
+
+def test_a_run_of_questions_becomes_a_draft_plan(service, asset_id):
+    campaign = service.create(asset_id, "T", "Anna")
+    run = service.add_run(campaign, "Sichtprüfung Schrank", "Sichtprüfung", datetime(2026, 5, 4, 9))
+    for name, question in (("Zugang", "Ist der Schrank zugänglich?"),
+                           ("Schilder", "Sind die Schilder lesbar?")):
+        values = [ResultValue("question", "Frage", Quantity(raw=question)),
+                  ResultValue("answer", "Antwort", Quantity(raw="yes"), Verdict.PASSED)]
+        taken = service.add_measurement(campaign, "visual_inspection", values,
+                                        datetime(2026, 5, 4, 9), Verdict.PASSED)
+        service.join_run(taken, run, name)
+    value = ResultValue("rlo", "RLO", Quantity.parse("0.2Ω"), Verdict.PASSED, "", "")
+    service.join_run(service.add_measurement(campaign, "rlo", [value], datetime(2026, 5, 4, 9),
+                                             Verdict.PASSED), run, "PE Schrank")
+    assert service.plan_from_run(run) == "Sichtprüfung Schrank"
+    assert service.plan_from_run(run) == "Sichtprüfung Schrank (2)"
+    plan = next(p for p in service.plans() if p.title == "Sichtprüfung Schrank")
+    assert [(s.kind, s.title) for s in plan.steps] == [
+        ("check", "Zugang"), ("check", "Schilder"), ("measure", "PE Schrank")]
+    assert plan.steps[0].question == "Ist der Schrank zugänglich?"
+    assert plan.steps[2].function == "rlo" and not plan.released

@@ -63,7 +63,8 @@ def test_a_question_has_no_wiring(plan):
 def test_every_builtin_measuring_step_has_an_instruction():
     instructions = load_instructions()
     for plan in load_plans():
-        assert all(step.function in instructions for step in plan.steps)
+        assert all(step.function in instructions for step in plan.steps
+                   if step.kind == "measure")
 
 
 def test_draft_says_so_in_its_label():
