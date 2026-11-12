@@ -61,23 +61,6 @@ class CampaignPhotos:
             self.place_targets[self.campaign_id] = asset_id or None
             self._show_place(asset_id or None)
 
-    def _show_detail_room(self, chosen: bool, photos: int, run: str) -> None:
-        """Sections without anything to show shrink to a line that says why."""
-        if run:
-            self.detail_section.set_empty(tr("“{run}” has several steps. A click on the time"
-                                             " unfolds them, then each can be edited on its own.",
-                                             run=run))
-        else:
-            self.detail_section.set_empty(None if chosen else tr("Choose a row of the table."))
-        if photos:
-            self.photo_tabs.show_note(None)
-        elif chosen:
-            self.photo_tabs.show_note(tr("No photos for this measurement. Drag photos onto the"
-                                         " row or attach them with a right-click."))
-        else:
-            self.photo_tabs.show_note(tr("Shows the photos of the chosen measurement."))
-        self._quiet_photos()
-
     def _row_takes_photo(self, position) -> bool:
         campaign = self._campaign()
         open_campaign = bool(campaign) and campaign["status"] == "open"

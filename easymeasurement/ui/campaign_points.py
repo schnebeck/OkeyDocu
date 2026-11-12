@@ -37,6 +37,7 @@ class CampaignPoints:
         column.addWidget(self.compare)
         column.addWidget(self.point)
         self.detail = holder
+        self.readings, self.files = self.editor.take_out()
 
     def current_point(self) -> int | None:
         current = self.table.currentItem()

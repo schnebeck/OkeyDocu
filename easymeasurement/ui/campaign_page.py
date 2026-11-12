@@ -16,6 +16,7 @@ from .board import EDGE, GUTTER, Board, GutterSplitter
 from .campaign_actions import CampaignActions
 from .campaign_checks import CampaignChecks
 from .campaign_confirm import CampaignConfirm
+from .campaign_detail import CampaignDetail
 from .campaign_display import CampaignDisplay
 from .campaign_header import CampaignHeader
 from .campaign_list import CampaignList
@@ -39,7 +40,7 @@ from .status_badges import ClockBadge, LinkBadge
 
 
 class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPhotos,
-                   CampaignPlaces, CampaignPlans, CampaignChecks, QWidget):
+                   CampaignDetail, CampaignPlaces, CampaignPlans, CampaignChecks, QWidget):
     """Choosing a campaign only shows it. The instrument stays with the one measuring."""
 
     changed = Signal()
@@ -83,12 +84,15 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.plan_section = self.side.add(tr("Test plans"), self.plan_list)
         self.loose_section = self.side.add(tr("Not assigned"), self.guided.open_box)
         self.detail_section = self.side.add(tr("Measurement"), self.values.detail, grows=False)
+        self.readings_section = self.side.add(tr("Readings"), self.values.readings, grows=False)
+        self.files_section = self.side.add(tr("Files"), self.values.files, grows=False)
         self._build_photos()
         self.photo_tabs = PhotoTabs(self.values.gallery, self.stack)
         self.photo_section = self.side.add(tr("Photos"), self.photo_tabs)
         self.report_section = self.side.add(tr("Reports"), self.reports)
         # Until a campaign needs them. Shown, they would count towards the minimum window size.
-        for section in (self.plan_section, self.loose_section, self.report_section):
+        for section in (self.plan_section, self.loose_section, self.readings_section,
+                        self.files_section, self.report_section):
             section.hide()
 
         self.work = GutterSplitter(Qt.Orientation.Vertical, objectName="campaign-panes",

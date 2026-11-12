@@ -49,7 +49,9 @@ def _facts(row, capture: str, db) -> str:
     return " · ".join([moment(when, seconds=True), capture, *extra])
 
 
-HINT_PLACEHOLDER = N_("How to measure here (internal)")
+HINT_PLACEHOLDER = N_("How to measure here")
+HINT_TIP = N_("How to measure here. Appears again at the repeat inspection; the report shows it"
+              " beneath the measurement's photos marked as a notice.")
 LOCATION_PLACEHOLDER = N_("Where it was measured")
 COMMENT_PLACEHOLDER = N_("Remark on the measurement")
 
@@ -94,8 +96,7 @@ class MeasurementEditor(MeasurementEditing, QWidget):
         self.verdict = verdict_combo("")
         self.comment = GrowingEdit(tr(COMMENT_PLACEHOLDER))
         self.hint = GrowingEdit(tr(HINT_PLACEHOLDER))
-        self.hint.setToolTip(tr("How to measure here. Stays internal and appears again at the"
-                                " repeat inspection, not in the report."))
+        self.hint.setToolTip(tr(HINT_TIP))
         self.rows = ValueRows()
         self.values = self.rows.table
         # The measurement has its remark field, so only files are attached; images join its photos.
@@ -147,13 +148,25 @@ class MeasurementEditor(MeasurementEditing, QWidget):
         self.comment.textChanged.connect(self._edited)
         self.hint.textChanged.connect(self._edited)
         self.rows.edited.connect(self._edited)
-        for keys in ("Ctrl+Return", "Ctrl+Enter"):
-            self._shortcut(keys, self.apply)
-        self._shortcut(QKeySequence.StandardKey.Cancel, self.discard)
+        self._keys(self)
         self.show_row(None, False)
 
-    def _shortcut(self, keys, slot) -> None:
-        shortcut = QShortcut(QKeySequence(keys), self)
+    def take_out(self) -> tuple[QWidget, QWidget]:
+        """The readings and the files leave the editor for places of their own; the keys
+        that apply or discard go with them."""
+        for part in (self.values, self.attachments):
+            self.layout().removeWidget(part)
+            self._keys(part)
+        return self.values, self.attachments
+
+    def _keys(self, widget: QWidget) -> None:
+        for keys in ("Ctrl+Return", "Ctrl+Enter"):
+            self._shortcut(widget, keys, self.apply)
+        self._shortcut(widget, QKeySequence.StandardKey.Cancel, self.discard)
+
+    @staticmethod
+    def _shortcut(widget: QWidget, keys, slot) -> None:
+        shortcut = QShortcut(QKeySequence(keys), widget)
         shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         shortcut.activated.connect(slot)
 

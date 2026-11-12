@@ -104,8 +104,13 @@ def test_empty_sections_say_so_in_a_line(shown):
     page.values.table.setCurrentItem(None)
     page.values._show_detail()
     assert page.detail_section.empty and page.photo_section.empty
+    assert page.readings_section.isHidden() and page.files_section.isHidden()
     page.values.table.selectRow(0)
     assert not page.detail_section.empty
+    assert not page.readings_section.isHidden() and not page.readings_section.empty
+    assert page.readings_section.toggle.text().endswith("(1)")
+    assert page.values.readings.parent() is page.readings_section.body
+    assert not page.files_section.isHidden() and not page.files_section.empty  # open: attach
     assert "Keine Fotos" in page.photo_tabs.note.text() and page.photo_section.empty
 
 
