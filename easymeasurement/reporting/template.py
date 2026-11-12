@@ -21,10 +21,7 @@ from __future__ import annotations
 
 import re
 
-from importlib import resources
-
 import jinja2
-import yaml
 from jinja2.sandbox import SandboxedEnvironment
 
 from ..vocabulary import function_markup
@@ -34,8 +31,15 @@ from .language import pick
 from .logo import LogoError, decode_logo
 from .footnotes import Footnotes
 from .measurement_views import group_nodes, place_nodes, remaining_photos, scope, single
-from .structure import ORDERS, structure_nodes
+from .structure import structure_nodes
 from .summary import SummaryPlace, summary_nodes
+from .template_loading import (  # noqa: F401
+    SHIPPED,
+    TemplateError,
+    default_template_text,
+    parse_template,
+    shipped_template_text,
+)
 from .nodes import (  # noqa: F401
     Fields,
     Heading,
@@ -55,65 +59,6 @@ SIMULATED_NOTICE = N_("SIMULATED VALUES – not a valid test report.")
 _env = SandboxedEnvironment(undefined=jinja2.ChainableUndefined, autoescape=False)
 # Headings may hold symbols set as in mathematics: their data is escaped, markup kept.
 _marked = SandboxedEnvironment(undefined=jinja2.ChainableUndefined, autoescape=True)
-
-
-class TemplateError(Exception):
-    """The template is not valid."""
-
-
-# Loading ----------------------------------------------------------------
-
-
-SHIPPED = {"standard.yaml": N_("Standard report"), "compact.yaml": N_("Standard report, compact")}
-
-
-def shipped_template_text(file: str) -> str:
-    return (resources.files("easymeasurement") / "data" / "templates" / file).read_text("utf-8")
-
-
-def default_template_text() -> str:
-    return shipped_template_text("standard.yaml")
-
-
-def parse_template(text: str) -> dict:
-    try:
-        template = yaml.safe_load(text)
-    except yaml.YAMLError as err:
-        raise TemplateError(tr("The template is not valid YAML: {error}", error=err)) from err
-    if not isinstance(template, dict) or not isinstance(template.get("blocks"), list):
-        raise TemplateError(tr("The template needs a list “blocks”."))
-    _validate(template["blocks"], template.get("images") or {})
-    return template
-
-
-_KNOWN_BLOCKS = {
-    "heading", "text", "notice", "fields", "steps", "measurements", "photos", "signature", "logo",
-    "attachments", "letterhead", "structure", "summary",
-}
-
-
-def _validate(blocks: list, images: dict, nested: bool = False) -> None:
-    for block in blocks:
-        kind = block.get("type") if isinstance(block, dict) else None
-        if kind not in _KNOWN_BLOCKS:
-            raise TemplateError(tr("Unknown block: {kind}", kind=repr(kind)))
-        if kind == "steps":
-            if nested:
-                raise TemplateError(tr("Repetitions cannot be nested."))
-            _validate(block.get("blocks", []), images, nested=True)
-        if kind == "structure" and nested:
-            raise TemplateError(tr("The measurements by structure do not belong in a repetition."))
-        if kind == "summary" and nested:
-            raise TemplateError(tr("The summary does not belong in a repetition."))
-        if kind == "structure" and block.get("order", "place") not in ORDERS:
-            raise TemplateError(tr("Unknown order: {order}", order=repr(block.get("order"))))
-        if kind == "logo":
-            if nested:
-                raise TemplateError(tr("A logo does not belong in a repetition."))
-            image = block.get("image")
-            if image and image not in images:
-                raise TemplateError(tr("The image {image} is missing in the template.",
-                                       image=repr(image)))
 
 
 # Resolving --------------------------------------------------------------

@@ -412,6 +412,11 @@ ohne eine laufende Messung zu unterbrechen.
 Titel und Anlage einer offenen Kampagne ändert „Kampagne bearbeiten …“ (`ui/campaign_edit.py`). Die
 Anlage darf nur wechseln, wenn danach keine Messung und keine Datei an einem Ort außerhalb der neuen
 Anlage hängt (`misplaced` in `campaign/editing.py`); zur übergeordneten Anlage geht es also immer.
+Ansprechpartner und Auftrag fragen „Neue Kampagne“ und „Kampagne bearbeiten“ gleich ab
+(`ui/campaign_order.py`): Der Ansprechpartner steht sichtbar, Abteilung, Durchwahl, E-Mail,
+Kostenstelle und Vorgangsnummer klappen darunter auf. Eine neue Kampagne schlägt den letzten
+Kontakt des Kunden vor; Kostenstelle und Vorgangsnummer gehören zu einem Auftrag und beginnen
+leer.
 Ein Rechtsklick in der Kampagnenliste bietet an, was mit der Kampagne gerade möglich ist.
 Eine Kampagne wird nach Rückfrage gelöscht; ihr Ordner mit Fotos, Dateien und Protokollen kommt
 in den Papierkorb. Bei einer versiegelten bleibt ein Eintrag in `deleted_campaigns` mit ihrem Siegel
