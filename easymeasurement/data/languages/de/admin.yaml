@@ -175,6 +175,7 @@ texts:
   Choice list: Auswahlliste
   "The list whose values the feature offers; any other may still be typed. The lists are edited under Settings → Choice lists.": "Die Liste, deren Werte das Merkmal anbietet; andere lassen sich trotzdem eingeben. Die Listen bearbeitet man unter Einstellungen → Auswahllisten."
   Suited measurements: Geeignete Messungen
+  F1 compares all values of the list.: F1 vergleicht alle Werte der Liste.
   "{amperes} A": "{amperes} A"
   "{times} × Iₙ": "{times} × Iₙ"
   "Iₐ = {current} at {seconds} s": "Iₐ = {current} bei {seconds} s"

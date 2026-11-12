@@ -115,3 +115,27 @@ def test_every_list_the_shipped_kinds_name_is_shipped():
     from easymeasurement.store.kinds import shipped_kinds
     named = {feature.choice_list for kind in shipped_kinds() for feature in kind.features}
     assert named - {None} <= {found.key for found in shipped_choice_lists()}
+
+
+def test_f1_in_the_field_sets_all_values_side_by_side(qtbot, app):
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QLabel
+
+    from easymeasurement.ui import rich_tip
+    from easymeasurement.ui.choice_tips import compare_tip
+    lists = app.db.choice_lists()
+    tip = compare_tip(lists["rcd_type"], "B")
+    heads, *body = tip.grid
+    assert len(heads) == 3 and len(body) == len(lists["rcd_type"].values)
+    assert body[tip.marked][0] == "B"
+    assert compare_tip(lists["cross_section"]) is None
+    with speaking("de"):
+        box = ChoiceBox(lists["rcd_type"], "F")
+        qtbot.addWidget(box)
+        box.show()
+        assert box.tip("F").hint == "F1 vergleicht alle Werte der Liste."
+        qtbot.keyClick(box.lineEdit(), Qt.Key.Key_F1)
+        assert rich_tip.showing()
+        shown = " ".join(label.text() for label in rich_tip._window.findChildren(QLabel))
+        assert "Erfasst" in shown and "font-weight:bold'>F<" in shown
+    rich_tip.hide_tip()

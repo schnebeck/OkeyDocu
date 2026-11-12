@@ -17,12 +17,13 @@ from dataclasses import dataclass
 from html import escape
 
 from PySide6.QtCore import QEvent, QObject, QPoint, Qt, QTimer
-from PySide6.QtGui import QCursor, QGuiApplication, QPixmap, QTextDocument
+from PySide6.QtGui import QGuiApplication, QPixmap, QTextDocument
 from PySide6.QtWidgets import QFrame, QLabel, QToolTip, QVBoxLayout, QWidget
 from shiboken6 import isValid
 
 SHOWN_MS = 30_000  # long enough to read a few paragraphs and a drawing
 TEXT_CHARS = 70  # widest line of text, in average characters
+GRID_SHARE = 0.9  # a tip with a table may take this share of the screen's width
 
 
 @dataclass(frozen=True)
@@ -33,6 +34,9 @@ class Tip:
     pictures: tuple[QPixmap, ...] = ()
     lines: tuple[str, ...] = ()  # a list below the pictures, such as suited methods
     lines_title: str = ""
+    grid: tuple[tuple[str, ...], ...] = ()  # a table below the text, its first row the heads
+    marked: int = -1  # the row of the grid, below its heads, shown in bold
+    hint: str = ""  # a small line at the end, such as a key that tells more
 
     def html(self) -> str:
         cells = "".join(f"<tr><td style='padding-right:10px'>{escape(name)}:</td>"
@@ -42,7 +46,19 @@ class Tip:
             parts.append(f"<table cellspacing='2'>{cells}</table>")
         parts += [f"<p>{escape(paragraph)}</p>" for paragraph in self.text.split("\n\n")
                   if paragraph.strip()]
+        if self.grid:
+            parts.append(self._grid_html())
         return "".join(parts)
+
+    def _grid_html(self) -> str:
+        heads, *body = self.grid
+        rows = ["".join(f"<th align='left' style='padding-right:12px'>{escape(head)}</th>"
+                        for head in heads)]
+        for index, row in enumerate(body):
+            weight = "bold" if index == self.marked else "normal"
+            rows.append("".join(f"<td style='padding-right:12px; font-weight:{weight}'>"
+                                f"{escape(cell)}</td>" for cell in row))
+        return "<table cellspacing='2'>" + "".join(f"<tr>{row}</tr>" for row in rows) + "</table>"
 
 
 Provider = Callable[[QPoint], "Tip | None"]
@@ -66,9 +82,14 @@ class TipWindow(QFrame):
         if tip.lines:
             heading = f"<b>{escape(tip.lines_title)}</b><br>" if tip.lines_title else ""
             texts.append(heading + "<br>".join(f"• {escape(line)}" for line in tip.lines))
+        if tip.hint:
+            texts.append(f"<small>{escape(tip.hint)}</small>")
         labels = [self._label(text) for text in texts]
         sizes = [picture.deviceIndependentSize().toSize() for picture in tip.pictures]
+        screen = (QGuiApplication.screenAt(where) or QGuiApplication.primaryScreen()).geometry()
         widest = self.fontMetrics().averageCharWidth() * TEXT_CHARS
+        if tip.grid:
+            widest = int(screen.width() * GRID_SHARE)
         width = max([min(self._natural_width(label), widest) for label in labels]
                     + [size.width() for size in sizes])
         for label in labels:
@@ -83,7 +104,6 @@ class TipWindow(QFrame):
             self.layout_.addWidget(label)
         self.layout_.activate()
         self.adjustSize()
-        screen = (QGuiApplication.screenAt(where) or QGuiApplication.primaryScreen()).geometry()
         x = min(where.x() + 2, screen.right() - self.width())
         y = where.y() + 20
         if y + self.height() > screen.bottom():
@@ -161,6 +181,6 @@ def showing() -> bool:
     return _window is not None and isValid(_window) and _window.isVisible()
 
 
-def cursor_tip(tip: Tip) -> None:
-    """Shows a tip at the mouse at once, as a key such as F1 asks for it."""
-    show_tip(tip, QCursor.pos())
+def widget_tip(tip: Tip, widget: QWidget) -> TipWindow:
+    """Shows a tip below a widget at once, as a key such as F1 asks for it."""
+    return show_tip(tip, widget.mapToGlobal(QPoint(0, widget.height() - 16)))

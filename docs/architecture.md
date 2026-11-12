@@ -52,7 +52,9 @@ der Liste unterscheiden: Bei B, C, D entfällt „Leitungsschutzschalter“, neb
 da. Eine Kennlinie wird für das Element gezeichnet: Sein Nennstrom macht aus Vielfachen Ampere, seine
 Netzform mit dem Nennstrom ergibt die geforderte Abschaltzeit, an der Iₐ markiert ist. Der Tooltip
 selbst ist ein allgemeines Bauteil (`ui/rich_tip.py`) für Text, Tabelle und Bilder, das jedes
-Widget über `install_tip` nutzen kann. Die Netzform steht meist an der Maschine oder Einspeisung:
+Widget über `install_tip` nutzen kann. F1 im Auswahlfeld stellt alle Werte der Liste in diesen
+Eigenschaften nebeneinander, der gewählte fett; das Feld nimmt die Taste vor dem Kürzel des
+Fensters. Die Netzform steht meist an der Maschine oder Einspeisung:
 Fehlt sie am Element, gilt die des nächsten Elements darüber (`ui/suited_methods.py`).
 
 In der Kampagne zeigt die Seitenleiste das gewählte Element (`ui/place_panel.py`) mit denselben

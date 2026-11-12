@@ -106,3 +106,18 @@ def list_tip(chosen: ChoiceList) -> Tip | None:
     if not chosen.help:
         return None
     return Tip(in_language(chosen.label), text=in_language(chosen.help))
+
+
+def compare_tip(chosen: ChoiceList, held: str | None = None) -> Tip | None:
+    """All values of the list side by side, in the attributes in which they differ; the value
+    held stands out. A list whose values tell nothing apart has only its help to give."""
+    names = chosen.telling()
+    if not names or not chosen.values:
+        return list_tip(chosen)
+    heads = (in_language(chosen.label), *(in_language(name) for name in names))
+    body = tuple((choice_text(entry.value),
+                  *(in_language(entry.facts.get(name, "")) for name in names))
+                 for entry in chosen.values)
+    marked = chosen.offered.index(held) if held in chosen.offered else -1
+    return Tip(in_language(chosen.label), text=in_language(chosen.help), grid=(heads, *body),
+               marked=marked)

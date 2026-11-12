@@ -13,16 +13,19 @@ offered value nor added to the list.
 
 Offered from a choice list, each value tells in its tooltip what sets it apart from the others,
 with its help, curve, picture and suited measurements; so does the field for the value it holds,
-and for the list as a whole while it is empty."""
+and for the list as a whole while it is empty. F1 in the field sets all values of the list side
+by side, the one held in bold."""
 from __future__ import annotations
 
-from PySide6.QtCore import QPoint, Qt
+from dataclasses import replace
+
+from PySide6.QtCore import QEvent, QObject, QPoint, Qt
 from PySide6.QtWidgets import QComboBox, QLineEdit
 
 from ..l10n import N_, tr
 from ..store.choice_lists import ChoiceList
-from .choice_tips import Context, choice_text, list_tip, text_tip
-from .rich_tip import Tip, install_tip
+from .choice_tips import Context, choice_text, compare_tip, held_value, list_tip, text_tip
+from .rich_tip import Tip, install_tip, widget_tip
 
 EMPTY, OWN = "empty", "own"
 LABELS = {EMPTY: N_("(empty)"), OWN: N_("Own text …")}
@@ -53,11 +56,21 @@ class ChoiceBox(QComboBox):
         install_tip(self.lineEdit(), lambda _: self.tip(self.currentText()))
         install_tip(self, lambda _: self.tip(self.currentText()))
         install_tip(self.view().viewport(), self._row_tip)
+        self.lineEdit().installEventFilter(_CompareKey(self))
 
     def tip(self, text: str) -> Tip | None:
         if not text.strip():
-            return list_tip(self.list)
-        return text_tip(self.list, text, self.context() if self.context else None)
+            found = list_tip(self.list)
+        else:
+            found = text_tip(self.list, text, self.context() if self.context else None)
+        if found is None or not self.list.telling():
+            return found
+        return replace(found, hint=tr("F1 compares all values of the list."))
+
+    def compare(self) -> None:
+        tip = compare_tip(self.list, held_value(self.list, self.currentText()))
+        if tip is not None:
+            widget_tip(tip, self)
 
     def _row_tip(self, where: QPoint) -> Tip | None:
         value = self.view().indexAt(where).data(VALUE)
@@ -70,6 +83,26 @@ class ChoiceBox(QComboBox):
         self.setEditText("")
         if kind == OWN:
             self.lineEdit().setFocus()
+
+
+class _CompareKey(QObject):
+    """F1 in the field compares the values; the field takes the key before any shortcut of the
+    window does."""
+
+    def __init__(self, box: ChoiceBox):
+        super().__init__(box)
+        self.box = box
+
+    def eventFilter(self, watched, event) -> bool:  # noqa: N802 - Qt's name
+        if event.type() not in (QEvent.Type.ShortcutOverride, QEvent.Type.KeyPress):
+            return False
+        if event.key() != Qt.Key.Key_F1 or not self.box.list.values:
+            return False
+        if event.type() == QEvent.Type.ShortcutOverride:
+            event.accept()
+            return True
+        self.box.compare()
+        return True
 
 
 def feature_field(feature, value: str, lists: dict[str, ChoiceList] | None = None,
