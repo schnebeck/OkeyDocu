@@ -22,8 +22,50 @@ _ASSET_COLUMNS = """
     basis TEXT NOT NULL DEFAULT ''  -- what it is tested to; empty: as the element above
 """
 
-# Kinds of structure elements and what can be noted about each, both editable.
+# Kinds of structure elements and what can be noted about each, both editable. A choice list
+# is a small table: its values are the rows, its attributes the columns, a fact one cell.
 _KINDS = """
+CREATE TABLE choice_lists (
+    key TEXT PRIMARY KEY,
+    label TEXT NOT NULL,
+    help TEXT NOT NULL DEFAULT '',  -- what the list is about, told above its values
+    position INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE choice_attributes (
+    list TEXT NOT NULL REFERENCES choice_lists(key) ON UPDATE CASCADE ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    position INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (list, name)
+);
+
+CREATE TABLE choice_values (
+    id INTEGER PRIMARY KEY,
+    list TEXT NOT NULL REFERENCES choice_lists(key) ON UPDATE CASCADE ON DELETE CASCADE,
+    value TEXT NOT NULL,
+    position INTEGER NOT NULL DEFAULT 0,
+    help TEXT NOT NULL DEFAULT '',  -- what to know about the value, a few paragraphs
+    curve TEXT NOT NULL DEFAULT '',  -- its time-current characteristic, such as "breaker 3 5"
+    picture BLOB NOT NULL DEFAULT x'',  -- a picture of its own, PNG or SVG
+    UNIQUE (list, value)
+);
+
+CREATE TABLE choice_facts (
+    value_id INTEGER NOT NULL REFERENCES choice_values(id) ON DELETE CASCADE,
+    attribute TEXT NOT NULL,
+    text TEXT NOT NULL,
+    PRIMARY KEY (value_id, attribute)
+);
+
+-- The measuring functions suited to an element that holds the value, and what to mind.
+CREATE TABLE choice_methods (
+    value_id INTEGER NOT NULL REFERENCES choice_values(id) ON DELETE CASCADE,
+    function TEXT NOT NULL,
+    note TEXT NOT NULL DEFAULT '',
+    position INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (value_id, function)
+);
+
 CREATE TABLE asset_kinds (
     key TEXT PRIMARY KEY,
     label TEXT NOT NULL,
@@ -40,7 +82,7 @@ CREATE TABLE kind_features (
     label TEXT NOT NULL,
     unit TEXT NOT NULL DEFAULT '',
     position INTEGER NOT NULL DEFAULT 0,
-    choices TEXT NOT NULL DEFAULT '',  -- values offered for it, one per line
+    choice_list TEXT REFERENCES choice_lists(key) ON UPDATE CASCADE ON DELETE SET NULL,
     UNIQUE (kind, key)
 );
 """

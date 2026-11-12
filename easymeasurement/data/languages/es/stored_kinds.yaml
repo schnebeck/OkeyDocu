@@ -157,4 +157,6 @@ texts:
   "general": "general"
   "selective (S)": "selectivo (S)"
   "short-time delayed (G)": "con retardo breve (G)"
+  "gL/gG <0.2s": "gL/gG <0,2s"
+  "gL/gG <0.4s": "gL/gG <0,4s"
   "Cores of the cable": "Conductores del cable"

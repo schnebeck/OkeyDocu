@@ -132,7 +132,7 @@ class KindsPage(QWidget):
         self.icon.setCurrentIndex(max(self.icon.findData(kind.icon), 0))
         self.izytron.setValue(kind.izytron_type or 0)
         self.interval.setValue(kind.interval_months)
-        self.features.show_features(kind.features)
+        self.features.show_features(kind.features, self.app.db.choice_lists())
         used = self.app.db.kind_usage(kind.key)
         if used:
             usage = plural(used, "{count} element is of this kind.",

@@ -49,7 +49,7 @@ texts:
   "Three-phase connection": "Drehstromanschluss"
   "Loop impedance L-PE": "Schleifenimpedanz L-PE"
   "Rated current": "Nennstrom"
-  "according to the protective device": "nach Schutzorgan"
+  "according to the protective device": "nach Schutzeinrichtung"
   "Tripping characteristic": "Auslösecharakteristik"
   "Touch voltage UL": "Berührungsspannung UL"
   "An upstream RCD may trip. Save data beforehand and switch off loads where necessary.": "Ein vorgeschaltetes RCD kann auslösen. Vorher Daten sichern und Verbraucher gegebenenfalls abschalten."

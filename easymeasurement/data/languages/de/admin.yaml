@@ -172,8 +172,38 @@ texts:
   Instead: Stattdessen
   Align: Ausrichten
   Drag the signature onto the line; the mouse wheel makes it larger or smaller.: Die Unterschrift auf die Linie ziehen; das Mausrad macht sie größer oder kleiner.
-  Choices: Auswahl
-  "Values offered for the feature, separated by semicolons; any other may still be typed.": "Werte, die das Merkmal zur Auswahl anbietet, durch Semikolon getrennt; andere lassen sich trotzdem eingeben."
+  Choice list: Auswahlliste
+  "The list whose values the feature offers; any other may still be typed. The lists are edited under Settings → Choice lists.": "Die Liste, deren Werte das Merkmal anbietet; andere lassen sich trotzdem eingeben. Die Listen bearbeitet man unter Einstellungen → Auswahllisten."
+  "Suited measurements:": "Geeignete Messungen:"
+  "{amperes} A": "{amperes} A"
+  "{times} × Iₙ": "{times} × Iₙ"
+  "Iₐ = {current} at {seconds} s": "Iₐ = {current} bei {seconds} s"
+  Choice lists: Auswahllisten
+  Choice lists …: Auswahllisten …
+  New list: Neue Liste
+  What the list is about, told while no value is chosen: Worum es in der Liste geht, angezeigt, solange kein Wert gewählt ist
+  Help: Hilfe
+  Values: Werte
+  Chosen value: Gewählter Wert
+  "{count} features": "{count} Merkmale"
+  Name of a new property: Name einer neuen Eigenschaft
+  Add value: Wert hinzufügen
+  Remove value: Wert entfernen
+  Add property: Eigenschaft hinzufügen
+  Remove property: Eigenschaft entfernen
+  What to know about the value, a few paragraphs: Was man über den Wert wissen sollte, ein paar Absätze
+  "A circuit breaker: “breaker”, then the instantaneous trip range in multiples of the rated current, optionally the conventional non-tripping and tripping currents.": "Ein Leitungsschutzschalter: „breaker“, dann der Bereich der unverzögerten Auslösung in Vielfachen des Nennstroms, wahlweise der kleine und der große Prüfstrom."
+  Picture …: Bild …
+  Remove picture: Bild entfernen
+  Add measurement: Messung hinzufügen
+  Remove measurement: Messung entfernen
+  Curve: Kennlinie
+  Picture: Bild
+  What to mind: Worauf zu achten ist
 contexts:
+  picture:
+    none: keines
   type code:
     none: keiner
+  choice list:
+    none: keine

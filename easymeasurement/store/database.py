@@ -14,12 +14,13 @@ from pathlib import Path
 
 from ..l10n import tr
 from ..vocabulary import outcome_text
+from .choice_store import ChoiceListsMixin
 from .kinds import KindsMixin
 from .device_texts import DeviceTextsMixin
 from .master_data import MasterDataMixin
 from .schema import _SCHEMA
 
-SCHEMA_VERSION = 25
+SCHEMA_VERSION = 26
 
 
 class SchemaMismatch(Exception):
@@ -38,7 +39,7 @@ class DuplicateMeasurement(Exception):
     """A measurement from an instrument is already in the database."""
 
 
-class Database(KindsMixin, MasterDataMixin, DeviceTextsMixin):
+class Database(ChoiceListsMixin, KindsMixin, MasterDataMixin, DeviceTextsMixin):
     def __init__(self, path: Path | str):
         self.path = path
         self.connection = sqlite3.connect(str(path))
@@ -56,6 +57,7 @@ class Database(KindsMixin, MasterDataMixin, DeviceTextsMixin):
             self.connection.executescript(_SCHEMA)
             self.connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
             self.connection.commit()
+            self.seed_choice_lists()
             self.seed_kinds()
         elif version != SCHEMA_VERSION:
             self.connection.close()

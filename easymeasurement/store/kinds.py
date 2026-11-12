@@ -27,7 +27,7 @@ class Feature:
     key: str
     label: str
     unit: str = ""
-    choices: tuple[str, ...] = ()  # values offered; any other may still be typed
+    choice_list: str | None = None  # key of the list of values offered; any other may be typed
 
 
 @dataclass(frozen=True)
@@ -46,29 +46,26 @@ def slug(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", folded).strip("_") or "feature"
 
 
-def _feature(spec) -> Feature:
-    """`Label|unit`, or a mapping with label, unit, choices and a key of its own, which keeps
-    values noted under an earlier label."""
+def _feature(spec, shared: dict[str, str]) -> Feature:
+    """`Label|unit`, or a mapping with label, unit, a key of its own, which keeps values noted
+    under an earlier label, and a list of its own. Otherwise the label names the list."""
     if isinstance(spec, dict):
         label = str(spec["label"])
+        chosen = spec["list"] if "list" in spec else shared.get(label)
         return Feature(str(spec.get("key") or slug(label)), label, str(spec.get("unit", "")),
-                       tuple(str(choice) for choice in spec.get("choices", ())))
+                       chosen)
     label, _, unit = spec.partition("|")
-    return Feature(slug(label), label.strip(), unit.strip())
+    return Feature(slug(label), label.strip(), unit.strip(), shared.get(label.strip()))
 
 
 def shipped_kinds() -> list[Kind]:
     raw = yaml.safe_load(
         (resources.files("easymeasurement") / "data" / "kinds.yaml").read_text(encoding="utf-8")
     )
-    shared = {label: tuple(str(choice) for choice in values)
-              for label, values in (raw.get("choices") or {}).items()}
+    shared = {str(label): str(key) for label, key in (raw.get("lists") or {}).items()}
 
     def feature(spec) -> Feature:
-        found = _feature(spec)
-        if found.choices or found.label not in shared:
-            return found
-        return Feature(found.key, found.label, found.unit, shared[found.label])
+        return _feature(spec, shared)
 
     return [
         Kind(item["key"], item["label"], item.get("icon", FALLBACK_ICON), item.get("izytron"),
@@ -109,9 +106,8 @@ class KindsMixin:
         features: dict[str, list[Feature]] = {}
         for row in self.query("SELECT * FROM kind_features ORDER BY position, id"):
             label = shown(names.get((row["kind"], row["key"])), row["label"])
-            choices = tuple(line for line in row["choices"].splitlines() if line.strip())
             features.setdefault(row["kind"], []).append(
-                Feature(row["key"], label, row["unit"], choices))
+                Feature(row["key"], label, row["unit"], row["choice_list"]))
         return [
             Kind(row["key"], shown(names.get(row["key"]), row["label"]), row["icon"],
                  row["izytron_type"], row["interval_months"],
@@ -154,9 +150,9 @@ class KindsMixin:
             for number, feature in enumerate(kind.features):
                 connection.execute(
                     "INSERT OR IGNORE INTO kind_features (kind, key, label, unit, position,"
-                    " choices) VALUES (?, ?, ?, ?, ?, ?)",
+                    " choice_list) VALUES (?, ?, ?, ?, ?, ?)",
                     (kind.key, feature.key, feature.label, feature.unit, number,
-                     "\n".join(feature.choices)),
+                     feature.choice_list),
                 )
 
     def _next_position(self) -> int:

@@ -87,12 +87,21 @@ def test_a_choice_can_always_be_emptied_or_replaced_by_own_text(qtbot):
     assert box.currentText() == "Bx" and box.findText("Bx") < 0
 
 
-def test_the_kind_editor_keeps_the_choices(qtbot):
+def test_the_kind_editor_picks_the_list_a_feature_offers(qtbot, app):
     table = FeatureTable()
     qtbot.addWidget(table)
-    table.show_features((Feature("charakter", "Charakteristik", "", ("B", "C")),))
-    table.table.item(0, 2).setText("B; C; D")
-    assert table.features()[0].choices == ("B", "C", "D")
+    lists = app.db.choice_lists()
+    table.show_features((Feature("charakter", "Charakteristik", "", "characteristic"),), lists)
+    assert table.table.item(0, 2).text() == "Charakteristik"
+    delegate = table.table.itemDelegateForColumn(2)
+    index = table.table.model().index(0, 2)
+    editor = delegate.createEditor(table.table, None, index)
+    editor.setCurrentIndex(editor.findData("rcd_type"))
+    delegate.setModelData(editor, table.table.model(), index)
+    assert table.features()[0].choice_list == "rcd_type"
+    editor.setCurrentIndex(0)
+    delegate.setModelData(editor, table.table.model(), index)
+    assert table.features()[0].choice_list is None
 
 
 def test_the_report_names_its_basis_in_the_title(app, tree):

@@ -1,5 +1,5 @@
 # EasyMeasurement - easymeasurement/ui/kind_features.py
-# The features of one kind as an editable table: name and unit, in the order shown.
+# The features of one kind as an editable table: name, unit and list, in the order shown.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
@@ -11,21 +11,45 @@ from __future__ import annotations
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QComboBox,
     QHBoxLayout,
     QHeaderView,
     QPushButton,
+    QStyledItemDelegate,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
     QWidget,
 )
 
-from ..l10n import tr
+from ..l10n import in_language, tr
+from ..store.choice_lists import ChoiceList
 from ..store.kinds import Feature, slug
 
 KEY = Qt.ItemDataRole.UserRole
-COLUMNS = 3  # feature, unit, choices
-SEPARATOR = "; "
+COLUMNS = 3  # feature, unit, choice list
+
+
+class ListDelegate(QStyledItemDelegate):
+    """The list column is edited by choosing one of the lists, or none."""
+
+    def __init__(self, table: "FeatureTable"):
+        super().__init__(table)
+        self.owner = table
+
+    def createEditor(self, parent, option, index):  # noqa: N802 - Qt's name
+        box = QComboBox(parent)
+        box.addItem(tr("none", context="choice list"), None)
+        for key, offered in self.owner.lists.items():
+            box.addItem(in_language(offered.label), key)
+        return box
+
+    def setEditorData(self, editor, index):  # noqa: N802 - Qt's name
+        editor.setCurrentIndex(max(editor.findData(index.data(KEY)), 0))
+
+    def setModelData(self, editor, model, index):  # noqa: N802 - Qt's name
+        model.setData(index, editor.currentData(), KEY)
+        model.setData(index, editor.currentText() if editor.currentData() else "")
 
 
 class FeatureTable(QWidget):
@@ -36,10 +60,12 @@ class FeatureTable(QWidget):
     def __init__(self):
         super().__init__()
         self.table = QTableWidget(0, COLUMNS)
-        self.table.setHorizontalHeaderLabels([tr("Feature"), tr("Unit"), tr("Choices")])
+        self.lists: dict[str, ChoiceList] = {}
+        self.table.setHorizontalHeaderLabels([tr("Feature"), tr("Unit"), tr("Choice list")])
         self.table.horizontalHeaderItem(2).setToolTip(tr(
-            "Values offered for the feature, separated by semicolons; any other may still be"
-            " typed."))
+            "The list whose values the feature offers; any other may still be typed. The lists"
+            " are edited under Settings → Choice lists."))
+        self.table.setItemDelegateForColumn(2, ListDelegate(self))
         self.table.verticalHeader().hide()
         self.table.verticalHeader().setDefaultSectionSize(self.table.fontMetrics().height() + 10)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
@@ -73,7 +99,9 @@ class FeatureTable(QWidget):
         layout.addLayout(buttons)
         self._filling = False
 
-    def show_features(self, features: tuple[Feature, ...]) -> None:
+    def show_features(self, features: tuple[Feature, ...],
+                      lists: dict[str, ChoiceList] | None = None) -> None:
+        self.lists = lists or {}
         self._filling = True
         self.table.setRowCount(0)
         for feature in features:
@@ -87,7 +115,10 @@ class FeatureTable(QWidget):
         name.setData(KEY, feature.key)
         self.table.setItem(row, 0, name)
         self.table.setItem(row, 1, QTableWidgetItem(feature.unit))
-        self.table.setItem(row, 2, QTableWidgetItem(SEPARATOR.join(feature.choices)))
+        offered = self.lists.get(feature.choice_list or "")
+        chosen = QTableWidgetItem(in_language(offered.label) if offered else "")
+        chosen.setData(KEY, feature.choice_list if offered else None)
+        self.table.setItem(row, 2, chosen)
         return row
 
     def features(self) -> tuple[Feature, ...]:
@@ -106,9 +137,8 @@ class FeatureTable(QWidget):
                 self._filling, was = True, self._filling
                 name.setData(KEY, key)
                 self._filling = was
-            choices = tuple(part.strip() for part in (offered.text() if offered else "").split(
-                SEPARATOR.strip()) if part.strip())
-            found.append(Feature(key, label, unit.text().strip() if unit else "", choices))
+            found.append(Feature(key, label, unit.text().strip() if unit else "",
+                                 offered.data(KEY) if offered else None))
         return tuple(found)
 
     def add(self) -> None:

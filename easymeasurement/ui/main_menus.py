@@ -107,6 +107,8 @@ class MainMenus:
         self.templates_action.triggered.connect(lambda: self.open_page(self.templates))
         self.kinds_action = menu.addAction(tr("Structure kinds …"))
         self.kinds_action.triggered.connect(lambda: self.open_page(self.kinds))
+        self.choice_lists_action = menu.addAction(tr("Choice lists …"))
+        self.choice_lists_action.triggered.connect(lambda: self.open_page(self.choice_lists))
         menu.addSeparator()
         self.language_action = menu.addAction(tr("Language …"))
         self.language_action.triggered.connect(lambda: LanguageOverlay(self).exec())

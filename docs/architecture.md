@@ -35,12 +35,26 @@ unter Einstellungen → Strukturtypen änderbar (`ui/kinds_page.py`). Mitgeliefe
 `data/kinds.yaml`. Jeder Typ nennt seinen IZYTRON-Typcode für den Import und ein Prüfintervall. Merkmalswerte liegen
 gesammelt am Element (`features_json`); leere werden nicht gespeichert und nirgends gezeigt. Wird ein
 Typ gelöscht, bekommen seine Elemente einen Ersatztyp, ihre Werte bleiben unsichtbar erhalten.
-Ein Merkmal kann Werte zur Auswahl anbieten (`choices`, eine je Zeile); das Elementformular zeigt es
-dann als Auswahlfeld, das auch andere Werte annimmt. `data/kinds.yaml` belegt übliche Normwerte vor,
-gemeinsam für alle Typen nach der Bezeichnung des Merkmals: Leitungstyp, Charakteristik, Querschnitt,
-Nennstrom, Bemessungsdifferenzstrom, Pole, Netzform, Schutzart, Schutzklasse. „Adern der Leitung“
-zählt alle Adern eines Kabels wie die Aderanzahl des PROFITEST PRIME (NYM-J 5×2,5: 5, eine Einzelader:
-1), „Pole der Schutzeinrichtung“ sagt, ob ein-, zwei-, drei- oder vierpolig geschaltet wird.
+Ein Merkmal kann eine Auswahlliste anbieten (`kind_features.choice_list`); das Elementformular zeigt
+es dann als Auswahlfeld, das auch andere Werte annimmt. Eine Auswahlliste ist eine kleine Tabelle in
+der Datenbank: Werte sind Zeilen (`choice_values`), Eigenschaften Spalten (`choice_attributes`), ein
+Fakt eine Zelle (`choice_facts`). Ein Wert trägt dazu einen Hilfetext, eine Kennlinie
+(`breaker 3 5`: Bereich der unverzögerten Auslösung in Vielfachen von Iₙ), ein eigenes Bild, etwa
+die Kennlinie aus einem Datenblatt, und die geeigneten Messfunktionen mit Hinweis
+(`choice_methods`). Mehrere Merkmale teilen sich eine Liste, „Zuleitung“ etwa die der Leitungstypen.
+Eine neue Datenbank beginnt mit `data/choice_lists.yaml`, `data/kinds.yaml` ordnet die Merkmale den
+Listen zu; bearbeitet werden sie unter Einstellungen → Auswahllisten (`ui/choice_lists_page.py`).
+Mitgelieferte Texte stehen englisch in der Datenbank und werden über die Kataloge übersetzt; die
+Fakten sind mit je zwei unabhängigen Quellen geprüft.
+
+Der Tooltip eines Werts (`ui/choice_tips.py`) nennt nur die Eigenschaften, in denen sich die Werte
+der Liste unterscheiden: Bei B, C, D entfällt „Leitungsschutzschalter“, neben Sicherungen steht es
+da. Eine Kennlinie wird für das Element gezeichnet: Sein Nennstrom macht aus Vielfachen Ampere, seine
+Netzform mit dem Nennstrom ergibt die geforderte Abschaltzeit, an der Iₐ markiert ist. Der Tooltip
+selbst ist ein allgemeines Bauteil (`ui/rich_tip.py`) für Text, Tabelle und Bilder, das jedes
+Widget über `install_tip` nutzen kann. „Adern der Leitung“ zählt alle Adern eines Kabels wie die
+Aderanzahl des PROFITEST PRIME (NYM-J 5×2,5: 5, eine Einzelader: 1), „Pole der Schutzeinrichtung“
+sagt, ob ein-, zwei-, drei- oder vierpolig geschaltet wird.
 
 Jedes Element hat eine Prüfgrundlage (`basis`). Leer folgt es der des Elements darüber; das oberste
 braucht eine, das Formular sagt es, solange sie fehlt. Das Protokoll nennt sie im Titel („Prüfprotokoll

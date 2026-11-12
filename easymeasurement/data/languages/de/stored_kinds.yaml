@@ -157,4 +157,6 @@ texts:
   "general": "allgemein"
   "selective (S)": "selektiv (S)"
   "short-time delayed (G)": "kurzzeitverzögert (G)"
+  "gL/gG <0.2s": "gL/gG <0,2s"
+  "gL/gG <0.4s": "gL/gG <0,4s"
   "Cores of the cable": "Adern der Leitung"

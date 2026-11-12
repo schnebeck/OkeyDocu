@@ -9,17 +9,26 @@
 """The list of a choice box always starts with two entries of its own: one that empties the
 field and one that clears it for a text of one's own. Neither is a value: choosing one leaves
 the field empty, the second with the cursor in it. Typed text is neither completed to an
-offered value nor added to the list."""
+offered value nor added to the list.
+
+Offered from a choice list, each value tells in its tooltip what sets it apart from the others,
+with its help, curve, picture and suited measurements; so does the field for the value it holds,
+and for the list as a whole while it is empty."""
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QPoint, Qt
 from PySide6.QtWidgets import QComboBox, QLineEdit
 
 from ..l10n import N_, tr
+from ..l10n.catalog import source_of
 from ..l10n.formats import pattern
+from ..store.choice_lists import ChoiceList
+from .choice_tips import Context, list_tip, value_tip
+from .rich_tip import Tip, install_tip
 
 EMPTY, OWN = "empty", "own"
 LABELS = {EMPTY: N_("(empty)"), OWN: N_("Own text …")}
+VALUE = Qt.ItemDataRole.UserRole + 1  # the value as the list holds it
 
 
 def choice_text(choice: str) -> str:
@@ -32,8 +41,11 @@ def choice_text(choice: str) -> str:
 
 
 class ChoiceBox(QComboBox):
-    def __init__(self, choices, value: str = ""):
+    def __init__(self, offered: ChoiceList | tuple[str, ...], value: str = "",
+                 context: Context | None = None):
         super().__init__(editable=True)
+        self.list = offered if isinstance(offered, ChoiceList) else ChoiceList("", "")
+        self.context = context
         self.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
         self.setCompleter(None)
         italic = self.font()
@@ -42,10 +54,40 @@ class ChoiceBox(QComboBox):
             self.addItem(tr(label), kind)
             self.setItemData(self.count() - 1, italic, Qt.ItemDataRole.FontRole)
         self.insertSeparator(len(LABELS))
-        self.addItems([choice_text(choice) for choice in choices])
+        values = self.list.offered if isinstance(offered, ChoiceList) else offered
+        for choice in values:
+            self.addItem(choice_text(choice))
+            self.setItemData(self.count() - 1, choice, VALUE)
         self.lineEdit().setPlaceholderText(tr("choose or type"))
         self.setEditText(value)
         self.activated.connect(self._chosen)
+        install_tip(self.lineEdit(), lambda _: self.tip(self.currentText()))
+        install_tip(self, lambda _: self.tip(self.currentText()))
+        install_tip(self.view().viewport(), self._row_tip)
+
+    def held(self, text: str) -> str | None:
+        """The value of the list the text stands for, shown in any language or as stored."""
+        text = text.strip()
+        for row in range(self.count()):
+            value = self.itemData(row, VALUE)
+            if value is not None and text in (value, self.itemText(row)):
+                return value
+        source = source_of(text)
+        return source if source in self.list.offered else None
+
+    def tip(self, text: str) -> Tip | None:
+        if not text.strip():
+            return list_tip(self.list)
+        value = self.held(text)
+        entry = self.list.entry(value) if value is not None else None
+        if entry is None:
+            return None
+        return value_tip(self.list, entry, choice_text(value),
+                         self.context() if self.context else None)
+
+    def _row_tip(self, where: QPoint) -> Tip | None:
+        value = self.view().indexAt(where).data(VALUE)
+        return self.tip(value) if value else None
 
     def _chosen(self, index: int) -> None:
         kind = self.itemData(index)
@@ -56,9 +98,13 @@ class ChoiceBox(QComboBox):
             self.lineEdit().setFocus()
 
 
-def feature_field(feature, value: str):
-    """A feature with choices offers them and still takes any other value."""
-    return ChoiceBox(feature.choices, value) if feature.choices else QLineEdit(value)
+def feature_field(feature, value: str, lists: dict[str, ChoiceList] | None = None,
+                  context: Context | None = None):
+    """A feature offering a list is a choice box that still takes any other value."""
+    offered = (lists or {}).get(feature.choice_list or "")
+    if offered is None or not offered.values:
+        return QLineEdit(value)
+    return ChoiceBox(offered, value, context)
 
 
 def field_text(field) -> str:

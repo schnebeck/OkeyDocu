@@ -25,6 +25,7 @@ from .dashboard_tiles import ARCHIVE, INSTRUMENT, MASTER_DATA, PLANS, TEMPLATES,
 from .main_menus import MainMenus
 from .master_data import MasterDataPage
 from .measurement_overlays import ImportOverlay
+from .choice_lists_page import ChoiceListsPage
 from .kinds_page import KindsPage
 from .measurement_search import MeasurementsPage
 from .photo_shared import shared_thumbs
@@ -52,6 +53,7 @@ class MainWindow(MainMenus, QMainWindow):
         self.templates = TemplatesPage(app)
         self.plan_editor = PlanEditorPage(app)
         self.kinds = KindsPage(app)
+        self.choice_lists = ChoiceListsPage(app)
         self.setCentralWidget(self.campaign)
         # Windows of their own, so they can stand beside a running campaign. No parent:
         # the window manager would otherwise keep them on top of the main window.
@@ -62,6 +64,7 @@ class MainWindow(MainMenus, QMainWindow):
             self.templates: self._page_window(self.templates, tr("Report templates"), 1200, 760),
             self.plan_editor: self._page_window(self.plan_editor, tr("Test plans"), 1200, 720),
             self.kinds: self._page_window(self.kinds, tr("Structure kinds"), 900, 640),
+            self.choice_lists: self._page_window(self.choice_lists, tr("Choice lists"), 1100, 720),
         }
         self._build_menus()
         self._build_status_bar()
@@ -80,6 +83,8 @@ class MainWindow(MainMenus, QMainWindow):
         self.kinds.changed.connect(self.campaign.refresh)
         self.kinds.changed.connect(self.master_data.refresh)
         self.master_data.kinds_requested.connect(lambda: self.open_page(self.kinds))
+        self.choice_lists.changed.connect(self.kinds.refresh)
+        self.choice_lists.changed.connect(self.master_data.refresh)
 
     def _page_window(self, page: QWidget, title: str, width: int, height: int) -> QWidget:
         window = QWidget()
@@ -94,7 +99,7 @@ class MainWindow(MainMenus, QMainWindow):
         if page is self.measurements:
             page.reload_choices()
         if page in (self.measurements, self.reports, self.plan_editor, self.master_data,
-                    self.kinds):
+                    self.kinds, self.choice_lists):
             page.refresh()
         window = self.page_windows[page]
         window.show()
