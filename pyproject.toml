@@ -36,7 +36,7 @@ okeydocu = "okeydocu.__main__:main"
 include = ["okeydocu*"]
 
 [tool.setuptools.package-data]
-okeydocu = ["data/**/*.yaml", "data/**/*.svg", "devices/**/*.yaml"]
+okeydocu = ["data/**/*.yaml", "data/**/*.svg", "devices/**/*.yaml", "devices/**/*.svg"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
