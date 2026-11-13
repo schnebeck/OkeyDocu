@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..l10n import tr
+from .pending_marks import PendingMarks
 
 MARGIN = 24
 SCRIM = QColor(0, 0, 0, 120)
@@ -47,6 +48,7 @@ class Overlay(QWidget):
             "#overlayCard { background: palette(window); border: 1px solid palette(mid);"
             " border-radius: 8px; }"
         )
+        self.pending_marks = PendingMarks(self.card)
         self.card.installEventFilter(self)
         heading = QLabel(title)
         font = heading.font()
@@ -113,6 +115,7 @@ class Overlay(QWidget):
         self.show()
         self.raise_()
         self._place()
+        self.pending_marks.watch()
         self.first_field().setFocus()
 
     def _close(self) -> None:

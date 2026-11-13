@@ -68,7 +68,7 @@ def test_a_feature_with_choices_offers_them_and_takes_another_value(qtbot, app, 
     form.feature_fields["cable_length"].setText("12")
     form.save()
     stored = app.db.asset_features(circuit)
-    assert stored["cross_section"] == "1,5" and stored["characteristic"] == "C"
+    assert stored["cross_section"] == "1.5" and stored["characteristic"] == "C"
     assert stored["cable_length"] == "12"
 
 

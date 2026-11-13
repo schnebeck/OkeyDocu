@@ -12,6 +12,7 @@ from ..campaign.service import TEXT_FIELDS
 from ..l10n import N_, tr
 from ..store import CampaignClosed
 from .common import show_error
+from .pending_marks import PendingMarks
 
 FIELD_NAMES = {
     "function": N_("Designation"), "operator": N_("Inspector"), "verdict": N_("Verdict"),
@@ -37,6 +38,19 @@ class MeasurementEditing:
             "hint": self.hint.toPlainText().strip(),
         }
         return {field: new for field, new in current.items() if new != self.row[field]}
+
+    @property
+    def pending_marks(self) -> PendingMarks:
+        """Made on first use, once the fields stand."""
+        if getattr(self, "_pending", None) is None:
+            self._pending = PendingMarks(self)
+        return self._pending
+
+    def _shown(self) -> None:
+        """A row has been filled in: the fields as they stand are what is applied."""
+        self.pending_marks.watch()
+        self._filling = False
+        self._edited()
 
     @property
     def dirty(self) -> bool:
@@ -72,6 +86,7 @@ class MeasurementEditing:
             return False
         self.row = self.app.db.one("SELECT * FROM measurements WHERE id=?", self.row["id"])
         self.rows.rows = self.app.service.values(self.row["id"])
+        self.pending_marks.watch()
         self._edited()
         self.changed.emit()
         return True

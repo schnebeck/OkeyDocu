@@ -217,8 +217,7 @@ class MeasurementEditor(MeasurementEditing, QWidget):
         self.hint.refit()
         for box in (self.function, self.verdict):
             box.setEnabled(editable)
-        self._filling = False
-        self._edited()
+        self._shown()
 
     def _add_photo(self, path) -> None:
         self.app.service.add_photo(self.row["id"], path)

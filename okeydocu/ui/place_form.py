@@ -19,8 +19,8 @@ from PySide6.QtWidgets import QComboBox, QFormLayout, QLabel, QLineEdit, QVBoxLa
 from ..campaign.measuring_place import MeasuringPlace
 from ..devices.guide import Guide
 from ..l10n import N_, tr
-from .choice_box import ChoiceBox, feature_field, field_text
-from .choice_tips import held_value
+from .choice_box import feature_field, field_text
+from .pending_marks import PendingMarks
 
 MISSING_STYLE = "background:#fde2c4"
 HINT = "#b35c00"
@@ -60,6 +60,7 @@ class PlaceForm(QWidget):
         self.hint = QLabel()
         self.hint.setWordWrap(True)
         self.data_title = QLabel()
+        self.pending_marks = PendingMarks(self)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(QLabel(f"<b>{tr('Where do we measure?')}</b>"))
@@ -122,6 +123,7 @@ class PlaceForm(QWidget):
                   " the usual layout.")
         missing = place.missing(self.fields)
         self.hint.setText(f"<span style='color:{HINT}'>{hint}</span>" if missing else "")
+        self.pending_marks.watch()
 
     def _typed(self, field, text: str) -> None:
         field.setStyleSheet("" if text.strip() else MISSING_STYLE)
@@ -140,11 +142,7 @@ class PlaceForm(QWidget):
 
     @staticmethod
     def _value(field) -> str:
-        """A word of a list is stored as the list holds it, not as shown in the language."""
-        text = field_text(field).strip()
-        if isinstance(field, ChoiceBox) and text:
-            return held_value(field.list, text) or text
-        return text
+        return field_text(field).strip()
 
     def store(self) -> bool:
         """Stores what was entered at an existing element; whether anything changed."""

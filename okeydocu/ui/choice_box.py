@@ -51,12 +51,21 @@ class ChoiceBox(QComboBox):
             self.addItem(choice_text(choice))
             self.setItemData(self.count() - 1, choice, VALUE)
         self.lineEdit().setPlaceholderText(tr("choose or type"))
-        self.setEditText(value)
+        self.setEditText(self.shown(value))
         self.activated.connect(self._chosen)
         install_tip(self.lineEdit(), lambda _: self.tip(self.currentText()))
         install_tip(self, lambda _: self.tip(self.currentText()))
         install_tip(self.view().viewport(), self._row_tip)
         self.lineEdit().installEventFilter(_CompareKey(self))
+
+    def shown(self, value: str) -> str:
+        """A value of the list in the language of the app; any other text as it is."""
+        return choice_text(value) if value in self.list.offered else value
+
+    def value(self) -> str:
+        """The text as the list holds it, so a word is stored the same in every language."""
+        text = self.currentText().strip()
+        return (held_value(self.list, text) or text) if text else ""
 
     def tip(self, text: str) -> Tip | None:
         if not text.strip():
@@ -115,4 +124,7 @@ def feature_field(feature, value: str, lists: dict[str, ChoiceList] | None = Non
 
 
 def field_text(field) -> str:
+    """What a field holds, a word of a list as the list holds it."""
+    if isinstance(field, ChoiceBox):
+        return field.value()
     return field.currentText() if isinstance(field, QComboBox) else field.text()
