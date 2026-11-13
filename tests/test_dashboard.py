@@ -10,6 +10,7 @@ from datetime import date, datetime, timedelta
 
 from PySide6.QtCore import Qt
 
+from okeydocu import APP_NAME, TAGLINE, __version__
 from okeydocu.model import Quantity, ResultValue, Verdict
 from okeydocu.ui.dashboard import CLOSED_SHOWN, OPEN_SHOWN
 from okeydocu.ui.dashboard_card import (
@@ -216,3 +217,14 @@ def test_without_any_campaign_only_the_new_card_stands_there(window, app):
     assert home.cards == []
     assert home.open_section.isVisibleTo(home)
     assert home.start_button.isEnabled()
+
+
+# Brand -----------------------------------------------------------------------
+
+
+def test_the_start_screen_names_the_program_its_version_and_tagline(window):
+    brand = _home(window).brand
+    assert brand.name.text() == APP_NAME
+    assert brand.version.text() == __version__
+    assert brand.tagline.text() == TAGLINE
+    assert brand.isVisibleTo(window)

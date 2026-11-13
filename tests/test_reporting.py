@@ -156,7 +156,8 @@ def test_full_report_shows_all_three_cases(service, asset_id, plan):
     assert "Max" in text  # n: table with summary
     assert "Grenzwert" in text  # 1: fields
     assert "Anlage nicht zugänglich" in text  # 0: reason
-    assert "überfällig" in text
+    assert "Rekalibrierung fällig" in text
+    assert "überfällig" not in text
     assert "Nicht vollständig geprüft" in text
     assert "MΩ" in text and "Ω" in text
     assert "Seite 1 von" in text

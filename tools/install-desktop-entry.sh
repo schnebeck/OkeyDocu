@@ -40,7 +40,12 @@ Terminal=false
 Categories=Office;Engineering;
 StartupWMClass=okeydocu
 EOF
+# A newer icon folder tells the icon caches of KDE and GTK to look again.
+touch "$data/icons/hicolor"
 if command -v update-desktop-database >/dev/null 2>&1; then
     timeout 20 update-desktop-database "$data/applications" || true
+fi
+if command -v kbuildsycoca6 >/dev/null 2>&1; then
+    timeout 60 kbuildsycoca6 >/dev/null 2>&1 || true
 fi
 echo "installed: $entry"

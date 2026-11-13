@@ -26,6 +26,7 @@ from ..campaign.seal import SealState
 from ..l10n import N_, tr
 from .campaign_items import heading
 from .common import AppContext
+from .dashboard_brand import Brand
 from .dashboard_card import CARD_WIDTH, SHOW, CampaignCard
 from .dashboard_due import DueSection
 from .dashboard_tiles import AdminTiles
@@ -123,8 +124,11 @@ class Dashboard(QScrollArea):
         self.start_button.setToolTip(
             tr("Choose customer and installation and start the next measurement"))
         self.start_button.clicked.connect(self.start_requested)
+        self.brand = Brand()
         top = QVBoxLayout()
-        top.addWidget(heading(tr("Measurement campaigns"), 22))
+        top.addWidget(self.brand)
+        top.addSpacing(SPACING)
+        top.addWidget(heading(tr("Measurement campaigns"), 18))
         top.addWidget(QLabel(tr("Choose customer and installation, measure, confirm the report.")))
 
         self.no_asset = QLabel(tr("A campaign needs a customer and an installation first."))
