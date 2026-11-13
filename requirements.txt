@@ -4,6 +4,7 @@ Jinja2==3.1.6
 pillow==13.0.0
 pyHanko==0.38.1
 pyserial==3.5
+python-pkcs11==0.10.1
 pytest==9.2.0
 pytest-qt==4.5.0
 PyYAML==6.0.3

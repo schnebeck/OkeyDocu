@@ -90,7 +90,6 @@ texts:
   Creating the report …: Erstelle das Protokoll …
   "Signing as {signer}, issued by {issuer}, valid until {day}.": "Signiert wird als {signer}, ausgestellt von {issuer}, gültig bis {day}."
   This is an email certificate (S/MIME). The signature is technically valid. Whether a PDF program shows it as trustworthy depends on whether it trusts the issuer.: Das ist ein E-Mail-Zertifikat (S/MIME). Die Signatur ist technisch gültig. Ob ein PDF-Programm sie als vertrauenswürdig anzeigt, hängt davon ab, ob es dem Aussteller vertraut.
-  File .p12 or .pfx: Datei .p12 oder .pfx
   Choose …: Wählen …
   Certificate: Zertifikat
   Password: Passwort

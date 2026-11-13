@@ -26,7 +26,11 @@ from PySide6.QtWidgets import (
 from ..l10n import day, tr
 from ..paths import data_dir
 from ..reporting.archive import ReportError
-from ..reporting.sign import CertificateInfo, Pkcs12Signer, SigningError, inspect_certificate
+from ..reporting.nss import parse
+from ..reporting.sign import CertificateInfo, PdfSigner, SigningError, certificate_info, signer_for
+from . import pinentry
+from .key_password import password_for
+from .nss_chooser import NssChooser
 from .common import AppContext, show_error
 from .overlay import Overlay
 
@@ -49,20 +53,26 @@ def describe(info: CertificateInfo) -> str:
 
 
 class CertificateFields(QWidget):
-    """The file stays where it is; who it belongs to shows once the password is in."""
+    """The file or the database stays where it is. The password is asked for by pinentry when
+    the report is signed; without pinentry it is typed here."""
 
     changed = Signal()
 
     def __init__(self, certificate: str = ""):
         super().__init__()
         self.path = QLineEdit(certificate or settings().value("last_certificate", ""))
-        self.path.setPlaceholderText(tr("File .p12 or .pfx"))
+        self.path.setPlaceholderText(tr("File .p12 or .pfx, or an NSS database"))
         browse = QPushButton(tr("Choose …"))
         browse.clicked.connect(self._browse)
+        nss = QPushButton(tr("NSS …"))
+        nss.setToolTip(tr("A certificate from an NSS database, such as the one of Firefox"))
+        nss.clicked.connect(self._choose_nss)
         row = QHBoxLayout()
         row.setContentsMargins(0, 0, 0, 0)
         row.addWidget(self.path, 1)
         row.addWidget(browse)
+        row.addWidget(nss)
+        self.password = ""
         self.passphrase = QLineEdit(echoMode=QLineEdit.EchoMode.Password)
         self.info = QLabel()
         self.info.setWordWrap(True)
@@ -70,6 +80,7 @@ class CertificateFields(QWidget):
         form.setContentsMargins(0, 0, 0, 0)
         form.addRow(tr("Certificate"), row)
         form.addRow(tr("Password"), self.passphrase)
+        form.setRowVisible(1, not pinentry.available())
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addLayout(form)
@@ -78,6 +89,8 @@ class CertificateFields(QWidget):
         self.passphrase.textChanged.connect(self._forget)
         self.passphrase.editingFinished.connect(self._show_owner)
         self.info.hide()
+        if parse(self.path.text()) is not None:
+            self._show_owner()
 
     def _browse(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
@@ -86,31 +99,49 @@ class CertificateFields(QWidget):
         if path:
             self.path.setText(path)
 
+    def _choose_nss(self) -> None:
+        chooser = NssChooser(self, self.path.text())
+        if chooser.exec():
+            self.path.setText(chooser.reference())
+            self._show_owner()
+
     def _forget(self) -> None:
         self.info.hide()
+        self.password = ""
         self.changed.emit()
 
     def _show_owner(self) -> None:
+        """Who the certificate belongs to, where that can be read without asking."""
         try:
-            self.info.setText(describe(self.check()))
+            if pinentry.available() and parse(self.path.text()) is None:
+                return
+            self.info.setText(describe(certificate_info(self.reference(), self.passphrase.text())))
         except SigningError as err:
             self.info.setText(str(err))
         self.info.show()
+
+    def reference(self) -> str:
+        return self.path.text().strip()
+
+    def first_field(self, otherwise):
+        return self.passphrase if self.passphrase.isVisible() else otherwise
 
     def ready(self) -> bool:
         return bool(self.path.text().strip())
 
     def check(self) -> CertificateInfo:
-        """Raises SigningError if the file, the password or the certificate will not do."""
-        info = inspect_certificate(Path(self.path.text().strip()), self.passphrase.text())
+        """Raises SigningError if the certificate, its password or its key will not do; the
+        password is asked for here and kept for signing."""
+        self.password = password_for(self, self.reference(), self.passphrase.text())
+        info = certificate_info(self.reference(), self.password)
         if info.expired:
             raise SigningError(tr("The certificate expired on {day}.", day=day(info.valid_until)))
         if not info.can_sign:
             raise SigningError(tr("This certificate is not issued for signing."))
         return info
 
-    def signer(self) -> Pkcs12Signer:
-        return Pkcs12Signer(Path(self.path.text().strip()), self.passphrase.text())
+    def signer(self) -> PdfSigner:
+        return signer_for(self.reference(), self.password or self.passphrase.text())
 
     def remember(self) -> None:
         settings().setValue("last_certificate", self.path.text().strip())
@@ -128,7 +159,9 @@ class SignOverlay(Overlay):
         self._update()
 
     def first_field(self):
-        return self.certificate.passphrase if self.certificate.ready() else self.certificate.path
+        if not self.certificate.ready():
+            return self.certificate.path
+        return self.certificate.first_field(self.ok_button)
 
     def _update(self) -> None:
         self.ok_button.setEnabled(self.certificate.ready())

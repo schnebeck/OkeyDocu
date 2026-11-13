@@ -8,50 +8,24 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Protocol
 
-from cryptography import x509
 from cryptography.hazmat.primitives.serialization import pkcs12
-from cryptography.x509.oid import ExtendedKeyUsageOID, NameOID
 
 from ..l10n import day, tr
+from .certificate_info import CertificateInfo, SigningError, describe_certificate
+from .nss import NssSigner, parse
+from .nss import inspect as inspect_nss
+from .nss import needs_password as nss_needs_password
 
-_DOCUMENT_SIGNING = x509.ObjectIdentifier("1.3.6.1.5.5.7.3.36")
-
-
-class SigningError(Exception):
-    pass
+__all__ = ["CertificateInfo", "SigningError", "PdfSigner", "Pkcs12Signer", "inspect_certificate",
+           "certificate_info", "signer_for", "needs_password"]
 
 
 class PdfSigner(Protocol):
     def sign(self, source: Path, target: Path, reason: str) -> str:
         """Write a signed copy of source to target and return the signer's name."""
-
-
-@dataclass(frozen=True)
-class CertificateInfo:
-    name: str
-    email: str
-    issuer: str
-    valid_until: datetime
-    expired: bool
-    can_sign: bool
-    email_only: bool  # issued for mail (S/MIME), not explicitly for documents
-
-
-def _attribute(name: x509.Name, oid) -> str:
-    found = name.get_attributes_for_oid(oid)
-    return str(found[0].value) if found else ""
-
-
-def _extension(certificate: x509.Certificate, kind):
-    try:
-        return certificate.extensions.get_extension_for_class(kind).value
-    except x509.ExtensionNotFound:
-        return None
 
 
 def inspect_certificate(path: Path, passphrase: str) -> CertificateInfo:
@@ -64,22 +38,33 @@ def inspect_certificate(path: Path, passphrase: str) -> CertificateInfo:
         raise SigningError(tr("Certificate not readable or wrong password.")) from err
     if certificate is None:
         raise SigningError(tr("The file contains no certificate."))
-    alternative = _extension(certificate, x509.SubjectAlternativeName)
-    addresses = alternative.get_values_for_type(x509.RFC822Name) if alternative else []
-    usage = _extension(certificate, x509.KeyUsage)
-    extended = _extension(certificate, x509.ExtendedKeyUsage)
-    purposes = list(extended) if extended else []
-    until = certificate.not_valid_after_utc
-    return CertificateInfo(
-        name=_attribute(certificate.subject, NameOID.COMMON_NAME) or certificate.subject.rfc4514_string(),
-        email=addresses[0] if addresses else _attribute(certificate.subject, NameOID.EMAIL_ADDRESS),
-        issuer=_attribute(certificate.issuer, NameOID.COMMON_NAME),
-        valid_until=until,
-        expired=until < datetime.now(timezone.utc),
-        can_sign=usage is None or usage.digital_signature or usage.content_commitment,
-        email_only=ExtendedKeyUsageOID.EMAIL_PROTECTION in purposes
-        and _DOCUMENT_SIGNING not in purposes,
-    )
+    return describe_certificate(certificate)
+
+
+def certificate_info(reference: str, password: str) -> CertificateInfo:
+    """A certificate named by the path of a PKCS#12 file or by an NSS reference."""
+    nss = parse(reference)
+    if nss is not None:
+        return inspect_nss(nss, password)
+    return inspect_certificate(Path(reference), password)
+
+
+def needs_password(reference: str) -> bool:
+    """Whether the key can only be reached with a password."""
+    nss = parse(reference)
+    if nss is not None:
+        return nss_needs_password(nss.folder)
+    try:
+        inspect_certificate(Path(reference), "")
+    except SigningError:
+        return True
+    return False
+
+
+def signer_for(reference: str, password: str) -> PdfSigner:
+    nss = parse(reference)
+    return NssSigner(nss, password) if nss is not None else Pkcs12Signer(Path(reference),
+                                                                         password)
 
 
 class Pkcs12Signer:

@@ -141,7 +141,7 @@ def test_the_password_of_a_certificate_is_not_kept(qtbot, app, monkeypatch, tmp_
 
     seen = []
     monkeypatch.setattr(
-        "okeydocu.ui.user_form.inspect_certificate",
+        "okeydocu.ui.user_form.certificate_info",
         lambda path, phrase: seen.append(phrase) or Info,
     )
     form = UserForm(app)

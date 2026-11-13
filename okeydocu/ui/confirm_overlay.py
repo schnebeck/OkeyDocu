@@ -106,7 +106,7 @@ class ConfirmOverlay(Overlay):
 
     def first_field(self):
         if self.sign.isChecked() and self.certificate.ready():
-            return self.certificate.passphrase
+            return self.certificate.first_field(self.ok_button)
         return self.ok_button if self.ok_button.isEnabled() else self.cancel_button
 
     def signing(self) -> bool:

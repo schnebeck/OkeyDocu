@@ -23,7 +23,10 @@ from PySide6.QtWidgets import (
 )
 
 from ..l10n import day, tr
-from ..reporting.sign import SigningError, inspect_certificate
+from ..reporting.sign import SigningError, certificate_info
+from . import pinentry
+from .key_password import password_for
+from .nss_chooser import NssChooser
 from .common import AppContext
 from .overlay import Overlay
 from .signature_pad import SignaturePad
@@ -73,11 +76,16 @@ class UserForm(Overlay):
         self.certificate.setPlaceholderText(tr("For signing the reports, can follow later"))
         self.choose_button = QPushButton(tr("Choose …"))
         self.choose_button.clicked.connect(self._choose_certificate)
+        self.nss_button = QPushButton(tr("NSS …"))
+        self.nss_button.setToolTip(tr("A certificate from an NSS database, such as the one of"
+                                      " Firefox"))
+        self.nss_button.clicked.connect(self._choose_nss)
         self.remove_button = QPushButton(tr("Remove"))
         self.remove_button.clicked.connect(self._remove_certificate)
         chooser = QHBoxLayout()
         chooser.addWidget(self.certificate, 1)
         chooser.addWidget(self.choose_button)
+        chooser.addWidget(self.nss_button)
         chooser.addWidget(self.remove_button)
         self.passphrase = QLineEdit(echoMode=QLineEdit.EchoMode.Password)
         self.passphrase.setPlaceholderText(tr("Certificate password, not stored"))
@@ -89,6 +97,7 @@ class UserForm(Overlay):
         unlock.setContentsMargins(0, 0, 0, 0)
         unlock.addWidget(self.passphrase, 1)
         unlock.addWidget(self.check_button)
+        self.passphrase.setVisible(not pinentry.available())
         self.unlock.hide()
         self.certificate_state = QLabel()
         self.certificate_state.setWordWrap(True)
@@ -135,6 +144,16 @@ class UserForm(Overlay):
             self.passphrase.setFocus()
             self._show_certificate()
 
+    def _choose_nss(self) -> None:
+        chooser = NssChooser(self, self.certificate.text())
+        if chooser.exec():
+            info = chooser.info()
+            self.certificate.setText(chooser.reference())
+            self.certificate_name = info.name
+            self.certificate_until = info.valid_until.date().isoformat()
+            self.unlock.hide()
+            self._show_certificate()
+
     def _remove_certificate(self) -> None:
         self.certificate.clear()
         self.certificate_name = self.certificate_until = ""
@@ -144,7 +163,8 @@ class UserForm(Overlay):
 
     def _check_certificate(self) -> None:
         try:
-            info = inspect_certificate(Path(self.certificate.text()), self.passphrase.text())
+            password = password_for(self, self.certificate.text(), self.passphrase.text())
+            info = certificate_info(self.certificate.text(), password)
         except SigningError as err:
             self.certificate_state.setText(str(err))
             self.passphrase.selectAll()

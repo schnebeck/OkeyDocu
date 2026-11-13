@@ -1,0 +1,21 @@
+# OkeyDocu - German texts of signing from an NSS database and of the password dialog.
+texts:
+  The certificate is not in the NSS database, or its key is missing.: Das Zertifikat ist nicht in der NSS-Datenbank, oder sein Schlüssel fehlt.
+  NSS is not installed on this computer.: NSS ist auf diesem Rechner nicht installiert.
+  "No NSS database in {folder}.": "Keine NSS-Datenbank in {folder}."
+  Signing from an NSS database needs python-pkcs11.: Signieren aus einer NSS-Datenbank braucht python-pkcs11.
+  Wrong password for the NSS database.: Falsches Passwort für die NSS-Datenbank.
+  Waiting for the password …: Warte auf das Passwort …
+  Signing was cancelled.: Das Signieren wurde abgebrochen.
+  The password of the signing key is needed.: Das Passwort des Signaturschlüssels wird gebraucht.
+  "Password:": "Passwort:"
+  "{who} · {issuer} · until {day}": "{who} · {issuer} · bis {day}"
+  Certificate from an NSS database: Zertifikat aus einer NSS-Datenbank
+  Take: Übernehmen
+  Choose folder …: Ordner wählen …
+  Database folder: Datenbankordner
+  Choose the NSS database folder: Ordner der NSS-Datenbank wählen
+  No valid certificate with its key here.: Hier gibt es kein gültiges Zertifikat mit Schlüssel.
+  File .p12 or .pfx, or an NSS database: Datei .p12 oder .pfx, oder eine NSS-Datenbank
+  NSS …: NSS …
+  A certificate from an NSS database, such as the one of Firefox: Ein Zertifikat aus einer NSS-Datenbank, etwa der von Firefox

@@ -24,6 +24,7 @@ dependencies = [
     "pyHanko>=0.25",
     "cryptography>=42",
     "secretstorage>=3.5",
+    "python-pkcs11>=0.10",
 ]
 
 [project.optional-dependencies]

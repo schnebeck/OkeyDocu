@@ -48,6 +48,14 @@ def own_thumbnails(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def no_real_pinentry(monkeypatch):
+    """No test may open the desktop's password dialog; passwords are typed into the form."""
+    from okeydocu.ui import pinentry
+
+    monkeypatch.setattr(pinentry, "program", lambda: None)
+
+
+@pytest.fixture(autouse=True)
 def no_real_password_store(monkeypatch):
     """Tests must never touch the password store of the person running them."""
     monkeypatch.setattr(SecretKeyStore, "key", lambda self: b"test" * 8)
