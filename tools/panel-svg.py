@@ -17,21 +17,25 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tools"))
 from okeydocu.devices.profitest_prime.panel import DIAL, STEP_DEGREES as STEP  # noqa: E402
 
-OUT = ROOT / "okeydocu/devices/profitest_prime/panel"
-WIDTH, HEIGHT = 1180, 600
+from panel_parts import DIM, GREEN, INK, PANEL, display, sockets, text, top  # noqa: E402
 
-PANEL, METAL, INK, GREEN, DIM = "#2c3037", "#b9bec4", "#f2f4f5", "#3ec46d", "#7d848b"
-SINE = "M-11,0 C-8,-9 -3,-9 0,0 S8,9 11,0"
+OUT = ROOT / "okeydocu/devices/profitest_prime/panel"
+WIDTH, HEIGHT = 1040, 725  # measured off a photo of the instrument, upright
+RING, LABELS, ARCS = 76, 89, 101  # radii of the detent ring, the labels and the group arcs
+
+# Wave symbols as on the dial: axes through the origin, one sine period starting upwards.
+AXES = "M-10,-9 V9 M-10,0 H12"
+SINE = "M-10,0 C-8.5,-12 -2.5,-12 1,0 C4.5,12 10.5,12 12,0"
+THIN = 'fill="none" stroke="{c}" stroke-width="1.8" stroke-linejoin="round"'
 ICONS = {
     "step": '<path d="M-11,6 h8 v-12 h14" fill="none" stroke="{c}" stroke-width="2"/>',
     "ramp": '<path d="M-11,7 L11,7 L11,-7 Z" fill="{c}"/>',
-    "sine": f'<path d="{SINE}" fill="none" stroke="{{c}}" stroke-width="2"/>',
-    "sine2": f'<path d="{SINE}" fill="none" stroke="{{c}}" stroke-width="2"/>'
-             '<path d="M-11,6 L11,-6" stroke="{c}" stroke-width="1.5"/>',
-    "pulse": '<path d="M-11,6 v-12 h5 v12 h4 v-12 h5 v12" fill="none" stroke="{c}"'
-             ' stroke-width="2"/>',
+    "sine": f'<path d="{AXES} {SINE}" {THIN}/>',
+    "sine2": f'<path d="{AXES} {SINE} M-10,0 L12,-7 V0" {THIN}/>',
+    "pulse": f'<path d="M-12,6 H-9 V-6 H-4 V6 H-1 V-6 H4 V6 H12" {THIN}/>',
     "battery": '<rect x="-12" y="-7" width="22" height="14" rx="2" fill="none" stroke="{c}"'
                ' stroke-width="2"/><rect x="10" y="-3" width="3" height="6" fill="{c}"/>'
                '<path d="M1,-6 L-4,1 L0,1 L-2,6 L4,-1 L0,-1 Z" fill="{c}"/>',
@@ -41,14 +45,16 @@ ICONS = {
 POSITIONS = [
     (0, 35, "OFF", None), (1, 12, "U", None), (2, 13, "0,2A", None), (3, 14, "25A", None),
     (4, 15, "", "step"), (5, 16, "", "ramp"), (6, 17, "IF◢", None), (7, 18, "IΔN", None),
-    (8, 19, "IF◢+IΔN", None), (9, 20, "", "sine"), (10, 21, "DC+", "sine"),
+    (8, 19, "IF◢\n+IΔN", None), (9, 20, "", "sine"), (10, 21, "DC+", "sine"),
     (11, 22, "", "sine2"), (12, 23, "", "pulse"), (13, 24, "Ures", None),
     (14, 25, "IMD", None), (15, 26, "RCM", None), (16, 27, "IL", None),
     (17, 28, "≤1V≂", None), (18, 29, "T, %r.H.", None), (19, 30, "Extra", None),
     (20, 31, "HV", None), (21, 32, "Auto", None), (22, 33, "Setup", None),
     (23, 34, "", "battery"),
 ]
-GROUPS = [("RLO", 2, 3), ("RISO", 4, 5), ("RCD", 6, 8), ("ZLOOP AC/DC", 9, 12)]
+# Each group arc runs between two detents, counted from OFF; its name stands at its end.
+GROUPS = [("RLO", 1.6, 3.3), ("RISO", 4.0, 5.1), ("RCD", 5.9, 7.9),
+          ("ZLOOP AC/DC", 8.6, 11.9)]
 
 
 def polar(radius: float, position: float) -> tuple[float, float]:
@@ -56,105 +62,98 @@ def polar(radius: float, position: float) -> tuple[float, float]:
     return DIAL[0] + radius * math.sin(angle), DIAL[1] - radius * math.cos(angle)
 
 
-def text(x, y, words, size=13, color=INK, anchor="middle", weight="normal"):
-    return (f'<text x="{x:.1f}" y="{y + size * 0.36:.1f}" font-family="sans-serif"'
-            f' font-size="{size}" fill="{color}" text-anchor="{anchor}"'
-            f' font-weight="{weight}">{words}</text>')
+FONT, LINE, ICON = 7.5, 8.5, (14.0, 11.0)  # dial text size, line pitch, symbol width and height
+GAP = 3.5  # clearance between a label and the ring or a group arc
+
+
+def text_width(words: str) -> float:
+    return len(words) * FONT * 0.56
+
+
+def label_size(words: str, icon: str | None) -> tuple[float, float]:
+    """Width and height of a dial label; a symbol stands beside its text, as on the dial."""
+    lines = words.split("\n") if words else []
+    widths = [text_width(part) for part in lines] or [0]
+    width = max(widths) + (ICON[0] + 1 if icon else 0)
+    height = max(LINE * len(lines), ICON[1] if icon else 0)
+    return width, height
+
+
+def reach(physical: int, radius: float, size: tuple[float, float]) -> tuple[float, float]:
+    """Nearest and farthest distance from the dial centre of a label placed at `radius`."""
+    x, y = polar(radius, physical)
+    dx, dy = abs(x - DIAL[0]), abs(y - DIAL[1])
+    near = math.hypot(max(dx - size[0] / 2, 0), max(dy - size[1] / 2, 0))
+    return near, math.hypot(dx + size[0] / 2, dy + size[1] / 2)
+
+
+def clear_radius(physical: int, size: tuple[float, float]) -> float:
+    """The smallest radius at which a label of that size keeps clear of the detent ring."""
+    keep = RING + 2.5 + GAP
+    radius = keep
+    while reach(physical, radius, size)[0] < keep and radius < keep + 40:
+        radius += 0.5
+    return radius
+
+
+def grouped(physical: int) -> bool:
+    return any(round(first) <= physical <= round(last) for _, first, last in GROUPS)
+
+
+def layout() -> tuple[dict[int, float], float]:
+    """Radius of every label, and the radius of the group arcs just outside the labels
+    they span."""
+    radii, outer = {}, ARCS
+    for physical, _, words, icon in POSITIONS:
+        size = label_size(words, icon)
+        radii[physical] = clear_radius(physical, size)
+        if grouped(physical):
+            outer = max(outer, reach(physical, radii[physical], size)[1] + GAP)
+    return radii, outer
+
+
+def label(words: str, icon: str | None, color: str) -> str:
+    lines = words.split("\n") if words else []
+    width, _ = label_size(words, icon)
+    left = -width / 2
+    body = []
+    for index, part in enumerate(lines):
+        centre = left + max(text_width(p) for p in lines) / 2
+        body.append(text(centre, (index - (len(lines) - 1) / 2) * LINE, part, FONT, color))
+    if icon:
+        x = width / 2 - ICON[0] / 2 if lines else 0
+        body.append(f'<g transform="translate({x:.1f},0) scale(0.62)">'
+                    + ICONS[icon].format(c=color) + "</g>")
+    return "".join(body)
 
 
 def dial() -> list[str]:
-    parts = [f'<circle cx="{DIAL[0]}" cy="{DIAL[1]}" r="104" fill="none" stroke="{GREEN}"'
-             ' stroke-width="7" stroke-dasharray="20 7.23" transform="rotate(-95.5 '
-             f'{DIAL[0]} {DIAL[1]})"/>']
+    dash = 2 * math.pi * RING / 24
+    parts = [f'<circle cx="{DIAL[0]}" cy="{DIAL[1]}" r="{RING}" fill="none" stroke="{GREEN}"'
+             f' stroke-width="5" stroke-dasharray="{dash * 0.72:.2f} {dash * 0.28:.2f}"'
+             f' transform="rotate({-90 - 0.36 * STEP:.2f} {DIAL[0]} {DIAL[1]})"/>']
+    radii, arcs = layout()
     for physical, value, words, icon in POSITIONS:
-        x, y = polar(132, physical)
+        x, y = polar(radii[physical], physical)
         color = DIM if value == 31 else INK
-        body = []
-        if words:
-            body.append(text(0, 0 if not icon else -9, words, 12, color))
-        if icon:
-            body.append(f'<g transform="translate(0,{8 if words else 0})">'
-                        + ICONS[icon].format(c=color) + "</g>")
         parts.append(f'<g id="pos-{value}" transform="translate({x:.1f},{y:.1f})">'
-                     + "".join(body) + "</g>")
-    for label, first, last in GROUPS:
-        x1, y1 = polar(166, first - 0.4)
-        x2, y2 = polar(166, last + 0.4)
-        parts.append(f'<path d="M{x1:.1f},{y1:.1f} A166,166 0 0 1 {x2:.1f},{y2:.1f}"'
-                     f' fill="none" stroke="{GREEN}" stroke-width="1.5"/>')
-        x, y = polar(182, (first + last) / 2)
-        parts.append(text(x, y, label, 11, GREEN))
-    return parts
-
-
-def keys() -> list[str]:
-    parts = [f'<rect x="318" y="238" width="392" height="314" rx="10" fill="none"'
-             f' stroke="{METAL}" stroke-width="2"/>']
-    leds = [("led-mains", "MAINS NETZ"), ("led-batt", "BATT"), ("led-ul", "UL/RL"),
-            ("led-rcd", "RCD FI")]
-    for index, (key, label) in enumerate(leds):
-        x = 352 + index * 92
-        parts.append(f'<circle id="{key}" cx="{x}" cy="262" r="7" fill="#55595e"'
-                     f' stroke="{METAL}"/>')
-        parts.append(text(x + 12, 262, label, 10, INK, "start"))
-    parts.append('<rect id="lcd" x="452" y="284" width="148" height="252" rx="4"'
-                 ' fill="#c9cfb8" stroke="#8b927c" stroke-width="2"/>')
-    for index, (key, label) in enumerate([("key-esc", "ESC"), ("key-mem", "MEM"),
-                                          ("key-help", "HELP"), ("key-start", "ON START"),
-                                          ("key-idn", "IΔN")]):
-        y = 296 + index * 50
-        parts.append(f'<rect id="{key}" x="330" y="{y}" width="56" height="30" rx="4"'
-                     ' fill="#1b1e22" stroke="#55595e" stroke-width="2"/>')
-        parts.append(text(394, y + 15, label, 11, GREEN if key == "key-start" else INK,
-                          "start"))
-    for index in range(5):
-        y = 296 + index * 50
-        parts.append(f'<rect id="soft-{index + 1}" x="640" y="{y}" width="56" height="30"'
-                     ' rx="4" fill="#1b1e22" stroke="#55595e" stroke-width="2"/>')
-        parts.append(f'<path d="M604,{y + 15} H636" stroke="{METAL}" stroke-width="1.5"/>')
-    return parts
-
-
-def sockets() -> list[str]:
-    parts = [f'<circle id="socket-clamp" cx="118" cy="214" r="24" fill="#1b1e22"'
-             f' stroke="{METAL}" stroke-width="3"/>',
-             '<circle id="led-warning" cx="118" cy="262" r="8" fill="#e8a33d"/>',
-             f'<rect x="40" y="290" width="250" height="24" fill="{METAL}"/>',
-             text(280, 302, "Electrical TEST", 12, "#2c3037", "end")]
-    for index, label in enumerate(["1(L)", "2(N)", "3(PE)"]):
-        y = 352 + index * 74
-        row = [f'<circle cx="{x}" cy="{y}" r="17" fill="#1b1e22" stroke="{METAL}"'
-               ' stroke-width="3"/>' for x in (70, 120)]
-        row.append(f'<circle cx="182" cy="{y}" r="25" fill="#1b1e22" stroke="{METAL}"'
-                   ' stroke-width="3"/>')
-        row.append(text(222, y + 22, label, 16, INK, "start", "bold"))
-        parts.append(f'<g id="socket-{index + 1}">' + "".join(row) + "</g>")
-    return parts
-
-
-def mains() -> list[str]:
-    parts = [f'<rect x="40" y="110" width="860" height="70" fill="{METAL}"/>',
-             '<rect id="mains-inlet" x="952" y="24" width="64" height="52" rx="4"'
-             ' fill="#1b1e22" stroke="#55595e" stroke-width="2"/>',
-             '<rect id="mains-switch" x="1036" y="24" width="34" height="52" rx="4"'
-             ' fill="#c0392b" stroke="#55595e" stroke-width="2"/>',
-             text(1011, 92, "115/230 V~", 11),
-             '<rect id="fuses" x="940" y="108" width="196" height="118" rx="4"'
-             ' fill="#1b1e22" stroke="#55595e" stroke-width="2"/>']
-    for index in range(4):
-        x = 954 + index * 46
-        parts.append(f'<rect id="fuse-{index + 1}" x="{x}" y="140" width="36" height="74"'
-                     f' rx="3" fill="#3a3f45" stroke="{METAL}"/>')
-        parts.append(text(x + 18, 124, f"F{index + 1}", 10))
-    parts += ['<rect id="usb" x="742" y="200" width="30" height="24" rx="3"'
-              f' fill="{METAL}" stroke="#55595e"/>', text(757, 238, "USB", 10),
-              '<path id="rs232" d="M792,198 h70 l-6,28 h-58 Z"'
-              f' fill="{METAL}" stroke="#55595e"/>', text(827, 238, "RS 232", 10)]
+                     + label(words, icon, color) + "</g>")
+    for name, first, last in GROUPS:
+        x1, y1 = polar(arcs, first)
+        x2, y2 = polar(arcs, last)
+        parts.append(f'<path d="M{x1:.1f},{y1:.1f} A{arcs:.1f},{arcs:.1f} 0 0 1'
+                     f' {x2:.1f},{y2:.1f}" fill="none" stroke="{GREEN}" stroke-width="1.2"/>')
+        if last > 9:
+            x, y = polar(arcs + 12, last + 0.3)
+            parts.append(text(x, y - 5, "ZLOOP", 7, GREEN) + text(x, y + 4, "AC/DC", 7, GREEN))
+        else:
+            x, y = polar(arcs + 4, last + 0.35)
+            parts.append(text(x, y, name, 7, GREEN, "start"))
     return parts
 
 
 def front() -> str:
-    body = mains() + sockets() + keys() + dial()
+    body = top() + sockets() + display() + dial()
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {WIDTH} {HEIGHT}">\n'
             '<!-- SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck'
             ' <thorsten.schnebeck@gmx.net> -->\n'

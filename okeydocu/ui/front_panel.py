@@ -150,7 +150,7 @@ class FrontPanel(QWidget):
         scale, _ = self._frame()
         offset = event.position() - self._dial_centre()
         distance = math.hypot(offset.x(), offset.y())
-        if distance > 190 * scale or distance < 20 * scale:
+        if distance > panel.DIAL_REACH * scale or distance < 12 * scale:
             return
         degrees = math.degrees(math.atan2(offset.x(), -offset.y()))
         value = panel.value_at(degrees)

@@ -16,8 +16,9 @@ FOLDER = resources.files(__name__)
 FRONT = FOLDER / "front.svg"
 KNOB = FOLDER / "knob.svg"
 
-DIAL = (950.0, 405.0)  # centre of the dial in the drawing
-KNOB_RADIUS = 95.0
+DIAL = (885.0, 548.0)  # centre of the dial in the drawing
+KNOB_RADIUS = 75.0
+DIAL_REACH = 135.0  # a click this far from the centre still turns the dial
 STEP_DEGREES = 15.0
 # Detent 0 is OFF; detents 1 to 23 report 12 to 34, OFF reports 35.
 VALUES = [35] + list(range(12, 35))
