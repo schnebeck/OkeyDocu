@@ -63,6 +63,7 @@ class _NumberedCanvas(pdf_canvas.Canvas):
     """Holds pages back so the footer can say "page x of y"."""
 
     footer = ""
+    middle = ""
     font = "Helvetica"
 
     def __init__(self, *args, **kwargs):
@@ -80,6 +81,7 @@ class _NumberedCanvas(pdf_canvas.Canvas):
             self.setFont(self.font, 7.5)
             self.setFillColor(colors.HexColor("#5b6670"))
             self.drawString(18 * mm + 6, 10 * mm, self.footer)  # where the text of the page starts
+            self.drawCentredString(A4[0] / 2, 10 * mm, self.middle)
             page = tr("Page {page} of {total}", page=self._pageNumber, total=total)
             self.drawRightString(A4[0] - 18 * mm - 6, 10 * mm, page)
             super().showPage()

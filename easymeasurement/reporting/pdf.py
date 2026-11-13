@@ -45,7 +45,7 @@ from .nodes import (
 from .nodes import Paragraph as TextNode
 from .pdf_frames import letterhead, signature
 from .pdf_tables import ContinuedTable, caption_of, column_widths, narrow_spaces
-from .pdf_pages import page_painters
+from .pdf_pages import page_painters, running_head
 from .pdf_parts import _NumberedCanvas, _register_fonts, _reserved_space
 from .pdf_photos import Footnoted as FootnotedFlowable
 from .pdf_photos import PageBudget, photo_cells, photo_rows
@@ -207,7 +207,9 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
         story.append(Spacer(1, 4))
     story.extend(headings)
 
-    canvas_class = type("Canvas", (_NumberedCanvas,), {"footer": footer, "font": regular})
+    # The day of the inspection stands in the middle of every foot.
+    canvas_class = type("Canvas", (_NumberedCanvas,), {"footer": footer, "font": regular,
+                                                       "middle": running_head(nodes)[1]})
     document = SimpleDocTemplate(
         str(target) if isinstance(target, Path) else target, pagesize=A4, leftMargin=18 * mm,
         rightMargin=18 * mm, topMargin=(MARGIN_MM + every_top) * mm,

@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+import re
 from math import sqrt
 from xml.sax.saxutils import escape
 
@@ -24,13 +25,22 @@ UNBROKEN = 14  # characters; a value with its unit stays on one line
 KEPT_NARROW = "\u202f"  # between a number and its unit: never broken
 BREAKING_NARROW = "\u2009"  # after a separator such as "/": a line may break there
 _NARROW = 0.6  # a narrow space as a part of a normal one
+_BODIES = r"(?:DIN|EN|IEC|ISO|VDE|DGUV|TRBS|ÖVE|ÖNORM)"
+# A standard by its bodies and number, as DIN EN 60204-1 or DGUV V3.
+STANDARD = re.compile(rf"\b{_BODIES}(?:\s+{_BODIES})*\s+(?:V\s?)?\d[\w.:\-]*")
+
+
+def kept_standards(text: str) -> str:
+    """A standard's name is never broken across lines: its spaces do not break."""
+    return STANDARD.sub(lambda found: re.sub(r"\s+", "\xa0", found[0]), text)
 
 
 def narrow_spaces(markup: str, size: float) -> str:
     """The layout breaks lines at every space and sets each one as wide as a normal space;
-    a narrow one is set as a smaller space, kept or breakable as it says."""
+    a narrow one is set as a smaller space, kept or breakable as it says. The name of a
+    standard stays on one line."""
     small = f"{size * _NARROW:.1f}"
-    return (markup.replace(KEPT_NARROW, f'<font size="{small}">\xa0</font>')
+    return (kept_standards(markup).replace(KEPT_NARROW, f'<font size="{small}">\xa0</font>')
             .replace(BREAKING_NARROW, f'<font size="{small}"> </font>'))
 WIDEST_TEXT_MM = 70  # a longer text wraps rather than squeeze its neighbours
 WIDEST_WORD_MM = 22  # what a column of sentences needs at least, short of room

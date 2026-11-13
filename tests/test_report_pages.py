@@ -129,3 +129,12 @@ def test_parts_handed_to_the_frame_count_the_room_above_their_heading():
     whole, _ = footnoted._measure(parts, 400)
     loose, _ = footnoted._measure(parts, 400, loose=True)
     assert loose == whole + 16
+
+
+def test_the_name_of_a_standard_is_never_broken():
+    from easymeasurement.reporting.pdf_tables import kept_standards
+
+    assert kept_standards("nach DIN EN 60204-1 und DIN VDE 0100-600") == (
+        "nach DIN\xa0EN\xa060204-1 und DIN\xa0VDE\xa00100-600")
+    assert kept_standards("DGUV V3") == "DGUV\xa0V3"
+    assert kept_standards("MEN 5 Kabel") == "MEN 5 Kabel"

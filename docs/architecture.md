@@ -206,8 +206,11 @@ loading, `campaign/plan_language.py` translates their texts (title, settings, wa
 source, connection diagram) into the program language; the German versions are in
 `data/languages/de/instructions.yaml`. Keys, functions, sockets and terminal IDs stay
 untranslated. A self-written plan stays in the language in which it was written.
-A campaign stores its steps in the language at its start; reports in a different
-language find the title again through the catalogues.
+A campaign stores its steps in the language at its start; reading a step
+(`plan_step`) tells its texts in the current language again wherever a catalogue knows them, and
+reports in a different language find the title the same way. The plan editor shows a supplied
+plan's title, points and texts in the program language; a text left as shown keeps the stored
+source text, so the plan stays translatable, and only a text actually changed is stored as typed.
 
 `tests/test_l10n.py` requires, for every marked text and every word of the supplied plans and
 instructions, a German entry with the same placeholders, and reports entries that nothing
@@ -650,6 +653,15 @@ and 4 measurements. Data are inserted from a list, display conditions are chosen
 “Source” shows the same template as YAML; changes there also apply in the layout.
 
 ### Letterhead and closing
+
+The pages after the first carry a head with title, campaign and installation, shortened from
+the title if it is too long (`reporting/pdf_pages.py`); the day of the inspection stands in the
+middle of every foot, between the identifier and the page number. The name of a standard such as
+DIN EN 60204-1 never breaks across lines (`kept_standards` in `reporting/pdf_tables.py`). A lower
+and an upper limit read as a range, `0 ms < ta < 300 ms`; instrument settings write their numbers
+with the decimal sign of the report language. A table of up to half a page is not split. Notices
+of one element that say the same share one row of the notices table. A draft carries no
+signature.
 
 The block “Letterhead” opens the report: a QR code with the identifier of the inspection (its UUID,
 the same as in the footer), next to it title and lines below, below that a frame with

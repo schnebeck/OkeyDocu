@@ -26,6 +26,7 @@ from ..l10n import tr
 from .nodes import Letterhead, SignatureLine
 from .logo import trimmed
 from .pdf_parts import _signature_image
+from .pdf_tables import kept_standards
 
 QR_MM = 24
 LOGO_BOX_MM = (55, 24)  # the most the firm's logo takes beside the title
@@ -59,7 +60,7 @@ def _logo(data: bytes) -> Image:
 
 
 def _lines(lines: list[str], style: ParagraphStyle) -> Paragraph:
-    return Paragraph("<br/>".join(escape(line) for line in lines), style)
+    return Paragraph("<br/>".join(kept_standards(escape(line)) for line in lines), style)
 
 
 def letterhead(node: Letterhead, usable: float, body: ParagraphStyle,
@@ -72,7 +73,8 @@ def letterhead(node: Letterhead, usable: float, body: ParagraphStyle,
     if node.code:
         cells.append(_qr(node.code, QR_MM * mm))
         widths.append((QR_MM + 5) * mm)
-    cells.append([Paragraph(escape(node.title), title), _lines(node.lines, body)])
+    cells.append([Paragraph(kept_standards(escape(node.title)), title),
+                  _lines(node.lines, body)])
     widths.append(usable - sum(widths) - (LOGO_BOX_MM[0] * mm if node.logo else 0))
     if node.logo:
         cells.append(_logo(node.logo))

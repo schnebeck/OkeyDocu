@@ -31,8 +31,8 @@ ELLIPSIS = "…"
 
 
 def running_head(nodes: list[Node]) -> tuple[list[str], str]:
-    """Title, what was tested and the occasion on the left, the day on the right, as the
-    letterhead of the first page says them."""
+    """Title, what was tested and the occasion for the head, the day for the middle of the
+    foot, as the letterhead of the first page says them."""
     head = next((node for node in nodes if isinstance(node, Letterhead)), None)
     if head is None:
         return [], ""
@@ -50,9 +50,10 @@ def _cut(text: str, font: str, width: float) -> str:
 
 
 def fitted_head(parts: list[str], right: str, font: str) -> str:
-    """The left half of the head in the room the right half leaves. The title, often a long
-    test basis, is shortened first; what was tested and when stays whole while it can."""
-    room = A4[0] - 2 * _EDGE - stringWidth(right, font, _HEAD_SIZE) - _HEAD_SPACE
+    """The head in the room `right` leaves beside it. The title, often a long test basis, is
+    shortened first; what was tested stays whole while it can."""
+    room = A4[0] - 2 * _EDGE - (stringWidth(right, font, _HEAD_SIZE) + _HEAD_SPACE if right
+                                else 0)
     whole = " · ".join(parts)
     if stringWidth(whole, font, _HEAD_SIZE) <= room or len(parts) < 2:
         return _cut(whole, font, room)
@@ -92,8 +93,8 @@ def page_painters(nodes: list[Node], logos: list, budget, font: str,
                   top: float) -> tuple[Callable, Callable]:
     """What the first page and the later pages draw before their text; `top` is where the
     text of a page begins, from the bottom of the sheet."""
-    parts, right = running_head(nodes)
-    left = fitted_head(parts, right, font)
+    parts, _ = running_head(nodes)
+    left = fitted_head(parts, "", font)
     every_page = [logo for logo in logos if logo.every_page]
 
     def first_page(canvas, _) -> None:
@@ -104,6 +105,6 @@ def page_painters(nodes: list[Node], logos: list, budget, font: str,
     def later_page(canvas, _) -> None:
         budget.new_page()
         _draw_logos(canvas, every_page)
-        _head(canvas, font, left, right, top)
+        _head(canvas, font, left, "", top)
 
     return first_page, later_page
