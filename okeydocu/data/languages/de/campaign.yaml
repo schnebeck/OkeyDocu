@@ -244,14 +244,19 @@ texts:
   as on the rating plate: laut Typenschild
   "Set for {element}:  {settings}": "Einstellen für {element}:  {settings}"
   "{setting}: {used} on the instrument, {expected} at {element}": "{setting}: am Gerät {used}, laut {element} {expected}"
-  "The instrument was set differently from the element:": "Das Gerät war anders eingestellt, als das Element angibt:"
-  Instrument settings differ from the element: Geräteeinstellung weicht vom Element ab
-  "The reading is stored. The instrument was set differently from what the element states:": "Der Messwert ist gespeichert. Das Gerät war anders eingestellt, als das Element angibt:"
-  "Check the setting on the instrument, or the element's data, before the next measurement.": "Vor der nächsten Messung die Einstellung am Gerät oder die Daten des Elements prüfen."
+  "Instrument settings to check:": "Geräteeinstellungen prüfen:"
+  Check the instrument settings: Geräteeinstellungen prüfen
+  "The reading is stored, but it does not match its RCD:": "Der Messwert ist gespeichert, passt aber nicht zu seinem RCD:"
+  "Before the next measurement, correct the instrument, the RCD's data or the place the reading is booked on.": "Vor der nächsten Messung das Gerät, die Daten des RCD oder den Messpunkt korrigieren."
+  "Not booked on an RCD: the settings cannot be checked. Book the reading on the RCD it tests.": "Nicht an einem RCD gebucht: Die Einstellungen lassen sich nicht prüfen. Den Messwert an dem RCD buchen, den er prüft."
+  "{element} does not state {settings}: not checked. Enter it at the element.": "{element} nennt nichts zu {settings}: nicht geprüft. Bitte am Element eintragen."
+  "No RCD chosen: choose the RCD this test is for as the place of the reading.": "Kein RCD gewählt: Als Messpunkt den RCD wählen, den dieser Test prüft."
+  "Enter what the rating plate says at {element}, so the next reading can be checked against it.": "Die Angaben vom Typenschild bei {element} eintragen, damit der nächste Messwert dagegen geprüft werden kann."
   Understood: Verstanden
-  "{count} set differently": "{count} abweichend eingestellt"
-  "{count} measurement was set differently from its element; it is marked orange.": "{count} Messung war anders eingestellt, als ihr Element angibt; sie ist orange markiert."
-  "{count} measurements were set differently from their element; they are marked orange.": "{count} Messungen waren anders eingestellt, als ihr Element angibt; sie sind orange markiert."
+  "{count} RCD test to check": "{count} RCD-Test zu prüfen"
+  "{count} RCD tests to check": "{count} RCD-Tests zu prüfen"
+  "{count} RCD test does not match its RCD; it is marked orange.": "{count} RCD-Test passt nicht zu seinem RCD; er ist orange markiert."
+  "{count} RCD tests do not match their RCD; they are marked orange.": "{count} RCD-Tests passen nicht zu ihrem RCD; sie sind orange markiert."
   Caution: Achtung
   Device under test: Prüfling
   Procedure: Vorgehen

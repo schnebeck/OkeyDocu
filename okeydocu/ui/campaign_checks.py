@@ -44,7 +44,7 @@ class CampaignChecks:
             parts.append(f'<a href="{FAILED_LINK}" style="color:{ALERT}">{text}</a>')
         set_apart = len(differing(self.app.db, campaign["id"]))
         if set_apart:
-            text = plural(set_apart, "{count} set differently", "{count} set differently")
+            text = plural(set_apart, "{count} RCD test to check", "{count} RCD tests to check")
             parts.append(f'<a href="{SETTINGS_LINK}" style="color:{NOTE}">{text}</a>')
         if campaign["plan_key"] == REPEAT:
             missing = sum(row["status"] in ("pending", "active")

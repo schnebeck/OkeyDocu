@@ -40,7 +40,8 @@ class CampaignPlaces:
     def _show_settings_for(self, asset_id: int | None) -> None:
         """The instructions name what the element that readings go to states for them."""
         check = SettingCheck(self.app.db)
-        expected, element = check.expected(asset_id), check.element(asset_id)
+        expected = check.expected(asset_id)
+        element = check.element(asset_id) if check.owner(asset_id) is not None else None
         self.guided.show_element(expected, element)
         self.free.instruction.show_element(expected, element)
 

@@ -6,12 +6,14 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""A setting keyed like a feature of an element is compared with that feature. The settings
-of an RCD test describe the RCD: the nearest element at or above the measured one that has an
-RCD type. Numbers are compared in base units, so 30 mA on the instrument meets 30 at a feature
-counted in mA; words without spaces, dashes and a leading `Typ`, so `Typ B` meets `B` and
-`A - EV` meets `A-EV` but not `A`. A value that is not known or
-cannot be read, on either side, is not compared: the check never claims what it cannot tell."""
+"""The settings of an RCD test describe the RCD it tests: the nearest element at or above the
+measured one whose kind has an RCD type. Each setting keyed like a feature of that element is
+compared with it. An RCD test without such an element, or at one that does not state a
+setting, is a finding of its own: nothing could be compared. Numbers are compared in base
+units, so 30 mA on the instrument meets 30 at a feature counted in mA; words without spaces,
+dashes and a leading `Typ`, so `Typ B` meets `B` and `A - EV` meets `A-EV` but not `A`. A
+value that is not known or cannot be read, on either side, is not compared: the check never
+claims what it cannot tell."""
 
 from __future__ import annotations
 
@@ -25,8 +27,9 @@ from ..l10n import tr
 from ..model import Quantity
 from ..vocabulary import setting_name
 
-OWNER = "rcd_type"  # the feature that marks the element the compared settings describe
+OWNER = "rcd_type"  # the feature that marks the kind of element the compared settings describe
 COMPARED = ("rcd_type", "rated_residual_current", "rated_current")
+RCD_FUNCTIONS = frozenset({"rcd_time", "rcd_touch", "rcd_current", "rcd_ramp_touch", "i_ramp"})
 
 
 @dataclass(frozen=True)
@@ -40,6 +43,26 @@ class Mismatch:
         return tr("{setting}: {used} on the instrument, {expected} at {element}",
                   setting=setting_name(self.key) or self.key, used=self.used,
                   expected=self.expected, element=self.element)
+
+
+@dataclass(frozen=True)
+class NoRcd:
+    """An RCD test booked where no RCD is at or above."""
+
+    def text(self) -> str:
+        return tr("Not booked on an RCD: the settings cannot be checked. Book the reading on"
+                  " the RCD it tests.")
+
+
+@dataclass(frozen=True)
+class Unstated:
+    keys: tuple[str, ...]
+    element: str
+
+    def text(self) -> str:
+        names = ", ".join(setting_name(key) or key for key in self.keys)
+        return tr("{element} does not state {settings}: not checked. Enter it at the element.",
+                  element=self.element, settings=names)
 
 
 def _number(text: str) -> float | None:
@@ -76,6 +99,7 @@ class SettingCheck:
         self._owners: dict[int, object] = {}
         units = db.query("SELECT kind, key, unit FROM kind_features")
         self._units = {(row["kind"], row["key"]): row["unit"] for row in units}
+        self._rcd_kinds = {kind for kind, key in self._units if key == OWNER}
 
     def owner(self, asset_id: int | None):
         """The element at or above `asset_id` whose settings are compared, or None."""
@@ -88,7 +112,7 @@ class SettingCheck:
                 row = self.db.one("SELECT * FROM assets WHERE id=?", current)
                 if row is None:
                     break
-                if json.loads(row["features_json"] or "{}").get(OWNER):
+                if row["kind"] in self._rcd_kinds:
                     found = row
                     break
                 current = row["parent_id"]
@@ -121,14 +145,20 @@ class SettingCheck:
             self._words = setting_words(self.db)
         return self._words.word(value)
 
-    def mismatches(self, parameters: list[tuple[str, str]],
-                   asset_id: int | None) -> list[Mismatch]:
-        """The settings that differ from the element the measurement was booked on."""
-        expected = dict(self.expected(asset_id))
-        if not expected:
+    def findings(self, function: str, parameters: list[tuple[str, str]],
+                 asset_id: int | None) -> list:
+        """What keeps an RCD test from matching the RCD it was booked on; other tests are not
+        judged."""
+        if function not in RCD_FUNCTIONS:
             return []
+        if self.owner(asset_id) is None:
+            return [NoRcd()]
+        expected = dict(self.expected(asset_id))
         element = self.element(asset_id)
-        found = []
+        found: list = []
+        unstated = tuple(key for key in COMPARED if key not in expected)
+        if unstated:
+            found.append(Unstated(unstated, element))
         for key, value in parameters:
             if key in expected:
                 used, said = self._word(value)
@@ -136,8 +166,8 @@ class SettingCheck:
                     found.append(Mismatch(key, used, expected[key], element))
         return found
 
-    def of_row(self, row) -> list[Mismatch]:
+    def of_row(self, row) -> list:
         """For a stored measurement."""
         stored = json.loads(row["parameters_json"] or "[]")
         parameters = [(item["key"], item["value"]) for item in stored]
-        return self.mismatches(parameters, row["asset_id"])
+        return self.findings(row["function"], parameters, row["asset_id"])

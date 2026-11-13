@@ -264,18 +264,21 @@ Settings the vocabulary knows are stored under its key instead of the code (`map
 the RCD type, the rated residual current and the rated current of an RCD test, so they can be held
 against the element.
 
-**Settings against the element** (`campaign/setting_check.py`): the RCD settings of a measurement
-describe the nearest element at or above the measured one that has an RCD type. Each setting that
-element states as a feature is compared with it: numbers in base units, so 30 mA meets a feature of
-30 in mA; words without spaces, dashes and a leading “Typ”, so “A - EV” is not “A”. A value that is not known, or a code without words, is not
-compared. Before measuring, the instructions name the values of the chosen element (“RCD type: A”),
-or “as on the rating plate” where it states none; a point of a repeat inspection takes them from the
-element instead of from the measurement back then. A pushed measurement that differs opens a card at
-once (`ui/setting_warning.py`), which does not block the next readings. In the table its row stays
-orange with the differences as tooltip, the head of the campaign counts such measurements with a
-link to the next one, and an import or fetch names their number. The check runs on display, so
-correcting the element's data takes the mark away. The report states the settings as they were and
-judges nothing about them.
+**RCD tests against their RCD** (`campaign/setting_check.py`): only RCD tests are checked. Their
+settings describe the RCD: the nearest element at or above the measured one whose kind has an RCD
+type. Each setting that element states is compared with it: numbers in base units, so 30 mA meets a
+feature of 30 in mA; words without spaces, dashes and a leading “Typ”, so “A - EV” is not “A”. A
+value that is not known, or a code without words, is not compared. An RCD test without an RCD
+element is a finding, and so is an RCD that does not state type, rated residual current or rated
+current. Before measuring, the instructions name the values of the RCD (“RCD type: A”), “as on the
+rating plate” where it states none, and warn when the chosen place has no RCD; a point of a repeat
+inspection takes them from the element instead of from the measurement back then. A pushed
+measurement with a finding opens a warning window at once (`ui/setting_warning.py`), while further
+readings keep arriving. In the table its row stays orange with the findings as tooltip, the head of
+the campaign counts such measurements with a link to the next one, and an import or fetch names
+their number. The check runs on display, so correcting the element's data or the place a reading is
+booked on takes the mark away. The report states the settings as they were and judges nothing about
+them.
 
 **Test and instrument log:** “Settings → Instruments → Test …” connects briefly and checks
 connection, instrument ID, calibration, clock, rotary switch, subscribing to and unsubscribing from Push/Print and the

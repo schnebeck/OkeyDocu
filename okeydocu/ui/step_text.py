@@ -15,6 +15,9 @@ from ..l10n import N_, tr
 from ..vocabulary import setting_name
 
 PLATE = N_("as on the rating plate")
+NO_RCD = N_("No RCD chosen: choose the RCD this test is for as the place of the reading.")
+UNSTATED = N_("Enter what the rating plate says at {element}, so the next reading can be"
+              " checked against it.")
 
 
 def title_html(step: PlanStep) -> str:
@@ -22,17 +25,26 @@ def title_html(step: PlanStep) -> str:
     return f"<h3>{escape(step.title)}</h3>{selector}"
 
 
-def settings_html(step: PlanStep, expected: list[tuple[str, str]] = (), element: str = "") -> str:
-    """`expected` is what the chosen element states for the settings it decides, by key;
-    a setting it does not state is read off the rating plate."""
+def settings_html(step: PlanStep, expected: list[tuple[str, str]] = (),
+                  element: str | None = "") -> str:
+    """`expected` is what the element the settings describe states for them, by key; a
+    setting it does not state is read off the rating plate. `element` None means the chosen
+    place has no such element, which a step deciding settings by its element warns about."""
     stated = dict(expected)
     pairs = [(setting_name(key) or key, stated.get(key) or tr(PLATE))
              for key in step.element_settings]
     items = "".join(f"<li>{escape(k)}: <b>{escape(v)}</b></li>"
                     for k, v in [*pairs, *step.settings])
+    if not items:
+        return ""
     title = (tr("Set on the instrument for {element}", element=escape(element))
-             if element and stated else tr("Set on the instrument"))
-    return f"<b>{title}</b><ul>{items}</ul>" if items else ""
+             if element else tr("Set on the instrument"))
+    html = f"<b>{title}</b><ul>{items}</ul>"
+    if step.element_settings and element is None:
+        html = f"<span style='color:#b03a2e'><b>⚠ {escape(tr(NO_RCD))}</b></span><br>" + html
+    elif step.element_settings and element and len(stated) < len(step.element_settings):
+        html += f"<i>{escape(tr(UNSTATED, element=element))}</i>"
+    return html
 
 
 def warnings_html(step: PlanStep) -> str:

@@ -56,7 +56,7 @@ class GuidedSteps:
             self.steps.setCurrentRow(keep if 0 <= keep < len(rows) else first_open)
         self._show_step()
 
-    def show_element(self, expected: list[tuple[str, str]], element: str) -> None:
+    def show_element(self, expected: list[tuple[str, str]], element: str | None) -> None:
         """The settings of a measuring step follow the element readings go to."""
         self.element = (expected, element)
         row = self._step()

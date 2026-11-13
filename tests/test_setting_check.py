@@ -11,7 +11,7 @@ from datetime import datetime
 import pytest
 
 from okeydocu.campaign.plan import load_instructions
-from okeydocu.campaign.setting_check import SettingCheck, same
+from okeydocu.campaign.setting_check import NoRcd, SettingCheck, Unstated, same
 from okeydocu.devices import LiveReading
 from okeydocu.devices.profitest_prime.info import DRIVER_KEY
 from okeydocu.devices.profitest_prime.parser import parse_event
@@ -72,8 +72,8 @@ def test_the_rcd_above_the_measured_element_decides(app, rcd):
                                               ("rated_current", "25 A")]
     assert check.element(rcd["circuit"]) == "=K1-F1"
     assert check.expected(rcd["machine"]) == []
-    found = check.mismatches([("rcd_type", "B"), ("rated_current", "63A"),
-                              ("rated_residual_current", "30mA")], rcd["circuit"])
+    found = check.findings("rcd_time", [("rcd_type", "B"), ("rated_current", "63A"),
+                                        ("rated_residual_current", "30mA")], rcd["circuit"])
     assert [(m.key, m.used, m.expected) for m in found] == [("rcd_type", "B", "A"),
                                                            ("rated_current", "63A", "25 A")]
 
@@ -82,20 +82,32 @@ def test_a_code_is_judged_by_the_instruments_own_word(app, rcd):
     app.db.save_device_texts(DRIVER_KEY, "1.0", "1", {"de-DE": {"TS1463": "B"},
                                                       "en-GB": {"TS1463": "B"}})
     with speaking("de"):
-        found = SettingCheck(app.db).mismatches([("rcd_type", "TS1463")], rcd["circuit"])
+        found = SettingCheck(app.db).findings("rcd_time", [("rcd_type", "TS1463")],
+                                              rcd["circuit"])
     assert [(m.used, m.expected) for m in found] == [("B", "A")]
 
 
 def test_a_code_without_words_is_not_judged(app, rcd):
-    found = SettingCheck(app.db).mismatches([("rcd_type", "TS9999")], rcd["circuit"])
+    found = SettingCheck(app.db).findings("rcd_time", [("rcd_type", "TS9999")], rcd["circuit"])
     assert found == []
 
 
-def test_a_setting_the_element_does_not_state_is_not_judged(app, rcd):
+def test_a_setting_the_rcd_does_not_state_is_named_instead_of_judged(app, rcd):
     app.db.set_asset_features(rcd["switch"], {"rcd_type": "B"})
-    found = SettingCheck(app.db).mismatches([("rcd_type", "B"), ("rated_current", "63 A")],
-                                            rcd["circuit"])
-    assert found == []
+    parameters = [("rcd_type", "B"), ("rated_current", "63 A")]
+    found = SettingCheck(app.db).findings("rcd_time", parameters, rcd["circuit"])
+    assert found == [Unstated(("rated_residual_current", "rated_current"), "=K1-F1")]
+
+
+def test_an_rcd_test_without_an_rcd_above_is_a_finding(app, rcd):
+    found = SettingCheck(app.db).findings("rcd_time", [("rcd_type", "B")], rcd["machine"])
+    assert found == [NoRcd()]
+
+
+def test_only_rcd_tests_are_held_against_the_rcd(app, rcd):
+    check = SettingCheck(app.db)
+    assert check.findings("zloop", [("rated_current", "16 A")], rcd["circuit"]) == []
+    assert check.findings("zloop", [], rcd["machine"]) == []
 
 
 def test_the_instruction_names_the_settings_of_the_chosen_element(app, rcd):
@@ -122,7 +134,7 @@ def test_a_differing_push_warns_at_once_and_stays_orange(window, app, rcd):
     assert table.item(0, 0).background().color() == ORANGE
     assert "=K1-F1" in table.item(0, 0).toolTip()
     with speaking("de"):
-        assert "1 Messung war anders eingestellt" in campaign_note(app.db, campaign)
+        assert "1 RCD-Test passt nicht zu seinem RCD" in campaign_note(app.db, campaign)
 
 
 def test_a_matching_push_raises_no_warning(window, app, rcd):
@@ -135,3 +147,23 @@ def test_a_matching_push_raises_no_warning(window, app, rcd):
     page._received(campaign, LiveReading(parse_event(RCD_PUSH), datetime(2026, 3, 1, 10, 0, 5)))
     assert page.settings_warning is None
     assert campaign_note(app.db, campaign) == ""
+
+
+def test_an_rcd_test_on_a_place_without_rcd_warns_in_a_window(window, app, rcd):
+    campaign = app.service.create(rcd["machine"], "Prüfung", "Tester")
+    page = window.campaign
+    page.show_campaign(campaign)
+    page._received(campaign, LiveReading(parse_event(RCD_PUSH), datetime(2026, 3, 1, 10, 0, 5)))
+    warning = page.settings_warning
+    assert warning.isVisible() and warning.icon() == warning.Icon.Warning
+    assert "Nicht an einem RCD gebucht" in warning.text()
+    warning.accept()
+
+
+def test_the_guide_asks_for_the_rcd_when_none_is_chosen(app, rcd):
+    step = load_instructions()["rcd_time"]
+    with speaking("de"):
+        missing = step_text.settings_html(step, [], None)
+        unstated = step_text.settings_html(step, [("rcd_type", "A")], "=K1-F1")
+    assert "Kein RCD gewählt" in missing
+    assert "bei =K1-F1 eintragen" in unstated

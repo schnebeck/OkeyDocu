@@ -76,7 +76,7 @@ class InstructionPanel(QWidget):
             self.wiring.show_step(None)
             self.text.setText(tr(NO_INSTRUCTION))
 
-    def show_element(self, expected: list[tuple[str, str]], element: str) -> None:
+    def show_element(self, expected: list[tuple[str, str]], element: str | None) -> None:
         self.element = (expected, element)
         self._show()
 
