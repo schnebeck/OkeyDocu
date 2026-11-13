@@ -425,6 +425,10 @@ lists:
   phases:
     label: Phases
     values: ["1", "3"]
+  n_terminal:
+    label: N terminal
+    help: Where the RCD has its N terminals, seen from the front.
+    values: [right, left]
   conductor_material:
     label: Conductor material
     values: [Cu, Al]

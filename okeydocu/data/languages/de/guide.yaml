@@ -20,3 +20,21 @@ texts:
   Place probe L (L1) on outgoing terminal 2 of the RCD.: Spitze L (L1) an Abgangsklemme 2 des FI setzen.
   Place probe N (L3) on outgoing terminal N of the RCD.: Spitze N (L3) an Abgangsklemme N des FI setzen.
   The test switches the circuit off. Secure the loads beforehand.: Der Test schaltet den Stromkreis ab. Verbraucher vorher sichern.
+  Inform the operator: Betreiber informieren
+  The test switches the circuit off.: Der Test schaltet den Stromkreis ab.
+  Secure the loads: Verbraucher sichern
+  "Save data, stop running machines.": "Daten speichern, laufende Maschinen anhalten."
+  Leave it switched on: Eingeschaltet lassen
+  The RCD and the circuit stay on.: Der FI und der Stromkreis bleiben ein.
+  Live: Unter Spannung
+  De-energised: Spannungsfrei
+  The circuit stays switched on.: Der Stromkreis bleibt eingeschaltet.
+  "Switch off, secure against switching on again, verify that it is dead.": "Freischalten, gegen Wiedereinschalten sichern, Spannungsfreiheit feststellen."
+  No element chosen yet: Noch kein Element gewählt
+  no element chosen: kein Element gewählt
+  Where do we measure?: Wo messen wir?
+  — choose —: — wählen —
+  Choose the element this test is for.: Das Element wählen, für das dieser Test ist.
+  Details from the rating plate: Angaben vom Typenschild
+  Missing details are stored at the element. Without them the drawing shows the usual layout.: Fehlende Angaben werden am Element gespeichert. Ohne sie zeigt die Zeichnung die übliche Bauform.
+  Prepared – next ▶: Vorbereitet – weiter ▶

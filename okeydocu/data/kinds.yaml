@@ -37,7 +37,7 @@ kinds:
                 "Rated current|A", "Rated voltage|V", "Rated power|kW", "Weight|kg"]}
   - {key: rcd, label: RCD, icon: rcd, izytron: 233, interval: 6,
      features: [RCD type, {key: number_of_poles, label: Poles of the protective device},
-                "Rated residual current|mA", "Rated current|A",
+                N terminal, "Rated residual current|mA", "Rated current|A",
                 {key: characteristic, label: Characteristic, list: rcd_characteristic},
                 Circuit breaker characteristic, Cable type,
                 {key: number_of_cores, label: Cores of the cable},
@@ -127,6 +127,7 @@ lists:
   Rated current: rated_current
   Rated residual current: rated_residual_current
   RCD type: rcd_type
+  N terminal: n_terminal
   Poles of the protective device: number_of_poles
   Cores of the cable: cores
   Number of poles: number_of_poles

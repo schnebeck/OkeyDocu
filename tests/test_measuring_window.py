@@ -20,13 +20,33 @@ from okeydocu.ui.test_objects import DRAWINGS
 
 
 @pytest.fixture
-def window(qtbot):
+def plant(app):
+    customer = app.db.add_customer("Muster AG")
+    machine = app.db.add_asset(customer, "machine", "Presse")
+    cabinet = app.db.add_asset(customer, "construction_distributor", "Schrank", machine,
+                               identifier="=K1")
+    switch = app.db.add_asset(customer, "rcd", "FI Steuerung", cabinet, identifier="=K1-F1")
+    other = app.db.add_asset(customer, "rcd", "FI Licht", cabinet, identifier="=K1-F2")
+    app.db.set_asset_features(switch, {"rcd_type": "A", "rated_residual_current": "30",
+                                       "rated_current": "25", "number_of_poles": "4"})
+    circuit = app.db.add_asset(customer, "circuit", "Steckdosen", switch)
+    campaign = app.service.create(machine, "Prüfung", "Tester")
+    return {"campaign": campaign, "machine": machine, "switch": switch, "other": other,
+            "circuit": circuit}
+
+
+def opened(qtbot, app, plant, asset_id):
     with speaking("de"):
-        shown = MeasuringWindow(DRIVER_KEY, "rcd_time", "=K1-F1", ["30 mA · A", "25 A"], 4)
+        shown = MeasuringWindow(app, plant["campaign"], DRIVER_KEY, "rcd_time", asset_id)
     qtbot.addWidget(shown)
     shown.resize(1440, 1020)
     shown.show()
     return shown
+
+
+@pytest.fixture
+def window(qtbot, app, plant):
+    return opened(qtbot, app, plant, plant["circuit"])
 
 
 def anchors_of(test_object: str, poles: int, n_left: bool) -> dict:
@@ -59,8 +79,8 @@ def test_n_stands_after_the_line_conductors_or_first(n_left, order):
 def test_leads_cross_only_where_plugs_and_terminals_force_it(window, poles, n_left, crossing):
     """Plugs stacked L over N, terminals side by side L before N: one bridge is unavoidable.
     With N first on the RCD the orders agree and nothing crosses; PE never crosses."""
-    window.bench.show_guide(guide_for("rcd_time"), ["30 mA"], poles, n_left)
     window.go(LEADS)
+    window.bench.show_guide(guide_for("rcd_time"), ["30 mA"], poles, n_left)
     window.bench.finish()
     window.bench.repaint()
     bench = window.bench
@@ -117,3 +137,43 @@ def test_the_last_station_closes_the_window(window):
     window.go(len(STATIONS) - 1)
     window.next.click()
     assert window.result() == window.DialogCode.Accepted
+
+
+# Station "Installation" ------------------------------------------------------------------
+
+
+def test_the_rcd_above_the_chosen_place_is_the_test_point(window, plant):
+    assert window.place.asset_id == plant["switch"]
+    assert window.place.path == ("Presse", "Schrank =K1")
+    assert window.place.lines() == ["30 mA · A", "25 A"] and window.place.poles == 4
+    assert window.form.choice.currentData() == plant["switch"]
+    assert window.form.choice.count() == 2
+
+
+def test_a_missing_detail_is_marked_and_does_not_stop_the_tester(window):
+    field = window.form.fields["n_terminal"]
+    assert "fde2c4" in field.styleSheet()
+    assert "Fehlende Angaben" in window.form.hint.text()
+    window.next.click()
+    assert window.station == 1
+
+
+def test_what_is_entered_is_stored_at_the_element_as_the_list_holds_it(window, app, plant):
+    window.form.fields["n_terminal"].setEditText("links")
+    window.next.click()
+    assert app.db.asset_features(plant["switch"])["n_terminal"] == "left"
+    assert window.place.n_left and window.bench.n_left
+
+
+def test_another_element_can_be_chosen(window, plant):
+    window.form.choice.setCurrentIndex(window.form.choice.findData(plant["other"]))
+    window.form.choice.activated.emit(window.form.choice.currentIndex())
+    assert window.place.asset_id == plant["other"]
+    assert window.place.lines() == ["? mA", "? A"]
+
+
+def test_without_an_rcd_the_station_asks_for_one(qtbot, app, plant):
+    window = opened(qtbot, app, plant, plant["machine"])
+    assert window.place.asset_id is None
+    assert window.form.choice.currentData() is None
+    assert "wählen" in window.form.hint.text()

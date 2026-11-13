@@ -25,11 +25,20 @@ RCD_LEADS = (
     Lead(*N_LEAD, "out_n", N_("Place probe N (L3) on outgoing terminal N of the RCD.")),
 )
 
+RCD_FEATURES = ("rcd_type", "rated_residual_current", "rated_current", "number_of_poles",
+                "n_terminal")
+LIVE_RCD = (
+    (N_("Inform the operator"), N_("The test switches the circuit off.")),
+    (N_("Secure the loads"), N_("Save data, stop running machines.")),
+    (N_("Leave it switched on"), N_("The RCD and the circuit stay on.")),
+)
+
 GUIDES = {
     "rcd_time": Guide(
         "rcd_time", N_("RCD tripping test IΔN"), 18, "rcd",
         N_("RCD, outgoing side"), RCD_LEADS,
-        N_("The test switches the circuit off. Secure the loads beforehand.")),
+        N_("The test switches the circuit off. Secure the loads beforehand."),
+        "rcd_type", RCD_FEATURES, True, LIVE_RCD),
 }
 
 

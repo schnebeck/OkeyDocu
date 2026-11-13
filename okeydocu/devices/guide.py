@@ -19,7 +19,7 @@ from ..l10n import N_
 
 STATIONS = (N_("Installation"), N_("Rotary switch"), N_("Test leads"), N_("Supply"),
             N_("Mode and limits"), N_("Measure"))
-LEADS = 2  # index of the station that connects the test leads
+PLACE, LEADS = 0, 2  # index of the stations choosing the place and connecting the leads
 
 
 @dataclass(frozen=True)
@@ -40,6 +40,10 @@ class Guide:
     test_point: str  # what the test point is, to be translated
     leads: tuple[Lead, ...]  # in the order the probes are placed
     caution: str = ""
+    owner_feature: str = ""  # a feature the kind of element measured has, such as an RCD type
+    element_features: tuple[str, ...] = ()  # what the guide needs that element to state
+    live: bool = True  # whether the installation stays energised while measuring
+    preparation: tuple[tuple[str, str], ...] = ()  # what to do beforehand: heading, text
 
 
 @dataclass(frozen=True)

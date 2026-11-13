@@ -1,6 +1,10 @@
 # OkeyDocu - German texts of the shipped choice lists: names, facts, help and notes.
 texts:
   RCD characteristic: RCD-Charakteristik
+  N terminal: N-Klemme
+  Where the RCD has its N terminals, seen from the front.: Wo der FI seine N-Klemmen hat, von vorn gesehen.
+  right: rechts
+  left: links
   Protective device: Schutzeinrichtung
   Instantaneous trip: Unverzögerte Auslösung
   Disconnecting current Iₐ: Abschaltstrom Iₐ
