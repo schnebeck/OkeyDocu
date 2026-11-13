@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_vocabulary.py
+# OkeyDocu - tests/test_vocabulary.py
 # The application's vocabulary: names in the current language, and a new field of measurement
 # added as a file of its own.
 #
@@ -9,10 +9,10 @@
 
 import pytest
 
-from easymeasurement import vocabulary as words
-from easymeasurement.l10n import speaking
-from easymeasurement.model import Quantity
-from easymeasurement.vocabulary import terms
+from okeydocu import vocabulary as words
+from okeydocu.l10n import speaking
+from okeydocu.model import Quantity
+from okeydocu.vocabulary import terms
 
 ACOUSTICS = """
 quantities:

@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_prime_parser.py
+# OkeyDocu - tests/test_prime_parser.py
 # Parsing the instrument's database and quantities. All instrument data is synthetic.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,10 +10,10 @@ from datetime import datetime
 
 import pytest
 
-from easymeasurement.devices.profitest_prime.mapping import FUNCTIONS
-from easymeasurement.devices.profitest_prime.parser import parse_database
-from easymeasurement.model import Quantity, Verdict, conductor_of
-from easymeasurement.vocabulary import function_keys
+from okeydocu.devices.profitest_prime.mapping import FUNCTIONS
+from okeydocu.devices.profitest_prime.parser import parse_database
+from okeydocu.model import Quantity, Verdict, conductor_of
+from okeydocu.vocabulary import function_keys
 
 from .prime_helpers import DATABASE
 

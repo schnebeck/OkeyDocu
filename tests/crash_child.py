@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/crash_child.py
+# OkeyDocu - tests/crash_child.py
 # Measures part of a guided round with the simulator, then ends its process at once.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -6,7 +6,7 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""Run as `python -m tests.crash_child` in a process of its own, with EASYMEASUREMENT_DATA
+"""Run as `python -m tests.crash_child` in a process of its own, with OKEYDOCU_DATA
 set. The first step is measured and finished, the second is set up and holds two readings when
 the process ends without closing anything, as a crash or an empty battery would end it. The
 last line on stdout names the campaign and how many readings it holds by then."""
@@ -19,10 +19,10 @@ CRASHED = 70  # the exit code the test expects; any other means the round failed
 
 def main() -> None:
     qt = QApplication([])
-    from easymeasurement.__main__ import build_context
-    from easymeasurement.campaign.plan import load_plans
-    from easymeasurement.ui import common
-    from easymeasurement.ui.main_window import MainWindow
+    from okeydocu.__main__ import build_context
+    from okeydocu.campaign.plan import load_plans
+    from okeydocu.ui import common
+    from okeydocu.ui.main_window import MainWindow
 
     from .guided_helpers import connect_all, run_step
 

@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_data_core.py
+# OkeyDocu - tests/test_data_core.py
 # Customers, assets, measurements and values: no instrument involved.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -11,12 +11,12 @@ from datetime import date, datetime
 import pytest
 from PIL import Image
 
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.reporting.archive import ReportArchive
-from easymeasurement.reporting.context import build_context
-from easymeasurement.reporting.template import default_template_text
-from easymeasurement.store import CampaignClosed
-from easymeasurement.store.search import MeasurementFilter, search_measurements, search_reports
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.reporting.archive import ReportArchive
+from okeydocu.reporting.context import build_context
+from okeydocu.reporting.template import default_template_text
+from okeydocu.store import CampaignClosed
+from okeydocu.store.search import MeasurementFilter, search_measurements, search_reports
 
 T0 = datetime(2026, 3, 1, 10, 0, 0)
 

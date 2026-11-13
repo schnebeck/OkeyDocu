@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/izytron_helpers.py
+# OkeyDocu - tests/izytron_helpers.py
 # An invented IZYTRON database for the import tests.
 #
 # Producer: thorsten.schnebeck@gmx.net

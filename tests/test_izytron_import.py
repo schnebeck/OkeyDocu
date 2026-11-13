@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_izytron_import.py
+# OkeyDocu - tests/test_izytron_import.py
 # Importing a day of testing from an IZYTRON database. All data here is invented.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -11,8 +11,8 @@ from datetime import date, datetime
 
 import pytest
 
-from easymeasurement.importing.izytron import ImportFailed, import_day
-from easymeasurement.model import (
+from okeydocu.importing.izytron import ImportFailed, import_day
+from okeydocu.model import (
     CONDUCTOR,
     MeterMeasurement,
     Parameter,
@@ -21,10 +21,10 @@ from easymeasurement.model import (
     Verdict,
     conductor_of,
 )
-from easymeasurement.reporting.context import ReportMeasurement, build_context
-from easymeasurement.reporting.footnotes import Footnotes
-from easymeasurement.reporting.measurement_table import group_nodes
-from easymeasurement.store import CampaignClosed
+from okeydocu.reporting.context import ReportMeasurement, build_context
+from okeydocu.reporting.footnotes import Footnotes
+from okeydocu.reporting.measurement_table import group_nodes
+from okeydocu.store import CampaignClosed
 
 from .izytron_helpers import build
 

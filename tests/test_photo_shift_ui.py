@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_photo_shift_ui.py
+# OkeyDocu - tests/test_photo_shift_ui.py
 # Dragging a photo sideways moves all photos on the timeline.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -12,7 +12,7 @@ import pytest
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtTest import QTest
 
-from easymeasurement.ui.photo_timeline_model import shift_text
+from okeydocu.ui.photo_timeline_model import shift_text
 
 from .photo_ui_helpers import (
     centre_of,

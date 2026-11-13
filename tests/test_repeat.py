@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_repeat.py
+# OkeyDocu - tests/test_repeat.py
 # A repeat inspection: the last one's measurements as points, filled in any order.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,7 +10,7 @@ from datetime import datetime
 
 import pytest
 
-from easymeasurement.model import MeterMeasurement, Parameter, Quantity, ResultValue, Verdict
+from okeydocu.model import MeterMeasurement, Parameter, Quantity, ResultValue, Verdict
 
 
 def _riso(text, lower=">1.00MΩ"):
@@ -138,8 +138,8 @@ def test_last_values_come_back_for_comparison(app, last):
 
 
 def test_the_report_groups_a_repeat_by_measurement_and_names_what_was_left_out(app, last):
-    from easymeasurement.reporting.context import build_context
-    from easymeasurement.reporting.nodes import plain
+    from okeydocu.reporting.context import build_context
+    from okeydocu.reporting.nodes import plain
     points = _points(app, last["again"])
     app.service.insert_imported(last["again"], _reading("n1", "L1-PE"), "device:x",
                                 datetime(2026, 5, 4, 9), None, None, None, last["cabinet"])

@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_instrument_choice.py
+# OkeyDocu - tests/test_instrument_choice.py
 # Choosing an instrument by name, and a window that stays alive during its work.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -13,16 +13,16 @@ import pytest
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QPushButton
 
-from easymeasurement.__main__ import build_context
-from easymeasurement.devices import DeviceError, FoundInstrument
-from easymeasurement.devices.profitest_prime import pairing
-from easymeasurement.devices.profitest_prime.info import DRIVER as PRIME_DRIVER
-from easymeasurement.devices.simulator import SimulatedMeter
-from easymeasurement.ui.campaign_dialog import CampaignDialog
-from easymeasurement.ui.common import run_busy
-from easymeasurement.ui.instrument_setup import InstrumentSetupOverlay
-from easymeasurement.ui.main_window import MainWindow
-from easymeasurement.ui.settings_dialog import SettingsOverlay
+from okeydocu.__main__ import build_context
+from okeydocu.devices import DeviceError, FoundInstrument
+from okeydocu.devices.profitest_prime import pairing
+from okeydocu.devices.profitest_prime.info import DRIVER as PRIME_DRIVER
+from okeydocu.devices.simulator import SimulatedMeter
+from okeydocu.ui.campaign_dialog import CampaignDialog
+from okeydocu.ui.common import run_busy
+from okeydocu.ui.instrument_setup import InstrumentSetupOverlay
+from okeydocu.ui.main_window import MainWindow
+from okeydocu.ui.settings_dialog import SettingsOverlay
 
 from .prime_helpers import ADDRESS
 
@@ -52,7 +52,7 @@ def test_dialog_asks_for_an_instrument_not_for_a_port(qtbot, app):
 
 
 def test_known_instrument_is_already_chosen(qtbot, app, plan, monkeypatch):
-    monkeypatch.setattr("easymeasurement.ui.campaign_dialog.find_instruments", lambda: [PRIME])
+    monkeypatch.setattr("okeydocu.ui.campaign_dialog.find_instruments", lambda: [PRIME])
     dialog = CampaignDialog(app, plans=[plan])
     qtbot.addWidget(dialog)
     assert dialog.source.currentData() == PRIME
@@ -60,7 +60,7 @@ def test_known_instrument_is_already_chosen(qtbot, app, plan, monkeypatch):
 
 
 def test_no_address_is_ever_shown(qtbot, app, plan, monkeypatch):
-    monkeypatch.setattr("easymeasurement.ui.campaign_dialog.find_instruments", lambda: [PRIME])
+    monkeypatch.setattr("okeydocu.ui.campaign_dialog.find_instruments", lambda: [PRIME])
     dialog = CampaignDialog(app, plans=[plan])
     qtbot.addWidget(dialog)
     assert not any(ADDRESS in text or "/dev" in text for text in labels(dialog))
@@ -70,18 +70,18 @@ def test_instrument_plugged_in_later_appears(qtbot, app, plan, monkeypatch):
     dialog = CampaignDialog(app, plans=[plan])
     qtbot.addWidget(dialog)
     assert labels(dialog) == ["Simulator (Zufallswerte)"]
-    monkeypatch.setattr("easymeasurement.ui.campaign_dialog.find_instruments", lambda: [PRIME])
+    monkeypatch.setattr("okeydocu.ui.campaign_dialog.find_instruments", lambda: [PRIME])
     dialog._fill_sources()
     assert labels(dialog)[0] == "PROFITEST PRIME (Bluetooth)"
 
 
 def test_refreshing_keeps_the_operators_choice(qtbot, app, plan, monkeypatch):
     usb = FoundInstrument("profitest-prime", "PROFITEST PRIME (USB)", "/dev/ttyACM0")
-    monkeypatch.setattr("easymeasurement.ui.campaign_dialog.find_instruments", lambda: [PRIME])
+    monkeypatch.setattr("okeydocu.ui.campaign_dialog.find_instruments", lambda: [PRIME])
     dialog = CampaignDialog(app, plans=[plan])
     qtbot.addWidget(dialog)
     dialog.source.setCurrentIndex(1)
-    monkeypatch.setattr("easymeasurement.ui.campaign_dialog.find_instruments", lambda: [usb, PRIME])
+    monkeypatch.setattr("okeydocu.ui.campaign_dialog.find_instruments", lambda: [usb, PRIME])
     dialog._fill_sources()
     assert dialog.source.currentText() == "Simulator (Zufallswerte)"
 
@@ -94,7 +94,7 @@ def test_campaign_without_a_plan_can_be_typed_in(qtbot, app):
 
 
 def test_plan_can_be_left_out_and_the_choice_follows(qtbot, app, plan, monkeypatch):
-    monkeypatch.setattr("easymeasurement.ui.campaign_dialog.find_instruments", lambda: [PRIME])
+    monkeypatch.setattr("okeydocu.ui.campaign_dialog.find_instruments", lambda: [PRIME])
     dialog = CampaignDialog(app, plans=[plan])
     qtbot.addWidget(dialog)
     dialog.plan.setCurrentIndex(dialog.plan.findText("Ohne Plan"))
@@ -145,7 +145,7 @@ def test_configuration_is_reached_from_the_menu(qtbot, app, monkeypatch):
 
 
 def test_configuration_lists_instruments_by_name(qtbot, monkeypatch):
-    monkeypatch.setattr("easymeasurement.ui.settings_dialog.find_instruments", lambda: [PRIME])
+    monkeypatch.setattr("okeydocu.ui.settings_dialog.find_instruments", lambda: [PRIME])
     dialog = SettingsOverlay()
     qtbot.addWidget(dialog)
     assert dialog.instruments.item(0).text() == "PROFITEST PRIME (Bluetooth)"
@@ -163,7 +163,7 @@ def test_instrument_appears_right_after_setting_it_up(qtbot, monkeypatch):
     dialog = SettingsOverlay()
     qtbot.addWidget(dialog)
     monkeypatch.setattr(InstrumentSetupOverlay, "exec", lambda self: 1)
-    monkeypatch.setattr("easymeasurement.ui.settings_dialog.find_instruments", lambda: [PRIME])
+    monkeypatch.setattr("okeydocu.ui.settings_dialog.find_instruments", lambda: [PRIME])
     dialog.pairing_buttons[PRIME_DRIVER.key].click()
     assert dialog.instruments.count() == 1
 
@@ -229,7 +229,7 @@ def test_error_during_the_work_reaches_the_caller_and_frees_the_window(qtbot, ap
 
 def test_failed_start_leaves_no_campaign_and_says_why(qtbot, app, plan, monkeypatch):
     errors = []
-    monkeypatch.setattr("easymeasurement.ui.guided_actions.show_error", lambda _, text: errors.append(text))
+    monkeypatch.setattr("okeydocu.ui.guided_actions.show_error", lambda _, text: errors.append(text))
     monkeypatch.setattr(SimulatedMeter, "identify", lambda self: (_ for _ in ()).throw(
         DeviceError("Kein Messgerät gefunden")))
     window = MainWindow(app)

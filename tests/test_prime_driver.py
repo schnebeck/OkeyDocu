@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_prime_driver.py
+# OkeyDocu - tests/test_prime_driver.py
 # The PROFITEST PRIME driver against a fake serial port with synthetic replies.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -12,9 +12,9 @@ from datetime import date, datetime
 
 import pytest
 
-from easymeasurement.devices.base import DeviceError
-from easymeasurement.devices.profitest_prime.driver import ProfitestPrimeDriver
-from easymeasurement.devices.profitest_prime.transport import (
+from okeydocu.devices.base import DeviceError
+from okeydocu.devices.profitest_prime.driver import ProfitestPrimeDriver
+from okeydocu.devices.profitest_prime.transport import (
     READ_ONLY_COMMANDS,
     ForbiddenCommand,
     PrimeTransport,

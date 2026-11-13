@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/seal_helpers.py
+# OkeyDocu - tests/seal_helpers.py
 # Fixtures of the seal tests: a sealing service, a finished campaign and forgery.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,9 +10,9 @@ import sqlite3
 
 import pytest
 
-from easymeasurement.campaign.service import CampaignService
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.store import Database
+from okeydocu.campaign.service import CampaignService
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.store import Database
 
 
 class Key:

@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_workspace_closing.py
+# OkeyDocu - tests/test_workspace_closing.py
 # Finishing a campaign, closed campaigns, and how the seal shows in the window.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,17 +10,17 @@ from pathlib import Path
 
 from PySide6.QtGui import QDesktopServices
 
-from easymeasurement.l10n import tr
-from easymeasurement.reporting.archive import ReportError
-from easymeasurement.reporting.context import build_context as report_context
-from easymeasurement.reporting.nodes import Letterhead, Notice
-from easymeasurement.reporting.template import (
+from okeydocu.l10n import tr
+from okeydocu.reporting.archive import ReportError
+from okeydocu.reporting.context import build_context as report_context
+from okeydocu.reporting.nodes import Letterhead, Notice
+from okeydocu.reporting.template import (
     DRAFT_NOTICE,
     default_template_text,
     parse_template,
     resolve,
 )
-from easymeasurement.ui.confirm_overlay import ConfirmOverlay
+from okeydocu.ui.confirm_overlay import ConfirmOverlay
 
 from .test_report_signing import smime_identity
 from .workspace_helpers import plan_title, start, with_asset
@@ -108,7 +108,7 @@ def test_a_wrong_password_closes_nothing(window, app, monkeypatch, tmp_path, qtb
 
 def test_a_failure_after_closing_says_what_is_done(window, app, monkeypatch):
     errors = []
-    monkeypatch.setattr("easymeasurement.ui.campaign_confirm.show_error", lambda _, t: errors.append(t))
+    monkeypatch.setattr("okeydocu.ui.campaign_confirm.show_error", lambda _, t: errors.append(t))
     monkeypatch.setattr(app.archive, "generate", lambda *_: (_ for _ in ()).throw(ReportError("kaputt")))
     with_asset(window, app)
     start(window, monkeypatch)
@@ -198,7 +198,7 @@ def test_a_further_report_appears_with_its_campaign(window, app, monkeypatch):
 
 def test_closing_without_a_key_is_said_out_loud(window, app, monkeypatch):
     errors = []
-    monkeypatch.setattr("easymeasurement.ui.campaign_confirm.show_error", lambda _, t: errors.append(t))
+    monkeypatch.setattr("okeydocu.ui.campaign_confirm.show_error", lambda _, t: errors.append(t))
     monkeypatch.setattr(app.service, "seal_key", lambda: None)
     campaign = finished_campaign(window, app, monkeypatch)
     assert "KWallet" in errors[0]
@@ -207,7 +207,7 @@ def test_closing_without_a_key_is_said_out_loud(window, app, monkeypatch):
 
 def test_closing_with_a_key_stays_quiet(window, app, monkeypatch):
     errors = []
-    monkeypatch.setattr("easymeasurement.ui.campaign_confirm.show_error", lambda _, t: errors.append(t))
+    monkeypatch.setattr("okeydocu.ui.campaign_confirm.show_error", lambda _, t: errors.append(t))
     finished_campaign(window, app, monkeypatch)
     assert errors == []
 

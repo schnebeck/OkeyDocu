@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_attachment_ui.py
+# OkeyDocu - tests/test_attachment_ui.py
 # Notes and files on a measurement or a place, in the window and in the report.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -11,10 +11,10 @@ from PIL import Image
 from PySide6.QtCore import QMimeData, QPointF, Qt, QUrl
 from PySide6.QtGui import QDropEvent
 
-from easymeasurement.reporting.context import build_context as report_context
-from easymeasurement.reporting.nodes import Fields, Footnoted, Photos
-from easymeasurement.reporting.template import parse_template, default_template_text, resolve
-from easymeasurement.ui.attachment_list import NoteOverlay
+from okeydocu.reporting.context import build_context as report_context
+from okeydocu.reporting.nodes import Fields, Footnoted, Photos
+from okeydocu.reporting.template import parse_template, default_template_text, resolve
+from okeydocu.ui.attachment_list import NoteOverlay
 
 
 @pytest.fixture
@@ -76,7 +76,7 @@ def test_a_measurement_offers_files_but_no_second_remark(shown):
 
 def test_an_unknown_file_is_explained(shown, app, tmp_path, monkeypatch):
     errors = []
-    monkeypatch.setattr("easymeasurement.ui.attachment_list.show_error",
+    monkeypatch.setattr("okeydocu.ui.attachment_list.show_error",
                         lambda _, text: errors.append(text))
     other = tmp_path / "liste.xlsx"
     other.write_bytes(b"x")
@@ -169,7 +169,7 @@ def test_a_remark_stands_in_the_row_of_its_measurement(app, asset):
 
 
 def test_a_photo_of_the_measurement_opens_large(shown, image, monkeypatch):
-    from easymeasurement.ui.photo_overlays import PhotoPreview
+    from okeydocu.ui.photo_overlays import PhotoPreview
 
     page = shown[0]
     page.values.editor.attachments.add_files([image])

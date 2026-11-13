@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_quantities.py
+# OkeyDocu - tests/test_quantities.py
 # Readings written as number and unit with a prefix in steps of a thousand.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -6,8 +6,8 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from easymeasurement.l10n import speaking
-from easymeasurement.reporting.language import value_text
+from okeydocu.l10n import speaking
+from okeydocu.reporting.language import value_text
 
 N = " "
 
@@ -53,7 +53,7 @@ def test_english_keeps_the_point_and_words_stay_as_they_are():
 
 
 def test_a_clock_offset_has_its_sign_but_zero_has_none():
-    from easymeasurement.l10n import signed_seconds
+    from okeydocu.l10n import signed_seconds
 
     assert signed_seconds(3.4) == "+3"
     assert signed_seconds(-60.0) == "−60"

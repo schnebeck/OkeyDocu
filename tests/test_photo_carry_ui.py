@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_photo_carry_ui.py
+# OkeyDocu - tests/test_photo_carry_ui.py
 # Carrying a photo between the timeline, the stack and other widgets.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -12,8 +12,8 @@ import pytest
 from PySide6.QtCore import QMimeData, QPoint
 from PySide6.QtWidgets import QTableWidget
 
-from easymeasurement.ui import photo_shared
-from easymeasurement.ui.photo_shared import (
+from okeydocu.ui import photo_shared
+from okeydocu.ui.photo_shared import (
     PHOTO_MIME,
     accept_photo_drops,
     dropped_photo,

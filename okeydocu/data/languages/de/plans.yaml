@@ -1,0 +1,38 @@
+# OkeyDocu - German texts: test plans, their editor and test runs.
+texts:
+  New: Neu
+  Copy: Kopieren
+  Delete …: Löschen …
+  Name of the test plan: Name des Messplans
+  Released: Freigegeben
+  + Check question: + Prüffrage
+  + Measurement: + Messung
+  + Hint: + Hinweis
+  Remove: Entfernen
+  Test run …: Testlauf …
+  New test plan: Neuer Messplan
+  "{title} (copy)": "{title} (Kopie)"
+  Delete test plan: Messplan löschen
+  "Delete “{title}”? Campaigns keep their copy of the points.": "„{title}“ löschen? Kampagnen behalten ihre Kopie der Punkte."
+  Untitled: Ohne Namen
+  Saving …: Wird gespeichert …
+  Saved: Gespeichert
+  Check question: Prüffrage
+  Measurement: Messung
+  Hint: Hinweis
+  Question: Frage
+  Title: Titel
+  Heading: Überschrift
+  Explanation: Erläuterung
+  Text: Text
+  "Yes": Ja
+  "No": Nein
+  Measured quantity: Messgröße
+  Expected answer: Erwartete Antwort
+  Choose or add a point.: Einen Punkt wählen oder hinzufügen.
+  Connection diagram and instructions come from the collection.: Anschlussbild und Anleitung kommen aus der Sammlung.
+  There are no instructions for this measurement yet.: Für diese Messung gibt es noch keine Anleitung.
+  "Test run: {title}": "Testlauf: {title}"
+  Test run: Testlauf
+  Test installation: Testanlage
+  "Test run: nothing of this is saved, the readings are random values.": "Testlauf: Nichts davon wird gespeichert, die Messwerte sind Zufallswerte."

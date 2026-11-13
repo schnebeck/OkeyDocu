@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_dashboard.py
+# OkeyDocu - tests/test_dashboard.py
 # The start screen: recent campaigns, search, next steps, and the tiles to everything set up once.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,9 +10,9 @@ from datetime import date, datetime, timedelta
 
 from PySide6.QtCore import Qt
 
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.ui.dashboard import CLOSED_SHOWN, OPEN_SHOWN
-from easymeasurement.ui.dashboard_card import (
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.ui.dashboard import CLOSED_SHOWN, OPEN_SHOWN
+from okeydocu.ui.dashboard_card import (
     MAKE_REPORT,
     OPEN_REPORT,
     RESUME,
@@ -20,7 +20,7 @@ from easymeasurement.ui.dashboard_card import (
     attention,
     when_text,
 )
-from easymeasurement.ui.dashboard_tiles import MASTER_DATA, PLANS
+from okeydocu.ui.dashboard_tiles import MASTER_DATA, PLANS
 
 from .workspace_helpers import start, with_asset
 
@@ -62,7 +62,7 @@ def test_the_campaign_measured_in_last_comes_first(app):
 
 
 def test_searching_needs_every_word():
-    from easymeasurement.campaign.overview import CampaignSummary
+    from okeydocu.campaign.overview import CampaignSummary
     summary = CampaignSummary(1, "Prüfung Halle", True, "manual", "Anna", "", "Nordwerk AG",
                               "Bremen", "Presse", 0, 0, 0, 0, 0, 0, T0)
     assert summary.matches(["bremen", "presse"])
@@ -139,12 +139,12 @@ def test_making_the_missing_report_is_one_click(window, app, monkeypatch):
 
 
 def test_a_closed_campaign_with_a_report_opens_it(window, app, monkeypatch):
-    from easymeasurement.reporting.template import default_template_text
+    from okeydocu.reporting.template import default_template_text
     campaign, = _campaigns(app, 1)
     app.service.close(campaign)
     app.archive.generate(campaign, "Standard", default_template_text(), "de")
     opened = []
-    monkeypatch.setattr("easymeasurement.ui.campaign_display.open_report",
+    monkeypatch.setattr("okeydocu.ui.campaign_display.open_report",
                         lambda _, report: opened.append(report["campaign_id"]))
     card, = _home(window).cards
     assert card.action == OPEN_REPORT

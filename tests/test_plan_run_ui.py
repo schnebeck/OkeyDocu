@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_plan_run_ui.py
+# OkeyDocu - tests/test_plan_run_ui.py
 # Test plans at the side of a campaign: run one in the middle, pause, end or remove it.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -8,11 +8,11 @@
 
 import pytest
 
-from easymeasurement.campaign.plan import parse_plan
-from easymeasurement.l10n import tr
-from easymeasurement.ui import campaign_plans
-from easymeasurement.ui.plan_list import progress_text
-from easymeasurement.ui.guided_pages import ReasonOverlay
+from okeydocu.campaign.plan import parse_plan
+from okeydocu.l10n import tr
+from okeydocu.ui import campaign_plans
+from okeydocu.ui.plan_list import progress_text
+from okeydocu.ui.guided_pages import ReasonOverlay
 
 PLAN = parse_plan("""
 key: sight
@@ -89,8 +89,8 @@ def test_a_sequence_in_the_table_is_taken_over_as_a_plan(page, app, monkeypatch)
 
     from PySide6.QtWidgets import QMessageBox
 
-    from easymeasurement.model import Quantity, ResultValue, Verdict
-    from easymeasurement.ui.table_columns import GROUP
+    from okeydocu.model import Quantity, ResultValue, Verdict
+    from okeydocu.ui.table_columns import GROUP
     run = app.service.add_run(page.campaign_id, "Sichtprüfung Halle", "Sichtprüfung",
                               datetime(2026, 5, 4, 9))
     values = [ResultValue("question", "Frage", Quantity(raw="Alles beschriftet?")),

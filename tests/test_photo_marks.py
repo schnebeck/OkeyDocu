@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_photo_marks.py
+# OkeyDocu - tests/test_photo_marks.py
 # Numbered marks on a photo with their texts, its role, and moving it to another measurement.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -13,12 +13,12 @@ import pytest
 from PIL import Image
 from PySide6.QtCore import QRectF
 
-from easymeasurement.campaign.photo_marks import PhotoMark
-from easymeasurement.campaign.seal import content
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.ui import photo_gallery
-from easymeasurement.ui.photo_gallery import PHOTO_ID
-from easymeasurement.ui.photo_preview import PhotoPreview
+from okeydocu.campaign.photo_marks import PhotoMark
+from okeydocu.campaign.seal import content
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.ui import photo_gallery
+from okeydocu.ui.photo_gallery import PHOTO_ID
+from okeydocu.ui.photo_preview import PhotoPreview
 
 
 @pytest.fixture

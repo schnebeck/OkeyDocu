@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_plan_editor.py
+# OkeyDocu - tests/test_plan_editor.py
 # Creating, correcting and trying out plans, and instructions without a plan.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -9,14 +9,14 @@
 import pytest
 from PySide6.QtWidgets import QMessageBox
 
-from easymeasurement.campaign.plan import load_plans, parse_plan
-from easymeasurement.devices import SelectorPosition
-from easymeasurement.l10n import tr
-from easymeasurement.ui.campaign_views import AssignPlanOverlay
-from easymeasurement.ui.common import ROW_ID
-from easymeasurement.ui.instruction_panel import NO_INSTRUCTION, InstructionPanel
-from easymeasurement.ui.plan_editor import PlanEditorPage
-from easymeasurement.ui.plan_test_run import PlanTestRun
+from okeydocu.campaign.plan import load_plans, parse_plan
+from okeydocu.devices import SelectorPosition
+from okeydocu.l10n import tr
+from okeydocu.ui.campaign_views import AssignPlanOverlay
+from okeydocu.ui.common import ROW_ID
+from okeydocu.ui.instruction_panel import NO_INSTRUCTION, InstructionPanel
+from okeydocu.ui.plan_editor import PlanEditorPage
+from okeydocu.ui.plan_test_run import PlanTestRun
 
 
 @pytest.fixture

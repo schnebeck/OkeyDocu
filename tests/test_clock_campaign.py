@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_clock_campaign.py
+# OkeyDocu - tests/test_clock_campaign.py
 # The clock during a campaign: drift, offsets by hand, the report and the status.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,12 +10,12 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from easymeasurement.campaign.service import CLOCK_TOLERANCE_S, ClockState, clock_needs_setting
-from easymeasurement.devices.base import DeviceError
-from easymeasurement.devices.simulator import SimulatedMeter
-from easymeasurement.reporting.context import build_context
-from easymeasurement.reporting.template_loading import SHIPPED, shipped_template_text
-from easymeasurement.store import CampaignClosed
+from okeydocu.campaign.service import CLOCK_TOLERANCE_S, ClockState, clock_needs_setting
+from okeydocu.devices.base import DeviceError
+from okeydocu.devices.simulator import SimulatedMeter
+from okeydocu.reporting.context import build_context
+from okeydocu.reporting.template_loading import SHIPPED, shipped_template_text
+from okeydocu.store import CampaignClosed
 
 from .clock_helpers import HOUR, open_campaign
 

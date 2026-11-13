@@ -1,8 +1,0 @@
-# EasyMeasurement - the German language: its name and how it writes dates and numbers.
-name: Deutsch
-program: true  # the user interface speaks it, not only reports
-formats:
-  date: "%d.%m.%Y"
-  time: "%H:%M:%S"
-  short_time: "%H:%M"
-  decimal: ","

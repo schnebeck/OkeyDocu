@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_window_photos.py
+# OkeyDocu - tests/test_window_photos.py
 # The photo timeline and stack in the main window, tied to the measurement table.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -48,7 +48,7 @@ def test_the_timeline_closes_by_its_own_button(window, app, asset, tmp_path):
 
 
 def test_importing_photos_opens_the_timeline(window, app, asset, tmp_path, monkeypatch):
-    from easymeasurement.ui import campaign_actions
+    from okeydocu.ui import campaign_actions
     campaign = app.service.create(asset, "T", "P")
     app.service.add_measurement(campaign, "rlo", [], datetime(2026, 3, 1, 10, 0))
     path = tmp_path / "20260301_100030.jpg"
@@ -134,7 +134,7 @@ def test_loose_photos_stand_out_in_the_side_panel_and_the_checks_line(window, ap
 
 
 def test_the_confirmation_says_loose_photos_miss_the_report(window, app, asset, tmp_path):
-    from easymeasurement.ui.confirm_overlay import ConfirmOverlay
+    from okeydocu.ui.confirm_overlay import ConfirmOverlay
     campaign, _ = photo_campaign(window, app, asset, tmp_path)
     app.service.stack_photo(app.service.photos(campaign)[0]["id"])
     overlay = ConfirmOverlay(app, app.service.campaign(campaign), window)
@@ -145,7 +145,7 @@ def _drop(page, index, photo_id):
     """A drop as the target's filter receives it; Qt itself only delivers one during a drag."""
     from PySide6.QtCore import QPointF, Qt
     from PySide6.QtGui import QDropEvent
-    from easymeasurement.ui.photo_shared import photo_mime_data
+    from okeydocu.ui.photo_shared import photo_mime_data
     target = page.tab_drops[index]
     mime = photo_mime_data(photo_id)  # the event does not own it, so it is kept here
     event = QDropEvent(QPointF(5, 5), Qt.DropAction.MoveAction, mime,

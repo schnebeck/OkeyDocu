@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_prime_selector.py
+# OkeyDocu - tests/test_prime_selector.py
 # Reading the rotary switch, text replies beside events, and how Push/Print ends.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -8,20 +8,20 @@
 
 import pytest
 
-from easymeasurement.devices import Capability, DeviceError, SelectorPosition
-from easymeasurement.devices.profitest_prime.driver import ProfitestPrimeDriver
-from easymeasurement.devices.profitest_prime.framing import EVENT, REPLY, TEXT, FrameSplitter
-from easymeasurement.devices.profitest_prime.push_print import PUSH_LEFT_ON
-from easymeasurement.devices.profitest_prime.selector import selector_position
-from easymeasurement.l10n import tr
-from easymeasurement.devices.profitest_prime.transport import (
+from okeydocu.devices import Capability, DeviceError, SelectorPosition
+from okeydocu.devices.profitest_prime.driver import ProfitestPrimeDriver
+from okeydocu.devices.profitest_prime.framing import EVENT, REPLY, TEXT, FrameSplitter
+from okeydocu.devices.profitest_prime.push_print import PUSH_LEFT_ON
+from okeydocu.devices.profitest_prime.selector import selector_position
+from okeydocu.l10n import tr
+from okeydocu.devices.profitest_prime.transport import (
     ALLOWED_COMMANDS,
     TEXT_COMMANDS,
     ForbiddenCommand,
     PrimeTransport,
 )
-from easymeasurement.devices.simulator import SimulatedMeter
-from easymeasurement.vocabulary import function_keys
+from okeydocu.devices.simulator import SimulatedMeter
+from okeydocu.vocabulary import function_keys
 
 from .prime_helpers import FakeInstrument, event, reply
 

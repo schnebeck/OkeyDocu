@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_company.py
+# OkeyDocu - tests/test_company.py
 # The own firm, entered once and shown in the letterhead of every report.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,12 +10,12 @@ import io
 
 from PIL import Image
 
-from easymeasurement.reporting.context import build_context
-from easymeasurement.reporting.logo import prepare_logo
-from easymeasurement.reporting.nodes import Letterhead
-from easymeasurement.reporting.pdf import render_pdf
-from easymeasurement.reporting.template import default_template_text, parse_template, resolve
-from easymeasurement.ui.company_form import CompanyForm
+from okeydocu.reporting.context import build_context
+from okeydocu.reporting.logo import prepare_logo
+from okeydocu.reporting.nodes import Letterhead
+from okeydocu.reporting.pdf import render_pdf
+from okeydocu.reporting.template import default_template_text, parse_template, resolve
+from okeydocu.ui.company_form import CompanyForm
 
 
 def _logo_file(tmp_path):

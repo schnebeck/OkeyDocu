@@ -179,7 +179,7 @@ tested”, never “Passed”.
 
 All texts are in English in the code and are looked up when shown: `tr("Serial number
 {serial}", serial=…)`, counted with `plural()`, module constants marked with `N_()` and translated where
-they appear (`easymeasurement/l10n/`). Every language has a folder under `data/languages/<code>/`:
+they appear (`okeydocu/l10n/`). Every language has a folder under `data/languages/<code>/`:
 `language.yaml` with names and formats for date, time and decimal separator, next to it catalogue files per
 area with `texts` (English → language) and `contexts` for an English word that needs two
 translations. A text may appear in several files, but only with the same translation.
@@ -227,7 +227,7 @@ nor change instrument settings, because the inspector does that at the instrumen
 is a new driver in `devices/registry.py`; the application stays unchanged. Only its mapping knows the codes of the
 instrument (`devices/profitest_prime/mapping.py`); functions, results,
 quantities, result words and settings are named in the app after their vocabulary
-(`easymeasurement/vocabulary/`, `data/vocabulary/*.yaml`).
+(`okeydocu/vocabulary/`, `data/vocabulary/*.yaml`).
 
 When a campaign starts with an instrument, the instrument identity, the clock offset and the measurements
 already present are recorded. After that only what is new is fetched, with corrected time.
@@ -330,7 +330,7 @@ otherwise that of the contact person, and the first active contact person of the
 phone, as a substitute mobile number, and e-mail. The cost centre that IZYTRON keeps per test object
 belongs to the customer; it is not taken over, because the cost centre of a campaign is the own one.
 
-    python -m easymeasurement.importing.izytron KOPIE.sqlite --offset -120
+    python -m okeydocu.importing.izytron KOPIE.sqlite --offset -120
 
 ## Instrument clock
 

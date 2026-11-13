@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_plan_steps.py
+# OkeyDocu - tests/test_plan_steps.py
 # Plans in the data: kinds of points, instructions, answers, several plans.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -8,11 +8,11 @@
 
 import pytest
 
-from easymeasurement.campaign.plan import load_instructions, load_plans, parse_plan
-from easymeasurement.reporting.archive import ReportArchive
-from easymeasurement.reporting.context import build_context
-from easymeasurement.reporting.template import default_template_text
-from easymeasurement.store import CampaignClosed
+from okeydocu.campaign.plan import load_instructions, load_plans, parse_plan
+from okeydocu.reporting.archive import ReportArchive
+from okeydocu.reporting.context import build_context
+from okeydocu.reporting.template import default_template_text
+from okeydocu.store import CampaignClosed
 
 PLAN = """
 key: sight
@@ -202,7 +202,7 @@ def test_answers_print_in_a_report(service, campaign):
 
 
 def test_shipped_instructions_speak_the_language_of_the_program():
-    from easymeasurement.l10n import speaking
+    from okeydocu.l10n import speaking
     with speaking("en"):
         english = load_instructions()["rlo"]
     with speaking("de"):
@@ -214,7 +214,7 @@ def test_shipped_instructions_speak_the_language_of_the_program():
 
 
 def test_a_plan_written_by_hand_keeps_its_words():
-    from easymeasurement.l10n import speaking
+    from okeydocu.l10n import speaking
     with speaking("en"):
         plan = parse_plan("key: x\ntitle: Eigener Plan\nreleased: true\nsteps:\n"
                           "- {key: a, kind: check, title: Schalter geprüft}")
@@ -223,7 +223,7 @@ def test_a_plan_written_by_hand_keeps_its_words():
 
 def test_a_shipped_step_speaks_the_language_shown_not_the_one_it_was_assigned_in(service,
                                                                                  asset_id):
-    from easymeasurement.l10n import speaking, tr
+    from okeydocu.l10n import speaking, tr
 
     campaign = service.create(asset_id, "Sichtprüfung", "Prüfer")
     with speaking("de"):

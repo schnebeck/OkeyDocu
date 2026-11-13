@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_measurement_rules.py
+# OkeyDocu - tests/test_measurement_rules.py
 # Value, unit and time are final. Changes of substance leave a trace, text fixes do not.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,11 +10,11 @@ import sqlite3
 
 import pytest
 
-from easymeasurement.devices.simulator import SimulatedMeter
-from easymeasurement.model import Quantity, ResultValue
-from easymeasurement.reporting.context import build_context as report_context
-from easymeasurement.reporting.measurement_words import marks as _marks
-from easymeasurement.store import ReadingIsFinal
+from okeydocu.devices.simulator import SimulatedMeter
+from okeydocu.model import Quantity, ResultValue
+from okeydocu.reporting.context import build_context as report_context
+from okeydocu.reporting.measurement_words import marks as _marks
+from okeydocu.store import ReadingIsFinal
 
 
 @pytest.fixture
@@ -226,7 +226,7 @@ def test_answers_saved_together_show_their_time_once():
     from datetime import datetime, timedelta
     from types import SimpleNamespace
 
-    from easymeasurement.reporting.measurement_words import clock_times
+    from okeydocu.reporting.measurement_words import clock_times
 
     at = datetime(2026, 5, 4, 10, 38, 12)
     rows = [SimpleNamespace(local_time=time, manual=manual, edited=False)

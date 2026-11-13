@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_notation.py
+# OkeyDocu - tests/test_notation.py
 # Symbols written as in mathematics, and what each figure of a result stands for.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -6,8 +6,8 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from easymeasurement.l10n import speaking
-from easymeasurement.vocabulary import (
+from okeydocu.l10n import speaking
+from okeydocu.vocabulary import (
     Role,
     conductors,
     counts,
@@ -80,7 +80,7 @@ def test_an_unknown_function_keeps_every_figure():
 
 
 def test_symbols_inside_an_instruments_words_are_set_too():
-    from easymeasurement.vocabulary import symbols_marked
+    from okeydocu.vocabulary import symbols_marked
 
     assert symbols_marked("RLO - Polung") == "<i>R</i><sub rise='30%'>LO</sub> - Polung"
     assert symbols_marked("RCD - Faktor IΔN").endswith("<i>I</i><sub rise='30%'>ΔN</sub>")

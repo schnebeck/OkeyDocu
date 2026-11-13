@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/photo_ui_helpers.py
+# OkeyDocu - tests/photo_ui_helpers.py
 # Synthetic campaigns and pointer moves for the photo widgets.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -16,10 +16,10 @@ from PySide6.QtGui import QDragEnterEvent, QDragMoveEvent, QDropEvent, QWheelEve
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication
 
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.ui.photo_shared import photo_mime_data, shared_thumbs
-from easymeasurement.ui.photo_stack import PhotoStack
-from easymeasurement.ui.photo_timeline import PhotoTimeline
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.ui.photo_shared import photo_mime_data, shared_thumbs
+from okeydocu.ui.photo_stack import PhotoStack
+from okeydocu.ui.photo_timeline import PhotoTimeline
 
 T0 = datetime(2026, 3, 1, 10, 0, 0)
 EXIF_IFD = 0x8769

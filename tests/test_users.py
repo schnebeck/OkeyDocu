@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_users.py
+# OkeyDocu - tests/test_users.py
 # People: who they are, how they are chosen, and what the record keeps of them.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -8,13 +8,13 @@
 
 import pytest
 
-from easymeasurement.campaign.service import full_name
-from easymeasurement.devices.simulator import SimulatedMeter
-from easymeasurement.reporting.context import build_context as report_context
-from easymeasurement.store import CampaignClosed
-from easymeasurement.ui.campaign_dialog import CampaignDialog
-from easymeasurement.ui.user_form import UserForm
-from easymeasurement.ui.users import UserChoice
+from okeydocu.campaign.service import full_name
+from okeydocu.devices.simulator import SimulatedMeter
+from okeydocu.reporting.context import build_context as report_context
+from okeydocu.store import CampaignClosed
+from okeydocu.ui.campaign_dialog import CampaignDialog
+from okeydocu.ui.user_form import UserForm
+from okeydocu.ui.users import UserChoice
 
 
 # Who they are ----------------------------------------------------------------

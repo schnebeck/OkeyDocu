@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/clock_helpers.py
+# OkeyDocu - tests/clock_helpers.py
 # Shared steps of the clock tests.
 #
 # Producer: thorsten.schnebeck@gmx.net

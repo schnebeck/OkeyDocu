@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_wizard.py
+# OkeyDocu - tests/test_wizard.py
 # Going through a plan point by point.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -11,10 +11,10 @@ from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication
 
-from easymeasurement.campaign.plan import parse_plan
-from easymeasurement.ui.growing_edit import GrowingEdit
-from easymeasurement.ui.guided_pages import ReasonOverlay
-from easymeasurement.ui.measurement_overlays import MeasurementOverlay
+from okeydocu.campaign.plan import parse_plan
+from okeydocu.ui.growing_edit import GrowingEdit
+from okeydocu.ui.guided_pages import ReasonOverlay
+from okeydocu.ui.measurement_overlays import MeasurementOverlay
 
 PLAN = parse_plan("""
 key: sight

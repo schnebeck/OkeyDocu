@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_photo_view.py
+# OkeyDocu - tests/test_photo_view.py
 # Turning a photo and cutting it to a part, without touching the original.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -13,13 +13,13 @@ import pytest
 from PIL import Image
 from PySide6.QtCore import QRectF
 
-from easymeasurement.campaign.photo_marks import PhotoMark
-from easymeasurement.campaign.photo_view import PhotoView, move_mark
-from easymeasurement.campaign.seal import content
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.reporting.pdf_parts import _photo
-from easymeasurement.ui.photo_preview import PhotoPreview
-from easymeasurement.ui.photo_shared import read_thumbnail
+from okeydocu.campaign.photo_marks import PhotoMark
+from okeydocu.campaign.photo_view import PhotoView, move_mark
+from okeydocu.campaign.seal import content
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.reporting.pdf_parts import _photo
+from okeydocu.ui.photo_preview import PhotoPreview
+from okeydocu.ui.photo_shared import read_thumbnail
 
 
 def test_a_quarter_turn_moves_the_top_to_the_right():

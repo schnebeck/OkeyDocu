@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_text_fits.py
+# OkeyDocu - tests/test_text_fits.py
 # No text is cut off, in German or English, at the window widths a laptop or a desk shows.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -9,8 +9,8 @@
 import pytest
 from PySide6.QtCore import QTimer
 
-from easymeasurement.l10n import set_language
-from easymeasurement.ui.main_window import MainWindow
+from okeydocu.l10n import set_language
+from okeydocu.ui.main_window import MainWindow
 
 from .text_fit import cut_texts
 from .workspace_helpers import plan_title, start, with_asset
@@ -32,12 +32,12 @@ def speaking_window(request, qtbot, app):
 
 
 def _overlays(window, app):
-    from easymeasurement.ui.campaign_dialog import CampaignDialog
-    from easymeasurement.ui.company_form import CompanyForm
-    from easymeasurement.ui.instrument_log import InstrumentLogOverlay
-    from easymeasurement.ui.language_choice import LanguageOverlay
-    from easymeasurement.ui.settings_dialog import SettingsOverlay
-    from easymeasurement.ui.users import UsersOverlay
+    from okeydocu.ui.campaign_dialog import CampaignDialog
+    from okeydocu.ui.company_form import CompanyForm
+    from okeydocu.ui.instrument_log import InstrumentLogOverlay
+    from okeydocu.ui.language_choice import LanguageOverlay
+    from okeydocu.ui.settings_dialog import SettingsOverlay
+    from okeydocu.ui.users import UsersOverlay
     return (("settings", lambda: SettingsOverlay(window, app)),
             ("instrument log", lambda: InstrumentLogOverlay(app, window)),
             ("company", lambda: CompanyForm(app, window)),

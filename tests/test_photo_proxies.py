@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_photo_proxies.py
+# OkeyDocu - tests/test_photo_proxies.py
 # Reduced copies of photos: made once, made again when the original changes, tidied away.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -11,15 +11,15 @@ from datetime import datetime
 
 from PIL import Image
 
-from easymeasurement.campaign import photo_proxies
-from easymeasurement.campaign.photo_proxies import (
+from okeydocu.campaign import photo_proxies
+from okeydocu.campaign.photo_proxies import (
     EDGE_PX,
     fresh_proxy,
     make_proxy,
     prune_proxies,
     proxy_path,
 )
-from easymeasurement.reporting.template import default_template_text
+from okeydocu.reporting.template import default_template_text
 
 
 def _original(folder, name="a1b2c3.jpg", size=(3000, 2000), orientation=1):
@@ -91,7 +91,7 @@ def test_deleting_a_photo_takes_its_proxy_along(service, tmp_path):
 
 
 def test_a_report_makes_the_proxies_and_tidies_strays(service, tmp_path):
-    from easymeasurement.reporting.archive import ReportArchive
+    from okeydocu.reporting.archive import ReportArchive
     asset = service.db.add_asset(service.db.add_customer("K"), "machine", "M")
     campaign = service.create(asset, "P", "T")
     measurement = service.add_measurement(campaign, "rlo", [], datetime(2026, 5, 4, 9, 0))

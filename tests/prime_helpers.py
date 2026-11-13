@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/prime_helpers.py
+# OkeyDocu - tests/prime_helpers.py
 # Synthetic replies, events and databases of the PROFITEST PRIME, and a fake instrument.
 #
 # Producer: thorsten.schnebeck@gmx.net

@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_campaign_record.py
+# OkeyDocu - tests/test_campaign_record.py
 # Photos of a campaign, closing it, and the frozen record.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -12,9 +12,9 @@ from datetime import datetime, timedelta
 import pytest
 from PIL import Image
 
-from easymeasurement.campaign.photos import read_photo_time
-from easymeasurement.devices.simulator import SimulatedMeter
-from easymeasurement.store import CampaignClosed
+from okeydocu.campaign.photos import read_photo_time
+from okeydocu.devices.simulator import SimulatedMeter
+from okeydocu.store import CampaignClosed
 
 from .campaign_helpers import T0, start, step_of
 

@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_campaign_orders.py
+# OkeyDocu - tests/test_campaign_orders.py
 # An installation exists once; each campaign against it is an order with its own number and contact.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -8,9 +8,9 @@
 
 import pytest
 
-from easymeasurement.l10n import tr
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.ui.campaign_dialog import CampaignDialog
+from okeydocu.l10n import tr
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.ui.campaign_dialog import CampaignDialog
 
 from .rlo_helpers import T0
 

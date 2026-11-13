@@ -1,0 +1,101 @@
+# OkeyDocu - German texts: report templates, the report archive and signing.
+texts:
+  As new template: Als neue Vorlage
+  Delete template: Vorlage löschen
+  "Preview: {count} measurement": "Vorschau: {count} Messung"
+  "Preview: {count} measurements": "Vorschau: {count} Messungen"
+  The preview shows the report in this language: In dieser Sprache zeigt die Vorschau das Protokoll
+  Add block: Block hinzufügen
+  → into repeat: → in Wiederholung
+  ← out: ← heraus
+  Remove: Entfernen
+  Up (Alt+↑): Nach oben (Alt+↑)
+  Down (Alt+↓): Nach unten (Alt+↓)
+  Layout: Aufbau
+  Source: Quelltext
+  Label: Bezeichnung
+  Content: Inhalt
+  Add row: Zeile hinzufügen
+  Remove row: Zeile entfernen
+  Append features of the inspected installation (only the filled-in ones): Merkmale der geprüften Anlage anhängen (nur die ausgefüllten)
+  All measurements and checks: Alle Messungen und Prüfungen
+  Shows: Zeigt
+  Show sentence: Satz anzeigen
+  Hide block: Block ausblenden
+  <b>With 0 measurements</b>: <b>Bei 0 Messungen</b>
+  Text: Text
+  Show measuring location: Messort anzeigen
+  <b>With 1 measurement</b> (form): <b>Bei 1 Messung</b> (Formular)
+  Show min and max row: Min- und Max-Zeile anzeigen
+  <b>With several measurements</b> (table): <b>Bei mehreren Messungen</b> (Tabelle)
+  Choose or add a block above.: Oben einen Block wählen oder hinzufügen.
+  Insert data field …: Datenfeld einfügen …
+  Level: Ebene
+  "Everything indented here appears in the report once per step\nor, without a test plan, once per measured quantity.": "Alles, was hier eingerückt steht, erscheint im Protokoll einmal je Messschritt\noder, ohne Messplan, einmal je Messgröße."
+  "Notes and files at locations of the installation or at the campaign itself.\nWhat belongs to a measurement appears in the report with that measurement.": "Notizen und Dateien an Orten der Anlage oder an der Kampagne selbst.\nWas an einer Messung hängt, steht im Protokoll bei dieser Messung."
+  Title: Titel
+  Lines below the title: Zeilen unter dem Titel
+  Client: Auftraggeber
+  Contractor: Auftragnehmer
+  One line per entry; the own company is under Settings → Company: Eine Zeile je Eintrag; die eigene Firma steht unter Einstellungen → Firma
+  QR code with the identifier of the inspection: QR-Code mit der Kennung der Prüfung
+  Company logo to the right of the title (Settings → Company): Firmenlogo rechts neben dem Titel (Einstellungen → Firma)
+  "empty: without frame and result": "leer: ohne Rahmen und Ergebnis"
+  Result above: Ergebnis darüber
+  Fields (separated by commas): Felder (mit Komma getrennt)
+  "Custom condition: {condition}": "Eigene Bedingung: {condition}"
+  Display: Anzeige
+  The SVG file cannot be read.: Die SVG-Datei ist nicht lesbar.
+  Choose logo: Logo wählen
+  "Images ({patterns})": "Bilder ({patterns})"
+  Replace image …: Bild ersetzen …
+  Choose image …: Bild wählen …
+  PNG, JPEG, WebP or SVG. Transparency is kept.: PNG, JPEG, WebP oder SVG. Transparenz bleibt erhalten.
+  Quick position …: Schnellposition …
+  "{height} mm (aspect ratio is kept)": "{height} mm (Seitenverhältnis bleibt erhalten)"
+  First page only: Nur erste Seite
+  Every page: Jede Seite
+  Text makes way for the logo: Text weicht dem Logo aus
+  Position: Position
+  From left: Von links
+  From top: Von oben
+  Width: Breite
+  Height: Höhe
+  Pages: Seiten
+  Drag the logo to move it, drag the corner to scale it: Logo ziehen zum Verschieben, Ecke ziehen zum Skalieren
+  Generate report: Protokoll erzeugen
+  Generate: Erzeugen
+  Completed campaign: Abgeschlossene Kampagne
+  Template: Vorlage
+  Language: Sprache
+  "Search: customer, installation, campaign, inspector …": "Suchen: Kunde, Anlage, Kampagne, Prüfer …"
+  All reports: Alle Protokolle
+  Signed only: Nur signierte
+  Unsigned only: Nur unsignierte
+  Open: Öffnen
+  Sign: Signieren
+  Created: Erstellt
+  Customer: Kunde
+  Installation: Anlage
+  Campaign: Kampagne
+  Inspector: Prüfer
+  Signed by: Signiert von
+  File: Datei
+  Double-click opens the report: Doppelklick öffnet das Protokoll
+  unchanged: unverändert
+  CHANGED OR MISSING: VERÄNDERT ODER FEHLT
+  "{count} report": "{count} Protokoll"
+  "{count} reports": "{count} Protokolle"
+  There is no completed campaign yet.: Es gibt noch keine abgeschlossene Kampagne.
+  Creating the report …: Erstelle das Protokoll …
+  "Signing as {signer}, issued by {issuer}, valid until {day}.": "Signiert wird als {signer}, ausgestellt von {issuer}, gültig bis {day}."
+  This is an email certificate (S/MIME). The signature is technically valid. Whether a PDF program shows it as trustworthy depends on whether it trusts the issuer.: Das ist ein E-Mail-Zertifikat (S/MIME). Die Signatur ist technisch gültig. Ob ein PDF-Programm sie als vertrauenswürdig anzeigt, hängt davon ab, ob es dem Aussteller vertraut.
+  File .p12 or .pfx: Datei .p12 oder .pfx
+  Choose …: Wählen …
+  Certificate: Zertifikat
+  Password: Passwort
+  Choose certificate: Zertifikat wählen
+  "The certificate expired on {day}.": "Das Zertifikat ist seit {day} abgelaufen."
+  This certificate is not issued for signing.: Dieses Zertifikat ist nicht zum Signieren ausgestellt.
+  Sign report: Protokoll signieren
+  The certificate is still missing.: Es fehlt noch das Zertifikat.

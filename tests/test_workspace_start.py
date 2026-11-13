@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_workspace_start.py
+# OkeyDocu - tests/test_workspace_start.py
 # The start screen, starting a campaign, and importing data from the menu.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -9,9 +9,9 @@
 from PySide6.QtCore import QPoint
 from PySide6.QtWidgets import QFileDialog
 
-from easymeasurement.importing.izytron import ImportFailed
-from easymeasurement.ui.measurement_overlays import ImportOverlay
-from easymeasurement.ui.status_badges import GOOD
+from okeydocu.importing.izytron import ImportFailed
+from okeydocu.ui.measurement_overlays import ImportOverlay
+from okeydocu.ui.status_badges import GOOD
 
 from .workspace_helpers import plan_title, start, with_asset
 
@@ -111,8 +111,8 @@ def test_import_from_the_menu_leaves_the_original_alone(window, app, monkeypatch
         raise ImportFailed("Die Datenbank enthält keine Prüfungen.")
 
     errors = []
-    monkeypatch.setattr("easymeasurement.ui.main_window.import_day", fake_import)
-    monkeypatch.setattr("easymeasurement.ui.main_window.show_error", lambda _, t: errors.append(t))
+    monkeypatch.setattr("okeydocu.ui.main_window.import_day", fake_import)
+    monkeypatch.setattr("okeydocu.ui.main_window.show_error", lambda _, t: errors.append(t))
     monkeypatch.setattr(QFileDialog, "getOpenFileName", lambda *_: (str(original), ""))
     monkeypatch.setattr(ImportOverlay, "exec", lambda self: self.offset.setValue(-600) or 1)
     window.import_action.trigger()
@@ -125,7 +125,7 @@ def test_a_file_that_is_no_database_is_explained(window, monkeypatch, tmp_path):
     other = tmp_path / "bild.sqlite"
     other.write_bytes(b"kein SQLite" * 100)
     errors = []
-    monkeypatch.setattr("easymeasurement.ui.main_window.show_error", lambda _, t: errors.append(t))
+    monkeypatch.setattr("okeydocu.ui.main_window.show_error", lambda _, t: errors.append(t))
     monkeypatch.setattr(QFileDialog, "getOpenFileName", lambda *_: (str(other), ""))
     monkeypatch.setattr(ImportOverlay, "exec", lambda self: 1)
     window.import_action.trigger()

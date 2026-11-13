@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_photo_pin_ui.py
+# OkeyDocu - tests/test_photo_pin_ui.py
 # Dragging a photo up onto a measurement takes only this photo there.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -11,7 +11,7 @@ from __future__ import annotations
 import pytest
 from PySide6.QtCore import QPoint
 
-from easymeasurement.ui import photo_timeline_mouse
+from okeydocu.ui import photo_timeline_mouse
 
 from .photo_ui_helpers import (
     centre_of,
@@ -145,7 +145,7 @@ def test_a_campaign_closed_behind_the_timeline_is_said_and_locks(
     monkeypatch, app, timeline, case
 ):
     said = []
-    monkeypatch.setattr("easymeasurement.ui.photo_timeline.show_error",
+    monkeypatch.setattr("okeydocu.ui.photo_timeline.show_error",
                         lambda parent, text: said.append(text))
     seen = []
     timeline.changed.connect(lambda: seen.append(1))

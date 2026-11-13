@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_guided.py
+# OkeyDocu - tests/test_guided.py
 # The guided flow in the real window, with the simulator as instrument.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -9,9 +9,9 @@
 import pytest
 from PySide6.QtWidgets import QMessageBox
 
-from easymeasurement.reporting.archive import ReportError
-from easymeasurement.reporting.sign import Pkcs12Signer
-from easymeasurement.ui.confirm_overlay import ConfirmOverlay
+from okeydocu.reporting.archive import ReportError
+from okeydocu.reporting.sign import Pkcs12Signer
+from okeydocu.ui.confirm_overlay import ConfirmOverlay
 
 from . import guided_helpers
 from .guided_helpers import connect_all, run_step, shown
@@ -110,7 +110,7 @@ def test_complete_run_from_first_step_to_report(page, window, monkeypatch):
     def fail(_, text):
         raise AssertionError(text)
 
-    monkeypatch.setattr("easymeasurement.ui.guided_actions.show_error", fail)
+    monkeypatch.setattr("okeydocu.ui.guided_actions.show_error", fail)
     monkeypatch.setattr(QMessageBox, "question", lambda *_: QMessageBox.StandardButton.Yes)
     monkeypatch.setattr(ConfirmOverlay, "exec", lambda self: 1)
     campaign = page.campaign_id
@@ -190,7 +190,7 @@ def test_the_switch_is_left_alone_while_measuring(page, window, monkeypatch):
 def test_a_connection_that_ended_badly_is_reported_once(page, window, monkeypatch):
     errors = []
     monkeypatch.setattr(
-        "easymeasurement.ui.campaign_actions.show_error", lambda _, text: errors.append(text)
+        "okeydocu.ui.campaign_actions.show_error", lambda _, text: errors.append(text)
     )
     driver = live_session(page, window)
     driver.stop_warning = "Bitte einschalten"

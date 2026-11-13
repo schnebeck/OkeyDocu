@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_user_overlay.py
+# OkeyDocu - tests/test_user_overlay.py
 # Overlays over the window, and changing the person of a campaign.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,7 +10,7 @@ import pytest
 from PySide6.QtCore import QPoint, Qt, QTimer
 from PySide6.QtTest import QTest
 
-from easymeasurement.ui.overlay import Overlay
+from okeydocu.ui.overlay import Overlay
 
 
 def run_overlay(overlay, action):
@@ -130,7 +130,7 @@ def test_person_is_changed_from_the_header(window, app, asset, monkeypatch):
         overlay.tester.fill(second)
         return 1
 
-    monkeypatch.setattr("easymeasurement.ui.campaign_views.TesterOverlay.exec", choose)
+    monkeypatch.setattr("okeydocu.ui.campaign_views.TesterOverlay.exec", choose)
     window.campaign.header.details.linkActivated.emit("tester")
     assert app.service.campaign(campaign)["tester"] == "Berta"
     assert "Berta" in window.campaign.header.details.text()
@@ -146,7 +146,7 @@ def test_closed_campaign_offers_no_change_of_person(window, app, asset):
 
 
 def test_signing_starts_with_the_certificate_of_the_person(window, app, asset, monkeypatch):
-    from easymeasurement.ui import report_signing
+    from okeydocu.ui import report_signing
 
     user = app.db.add_user("Anna", certificate_path="/tmp/anna.p12")
     campaign = app.service.create(asset, "T", "Anna", user_id=user)

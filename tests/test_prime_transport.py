@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_prime_transport.py
+# OkeyDocu - tests/test_prime_transport.py
 # Framing, commands and events on the link to the instrument. All data is synthetic.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -12,9 +12,9 @@ from datetime import datetime
 
 import pytest
 
-from easymeasurement.devices.base import DeviceError
-from easymeasurement.devices.profitest_prime.parser import parse_event
-from easymeasurement.devices.profitest_prime.transport import (
+from okeydocu.devices.base import DeviceError
+from okeydocu.devices.profitest_prime.parser import parse_event
+from okeydocu.devices.profitest_prime.transport import (
     ALLOWED_COMMANDS,
     EVENT,
     PUSH_COMMANDS,
@@ -25,7 +25,7 @@ from easymeasurement.devices.profitest_prime.transport import (
     RfcommChannel,
     open_channel,
 )
-from easymeasurement.model import Verdict
+from okeydocu.model import Verdict
 
 from .prime_helpers import FakeInstrument, OHM, boolean_reply, empty_reply, event, reply
 

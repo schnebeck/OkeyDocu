@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_measurement_window.py
+# OkeyDocu - tests/test_measurement_window.py
 # Measurement rules in the window and in closed campaigns.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -13,9 +13,9 @@ from PySide6.QtCore import QPoint, QPointF, Qt
 from PySide6.QtGui import QWheelEvent
 from PySide6.QtWidgets import QApplication, QMessageBox
 
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.store import CampaignClosed
-from easymeasurement.ui.main_window import MainWindow
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.store import CampaignClosed
+from okeydocu.ui.main_window import MainWindow
 
 
 # Closed campaigns ------------------------------------------------------------
@@ -233,7 +233,7 @@ def test_keys_on_the_table_edit_and_delete(qtbot, window, app, monkeypatch):
 
 def test_an_edit_on_a_record_closed_meanwhile_is_reported(window, app, monkeypatch):
     errors = []
-    monkeypatch.setattr("easymeasurement.ui.measurement_editing.show_error",
+    monkeypatch.setattr("okeydocu.ui.measurement_editing.show_error",
                         lambda _, text: errors.append(text))
     page, measurement = one_measurement(window, app)
     page.editor.comment.setPlainText("zu spät")

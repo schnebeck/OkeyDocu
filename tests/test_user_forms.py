@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_user_forms.py
+# OkeyDocu - tests/test_user_forms.py
 # The signature pad, the form for a person, and the list of people.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -12,9 +12,9 @@ from PySide6.QtGui import QImage
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QMessageBox
 
-from easymeasurement.ui.signature_pad import SignaturePad
-from easymeasurement.ui.user_form import UserForm
-from easymeasurement.ui.users import UsersOverlay
+from okeydocu.ui.signature_pad import SignaturePad
+from okeydocu.ui.user_form import UserForm
+from okeydocu.ui.users import UsersOverlay
 
 
 # Signature pad ---------------------------------------------------------------
@@ -47,7 +47,7 @@ def test_what_was_written_keeps_its_place_on_the_line(qtbot):
 
 
 def test_aligning_drags_the_signature_and_the_report_puts_it_on_the_line(qtbot):
-    from easymeasurement.reporting.pdf_parts import SignatureBox, _signature_image
+    from okeydocu.reporting.pdf_parts import SignatureBox, _signature_image
 
     pad = SignaturePad()
     write(qtbot, pad)
@@ -141,7 +141,7 @@ def test_the_password_of_a_certificate_is_not_kept(qtbot, app, monkeypatch, tmp_
 
     seen = []
     monkeypatch.setattr(
-        "easymeasurement.ui.user_form.inspect_certificate",
+        "okeydocu.ui.user_form.inspect_certificate",
         lambda path, phrase: seen.append(phrase) or Info,
     )
     form = UserForm(app)

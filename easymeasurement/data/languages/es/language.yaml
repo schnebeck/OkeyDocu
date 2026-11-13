@@ -1,5 +1,0 @@
-# EasyMeasurement - the Spanish language: its name and how it writes dates and numbers.
-name: Español
-formats:
-  date: "%d/%m/%Y"
-  decimal: ","

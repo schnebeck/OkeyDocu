@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_attachments.py
+# OkeyDocu - tests/test_attachments.py
 # Comments, images and PDFs on measurements and places.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -9,8 +9,8 @@
 import pytest
 from PIL import Image
 
-from easymeasurement.campaign.attachments import AttachmentError
-from easymeasurement.store import CampaignClosed
+from okeydocu.campaign.attachments import AttachmentError
+from okeydocu.store import CampaignClosed
 
 
 @pytest.fixture

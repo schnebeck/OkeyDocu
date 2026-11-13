@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_workspace_by_hand.py
+# OkeyDocu - tests/test_workspace_by_hand.py
 # Values typed in by hand during a campaign.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -6,7 +6,7 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from easymeasurement.ui.measurement_overlays import MeasurementOverlay
+from okeydocu.ui.measurement_overlays import MeasurementOverlay
 
 
 def test_a_value_typed_in_lands_where_the_tree_points(window, app, monkeypatch):

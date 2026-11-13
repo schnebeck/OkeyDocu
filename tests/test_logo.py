@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_logo.py
+# OkeyDocu - tests/test_logo.py
 # Logo import, scaling and placement, checked in the rendered PDF.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -13,16 +13,16 @@ import subprocess
 import pytest
 from PIL import Image
 
-from easymeasurement.reporting.logo import (
+from okeydocu.reporting.logo import (
     LogoError,
     clamp_placement,
     decode_logo,
     prepare_logo,
     trimmed,
 )
-from easymeasurement.reporting.pdf import render_pdf
-from easymeasurement.reporting.template import Heading, Logo, TemplateError, parse_template, resolve
-from easymeasurement.reporting.template_model import dump_template, new_block
+from okeydocu.reporting.pdf import render_pdf
+from okeydocu.reporting.template import Heading, Logo, TemplateError, parse_template, resolve
+from okeydocu.reporting.template_model import dump_template, new_block
 
 from .logo_helpers import RED, png
 
@@ -34,7 +34,7 @@ def render(tmp_path, logos, heading=True, rows=0):
     nodes = list(logos)
     if heading:
         nodes.append(Heading("Prüfprotokoll"))
-    from easymeasurement.reporting.template import Paragraph
+    from okeydocu.reporting.template import Paragraph
 
     nodes += [Paragraph(f"Zeile {n}") for n in range(rows)]
     path = tmp_path / "logo.pdf"

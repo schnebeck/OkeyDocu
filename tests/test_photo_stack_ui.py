@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_photo_stack_ui.py
+# OkeyDocu - tests/test_photo_stack_ui.py
 # The stack of unassigned photos, and carrying photos between widgets.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -13,7 +13,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QMessageBox
 
-from easymeasurement.ui import photo_stack
+from okeydocu.ui import photo_stack
 
 from .photo_ui_helpers import make_campaign, open_stack, owners, photo_ids, write_photo
 

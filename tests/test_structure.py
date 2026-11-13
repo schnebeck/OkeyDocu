@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_structure.py
+# OkeyDocu - tests/test_structure.py
 # Rebuilding the structure of an installation and booking measurements onto its elements.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,9 +10,9 @@ from datetime import datetime
 
 import pytest
 
-from easymeasurement.campaign.service import StructureError
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.store import CampaignClosed
+from okeydocu.campaign.service import StructureError
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.store import CampaignClosed
 
 
 @pytest.fixture
@@ -158,7 +158,7 @@ def _closed(app, asset, title, closed_at, failed=False):
 
 def test_months_are_added_to_the_last_day_that_exists():
     from datetime import date
-    from easymeasurement.campaign.due import add_months
+    from okeydocu.campaign.due import add_months
     assert add_months(date(2025, 1, 31), 1) == date(2025, 2, 28)
     assert add_months(date(2025, 11, 15), 14) == date(2027, 1, 15)
 

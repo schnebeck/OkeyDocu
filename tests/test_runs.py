@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_runs.py
+# OkeyDocu - tests/test_runs.py
 # Runs: steps measured as one named sequence, folded into one line of the table.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -12,9 +12,9 @@ from datetime import datetime
 import pytest
 from PySide6.QtCore import Qt
 
-from easymeasurement.campaign.seal import content
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.ui.common import RUN_ID, selected_ids
+from okeydocu.campaign.seal import content
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.ui.common import RUN_ID, selected_ids
 
 FUNCTION, VALUES = 5, 6
 QUESTIONS = (("Zugänglichkeit", "Ist die Anlage zugänglich?", "yes"),
@@ -113,7 +113,7 @@ def test_the_measurement_names_its_element_instead_of_a_long_path(shown):
 
 
 def test_properties_are_stored_only_on_taking_them_over(shown, app):
-    from easymeasurement.ui.element_form import ElementOverlay
+    from okeydocu.ui.element_form import ElementOverlay
     overlay = ElementOverlay(app, shown["cabinet"])
     assert (overlay.ok_button.text(), overlay.cancel_button.text()) == ("Übernehmen", "Abbrechen")
     overlay.form.fields["name"].setText("Schrank X1")

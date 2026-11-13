@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_measurement_details.py
+# OkeyDocu - tests/test_measurement_details.py
 # A right click on a measurement shows what was measured how, and every figure's role.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -8,10 +8,10 @@
 
 from datetime import datetime
 
-from easymeasurement.devices.base import LiveReading
-from easymeasurement.devices.profitest_prime.parser import parse_event
-from easymeasurement.l10n import speaking
-from easymeasurement.ui.measurement_details import (
+from okeydocu.devices.base import LiveReading
+from okeydocu.devices.profitest_prime.parser import parse_event
+from okeydocu.l10n import speaking
+from okeydocu.ui.measurement_details import (
     MeasurementDetails,
     details_html,
     readable_record,
@@ -71,7 +71,7 @@ def test_the_view_opens_over_the_window(qtbot, app, asset):
 
 
 def test_a_row_shows_the_figures_that_count():
-    from easymeasurement.ui.readings import readings_line, stored_values
+    from okeydocu.ui.readings import readings_line, stored_values
 
     figures = [("rlo", "RLO", "0.21Ω"), ("rlo_offset", "RLO-OFFSET", "0.04Ω"),
                ("rlo_minus", "RLO-", "---")]

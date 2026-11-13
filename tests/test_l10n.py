@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_l10n.py
+# OkeyDocu - tests/test_l10n.py
 # Every text the program translates has a German entry with the same placeholders.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -15,10 +15,10 @@ from pathlib import Path
 import pytest
 import yaml
 
-from easymeasurement import l10n
-from easymeasurement.l10n.catalog import STORED, catalog, folder
-from easymeasurement.store.choice_lists import shipped_choice_texts
-from easymeasurement.vocabulary.terms import GROUPS, vocabulary
+from okeydocu import l10n
+from okeydocu.l10n.catalog import STORED, catalog, folder
+from okeydocu.store.choice_lists import shipped_choice_texts
+from okeydocu.vocabulary.terms import GROUPS, vocabulary
 
 PACKAGE = Path(l10n.__file__).parents[1]
 MARKERS = {"tr": (0,), "plural": (1, 2), "N_": (0,)}
@@ -93,9 +93,9 @@ def test_every_name_of_the_vocabulary_has_a_german_entry():
 
 def shipped_plan_words() -> set[str]:
     """The words of the shipped plans and of the drivers' instructions."""
-    from easymeasurement.campaign.plan import builtin_plan_texts
-    from easymeasurement.campaign.plan_language import words
-    from easymeasurement.devices.registry import instruction_folders
+    from okeydocu.campaign.plan import builtin_plan_texts
+    from okeydocu.campaign.plan_language import words
+    from okeydocu.devices.registry import instruction_folders
     raws = [yaml.safe_load(text) for text in builtin_plan_texts()]
     raws += [yaml.safe_load(entry.read_text(encoding="utf-8")) for folder in instruction_folders()
              for entry in folder.iterdir() if entry.name.endswith(".yaml")]
@@ -153,7 +153,7 @@ def test_a_language_names_itself(code):
 def test_telling_a_translation_reads_no_file(monkeypatch):
     """Kinds and features ask this for every label, so it answers from what was read once."""
     import importlib
-    catalogs = importlib.import_module("easymeasurement.l10n.catalog")
+    catalogs = importlib.import_module("okeydocu.l10n.catalog")
     l10n.available()
 
     def no_file(entry):
@@ -165,7 +165,7 @@ def test_telling_a_translation_reads_no_file(monkeypatch):
 
 
 def test_the_program_offers_only_languages_its_interface_speaks(qtbot, tmp_path, monkeypatch):
-    from easymeasurement.ui import language_choice
+    from okeydocu.ui import language_choice
     from PySide6.QtCore import QSettings
     stored = QSettings(str(tmp_path / "settings.ini"), QSettings.Format.IniFormat)
     monkeypatch.setattr(language_choice, "settings", lambda: stored)

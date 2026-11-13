@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_test_basis.py
+# OkeyDocu - tests/test_test_basis.py
 # What an element is tested to, inherited from the element above, and features with choices.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -9,12 +9,12 @@
 import pytest
 from PySide6.QtWidgets import QComboBox
 
-from easymeasurement.reporting.context import build_context
-from easymeasurement.reporting.nodes import Letterhead
-from easymeasurement.reporting.template import default_template_text, parse_template, resolve
-from easymeasurement.store.kinds import Feature
-from easymeasurement.ui.element_form import ElementForm
-from easymeasurement.ui.kind_features import FeatureTable
+from okeydocu.reporting.context import build_context
+from okeydocu.reporting.nodes import Letterhead
+from okeydocu.reporting.template import default_template_text, parse_template, resolve
+from okeydocu.store.kinds import Feature
+from okeydocu.ui.element_form import ElementForm
+from okeydocu.ui.kind_features import FeatureTable
 
 
 @pytest.fixture
@@ -73,7 +73,7 @@ def test_a_feature_with_choices_offers_them_and_takes_another_value(qtbot, app, 
 
 
 def test_a_choice_can_always_be_emptied_or_replaced_by_own_text(qtbot):
-    from easymeasurement.ui.choice_box import EMPTY, OWN, ChoiceBox
+    from okeydocu.ui.choice_box import EMPTY, OWN, ChoiceBox
 
     box = ChoiceBox(("B", "C"), "C")
     qtbot.addWidget(box)

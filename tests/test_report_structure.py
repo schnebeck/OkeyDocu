@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_report_structure.py
+# OkeyDocu - tests/test_report_structure.py
 # Reports by the structure of the installation: blocks that state what they share, the
 # figures that count, remarks and photos as footnotes.
 #
@@ -11,18 +11,18 @@ from datetime import timedelta
 
 import pytest
 
-from easymeasurement.campaign.photo_marks import PhotoMark
-from easymeasurement.model import MeterMeasurement, Quantity, ResultValue, Verdict
-from easymeasurement.reporting.context import (
+from okeydocu.campaign.photo_marks import PhotoMark
+from okeydocu.model import MeterMeasurement, Quantity, ResultValue, Verdict
+from okeydocu.reporting.context import (
     ReportMeasurement,
     ReportStep,
     build_context,
 )
-from easymeasurement.reporting.footnotes import Footnotes
-from easymeasurement.reporting.language import speaking
-from easymeasurement.reporting.measurement_table import group_nodes
-from easymeasurement.reporting.nodes import Fields, Heading, plain
-from easymeasurement.reporting.template import resolve
+from okeydocu.reporting.footnotes import Footnotes
+from okeydocu.reporting.language import speaking
+from okeydocu.reporting.measurement_table import group_nodes
+from okeydocu.reporting.nodes import Fields, Heading, plain
+from okeydocu.reporting.template import resolve
 
 from .rlo_helpers import T0, rlo
 
@@ -166,7 +166,7 @@ def test_an_element_says_what_it_is_and_how_it_was_measured(app):
 
 
 def test_compact_puts_every_function_of_an_element_into_one_table():
-    from easymeasurement.reporting.compact import compact_nodes
+    from okeydocu.reporting.compact import compact_nodes
 
     three_phase = ReportMeasurement(MeterMeasurement("u3", "u3", T0, Verdict.PASSED, results=(
         ResultValue("u_l1l2", "UL1L2", Quantity.parse("400V")),
@@ -201,7 +201,7 @@ def test_a_figure_few_rows_have_joins_their_remark():
 
 
 def test_a_setting_is_named_without_the_group_the_instrument_puts_before_it():
-    from easymeasurement.reporting.measurement_words import _without_group
+    from okeydocu.reporting.measurement_words import _without_group
 
     named = [("RCD - Typ", "B"), ("RCD - Nennstrom", "63 A"), ("RISO/RLO Messdauer", "AUTO")]
     assert _without_group(named) == [("Typ", "B"), ("Nennstrom", "63 A"),
@@ -211,7 +211,7 @@ def test_a_setting_is_named_without_the_group_the_instrument_puts_before_it():
 
 
 def test_a_setting_writes_its_numbers_as_the_language_does():
-    from easymeasurement.reporting.measurement_words import in_decimals
+    from okeydocu.reporting.measurement_words import in_decimals
 
     with speaking("de"):
         assert in_decimals("gL/gG <0.2s") == "gL/gG <0,2s"
@@ -222,14 +222,14 @@ def test_a_setting_writes_its_numbers_as_the_language_does():
 
 
 def test_a_lower_and_an_upper_limit_read_as_a_range():
-    from easymeasurement.reporting.measurement_table import limit_markup
+    from okeydocu.reporting.measurement_table import limit_markup
 
     assert limit_markup("t", "> 0 ms < 300 ms") == "0 ms &lt; t &lt; 300 ms"
     assert limit_markup("R", "< 1,00 Ω") == "R &lt; 1,00 Ω"
 
 
 def test_photos_of_an_element_that_say_the_same_share_a_row():
-    from easymeasurement.reporting.summary import _merged, numbers_text
+    from okeydocu.reporting.summary import _merged, numbers_text
 
     assert numbers_text([3]) == "[3]"
     assert numbers_text([3, 4]) == "[3], [4]"

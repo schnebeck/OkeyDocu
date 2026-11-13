@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_workspace_values.py
+# OkeyDocu - tests/test_workspace_values.py
 # The data table: many values, what all rows share, and conductors.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -9,7 +9,7 @@
 import time
 from datetime import datetime
 
-from easymeasurement.model import Quantity, ResultValue, Verdict
+from okeydocu.model import Quantity, ResultValue, Verdict
 
 
 # Many values -----------------------------------------------------------------

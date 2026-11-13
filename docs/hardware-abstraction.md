@@ -1,6 +1,6 @@
 # Hardware abstraction
 
-EasyMeasurement does not know any instrument. It knows a vocabulary of measuring functions,
+OkeyDocu does not know any instrument. It knows a vocabulary of measuring functions,
 results, quantities, outcomes and settings, and every instrument is translated into that
 vocabulary before the application sees its data. An instrument that measures something new,
 such as sound level at a machine, brings its words into the vocabulary and needs no change in
@@ -13,7 +13,7 @@ the user interface, the store or the reports.
               (protocol)  (codes→keys)   (keys, names)
 ```
 
-1. **Driver** (`easymeasurement/devices/<instrument>/`): transport, protocol, events and the
+1. **Driver** (`okeydocu/devices/<instrument>/`): transport, protocol, events and the
    instrument's own texts. It implements `MeterDriver` from `devices/base.py` and declares what
    it can do in `capabilities`. It reads the instrument's records in the instrument's terms.
 2. **Mapping** (`devices/<instrument>/mapping.py`): the one place where the instrument's codes
@@ -22,7 +22,7 @@ the user interface, the store or the reports.
    record is stored unchanged with every measurement (`raw`), so the origin of each figure can
    always be traced. What the mapping does not know is passed through as the instrument's code
    and named by the instrument itself (see below).
-3. **App vocabulary** (`easymeasurement/vocabulary/`, data in `data/vocabulary/<domain>.yaml`):
+3. **App vocabulary** (`okeydocu/vocabulary/`, data in `data/vocabulary/<domain>.yaml`):
    keys, symbols, units and English names. The program's language catalogues translate the
    names (`data/languages/<code>/vocabulary_<domain>.yaml`). Plans, templates, the store and the
    reports use only these keys.
@@ -141,7 +141,7 @@ serial port, such as `LEQ,A,F,78.4,2026-05-04T10:15:02`.
 
    The German names go into `data/languages/de/vocabulary_acoustics.yaml`
    (`Sound pressure level: Schalldruckpegel`, …). The l10n test fails until every name has one.
-2. **Driver package** `easymeasurement/devices/sound_meter/`:
+2. **Driver package** `okeydocu/devices/sound_meter/`:
    - `discovery.py` finds the instrument (USB vendor and product id) and returns
      `FoundInstrument` entries; the operator never sees ports.
    - `transport.py` owns the serial port, with a timeout on every read and an allowlist of the

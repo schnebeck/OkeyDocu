@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_report_signing.py
+# OkeyDocu - tests/test_report_signing.py
 # Signing reports with PKCS#12 and S/MIME certificates.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -17,9 +17,9 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography.x509.oid import NameOID
 
-from easymeasurement.reporting.archive import ReportArchive
-from easymeasurement.reporting.sign import Pkcs12Signer, SigningError
-from easymeasurement.reporting.template import default_template_text
+from okeydocu.reporting.archive import ReportArchive
+from okeydocu.reporting.sign import Pkcs12Signer, SigningError
+from okeydocu.reporting.template import default_template_text
 
 from .report_helpers import closed_campaign
 
@@ -131,7 +131,7 @@ def test_smime_certificate_signs_a_report(service, asset_id, plan, tmp_path, leg
 
 
 def test_certificate_details_are_shown_before_signing(tmp_path):
-    from easymeasurement.reporting.sign import inspect_certificate
+    from okeydocu.reporting.sign import inspect_certificate
 
     path = tmp_path / "mail.p12"
     smime_identity(path, "geheim")
@@ -168,10 +168,10 @@ def test_nothing_of_the_certificate_reaches_the_database(service, asset_id, plan
 def test_signing_remembers_the_path_but_never_the_passphrase(
     service, asset_id, plan, tmp_path, qtbot, monkeypatch
 ):
-    from easymeasurement.paths import data_dir
-    from easymeasurement.ui import report_signing
-    from easymeasurement.ui import reports as reports_ui
-    from easymeasurement.ui.common import AppContext
+    from okeydocu.paths import data_dir
+    from okeydocu.ui import report_signing
+    from okeydocu.ui import reports as reports_ui
+    from okeydocu.ui.common import AppContext
 
     campaign = closed_campaign(service, asset_id, plan, driver_key="profitest-prime")
     archive = ReportArchive(service)
@@ -203,7 +203,7 @@ def test_signing_remembers_the_path_but_never_the_passphrase(
 
 
 def test_a_wrong_password_keeps_the_overlay_open(tmp_path, qtbot):
-    from easymeasurement.ui.report_signing import SignOverlay
+    from okeydocu.ui.report_signing import SignOverlay
 
     certificate = tmp_path / "mail.p12"
     smime_identity(certificate, "streng-geheim")

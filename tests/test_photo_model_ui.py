@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_photo_model_ui.py
+# OkeyDocu - tests/test_photo_model_ui.py
 # The plain logic of the photo timeline: mapping, ticks, wording, drag decisions.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from easymeasurement.ui.photo_timeline_model import (
+from okeydocu.ui.photo_timeline_model import (
     GUTTER_PX,
     MAX_PX_PER_S,
     MIN_GAP_S,

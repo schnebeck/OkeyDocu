@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_photo_data_ui.py
+# OkeyDocu - tests/test_photo_data_ui.py
 # The snapshot of the timeline agrees with the backend arithmetic.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -11,9 +11,9 @@ from __future__ import annotations
 import random
 from datetime import datetime, timedelta
 
-from easymeasurement.campaign.photos import nearest_measurement, timeline_time
-from easymeasurement.ui.photo_timeline_data import TimelineData, TrackGap, TrackMark, TrackPhoto
-from easymeasurement.ui.photo_timeline_model import to_moment, to_seconds
+from okeydocu.campaign.photos import nearest_measurement, timeline_time
+from okeydocu.ui.photo_timeline_data import TimelineData, TrackGap, TrackMark, TrackPhoto
+from okeydocu.ui.photo_timeline_model import to_moment, to_seconds
 
 from .photo_ui_helpers import T0
 

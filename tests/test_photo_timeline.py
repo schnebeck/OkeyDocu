@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_photo_timeline.py
+# OkeyDocu - tests/test_photo_timeline.py
 # Photos on the timeline: shift, gaps, the stack, and pinning by hand.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -11,8 +11,8 @@ from datetime import datetime, timedelta
 import pytest
 from PIL import Image
 
-from easymeasurement.campaign.photos import nearest_measurement, timeline_time
-from easymeasurement.store import CampaignClosed
+from okeydocu.campaign.photos import nearest_measurement, timeline_time
+from okeydocu.store import CampaignClosed
 
 T0 = datetime(2026, 3, 1, 10, 0, 0)
 EXIF_DATETIME_ORIGINAL = 36867

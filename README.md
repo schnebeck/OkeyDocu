@@ -1,4 +1,6 @@
-# EasyMeasurement
+# OkeyDocu
+
+*Field testing and documentation on the go*
 
 Messdatenablage und Protokollerstellung für den Linux-Plasma-Desktop.
 
@@ -27,7 +29,7 @@ Alles dreht sich um eine Kette:
 ## Starten
 
     tools/setup-venv.sh
-    .venv/bin/python -m easymeasurement
+    .venv/bin/python -m okeydocu
 
 Ins Startmenü kommt das Programm mit `tools/install-desktop-entry.sh`: Das Skript trägt den
 Start aus diesem Checkout und das Programmsymbol für den angemeldeten Nutzer ein
@@ -36,7 +38,7 @@ Start aus diesem Checkout und das Programmsymbol für den angemeldeten Nutzer ei
 Die `.venv` ist isoliert und nutzt die festen Versionen aus `requirements.txt`. Nur PySide6 kommt
 aus der Distribution (Paket `python3-pyside6`), weil es zum System-Qt passen muss, damit der
 Plasma-Stil geladen wird. Daten liegen unter
-`~/.local/share/EasyMeasurement`; `EASYMEASUREMENT_DATA` wählt einen anderen Ordner.
+`~/.local/share/OkeyDocu`; `OKEYDOCU_DATA` wählt einen anderen Ordner.
 
 ## Tests
 

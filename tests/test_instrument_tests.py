@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_instrument_tests.py
+# OkeyDocu - tests/test_instrument_tests.py
 # Testing an instrument, keeping each run, and its history with the campaigns it measured in.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -8,9 +8,9 @@
 
 from datetime import date, datetime, timedelta
 
-from easymeasurement.devices import Capability, DeviceError, SelectorPosition
-from easymeasurement.devices.instrument_check import FAILED, NOTE, OK, run_checks
-from easymeasurement.model import DeviceIdentity
+from okeydocu.devices import Capability, DeviceError, SelectorPosition
+from okeydocu.devices.instrument_check import FAILED, NOTE, OK, run_checks
+from okeydocu.model import DeviceIdentity
 
 IDENTITY = DeviceIdentity("Hersteller", "Modell", "TEST0001", "01.02.03",
                           calibrated_on=date(2025, 3, 1), recalibration_due=date(2026, 9, 1))
@@ -88,7 +88,7 @@ def test_the_history_holds_tests_and_campaigns_newest_first(app):
 
 
 def test_the_test_window_runs_by_itself_and_keeps_the_run(app, qtbot, monkeypatch):
-    from easymeasurement.ui.instrument_test import InstrumentTestOverlay
+    from okeydocu.ui.instrument_test import InstrumentTestOverlay
     monkeypatch.setattr(app.devices, "new_driver", lambda key, port="": _Instrument())
     overlay = InstrumentTestOverlay(app, "prime", "bt:00:11:22:33:44:55", "PRIME (Bluetooth)")
     qtbot.addWidget(overlay)
@@ -100,7 +100,7 @@ def test_the_test_window_runs_by_itself_and_keeps_the_run(app, qtbot, monkeypatc
 
 
 def test_the_log_opens_without_an_instrument_and_shows_the_runs(app, qtbot):
-    from easymeasurement.ui.instrument_log import InstrumentLogOverlay
+    from okeydocu.ui.instrument_log import InstrumentLogOverlay
     app.service.save_instrument_test("prime", "USB", run_checks(_Instrument(), date(2026, 5, 4)))
     log = InstrumentLogOverlay(app)
     qtbot.addWidget(log)
@@ -110,8 +110,8 @@ def test_the_log_opens_without_an_instrument_and_shows_the_runs(app, qtbot):
 
 
 def test_an_empty_log_says_why(app, qtbot):
-    from easymeasurement.l10n import tr
-    from easymeasurement.ui.instrument_log import EMPTY, InstrumentLogOverlay
+    from okeydocu.l10n import tr
+    from okeydocu.ui.instrument_log import EMPTY, InstrumentLogOverlay
     log = InstrumentLogOverlay(app)
     qtbot.addWidget(log)
     assert log.hint.text() == tr(EMPTY) and not log.copy_button.isEnabled()
@@ -134,7 +134,7 @@ class _SlowToConnect(_Instrument):
 
 
 def test_a_test_that_waits_can_be_cancelled_and_keeps_nothing(app, qtbot, monkeypatch):
-    from easymeasurement.ui.instrument_test import InstrumentTestOverlay
+    from okeydocu.ui.instrument_test import InstrumentTestOverlay
     monkeypatch.setattr(app.devices, "new_driver", lambda key, port="": _SlowToConnect())
     overlay = InstrumentTestOverlay(app, "prime", "bt:00:11:22:33:44:55", "PRIME (Bluetooth)")
     qtbot.addWidget(overlay)

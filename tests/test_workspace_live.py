@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_workspace_live.py
+# OkeyDocu - tests/test_workspace_live.py
 # Values arriving live, and the messages about the link to the instrument.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,11 +10,11 @@ from datetime import datetime
 
 import pytest
 
-from easymeasurement.devices import Capability, DeviceError, LiveReading
-from easymeasurement.devices.profitest_prime import transport
-from easymeasurement.devices.simulator import SimulatedMeter
-from easymeasurement.ui.live_session import LiveSession
-from easymeasurement.ui.status_badges import BAD, ICON_SIZE, MAX_TEXT_WIDTH
+from okeydocu.devices import Capability, DeviceError, LiveReading
+from okeydocu.devices.profitest_prime import transport
+from okeydocu.devices.simulator import SimulatedMeter
+from okeydocu.ui.live_session import LiveSession
+from okeydocu.ui.status_badges import BAD, ICON_SIZE, MAX_TEXT_WIDTH
 
 from .workspace_helpers import plan_title, start, with_asset
 

@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_seal_keys.py
+# OkeyDocu - tests/test_seal_keys.py
 # Manipulated records are turned away, checks without the key, and the key in KWallet.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,12 +10,12 @@ import subprocess
 
 import pytest
 
-from easymeasurement.campaign import seal
-from easymeasurement.campaign.seal import KWalletKeyStore, SealState
-from easymeasurement.campaign.service import CampaignService
-from easymeasurement.reporting.archive import ReportArchive, ReportError
-from easymeasurement.reporting.context import build_context
-from easymeasurement.reporting.template import default_template_text
+from okeydocu.campaign import seal
+from okeydocu.campaign.seal import KWalletKeyStore, SealState
+from okeydocu.campaign.service import CampaignService
+from okeydocu.reporting.archive import ReportArchive, ReportError
+from okeydocu.reporting.context import build_context
+from okeydocu.reporting.template import default_template_text
 
 from . import seal_helpers
 from .seal_helpers import Key, finished, forge

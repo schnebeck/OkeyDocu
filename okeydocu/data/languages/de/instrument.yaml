@@ -1,0 +1,49 @@
+# OkeyDocu - German texts: instruments, their tests and their log.
+texts:
+  Connection: Verbindung
+  "up after {seconds} s": "steht nach {seconds} s"
+  Identity: Gerätekennung
+  "{model}, serial number {serial}, firmware {firmware}": "{model}, Seriennummer {serial}, Firmware {firmware}"
+  Calibration: Kalibrierung
+  due date unknown: Fälligkeit unbekannt
+  "overdue since {day}": "seit {day} überfällig"
+  "due on {day}": "fällig am {day}"
+  Clock: Uhr
+  is exact: geht genau
+  "is {offset} s off, set when a measurement starts": "weicht {offset} s ab, wird beim Messstart gestellt"
+  Rotary switch: Drehrad
+  an unknown position: unbekannter Stellung
+  "set to {position}": "steht auf {position}"
+  Push & Print: Push & Print
+  switched on and off: an- und abgemeldet
+  "The instrument is connected briefly and checked. Nothing is set and nothing is measured. The result goes into the instrument log.": "Das Messgerät wird kurz verbunden und geprüft. Es wird nichts gestellt und nichts gemessen. Das Ergebnis kommt ins Geräteprotokoll."
+  Ready for measurements: Bereit für Messungen
+  Not ready: Nicht bereit
+  Test the instrument: Messgerät testen
+  Connecting …: Verbinde …
+  Instrument texts: Gerätetexte
+  present: liegen vor
+  "missing: “Set up …” transfers them": "fehlen: „Einrichten …“ überträgt sie"
+  Ready for measurements.: Bereit für Messungen.
+  "Not ready for measurements, see ✗.": "Nicht bereit für Messungen, siehe ✗."
+  Time: Zeitpunkt
+  Entry: Eintrag
+  Firmware: Firmware
+  Calibrated: Kalibriert
+  Due: Fällig
+  No instrument tested or used in a campaign yet.: Noch kein Messgerät getestet oder in einer Kampagne benutzt.
+  Instrument log: Geräteprotokoll
+  "{model}, serial number {serial}": "{model}, Seriennummer {serial}"
+  Click ▸ to show the single checks of a test: Klick auf ▸ zeigt die Einzelprüfungen eines Tests
+  Instrument: Messgerät
+  "Test via {connection}": "Test über {connection}"
+  "Campaign “{title}”": "Kampagne „{title}“"
+  Instruments: Messgeräte
+  No instrument set up yet. Instruments connected by USB appear by themselves.: Noch kein Messgerät eingerichtet. Per USB angeschlossene Geräte erscheinen von selbst.
+  Set up …: Einrichten …
+  Checks what the instrument already has here and transfers what is missing. Rotary switch to Setup.: Prüft, was das Messgerät hier schon hat, und überträgt, was fehlt. Drehrad dafür auf Setup.
+  Test …: Testen …
+  Connects briefly and checks the instrument without setting or measuring anything. The result goes into the instrument log.: Verbindet kurz und prüft das Messgerät, ohne etwas zu stellen oder zu messen. Das Ergebnis kommt ins Geräteprotokoll.
+  Instrument log …: Geräteprotokoll …
+  Tests and campaigns per instrument, without a connection: Tests und Kampagnen je Messgerät, ohne Verbindung
+  "Double-click: set up": "Doppelklick: einrichten"

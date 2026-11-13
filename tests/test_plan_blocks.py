@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_plan_blocks.py
+# OkeyDocu - tests/test_plan_blocks.py
 # The plans of a campaign one by one: progress, pausing, ending and removing one.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,8 +10,8 @@ from datetime import datetime
 
 import pytest
 
-from easymeasurement.campaign.plan import parse_plan
-from easymeasurement.model import Quantity, ResultValue, Verdict
+from okeydocu.campaign.plan import parse_plan
+from okeydocu.model import Quantity, ResultValue, Verdict
 
 SIGHT = """
 key: sight

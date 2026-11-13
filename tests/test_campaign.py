@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_campaign.py
+# OkeyDocu - tests/test_campaign.py
 # Campaign flow: baseline, clock offset and assignment to steps.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,8 +10,8 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from easymeasurement.campaign.assignment import StepWindow, assign
-from easymeasurement.devices.simulator import SimulatedMeter
+from okeydocu.campaign.assignment import StepWindow, assign
+from okeydocu.devices.simulator import SimulatedMeter
 
 from .campaign_helpers import T0, start, step_of
 

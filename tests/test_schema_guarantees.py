@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_schema_guarantees.py
+# OkeyDocu - tests/test_schema_guarantees.py
 # What the schema guarantees: logging, origin of readings, once per device, stored keys.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,13 +10,13 @@ import sqlite3
 
 import pytest
 
-from easymeasurement.campaign.plan import load_plans
-from easymeasurement.campaign.service import CampaignService
-from easymeasurement.devices.simulator import SimulatedMeter
-from easymeasurement.model import Quantity, ResultValue
-from easymeasurement.store import Database, SchemaMismatch
-from easymeasurement.store.database import SCHEMA_VERSION, DuplicateMeasurement
-from easymeasurement.store.search import MeasurementFilter, search_measurements
+from okeydocu.campaign.plan import load_plans
+from okeydocu.campaign.service import CampaignService
+from okeydocu.devices.simulator import SimulatedMeter
+from okeydocu.model import Quantity, ResultValue
+from okeydocu.store import Database, SchemaMismatch
+from okeydocu.store.database import SCHEMA_VERSION, DuplicateMeasurement
+from okeydocu.store.search import MeasurementFilter, search_measurements
 
 
 def test_file_database_uses_write_ahead_logging(tmp_path):

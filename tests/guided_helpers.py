@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/guided_helpers.py
+# OkeyDocu - tests/guided_helpers.py
 # Fixtures and steps of the guided flow in the real window, with the simulator.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,10 +10,10 @@ import pytest
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtTest import QTest
 
-from easymeasurement.__main__ import build_context
-from easymeasurement.campaign.plan import load_plans
-from easymeasurement.ui import common
-from easymeasurement.ui.main_window import MainWindow
+from okeydocu.__main__ import build_context
+from okeydocu.campaign.plan import load_plans
+from okeydocu.ui import common
+from okeydocu.ui.main_window import MainWindow
 
 
 @pytest.fixture

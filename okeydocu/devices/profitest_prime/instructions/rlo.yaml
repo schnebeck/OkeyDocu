@@ -1,0 +1,38 @@
+# OkeyDocu - instruction for one measuring function, draft.
+# Connections follow the PROFITEST PRIME manual (3-349-933-03).
+# `dut` says how the test object has to be operated during the measurement.
+title: Protective conductor continuity
+function: rlo
+selector: RLO
+settings:
+- Test current: 0.2 A
+- Polarity: automatic reversal (±)
+- Test duration: AUTO
+- Limit: set according to cable length and cross-section
+warnings:
+- Measure only on de-energised parts.
+- Make contact first, then start. Starting first and making contact afterwards trips the instrument's
+  fuse.
+instructions:
+- Place probe 3(PE) on the PE bar.
+- Place probe 1(L) on the measuring point on the enclosure.
+- Press ON/START on the instrument.
+- Save the value with “Save Value”. A long press saves it to the object chosen last.
+source: Operating instructions, sections 10.1.4 and 10.1.5
+wiring:
+  instrument: PROFITEST PRIME
+  sockets:
+  - 1(L)
+  - 2(N)
+  - 3(PE)
+  object_label: Protective conductor system (de-energised)
+  terminals:
+  - id: body
+    label: Enclosure / measuring point
+  - id: pe
+    label: PE bar
+  wires:
+  - socket: 3(PE)
+    target: pe
+  - socket: 1(L)
+    target: body

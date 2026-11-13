@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_clock.py
+# OkeyDocu - tests/test_clock.py
 # The instrument's clock: the driver, and setting it at the start of a campaign.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,10 +10,10 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from easymeasurement.devices.base import DeviceError
-from easymeasurement.devices.profitest_prime.driver import ProfitestPrimeDriver
-from easymeasurement.devices.profitest_prime.transport import ForbiddenCommand, PrimeTransport
-from easymeasurement.devices.simulator import SimulatedMeter
+from okeydocu.devices.base import DeviceError
+from okeydocu.devices.profitest_prime.driver import ProfitestPrimeDriver
+from okeydocu.devices.profitest_prime.transport import ForbiddenCommand, PrimeTransport
+from okeydocu.devices.simulator import SimulatedMeter
 
 from .clock_helpers import HOUR, open_campaign
 from .prime_helpers import FakeInstrument, empty_reply

@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/workspace_helpers.py
+# OkeyDocu - tests/workspace_helpers.py
 # Shared steps of the workspace tests: an asset and a started campaign.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -6,8 +6,8 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from easymeasurement.devices import FoundInstrument
-from easymeasurement.ui.campaign_dialog import CampaignDialog
+from okeydocu.devices import FoundInstrument
+from okeydocu.ui.campaign_dialog import CampaignDialog
 
 
 def with_asset(window, app):
@@ -19,7 +19,7 @@ def with_asset(window, app):
 def start(window, monkeypatch, plan="Ohne Plan", simulated=False):
     if simulated:
         monkeypatch.setattr(
-            "easymeasurement.ui.campaign_dialog.find_instruments",
+            "okeydocu.ui.campaign_dialog.find_instruments",
             lambda: [FoundInstrument("simulator", "Simulator (Zufallswerte)")],
         )
 

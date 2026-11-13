@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/template_page.py
+# OkeyDocu - tests/template_page.py
 # The template editor in the real window, with a template that repeats per step.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -6,10 +6,10 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from easymeasurement.__main__ import build_context
-from easymeasurement.reporting.template import default_template_text
-from easymeasurement.reporting.template_model import in_program_language
-from easymeasurement.ui.main_window import MainWindow
+from okeydocu.__main__ import build_context
+from okeydocu.reporting.template import default_template_text
+from okeydocu.reporting.template_model import in_program_language
+from okeydocu.ui.main_window import MainWindow
 
 # The repeat these tests work in, in place of the standard template's structure block.
 STEPS = """  - type: steps

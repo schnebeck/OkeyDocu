@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_device_texts.py
+# OkeyDocu - tests/test_device_texts.py
 # The instrument's words for its codes: read on setting it up, kept, and used to show settings.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -12,10 +12,10 @@ from datetime import datetime
 
 import pytest
 
-from easymeasurement.devices import Capability, DeviceBlocked, DeviceTexts
-from easymeasurement.devices.profitest_prime.texts import parse_texts
-from easymeasurement.model import DeviceIdentity, Parameter, Verdict
-from easymeasurement.ui.instrument_prepare import InstrumentPrepareOverlay, texts_needed
+from okeydocu.devices import Capability, DeviceBlocked, DeviceTexts
+from okeydocu.devices.profitest_prime.texts import parse_texts
+from okeydocu.model import DeviceIdentity, Parameter, Verdict
+from okeydocu.ui.instrument_prepare import InstrumentPrepareOverlay, texts_needed
 
 # Invented codes and words: the instrument's own texts stay out of the project.
 TEXTS = {"de-DE": {"TS9001": "Prüfmodus", "TS9002": "Langsam"},
@@ -42,8 +42,8 @@ def test_kept_texts_replace_older_ones_and_name_their_firmware(app):
 
 
 def _words(app):
-    from easymeasurement.devices.naming import InstrumentWords, SettingWords
-    from easymeasurement.devices.profitest_prime import mapping
+    from okeydocu.devices.naming import InstrumentWords, SettingWords
+    from okeydocu.devices.profitest_prime import mapping
     app.db.save_device_texts("prime", "02.00.00", "2", TEXTS)
     return SettingWords(app.db, [InstrumentWords("prime", mapping.is_code, mapping.culture)])
 
@@ -57,7 +57,7 @@ def test_a_setting_reads_as_words_where_they_are_known(app):
 
 
 def test_the_instrument_speaks_the_language_of_the_program(app):
-    from easymeasurement.l10n import speaking
+    from okeydocu.l10n import speaking
     with speaking("en"):
         assert _words(app).say("TS9001", "TS9002") == ("Test mode", "Slow", True)
 
@@ -121,8 +121,8 @@ def test_a_blocked_instrument_asks_for_setup_and_can_be_tried_again(app, qtbot, 
 
 def test_a_changed_setting_is_judged_in_words_on_both_sides(app):
     """A push sends codes, an import brings German text: they must not look different."""
-    from easymeasurement.campaign.plan import PlanStep
-    from easymeasurement.devices.profitest_prime.discovery import DRIVER_KEY
+    from okeydocu.campaign.plan import PlanStep
+    from okeydocu.devices.profitest_prime.discovery import DRIVER_KEY
     app.db.save_device_texts(DRIVER_KEY, "02.00.00", "2", TEXTS)
     asset = app.db.add_asset(app.db.add_customer("Muster AG"), "machine", "Presse")
     campaign = app.service.create(asset, "Prüfung", "Prüfer")
@@ -138,13 +138,13 @@ def test_a_changed_setting_is_judged_in_words_on_both_sides(app):
 
 @pytest.mark.parametrize("command", ["DATABASEXML:GET:TRANSLATIONFILE"])
 def test_reading_the_texts_is_an_approved_read(command):
-    from easymeasurement.devices.profitest_prime.transport import READ_ONLY_COMMANDS
+    from okeydocu.devices.profitest_prime.transport import READ_ONLY_COMMANDS
     assert command in READ_ONLY_COMMANDS
 
 
 def test_the_instruments_dialog_sets_up_the_chosen_instrument(app, qtbot, monkeypatch):
-    from easymeasurement.devices import FoundInstrument
-    from easymeasurement.ui import settings_dialog
+    from okeydocu.devices import FoundInstrument
+    from okeydocu.ui import settings_dialog
     found = FoundInstrument("profitest-prime", "PROFITEST PRIME (USB)", "/dev/ttyACM0")
     monkeypatch.setattr(settings_dialog, "find_instruments", lambda: [found])
     opened = []
@@ -159,7 +159,7 @@ def test_the_instruments_dialog_sets_up_the_chosen_instrument(app, qtbot, monkey
 
 
 def test_pairing_over_bluetooth_goes_straight_on_to_setting_up(app, qtbot, monkeypatch):
-    from easymeasurement.ui import settings_dialog
+    from okeydocu.ui import settings_dialog
     opened = []
     monkeypatch.setattr(settings_dialog.InstrumentPrepareOverlay, "__init__",
                         lambda self, app, key, port, parent=None: opened.append((key, port)))

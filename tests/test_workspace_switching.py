@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_workspace_switching.py
+# OkeyDocu - tests/test_workspace_switching.py
 # Interrupting, resuming and looking at another campaign while one measures.
 #
 # Producer: thorsten.schnebeck@gmx.net

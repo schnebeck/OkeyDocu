@@ -1,0 +1,22 @@
+# OkeyDocu - German texts: the instrument connected, prepared and paired.
+texts:
+  Disconnecting from the instrument …: Trenne vom Messgerät …
+  Fetching the readings from the instrument …: Rufe die Messwerte vom Gerät ab …
+  Checking the instrument clock …: Prüfe die Geräteuhr …
+  Setting the instrument clock …: Stelle die Geräteuhr …
+  Clock offset: Uhrenversatz
+  "The instrument is ahead (+) or behind (−), in seconds:": "Das Messgerät geht vor (+) oder nach (−), in Sekunden:"
+  Recognise the instrument: Messgerät erkennen
+  Transfer instrument texts: Gerätetexte übertragen
+  Preparing the instrument: Messgerät wird vorbereitet
+  The instrument is being prepared for this program. Please do not disconnect it.: Das Messgerät wird für dieses Programm vorbereitet. Bitte das Gerät nicht trennen.
+  Done: Fertig
+  Later: Später
+  The instrument is ready.: Das Messgerät ist bereit.
+  Try again: Erneut versuchen
+  Set up instrument: Messgerät einrichten
+  Set up: Einrichten
+  Instrument PIN: PIN des Geräts
+  The instrument is paired.: Das Messgerät ist gekoppelt.
+  Cancelled.: Abgebrochen.
+  Cancelling …: Wird abgebrochen …

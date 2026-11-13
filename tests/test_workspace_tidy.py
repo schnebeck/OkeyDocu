@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_workspace_tidy.py
+# OkeyDocu - tests/test_workspace_tidy.py
 # The calm workspace: the list at the edge, row actions in the menu, checks in the head.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -11,11 +11,11 @@ from datetime import datetime
 import pytest
 from PySide6.QtCore import QPoint
 
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.ui.campaign_checks import FAILED_LINK, UNPLACED_LINK
-from easymeasurement.ui.edge_drawer import LEAVE_POLLS
-from easymeasurement.ui.move_overlay import MoveOverlay
-from easymeasurement.ui.structure_tree import UNPLACED
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.ui.campaign_checks import FAILED_LINK, UNPLACED_LINK
+from okeydocu.ui.edge_drawer import LEAVE_POLLS
+from okeydocu.ui.move_overlay import MoveOverlay
+from okeydocu.ui.structure_tree import UNPLACED
 
 
 def _value(text, verdict=Verdict.PASSED):

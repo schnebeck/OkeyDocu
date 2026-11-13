@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_photo_gaps_ui.py
+# OkeyDocu - tests/test_photo_gaps_ui.py
 # Gaps in the photo track: insert, stretch, remove.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -13,8 +13,8 @@ from datetime import timedelta
 import pytest
 from PySide6.QtCore import QPoint
 
-from easymeasurement.ui.photo_timeline_events import Hit
-from easymeasurement.ui.photo_timeline_model import MIN_GAP_S, to_seconds
+from okeydocu.ui.photo_timeline_events import Hit
+from okeydocu.ui.photo_timeline_model import MIN_GAP_S, to_seconds
 
 from .photo_ui_helpers import (
     T0,

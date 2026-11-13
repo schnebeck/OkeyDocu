@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/text_fit.py
+# OkeyDocu - tests/text_fit.py
 # Finds texts that do not fit the widget showing them, as a person would see them cut off.
 #
 # Producer: thorsten.schnebeck@gmx.net

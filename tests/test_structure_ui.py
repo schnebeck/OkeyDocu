@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_structure_ui.py
+# OkeyDocu - tests/test_structure_ui.py
 # The structure beside the table, its menu, the kinds settings and what is due on the start screen.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -11,12 +11,12 @@ from datetime import datetime
 import pytest
 from PySide6.QtCore import QPoint
 
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.ui.campaign_dialog import CampaignDialog
-from easymeasurement.ui.kind_removal import RemoveKindOverlay
-from easymeasurement.ui.structure_cleanup import CleanupOverlay
-from easymeasurement.ui.structure_tree import UNPLACED
-from easymeasurement.ui.suited_methods import context_of
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.ui.campaign_dialog import CampaignDialog
+from okeydocu.ui.kind_removal import RemoveKindOverlay
+from okeydocu.ui.structure_cleanup import CleanupOverlay
+from okeydocu.ui.structure_tree import UNPLACED
+from okeydocu.ui.suited_methods import context_of
 
 
 @pytest.fixture
@@ -185,6 +185,6 @@ def test_searching_the_structure_keeps_the_way_to_a_hit(shown):
 
 
 def test_features_reach_the_report(app, shown):
-    from easymeasurement.reporting.levels import asset_features
+    from okeydocu.reporting.levels import asset_features
     app.db.set_asset_features(shown["press"], {"rated_current": "16", "year_of_manufacture": ""})
     assert asset_features(app.db, app.db.asset(shown["press"])) == [("Nennstrom", "16\u202fA")]

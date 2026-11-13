@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_instrument_finding.py
+# OkeyDocu - tests/test_instrument_finding.py
 # Finding instruments, first-time pairing, and starting wherever the switch stands.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -13,9 +13,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from easymeasurement.devices import DeviceBlocked, DeviceError, FoundInstrument
-from easymeasurement.devices.profitest_prime import discovery, pairing
-from easymeasurement.devices.simulator import SimulatedMeter
+from okeydocu.devices import DeviceBlocked, DeviceError, FoundInstrument
+from okeydocu.devices.profitest_prime import discovery, pairing
+from okeydocu.devices.simulator import SimulatedMeter
 
 from .prime_helpers import ADDRESS
 

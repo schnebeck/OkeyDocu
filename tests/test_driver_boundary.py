@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_driver_boundary.py
+# OkeyDocu - tests/test_driver_boundary.py
 # The application knows instruments only by what their drivers say about themselves.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -12,12 +12,12 @@ from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
 
-import easymeasurement
-from easymeasurement.campaign.plan import parse_plan, says_draft
-from easymeasurement.devices import available_drivers, driver_info, is_simulated
-from easymeasurement.l10n import qt_moment, speaking
+import okeydocu
+from okeydocu.campaign.plan import parse_plan, says_draft
+from okeydocu.devices import available_drivers, driver_info, is_simulated
+from okeydocu.l10n import qt_moment, speaking
 
-PACKAGE = Path(easymeasurement.__file__).parent
+PACKAGE = Path(okeydocu.__file__).parent
 DRIVER_IMPORT = re.compile(r"devices\.(profitest_prime|simulator)\b|from \.(profitest_prime|simulator)")
 # The UI drives the simulator itself; the IZYTRON import reads a PROFITEST PRIME's results.
 KNOWS_A_DRIVER = {
@@ -63,7 +63,7 @@ def test_moment_fields_follow_the_language():
 
 
 def test_a_check_is_answered_by_the_underlined_letter_of_its_language(qtbot):
-    from easymeasurement.ui.guided_pages import CheckPage
+    from okeydocu.ui.guided_pages import CheckPage
     with speaking("en"):
         page = CheckPage()
     qtbot.addWidget(page)

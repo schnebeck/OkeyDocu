@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/campaign_helpers.py
+# OkeyDocu - tests/campaign_helpers.py
 # Shared timeline and steps of the campaign tests.
 #
 # Producer: thorsten.schnebeck@gmx.net

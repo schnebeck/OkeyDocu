@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_template_editor.py
+# OkeyDocu - tests/test_template_editor.py
 # The graphical template editor in the real window.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -9,10 +9,10 @@
 import pytest
 from PySide6.QtWidgets import QMessageBox
 
-from easymeasurement.reporting.nodes import Footnoted
-from easymeasurement.reporting.template import Paragraph, Table, parse_template, resolve
-from easymeasurement.reporting.template_model import BLOCK_LABELS, dump_template, new_block
-from easymeasurement.ui.template_document import sample_context
+from okeydocu.reporting.nodes import Footnoted
+from okeydocu.reporting.template import Paragraph, Table, parse_template, resolve
+from okeydocu.reporting.template_model import BLOCK_LABELS, dump_template, new_block
+from okeydocu.ui.template_document import sample_context
 
 
 

@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_ui.py
+# OkeyDocu - tests/test_ui.py
 # The window against a real database, offscreen.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -16,9 +16,9 @@ from datetime import datetime
 import pytest
 from PySide6.QtWidgets import QApplication, QMessageBox
 
-from easymeasurement.__main__ import build_context
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.ui.main_window import MainWindow
+from okeydocu.__main__ import build_context
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.ui.main_window import MainWindow
 
 
 def value(text, verdict=Verdict.PASSED):
@@ -134,7 +134,7 @@ def test_values_column_is_readable(window):
 
 def test_broken_template_is_reported_not_saved(window, monkeypatch):
     page = window.templates
-    monkeypatch.setattr("easymeasurement.ui.template_document.show_error", lambda *_: None)
+    monkeypatch.setattr("okeydocu.ui.template_document.show_error", lambda *_: None)
     before = window.app.db.templates()[0]["body"]
     page.modes.setCurrentWidget(page.editor)
     page.editor.setPlainText("blocks:\n  - type: magic\n")
@@ -153,7 +153,7 @@ def test_master_data_shows_customers_and_their_structure(window):
 
 def test_customer_with_assets_cannot_be_deleted(window, monkeypatch):
     errors = []
-    monkeypatch.setattr("easymeasurement.ui.master_data.show_error", lambda _, t: errors.append(t))
+    monkeypatch.setattr("okeydocu.ui.master_data.show_error", lambda _, t: errors.append(t))
     monkeypatch.setattr(QMessageBox, "question", lambda *_: QMessageBox.StandardButton.Yes)
     page = window.master_data
     page.customers.setCurrentRow(0)
@@ -220,9 +220,9 @@ def test_report_list_finds_a_generated_report(window):
 def test_terminating_the_program_exits_in_an_orderly_way(tmp_path):
     """Only an orderly exit lets a driver leave Push/Print on the instrument."""
     environment = {
-        **os.environ, "QT_QPA_PLATFORM": "offscreen", "EASYMEASUREMENT_DATA": str(tmp_path),
+        **os.environ, "QT_QPA_PLATFORM": "offscreen", "OKEYDOCU_DATA": str(tmp_path),
     }
-    process = subprocess.Popen([sys.executable, "-m", "easymeasurement"], env=environment)
+    process = subprocess.Popen([sys.executable, "-m", "okeydocu"], env=environment)
     time.sleep(3)
     process.send_signal(signal.SIGTERM)
     assert process.wait(timeout=10) == 0

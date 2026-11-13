@@ -1,5 +1,5 @@
 #!/bin/sh
-# EasyMeasurement - tools/setup-venv.sh
+# OkeyDocu - tools/setup-venv.sh
 # Builds an isolated .venv. Only PySide6 comes from the distribution, because it must
 # match the system Qt for the Plasma style to load; everything else is pinned here.
 #
@@ -24,4 +24,4 @@ done
 
 .venv/bin/pip install --quiet -r requirements.txt
 .venv/bin/pip install --quiet --no-deps --no-build-isolation -e .
-.venv/bin/python -c 'import PySide6.QtWidgets, easymeasurement; print("venv bereit")'
+.venv/bin/python -c 'import PySide6.QtWidgets, okeydocu; print("venv bereit")'

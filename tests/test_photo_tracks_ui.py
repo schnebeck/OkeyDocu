@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_photo_tracks_ui.py
+# OkeyDocu - tests/test_photo_tracks_ui.py
 # The tracks on screen: what they show, zoom, pan, reading, closed campaigns.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -13,10 +13,10 @@ from PIL import Image
 from PySide6.QtCore import QPoint
 from PySide6.QtGui import QColor, QPalette
 
-from easymeasurement.model import Verdict
-from easymeasurement.ui.photo_shared import THUMB_EDGE_PX, read_thumbnail, shared_thumbs
-from easymeasurement.ui.photo_timeline import PhotoTimeline
-from easymeasurement.ui.photo_timeline_events import Hit
+from okeydocu.model import Verdict
+from okeydocu.ui.photo_shared import THUMB_EDGE_PX, read_thumbnail, shared_thumbs
+from okeydocu.ui.photo_timeline import PhotoTimeline
+from okeydocu.ui.photo_timeline_events import Hit
 
 from .photo_ui_helpers import (
     click,

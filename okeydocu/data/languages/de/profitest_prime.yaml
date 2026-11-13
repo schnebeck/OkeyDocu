@@ -1,0 +1,6 @@
+# OkeyDocu - German texts of the PROFITEST PRIME driver.
+texts:
+  Battery state: Batteriezustand
+  "Set up {instrument} via Bluetooth …": "{instrument} über Bluetooth einrichten …"
+  "<ol><li>Unplug the USB cable.</li><li>Turn the rotary switch to <b>Setup</b>.</li><li>In the Bluetooth menu, set Bluetooth to <b>on</b> and <b>visible</b>.</li><li>Click <b>Set up</b> here and confirm a request on the instrument.</li></ol>This is needed only once. After that the instrument is in the list and only gets chosen.": "<ol><li>USB-Kabel abziehen.</li><li>Drehschalter auf <b>Setup</b> stellen.</li><li>Im Bluetooth-Menü Bluetooth <b>ein</b> und <b>sichtbar</b> stellen.</li><li>Hier auf <b>Einrichten</b> klicken und eine Abfrage am Gerät bestätigen.</li></ol>Das ist nur einmal nötig. Danach steht das Gerät in der Liste und wird nur noch ausgewählt."
+  "The instrument is being prepared for this program. The first time and after a firmware update this takes about a minute. Please leave the rotary switch at <b>Setup</b> and do not disconnect the instrument.": "Das Messgerät wird für dieses Programm vorbereitet. Beim ersten Mal und nach einem Firmware-Update dauert das etwa eine Minute. Bitte den Drehschalter auf <b>Setup</b> lassen und das Gerät nicht trennen."

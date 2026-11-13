@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_busy.py
+# OkeyDocu - tests/test_busy.py
 # Slow work in the background: the window waits, and the operator may stop it.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -12,8 +12,8 @@ import pytest
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QProgressDialog, QWidget
 
-from easymeasurement.devices import Cancelled, DeviceError
-from easymeasurement.ui.common import run_busy
+from okeydocu.devices import Cancelled, DeviceError
+from okeydocu.ui.common import run_busy
 
 
 def _press_cancel(window):
@@ -49,7 +49,7 @@ def test_work_done_before_the_cancel_keeps_its_result(qtbot):
 
 
 def test_the_program_has_its_own_icon(qtbot):
-    from easymeasurement.__main__ import program_icon
+    from okeydocu.__main__ import program_icon
 
     icon = program_icon()
     assert not icon.isNull() and not icon.pixmap(32, 32).isNull()

@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_campaign_contact.py
+# OkeyDocu - tests/test_campaign_contact.py
 # The customer's department and person for a campaign, up to the report's letterhead.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -8,12 +8,12 @@
 
 import pytest
 
-from easymeasurement.reporting.context import build_context
-from easymeasurement.reporting.language import speaking
-from easymeasurement.reporting.nodes import Letterhead
-from easymeasurement.reporting.template import default_template_text, parse_template, resolve
-from easymeasurement.store import CampaignClosed
-from easymeasurement.ui.campaign_edit import CampaignEditOverlay
+from okeydocu.reporting.context import build_context
+from okeydocu.reporting.language import speaking
+from okeydocu.reporting.nodes import Letterhead
+from okeydocu.reporting.template import default_template_text, parse_template, resolve
+from okeydocu.store import CampaignClosed
+from okeydocu.ui.campaign_edit import CampaignEditOverlay
 
 
 def _client(app, campaign, language="de"):
@@ -77,7 +77,7 @@ def test_the_order_opens_where_it_holds_something(app, window, press):
 
 
 def test_a_new_campaign_asks_for_the_same_order_and_suggests_the_last_contact(app, window, press):
-    from easymeasurement.ui.campaign_dialog import CampaignDialog
+    from okeydocu.ui.campaign_dialog import CampaignDialog
 
     first = app.service.create(press, "2026", "Anna Prüfer")
     app.service.set_contact(first, "", "Frau Muster", "", "")

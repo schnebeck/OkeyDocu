@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_reporting.py
+# OkeyDocu - tests/test_reporting.py
 # Templates with 0, 1 and n measurements, the PDF and the archive.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -12,19 +12,19 @@ from datetime import timedelta
 
 import pytest
 
-from easymeasurement.devices.simulator import SimulatedMeter
-from easymeasurement.model import MeterMeasurement, Quantity, ResultValue, Verdict
-from easymeasurement.reporting.archive import ReportArchive, ReportError
-from easymeasurement.reporting.context import (
+from okeydocu.devices.simulator import SimulatedMeter
+from okeydocu.model import MeterMeasurement, Quantity, ResultValue, Verdict
+from okeydocu.reporting.archive import ReportArchive, ReportError
+from okeydocu.reporting.context import (
     ReportMeasurement,
     ReportStep,
     build_context,
     overall_verdict,
 )
-from easymeasurement.reporting.pdf import render_pdf
-from easymeasurement.reporting.sign import Pkcs12Signer
-from easymeasurement.reporting.nodes import Footnoted
-from easymeasurement.reporting.template import (
+from okeydocu.reporting.pdf import render_pdf
+from okeydocu.reporting.sign import Pkcs12Signer
+from okeydocu.reporting.nodes import Footnoted
+from okeydocu.reporting.template import (
     Fields,
     Notice,
     Paragraph,
@@ -224,7 +224,7 @@ def test_report_without_instrument_has_no_device_section(service, asset_id):
 
 
 def test_photo_caption_names_its_measurement(tmp_path):
-    from easymeasurement.reporting.template import Photos
+    from okeydocu.reporting.template import Photos
 
     measurement = reading()
     measurement.photos.append(tmp_path / "a.jpg")
@@ -236,8 +236,8 @@ def test_photo_caption_names_its_measurement(tmp_path):
 
 
 def test_a_defect_photo_says_so_and_names_its_marks(tmp_path):
-    from easymeasurement.campaign.photo_marks import PhotoMark
-    from easymeasurement.reporting.template import Photos
+    from okeydocu.campaign.photo_marks import PhotoMark
+    from okeydocu.reporting.template import Photos
 
     measurement = reading()
     path = tmp_path / "a.jpg"

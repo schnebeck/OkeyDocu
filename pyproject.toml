@@ -1,4 +1,4 @@
-# EasyMeasurement - pyproject.toml
+# OkeyDocu - pyproject.toml
 #
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -8,9 +8,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "easymeasurement"
+name = "okeydocu"
 version = "0.1.0"
-description = "Geführte Messwerterfassung, Protokollvorlagen und Protokollablage für den Plasma-Desktop"
+description = "Field testing and documentation on the go"
 requires-python = ">=3.12"
 license = "GPL-3.0-or-later"
 authors = [{ name = "Thorsten Schnebeck", email = "thorsten.schnebeck@gmx.net" }]
@@ -29,13 +29,13 @@ dependencies = [
 dev = ["pytest>=8", "pytest-qt>=4.4"]
 
 [project.gui-scripts]
-easymeasurement = "easymeasurement.__main__:main"
+okeydocu = "okeydocu.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["easymeasurement*"]
+include = ["okeydocu*"]
 
 [tool.setuptools.package-data]
-easymeasurement = ["data/**/*.yaml", "data/**/*.svg", "devices/**/*.yaml"]
+okeydocu = ["data/**/*.yaml", "data/**/*.svg", "devices/**/*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

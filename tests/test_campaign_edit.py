@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_campaign_edit.py
+# OkeyDocu - tests/test_campaign_edit.py
 # Changing title and installation of an open campaign, and the context menu of the campaign list.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,9 +10,9 @@ from datetime import datetime
 
 import pytest
 
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.store import CampaignClosed
-from easymeasurement.ui.campaign_edit import TESTER, CampaignEditOverlay
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.store import CampaignClosed
+from okeydocu.ui.campaign_edit import TESTER, CampaignEditOverlay
 
 
 @pytest.fixture

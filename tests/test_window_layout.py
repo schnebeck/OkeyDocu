@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_window_layout.py
+# OkeyDocu - tests/test_window_layout.py
 # The window around the work: status bar, menus, panels and what survives a restart.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -8,8 +8,8 @@
 
 from PySide6.QtWidgets import QApplication
 
-from easymeasurement.ui.board import GUTTER
-from easymeasurement.ui.main_window import MainWindow
+from okeydocu.ui.board import GUTTER
+from okeydocu.ui.main_window import MainWindow
 
 from .workspace_helpers import plan_title, start, with_asset
 
@@ -183,7 +183,7 @@ def test_closing_the_main_window_closes_the_others(window):
 
 
 def test_quitting_says_that_the_program_ends(window):
-    assert window.quit_action.text() == "EasyMeasurement beenden"
+    assert window.quit_action.text() == "OkeyDocu beenden"
 
 
 def test_a_restart_begins_on_the_start_screen(qtbot, app, window, monkeypatch):

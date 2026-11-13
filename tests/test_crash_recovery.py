@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_crash_recovery.py
+# OkeyDocu - tests/test_crash_recovery.py
 # A guided round with the simulator that ends in a crash goes on where it stopped.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -14,10 +14,10 @@ from pathlib import Path
 import pytest
 from PySide6.QtWidgets import QMessageBox
 
-from easymeasurement.__main__ import build_context
-from easymeasurement.ui import common
-from easymeasurement.ui.confirm_overlay import ConfirmOverlay
-from easymeasurement.ui.main_window import MainWindow
+from okeydocu.__main__ import build_context
+from okeydocu.ui import common
+from okeydocu.ui.confirm_overlay import ConfirmOverlay
+from okeydocu.ui.main_window import MainWindow
 
 from .crash_child import CRASHED
 from .guided_helpers import run_step
@@ -27,7 +27,7 @@ REPO = Path(__file__).resolve().parent.parent
 
 def crashed_round(data: Path) -> tuple[int, int]:
     """The campaign and its readings as the crashed process saw them last."""
-    env = {**os.environ, "EASYMEASUREMENT_DATA": str(data), "QT_QPA_PLATFORM": "offscreen"}
+    env = {**os.environ, "OKEYDOCU_DATA": str(data), "QT_QPA_PLATFORM": "offscreen"}
     run = subprocess.run([sys.executable, "-m", "tests.crash_child"], cwd=REPO, env=env,
                          capture_output=True, text=True, timeout=120)
     assert run.returncode == CRASHED, run.stderr[-2000:]
@@ -38,7 +38,7 @@ def crashed_round(data: Path) -> tuple[int, int]:
 @pytest.fixture
 def after_crash(tmp_path, qtbot, monkeypatch):
     """The round as it stands when the program is started again on the same data."""
-    data = Path(os.environ["EASYMEASUREMENT_DATA"])
+    data = Path(os.environ["OKEYDOCU_DATA"])
     campaign, readings = crashed_round(data)
     monkeypatch.setattr(common, "SIMULATED_FAILURE_RATE", 0.0)
     app = build_context()

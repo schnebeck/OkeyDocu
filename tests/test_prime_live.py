@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_prime_live.py
+# OkeyDocu - tests/test_prime_live.py
 # Push/Print and the link to the instrument. All instrument data here is synthetic.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -11,11 +11,11 @@ from datetime import datetime
 
 import pytest
 
-from easymeasurement.devices.base import DeviceError, LinkState
-from easymeasurement.devices.profitest_prime.driver import ProfitestPrimeDriver
-from easymeasurement.devices.profitest_prime.transport import ALLOWED_COMMANDS
-from easymeasurement.devices.simulator import SimulatedMeter
-from easymeasurement.model import UNREADABLE_FUNCTION, Verdict
+from okeydocu.devices.base import DeviceError, LinkState
+from okeydocu.devices.profitest_prime.driver import ProfitestPrimeDriver
+from okeydocu.devices.profitest_prime.transport import ALLOWED_COMMANDS
+from okeydocu.devices.simulator import SimulatedMeter
+from okeydocu.model import UNREADABLE_FUNCTION, Verdict
 
 from .prime_helpers import FakeInstrument, event
 

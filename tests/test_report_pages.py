@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_report_pages.py
+# OkeyDocu - tests/test_report_pages.py
 # How a report fills its pages: photo rows, signature lines, column widths, the running head.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -13,12 +13,12 @@ from collections import Counter
 
 import pytest
 
-from easymeasurement.reporting.context import ReportStep
-from easymeasurement.reporting.footnotes import Footnotes
-from easymeasurement.reporting.measurement_table import group_nodes
-from easymeasurement.reporting.nodes import Table
-from easymeasurement.reporting.pdf import render_pdf
-from easymeasurement.reporting.template import resolve
+from okeydocu.reporting.context import ReportStep
+from okeydocu.reporting.footnotes import Footnotes
+from okeydocu.reporting.measurement_table import group_nodes
+from okeydocu.reporting.nodes import Table
+from okeydocu.reporting.pdf import render_pdf
+from okeydocu.reporting.template import resolve
 
 from .rlo_helpers import photo, rlo
 
@@ -55,7 +55,7 @@ def test_a_photo_a_measurement_shows_is_not_shown_again(tmp_path):
 
 
 def test_place_date_and_name_are_written_on_the_signature_lines():
-    from easymeasurement.reporting.template_model import FILLED_PLACE
+    from okeydocu.reporting.template_model import FILLED_PLACE
 
     block = {"type": "signature", "labels": ["Ort, Datum", "Unterschrift"],
              "fills": [FILLED_PLACE, "{{ campaign.tester }}"]}
@@ -79,7 +79,7 @@ def test_measurement_block_outside_a_repeat_covers_the_campaign():
 
 
 def test_the_remarks_take_the_room_the_other_columns_leave():
-    from easymeasurement.reporting.pdf_tables import column_widths
+    from okeydocu.reporting.pdf_tables import column_widths
 
     headers = ["Nr.", "Zeit", "Bemerkung"]
     rows = [["1", "10:00:00", "kurz"]]
@@ -90,8 +90,8 @@ def test_the_remarks_take_the_room_the_other_columns_leave():
 
 
 def test_the_letterhead_names_the_later_pages():
-    from easymeasurement.reporting.nodes import Letterhead
-    from easymeasurement.reporting.pdf_pages import running_head
+    from okeydocu.reporting.nodes import Letterhead
+    from okeydocu.reporting.pdf_pages import running_head
 
     head = Letterhead("Prüfprotokoll", ["Prüfung", "Maschine: Presse", "Prüfung vom 01.03.2026"],
                       [], [])
@@ -103,7 +103,7 @@ def test_the_letterhead_names_the_later_pages():
 def test_a_long_head_shortens_its_title_and_keeps_what_was_tested():
     from reportlab.pdfbase.pdfmetrics import stringWidth
 
-    from easymeasurement.reporting.pdf_pages import ELLIPSIS, fitted_head
+    from okeydocu.reporting.pdf_pages import ELLIPSIS, fitted_head
 
     title = "Prüfprotokoll nach einer sehr langen Prüfgrundlage mit vielen Normen " * 3
     parts = [title.strip(), "Wiederholungsprüfung nach Umzug", "Maschine: Presse"]
@@ -120,7 +120,7 @@ def test_parts_handed_to_the_frame_count_the_room_above_their_heading():
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.platypus import Paragraph, Spacer
 
-    from easymeasurement.reporting.pdf_photos import Footnoted, PageBudget
+    from okeydocu.reporting.pdf_photos import Footnoted, PageBudget
 
     heading = Paragraph("Schrank", ParagraphStyle("h", spaceBefore=16))
     footnoted = Footnoted(lambda rows, last: Spacer(1, 10 * len(rows)), [1, 2], [0, 0], [],
@@ -132,7 +132,7 @@ def test_parts_handed_to_the_frame_count_the_room_above_their_heading():
 
 
 def test_the_name_of_a_standard_is_never_broken():
-    from easymeasurement.reporting.pdf_tables import kept_standards
+    from okeydocu.reporting.pdf_tables import kept_standards
 
     assert kept_standards("nach DIN EN 60204-1 und DIN VDE 0100-600") == (
         "nach DIN\xa0EN\xa060204-1 und DIN\xa0VDE\xa00100-600")

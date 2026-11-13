@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_photo_menu_ui.py
+# OkeyDocu - tests/test_photo_menu_ui.py
 # Taking a photo off the timeline, the context menu, and the cards over the window.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -17,10 +17,10 @@ from PySide6.QtGui import QContextMenuEvent
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication
 
-from easymeasurement.ui import photo_overlays
-from easymeasurement.ui.photo_timeline_events import Hit
-from easymeasurement.l10n import tr
-from easymeasurement.ui.photo_timeline_mouse import IDLE_HINT
+from okeydocu.ui import photo_overlays
+from okeydocu.ui.photo_timeline_events import Hit
+from okeydocu.l10n import tr
+from okeydocu.ui.photo_timeline_mouse import IDLE_HINT
 
 from .photo_ui_helpers import (
     T0,

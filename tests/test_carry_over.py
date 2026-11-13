@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_carry_over.py
+# OkeyDocu - tests/test_carry_over.py
 # Notes and files of the last confirmed inspection, offered again and copied on request.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,7 +10,7 @@ from datetime import datetime
 
 import pytest
 
-from easymeasurement.ui.place_files import EARLIER, PlaceFiles
+from okeydocu.ui.place_files import EARLIER, PlaceFiles
 
 
 @pytest.fixture

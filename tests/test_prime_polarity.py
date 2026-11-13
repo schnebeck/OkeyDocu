@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_prime_polarity.py
+# OkeyDocu - tests/test_prime_polarity.py
 # RLO in both current directions, delivered as the vocabulary's contract says.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -6,8 +6,8 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from easymeasurement.devices.profitest_prime.polarity import by_direction
-from easymeasurement.model import Quantity, ResultValue, Verdict
+from okeydocu.devices.profitest_prime.polarity import by_direction
+from okeydocu.model import Quantity, ResultValue, Verdict
 
 
 def figures(rlo, plus, minus, offset="0.00Ω"):

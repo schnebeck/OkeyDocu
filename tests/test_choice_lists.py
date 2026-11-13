@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_choice_lists.py
+# OkeyDocu - tests/test_choice_lists.py
 # Choice lists live in tables of their own; a value tells what sets it apart from the others.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -8,10 +8,10 @@
 
 from dataclasses import replace
 
-from easymeasurement.l10n import speaking
-from easymeasurement.store.choice_lists import ChoiceList, ChoiceValue, Method
-from easymeasurement.ui.choice_box import ChoiceBox
-from easymeasurement.ui.choice_tips import required_time
+from okeydocu.l10n import speaking
+from okeydocu.store.choice_lists import ChoiceList, ChoiceValue, Method
+from okeydocu.ui.choice_box import ChoiceBox
+from okeydocu.ui.choice_tips import required_time
 
 
 def test_a_fresh_database_knows_the_shipped_lists_and_the_features_offer_them(app):
@@ -71,7 +71,7 @@ def test_the_disconnection_time_follows_the_element():
 
 
 def test_the_page_stores_an_edited_cell_and_keeps_shipped_texts_english(qtbot, app):
-    from easymeasurement.ui.choice_lists_page import ChoiceListsPage
+    from okeydocu.ui.choice_lists_page import ChoiceListsPage
     with speaking("de"):
         page = ChoiceListsPage(app)
         qtbot.addWidget(page)
@@ -86,7 +86,7 @@ def test_the_page_stores_an_edited_cell_and_keeps_shipped_texts_english(qtbot, a
 
 
 def test_the_value_form_hands_on_help_and_methods(qtbot, app):
-    from easymeasurement.ui.choice_lists_page import ChoiceListsPage
+    from okeydocu.ui.choice_lists_page import ChoiceListsPage
     page = ChoiceListsPage(app)
     qtbot.addWidget(page)
     page.refresh(select="protection_class")
@@ -100,7 +100,7 @@ def test_a_tip_shown_again_holds_only_its_own_content(qtbot):
     from PySide6.QtCore import QPoint
     from PySide6.QtWidgets import QLabel
 
-    from easymeasurement.ui import rich_tip
+    from okeydocu.ui import rich_tip
     first = rich_tip.show_tip(rich_tip.Tip("First", text="One\n\nTwo", lines=("a",)), QPoint())
     second = rich_tip.show_tip(rich_tip.Tip("Second"), QPoint())
     assert not first.isVisible() and second.isVisible()
@@ -111,8 +111,8 @@ def test_a_tip_shown_again_holds_only_its_own_content(qtbot):
 
 
 def test_every_list_the_shipped_kinds_name_is_shipped():
-    from easymeasurement.store.choice_lists import shipped_choice_lists
-    from easymeasurement.store.kinds import shipped_kinds
+    from okeydocu.store.choice_lists import shipped_choice_lists
+    from okeydocu.store.kinds import shipped_kinds
     named = {feature.choice_list for kind in shipped_kinds() for feature in kind.features}
     assert named - {None} <= {found.key for found in shipped_choice_lists()}
 
@@ -121,8 +121,8 @@ def test_f1_in_the_field_sets_all_values_side_by_side(qtbot, app):
     from PySide6.QtCore import Qt
     from PySide6.QtWidgets import QLabel
 
-    from easymeasurement.ui import rich_tip
-    from easymeasurement.ui.choice_tips import compare_tip
+    from okeydocu.ui import rich_tip
+    from okeydocu.ui.choice_tips import compare_tip
     lists = app.db.choice_lists()
     tip = compare_tip(lists["rcd_type"], "B")
     heads, *body = tip.grid

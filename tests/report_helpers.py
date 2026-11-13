@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/report_helpers.py
+# OkeyDocu - tests/report_helpers.py
 # A closed campaign on a fixed timeline for the report tests.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -8,7 +8,7 @@
 
 from datetime import datetime, timedelta
 
-from easymeasurement.devices.simulator import SimulatedMeter
+from okeydocu.devices.simulator import SimulatedMeter
 
 T0 = datetime(2026, 3, 1, 10, 0, 0)
 

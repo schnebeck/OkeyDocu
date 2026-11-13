@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_photo_zoom_ui.py
+# OkeyDocu - tests/test_photo_zoom_ui.py
 # Finding one's way along the tracks, and staying fluid with a full campaign.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -14,8 +14,8 @@ import pytest
 from PySide6.QtCore import QPoint
 from PySide6.QtWidgets import QApplication
 
-from easymeasurement.ui.photo_shared import shared_thumbs
-from easymeasurement.ui.photo_timeline import PhotoTimeline
+from okeydocu.ui.photo_shared import shared_thumbs
+from okeydocu.ui.photo_timeline import PhotoTimeline
 
 from .photo_ui_helpers import (
     T0,
@@ -204,7 +204,7 @@ def test_a_held_gesture_stops_the_decoding_until_it_ends(qtbot, app, full):
 def test_reading_again_keeps_the_decoded_thumbnails(qtbot, app, full, monkeypatch):
     timeline = open_timeline(qtbot, app, full)
     calls = []
-    monkeypatch.setattr("easymeasurement.ui.photo_shared.read_thumbnail",
+    monkeypatch.setattr("okeydocu.ui.photo_shared.read_thumbnail",
                         lambda path: calls.append(path))
     timeline.refresh()
     shared_thumbs().finish()

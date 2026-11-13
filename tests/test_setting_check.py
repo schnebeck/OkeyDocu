@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_setting_check.py
+# OkeyDocu - tests/test_setting_check.py
 # Instrument settings held against the element they were set for.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,15 +10,15 @@ from datetime import datetime
 
 import pytest
 
-from easymeasurement.campaign.plan import load_instructions
-from easymeasurement.campaign.setting_check import SettingCheck, same
-from easymeasurement.devices import LiveReading
-from easymeasurement.devices.profitest_prime.info import DRIVER_KEY
-from easymeasurement.devices.profitest_prime.parser import parse_event
-from easymeasurement.importing.izytron_measurements import _parameter
-from easymeasurement.l10n import speaking
-from easymeasurement.ui import step_text
-from easymeasurement.ui.setting_warning import ORANGE, campaign_note
+from okeydocu.campaign.plan import load_instructions
+from okeydocu.campaign.setting_check import SettingCheck, same
+from okeydocu.devices import LiveReading
+from okeydocu.devices.profitest_prime.info import DRIVER_KEY
+from okeydocu.devices.profitest_prime.parser import parse_event
+from okeydocu.importing.izytron_measurements import _parameter
+from okeydocu.l10n import speaking
+from okeydocu.ui import step_text
+from okeydocu.ui.setting_warning import ORANGE, campaign_note
 
 RCD_PUSH = (
     '<Event xmlns="http://example.org/Common-Event-xml" name="OnSavePressed">'

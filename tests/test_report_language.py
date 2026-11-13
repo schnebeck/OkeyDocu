@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_report_language.py
+# OkeyDocu - tests/test_report_language.py
 # A protocol in another language than the program, chosen per protocol.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -8,11 +8,11 @@
 
 from datetime import datetime
 
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.reporting.context import build_context
-from easymeasurement.l10n import tr
-from easymeasurement.reporting.language import day, languages, moment, speaking, value_text
-from easymeasurement.reporting.nodes import (
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.reporting.context import build_context
+from okeydocu.l10n import tr
+from okeydocu.reporting.language import day, languages, moment, speaking, value_text
+from okeydocu.reporting.nodes import (
     Fields,
     Footnoted,
     Heading,
@@ -20,7 +20,7 @@ from easymeasurement.reporting.nodes import (
     SignatureLine,
     plain,
 )
-from easymeasurement.reporting.template import default_template_text, parse_template, resolve
+from okeydocu.reporting.template import default_template_text, parse_template, resolve
 
 
 def campaign_with_one_value(app, asset):
@@ -89,7 +89,7 @@ def test_kinds_and_features_are_translated_by_their_key(app):
 
 
 def test_a_kind_added_in_the_settings_keeps_its_german_name(app):
-    from easymeasurement.store.kinds import Feature, Kind
+    from okeydocu.store.kinds import Feature, Kind
     app.db.save_kind(Kind("pumpe", "Pumpe", features=(Feature("foerderhoehe", "Förderhöhe", "m"),)))
     pump = app.db.add_asset(app.db.add_customer("Muster AG"), "pumpe", "P1")
     app.db.set_asset_features(pump, {"foerderhoehe": "12"})
@@ -110,7 +110,7 @@ def test_a_template_can_give_its_own_words_per_language(app, asset):
 
 
 def test_the_language_stays_with_the_protocol_and_its_signed_copy(app, asset, tmp_path):
-    from easymeasurement.reporting.sign import Pkcs12Signer
+    from okeydocu.reporting.sign import Pkcs12Signer
 
     from .test_report_signing import smime_identity
 
@@ -162,7 +162,7 @@ def test_the_same_campaign_in_three_languages(app, asset):
 def test_every_report_language_knows_every_stored_word():
     import yaml
 
-    from easymeasurement.l10n.catalog import STORED, folder
+    from okeydocu.l10n.catalog import STORED, folder
 
     def stored(code):
         return {text for entry in (folder() / code).iterdir() if entry.name.startswith(STORED)

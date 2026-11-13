@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_repeat_ui.py
+# OkeyDocu - tests/test_repeat_ui.py
 # A repeat inspection on screen: the open points in the table and beside it.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,10 +10,10 @@ from datetime import datetime
 
 import pytest
 
-from easymeasurement.model import MeterMeasurement, Parameter, Quantity, ResultValue, Verdict
-from easymeasurement.ui.campaign_dialog import CampaignDialog
-from easymeasurement.ui.common import POINT_ID
-from easymeasurement.ui.guided_pages import ReasonOverlay
+from okeydocu.model import MeterMeasurement, Parameter, Quantity, ResultValue, Verdict
+from okeydocu.ui.campaign_dialog import CampaignDialog
+from okeydocu.ui.common import POINT_ID
+from okeydocu.ui.guided_pages import ReasonOverlay
 
 VALUES = 6
 

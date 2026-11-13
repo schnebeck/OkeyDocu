@@ -1,0 +1,98 @@
+# OkeyDocu - German texts: photos, places and their files.
+texts:
+  The image file cannot be read.: Die Bilddatei lässt sich nicht lesen.
+  "Detach from this measurement: the photo goes to the unassigned photos.": "Von dieser Messung lösen: Das Foto kommt zu den nicht zugeordneten Fotos."
+  Double-click shows the photo large; dragged onto another row of the table, it belongs to that measurement.: Doppelklick zeigt das Foto groß; auf eine andere Zeile der Tabelle gezogen, gehört es zu jener Messung.
+  Set the start of the photos: Start der Fotos setzen
+  Apply: Übernehmen
+  Where should the first photo stand? All other photos move along.: Wann soll das erste Foto stehen? Alle anderen Fotos rücken mit.
+  Time taken: Aufnahmezeit
+  "The camera's time: {moment}": "Die Zeit der Kamera: {moment}"
+  There is no photo on the timeline yet.: Es steht noch kein Foto auf der Zeitleiste.
+  without time taken: ohne Aufnahmezeit
+  no measurement: keine Messung
+  pinned: angeheftet
+  follows the time: folgt der Zeit
+  "Taken {taken} · {where} · {how}": "Aufgenommen {taken} · {where} · {how}"
+  "{name}\n{words}\nDouble-click: show large": "{name}\n{words}\nDoppelklick: groß zeigen"
+  "Gap {duration}": "Lücke {duration}"
+  Show large: Groß anzeigen
+  Detach from the reading: Vom Messwert lösen
+  Follow the time again: Wieder der Zeit folgen
+  Insert gap before: Lücke davor einfügen
+  Remove gap: Lücke entfernen
+  Insert gap here: Lücke hier einfügen
+  ", small for the report": ", klein für das Protokoll"
+  <b>In the report as</b>: <b>Im Protokoll als</b>
+  <b>Marks</b>: <b>Markierungen</b>
+  Show all, otherwise only the chosen one: Alle zeigen, sonst nur die gewählte
+  "Mark an area: drag a rectangle across the photo. The text next to it explains the number.": "Einen Bereich markieren: ein Rechteck über das Foto ziehen. Die Nummer erklärt der Text daneben."
+  A click on a line shows its area.: Ein Klick auf eine Zeile zeigt ihren Bereich.
+  What can be seen here: Was hier zu sehen ist
+  Remove mark: Markierung entfernen
+  The stack is empty. Photos detached from a measurement land here.: Der Stapel ist leer. Hier landen Fotos, die von einer Messung gelöst wurden.
+  Drag onto a row of the table or onto the “Measurement” tab.: Auf eine Zeile der Tabelle oder auf den Reiter „Messung“ ziehen.
+  "Completed campaign: view only.": "Abgeschlossene Kampagne: nur ansehen."
+  Back onto the timeline: Zurück auf die Zeitleiste
+  Delete …: Löschen …
+  "{name}\nDouble-click: show large": "{name}\nDoppelklick: groß zeigen"
+  no time: ohne Zeit
+  Without a time taken, only dragging onto a measurement works.: Ohne Aufnahmezeit geht es nur per Ziehen auf eine Messung.
+  The campaign is completed, photos can no longer be changed.: Die Kampagne ist abgeschlossen, Fotos lassen sich nicht mehr ändern.
+  "Delete the photo {name} for good?\n\nThe image file is removed. This cannot be undone.": "Das Foto {name} endgültig löschen?\n\nDie Bilddatei wird entfernt. Das lässt sich nicht rückgängig machen."
+  "Delete {count} photos for good?\n\nThe image files are removed. This cannot be undone.": "{count} Fotos endgültig löschen?\n\nDie Bilddatei wird entfernt. Das lässt sich nicht rückgängig machen."
+  Delete photo: Foto löschen
+  "Taken {taken}": "Aufgenommen {taken}"
+  Unassigned: Nicht zugeordnet
+  Measurement: Messung
+  The photos of the chosen measurement. A photo dragged here then belongs to it.: Die Fotos der gewählten Messung. Ein Foto hierher gezogen gehört dann zu ihr.
+  Photos that belong to no measurement. They are missing from the report until they are dragged onto a measurement.: Fotos, die keiner Messung gehören. Sie fehlen im Protokoll, bis sie auf eine Messung gezogen werden.
+  This photo has no time taken. Please drag it onto a measurement.: Dieses Foto hat keine Aufnahmezeit. Bitte auf eine Messung ziehen.
+  "First click a photo that is not pinned: the gap appears right before it.": "Erst ein nicht angeheftetes Foto anklicken: die Lücke entsteht direkt davor."
+  Fit: Einpassen
+  Fit everything into the width: Alles in die Breite einpassen
+  Insert gap: Lücke einfügen
+  Insert a gap before the chosen photo: Vor dem gewählten Foto eine Lücke einfügen
+  Set start …: Start setzen …
+  Enter the exact time of the first photo: Die genaue Zeit des ersten Fotos eingeben
+  Hide the timeline; “Assign photos” above shows it again: Die Zeitleiste ausblenden; „Fotos zuordnen“ oben zeigt sie wieder
+  No measurements yet. They appear here by themselves.: Noch keine Messungen. Sie erscheinen hier von selbst.
+  "No photos here yet: import photos or drag them here from the stack.": "Noch keine Fotos hier: Fotos importieren oder vom Stapel hierher ziehen."
+  "Move all photos: {shift}": "Alle Fotos verschieben: {shift}"
+  "{count} photo changes its measurement": "{count} Foto wechselt die Messung"
+  "{count} photos change their measurement": "{count} Fotos wechseln die Messung"
+  "Let go: pin only this photo to {mark} {moment}": "Loslassen: nur dieses Foto an {mark} {moment} heften"
+  This photo stays at its measurement. To change, drag it up onto a measurement.: Dieses Foto bleibt an seiner Messung. Zum Ändern nach oben auf eine Messung ziehen.
+  "Gap {duration}: the photos after it move along": "Lücke {duration}: die Fotos danach rücken mit"
+  Measurements: Messungen
+  Photos: Fotos
+  "{month}-{day}": "{day}.{month}."
+  "{count} day": "{count} Tag"
+  "{count} days": "{count} Tage"
+  Photos at their time taken: Fotos zur Aufnahmezeit
+  "Photos {duration} later": "Fotos {duration} später"
+  "Photos {duration} earlier": "Fotos {duration} früher"
+  "Drag a photo sideways: move all photos · Drag a photo onto a measurement: only this one": "Foto seitlich ziehen: alle Fotos verschieben · Foto auf eine Messung ziehen: nur dieses"
+  "Completed campaign: view only. Double-click shows a photo large.": "Abgeschlossene Kampagne: nur ansehen. Doppelklick zeigt ein Foto groß."
+  "Pinned: stays with its measurement · Drag onto another measurement · Right-click: follow the time again": "Angeheftet: bleibt bei seiner Messung · Auf eine andere Messung ziehen · Rechtsklick: wieder der Zeit folgen"
+  "Drag sideways: move all photos · Drag up onto a measurement: only this photo · Double-click: large": "Seitlich ziehen: alle Fotos verschieben · Nach oben auf eine Messung ziehen: nur dieses Foto · Doppelklick: groß"
+  "Click: show this measurement in the table": "Klick: diese Messung in der Tabelle zeigen"
+  "Gap: the photos after it stand later · Drag the right edge to stretch": "Lücke: die Fotos danach stehen später · Rechte Kante ziehen zum Dehnen"
+  "Drag: stretch or shorten the gap": "Ziehen: Lücke dehnen oder kürzen"
+  "Click: remove the gap, the photos move back": "Klick: Lücke entfernen, die Fotos rücken zurück"
+  "Drag: move the view · Mouse wheel: zoom · Right-click: insert gap here": "Ziehen: Ansicht bewegen · Mausrad: zoomen · Rechtsklick: Lücke hier einfügen"
+  Let go on the stack, a measurement or the table of readings: Loslassen auf dem Stapel, einer Messung oder der Messwerttabelle
+  "Let go: pin the photo to {mark} {moment}": "Loslassen: Foto an {mark} {moment} heften"
+  "Let go: the photo follows its time taken again": "Loslassen: Foto folgt wieder seiner Aufnahmezeit"
+  Take over: Übernehmen
+  Fetch the chosen entry of the last inspection into this campaign. The completed inspection stays unchanged.: Den gewählten Eintrag der letzten Prüfung in diese Kampagne holen. Die abgeschlossene Prüfung bleibt unverändert.
+  "From the inspection of {day}. “Take over” fetches it into this campaign, a double-click shows it.": "Aus der Prüfung vom {day}. „Übernehmen“ holt ihn in diese Kampagne, ein Doppelklick zeigt ihn."
+  Show in the structure tree: Im Strukturbaum zeigen
+  Assign to another element …: Anderem Element zuordnen …
+  Change measuring location: Messort ändern
+  "Preparing photos for the report: {done} of {total}": "Bereite Fotos für das Protokoll vor: {done} von {total}"
+  Turn left: Links drehen
+  Turn right: Rechts drehen
+  Cut out …: Zuschneiden …
+  Whole photo: Ganzes Foto
+  "Drag a rectangle across the photo: only that part stays in view and in the report.": "Ein Rechteck über das Foto ziehen: Nur dieser Teil bleibt in der Ansicht und im Protokoll."

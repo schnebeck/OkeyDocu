@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_table_columns.py
+# OkeyDocu - tests/test_table_columns.py
 # Columns of the measurement table: shown or hidden by hand, sorted and moved, kept for later.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -12,8 +12,8 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMenu
 
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.ui.table_columns import TableColumns
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.ui.table_columns import TableColumns
 
 PLACE, FUNCTION, VALUES = 4, 5, 6
 

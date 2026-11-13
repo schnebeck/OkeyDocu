@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_seal.py
+# OkeyDocu - tests/test_seal.py
 # After closing, the record can be proven unchanged, and manipulation is noticed.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -9,7 +9,7 @@
 import pytest
 from PIL import Image
 
-from easymeasurement.campaign.seal import SealState, authenticate, digest
+from okeydocu.campaign.seal import SealState, authenticate, digest
 
 from . import seal_helpers
 from .seal_helpers import finished, forge

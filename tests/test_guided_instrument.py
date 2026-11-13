@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_guided_instrument.py
+# OkeyDocu - tests/test_guided_instrument.py
 # Wiring and the instrument's clock in the guided flow, with the simulator.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -13,8 +13,8 @@ from PySide6.QtGui import QColor, QImage
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QInputDialog
 
-from easymeasurement.campaign.service import ClockState
-from easymeasurement.ui.status_badges import clock_icon
+from okeydocu.campaign.service import ClockState
+from okeydocu.ui.status_badges import clock_icon
 
 from . import guided_helpers
 from .guided_helpers import click_wire
@@ -160,7 +160,7 @@ def _answer_yes(monkeypatch):
         questions.append(offset)
         return True
 
-    monkeypatch.setattr("easymeasurement.ui.instrument_control.ask_clock_sync", automatic)
+    monkeypatch.setattr("okeydocu.ui.instrument_control.ask_clock_sync", automatic)
     return questions
 
 
@@ -186,7 +186,7 @@ def test_after_a_pause_stored_readings_are_fetched_first(page, monkeypatch):
 
 
 def test_a_lost_link_counts_as_a_break_but_a_stop_asked_for_does_not(page):
-    from easymeasurement.devices import LinkState
+    from okeydocu.devices import LinkState
     session = page.window().campaign.session
     assert not session.gap
     session._stop.set()

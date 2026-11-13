@@ -1,0 +1,213 @@
+# OkeyDocu - German texts: start screen, master data, users and structure kinds.
+texts:
+  ⚠ Modified: ⚠ Verändert
+  Not sealed: Nicht versiegelt
+  New campaign: Neue Kampagne
+  "{shown} of {total}, all are listed on the left": "{shown} von {total}, alle stehen links in der Liste"
+  Choose customer and installation and start the next measurement: Kunde und Anlage wählen und die nächste Messung beginnen
+  Measurement campaigns: Messkampagnen
+  Choose customer and installation, measure, confirm the report.: Kunde und Anlage wählen, messen, Protokoll bestätigen.
+  A campaign needs a customer and an installation first.: Für eine Kampagne braucht es zuerst einen Kunden und eine Anlage.
+  Go to master data: Zu den Stammdaten
+  Search campaign, customer, location, installation or inspector …: Kampagne, Kunde, Ort, Anlage oder Prüfer suchen …
+  Open measurements: Offene Messungen
+  Completed measurements: Abgeschlossene Messungen
+  Set up and manage: Einrichten und verwalten
+  "No campaign matches “{search}”.": "Keine Kampagne passt zu „{search}“."
+  Ready to confirm: Bereit zum Bestätigen
+  "today {time}": "heute {time}"
+  "yesterday {time}": "gestern {time}"
+  No report made yet: Noch kein Protokoll erstellt
+  "{count} unassigned": "{count} nicht zugeordnet"
+  Click to view the campaign: Klicken, um die Kampagne anzusehen
+  "Test plan: {plan}": "Messplan: {plan}"
+  No test plan: Ohne Messplan
+  "{done} of {total} steps": "{done} von {total} Schritten"
+  "Inspector: {tester}": "Prüfer: {tester}"
+  No inspector: Prüfer fehlt
+  ● Measuring now: ● Misst gerade
+  "{count} not OK": "{count} n. i. O."
+  Go to measurement: Zur Messung
+  Show the campaign the instrument is measuring for: Die Kampagne zeigen, für die das Messgerät gerade misst
+  Continue measuring: Weitermessen
+  Open: Öffnen
+  Connect the instrument and carry on: Mit dem Messgerät verbinden und weitermachen
+  Open the campaign: Die Kampagne öffnen
+  Open report: Protokoll öffnen
+  Make report …: Protokoll erstellen …
+  "due on {day}, in {days} days": "fällig am {day}, in {days} Tagen"
+  due today: heute fällig
+  "due since {day}, {weeks} weeks overdue": "seit {day} fällig, {weeks} Wochen über"
+  "due since {day}": "seit {day} fällig"
+  Due: Fällig
+  "and {count} more": "und {count} weitere"
+  "Repeat inspection {year}": "Wiederholungsprüfung {year}"
+  "{since} · last inspected on {day}, every {months} months": "{since} · zuletzt geprüft am {day}, alle {months} Monate"
+  Create inspection …: Prüfung anlegen …
+  "{count} defect": "{count} Mangel"
+  "{count} defects": "{count} Mängel"
+  "Follow-up open: {defects} from “{title}” of {day}": "Nachprüfung offen: {defects} aus „{title}“ vom {day}"
+  Create follow-up …: Nachprüfung anlegen …
+  "Follow-up: {title}": "Nachprüfung: {title}"
+  Master data: Stammdaten
+  Customers, installations and their parts: Kunden, Anlagen und ihre Teile
+  Test plans: Messpläne
+  Which measurements in which order: Welche Messungen in welcher Reihenfolge
+  Report templates: Protokollvorlagen
+  Layout, logos and texts of the reports: Aufbau, Logos und Texte der Protokolle
+  Report archive: Protokollarchiv
+  Generated and signed reports: Erzeugte und signierte Protokolle
+  Users: Benutzer
+  Inspectors with signature and certificate: Prüfer mit Unterschrift und Zertifikat
+  Instrument: Messgerät
+  Pair Bluetooth, detect USB: Bluetooth koppeln, USB erkennen
+  "{count} customer": "{count} Kunde"
+  "{count} customers": "{count} Kunden"
+  "{count} element": "{count} Element"
+  "{count} elements": "{count} Elemente"
+  "{count} plan": "{count} Plan"
+  "{count} plans": "{count} Pläne"
+  "{count} template": "{count} Vorlage"
+  "{count} templates": "{count} Vorlagen"
+  "{count} report": "{count} Protokoll"
+  "{count} reports": "{count} Protokolle"
+  "{count} inspector": "{count} Prüfer"
+  "{count} inspectors": "{count} Prüfer"
+  Dragging reorders, even to the very top. Marking several and “Combine” puts them under a new element, such as machines under an installation.: Ziehen ordnet um, auch ganz nach oben. Mehrere markieren und „Zusammenfassen“ hängt sie unter ein neues Element, etwa Maschinen unter eine Anlage.
+  New customer: Neuer Kunde
+  Delete …: Löschen …
+  Customers: Kunden
+  Kinds …: Typen …
+  Edit structure kinds and their features: Strukturtypen und ihre Merkmale bearbeiten
+  Choose or create a customer on the left.: Links einen Kunden wählen oder anlegen.
+  Element: Element
+  Orders: Aufträge
+  No campaign has been run on this element yet.: An diesem Element lief noch keine Kampagne.
+  "Double-click: show the campaign": "Doppelklick: Kampagne zeigen"
+  Customer: Kunde
+  Delete: Löschen
+  "Delete the customer “{name}”?": "Den Kunden „{name}“ löschen?"
+  "Not possible: the customer still has installations. Delete them first.": "Das geht nicht: Der Kunde hat noch Anlagen. Erst diese löschen."
+  Name: Name
+  Street: Straße
+  Postcode: PLZ
+  City: Ort
+  Comment: Kommentar
+  Changes apply when leaving the field.: Änderungen gelten beim Verlassen des Felds.
+  The customer needs a name.: Der Kunde braucht einen Namen.
+  e.g. Sample Electrical Ltd: z. B. Muster Elektrotechnik GmbH
+  Phone: Telefon
+  Email: E-Mail
+  Website: Internet
+  Company: Firma
+  Apply: Übernehmen
+  Postcode, city: PLZ, Ort
+  Remove: Entfernen
+  In the letterhead of every report, to the right of the title. PNG, JPEG, WebP or SVG; transparency is kept.: Im Briefkopf jedes Protokolls rechts neben dem Titel. PNG, JPEG, WebP oder SVG; Transparenz bleibt erhalten.
+  Logo: Logo
+  No logo: Kein Logo
+  Replace …: Ersetzen …
+  Choose logo …: Logo wählen …
+  The file cannot be read.: Die Datei lässt sich nicht lesen.
+  Choose logo: Logo wählen
+  "Images ({patterns})": "Bilder ({patterns})"
+  Edit user: Benutzer ändern
+  New user: Neuer Benutzer
+  e.g. Dipl.-Ing.: z. B. Dipl.-Ing.
+  First and last name: Vor- und Nachname
+  Clear: Löschen
+  From file …: Aus Datei …
+  For signing the reports, can follow later: Zum Signieren der Protokolle, kann später folgen
+  Choose …: Wählen …
+  Certificate password, not stored: Passwort des Zertifikats, wird nicht gespeichert
+  Check: Prüfen
+  Title: Titel
+  Signature: Unterschrift
+  Certificate: Zertifikat
+  The name is still missing.: Der Name fehlt noch.
+  Choose signature: Unterschrift wählen
+  This file is not a readable image.: Diese Datei ist kein lesbares Bild.
+  Choose certificate: Zertifikat wählen
+  Not checked yet. The password is only needed when signing.: Noch nicht geprüft. Das Passwort wird erst beim Signieren gebraucht.
+  "{name}: expired on {day}": "{name}: abgelaufen am {day}"
+  "{name}, valid until {day}": "{name}, gültig bis {day}"
+  signature stored: Unterschrift hinterlegt
+  no signature: keine Unterschrift
+  no certificate: kein Zertifikat
+  "certificate expired {day}": "Zertifikat abgelaufen {day}"
+  "certificate until {day}": "Zertifikat bis {day}"
+  certificate unchecked: Zertifikat ungeprüft
+  "Double-click: edit user": "Doppelklick: Benutzer ändern"
+  New user …: Neuer Benutzer …
+  Edit …: Ändern …
+  Remove …: Entfernen …
+  Remove user: Benutzer entfernen
+  "Remove {name}? Existing campaigns and reports keep the name.": "{name} entfernen? Bestehende Kampagnen und Protokolle behalten den Namen."
+  No user created yet: Noch kein Benutzer angelegt
+  New …: Neu …
+  New kind: Neuer Typ
+  Structure kinds: Strukturtypen
+  months: Monate
+  no repetition: keine Wiederholung
+  Label: Bezeichnung
+  Icon: Symbol
+  IZYTRON type code: IZYTRON-Typcode
+  Inspection interval: Prüfintervall
+  Features: Merkmale
+  "{count} in use": "{count} in Gebrauch"
+  unused: unbenutzt
+  "{count} element is of this kind.": "{count} Element ist von diesem Typ."
+  "{count} elements are of this kind.": "{count} Elemente sind von diesem Typ."
+  No element is of this kind.: Kein Element ist von diesem Typ.
+  Building: Gebäude
+  Room: Raum
+  General: Allgemein
+  Feature: Merkmal
+  Unit: Einheit
+  Add feature: Merkmal hinzufügen
+  Move up: Weiter nach oben
+  Move down: Weiter nach unten
+  New feature: Neues Merkmal
+  "Delete kind “{kind}”": "Typ „{kind}“ löschen"
+  "{count} element is of this kind. It gets the one chosen here instead. Its name, measurements and feature values are kept.": "{count} Element ist von diesem Typ. Es bekommt stattdessen den hier gewählten. Sein Name, seine Messungen und Merkmalswerte bleiben erhalten."
+  "{count} elements are of this kind. They get the one chosen here instead. Their names, measurements and feature values are kept.": "{count} Elemente sind von diesem Typ. Sie bekommen stattdessen den hier gewählten. Ihre Namen, Messungen und Merkmalswerte bleiben erhalten."
+  No element is of this kind. It simply disappears from the choice.: Kein Element ist von diesem Typ. Er verschwindet einfach aus der Auswahl.
+  Instead: Stattdessen
+  Align: Ausrichten
+  Drag the signature onto the line; the mouse wheel makes it larger or smaller.: Die Unterschrift auf die Linie ziehen; das Mausrad macht sie größer oder kleiner.
+  Choice list: Auswahlliste
+  "The list whose values the feature offers; any other may still be typed. The lists are edited under Settings → Choice lists.": "Die Liste, deren Werte das Merkmal anbietet; andere lassen sich trotzdem eingeben. Die Listen bearbeitet man unter Einstellungen → Auswahllisten."
+  Suited measurements: Geeignete Messungen
+  F1 compares all values of the list.: F1 vergleicht alle Werte der Liste.
+  "{amperes} A": "{amperes} A"
+  "{times} × Iₙ": "{times} × Iₙ"
+  "Iₐ = {current} at {seconds} s": "Iₐ = {current} bei {seconds} s"
+  Choice lists: Auswahllisten
+  Choice lists …: Auswahllisten …
+  New list: Neue Liste
+  What the list is about, told while no value is chosen: Worum es in der Liste geht, angezeigt, solange kein Wert gewählt ist
+  Help: Hilfe
+  Values: Werte
+  Chosen value: Gewählter Wert
+  "{count} features": "{count} Merkmale"
+  Name of a new property: Name einer neuen Eigenschaft
+  Add value: Wert hinzufügen
+  Remove value: Wert entfernen
+  Add property: Eigenschaft hinzufügen
+  Remove property: Eigenschaft entfernen
+  What to know about the value, a few paragraphs: Was man über den Wert wissen sollte, ein paar Absätze
+  "A circuit breaker: “breaker”, then the instantaneous trip range in multiples of the rated current, optionally the conventional non-tripping and tripping currents.": "Ein Leitungsschutzschalter: „breaker“, dann der Bereich der unverzögerten Auslösung in Vielfachen des Nennstroms, wahlweise der kleine und der große Prüfstrom."
+  Picture …: Bild …
+  Remove picture: Bild entfernen
+  Add measurement: Messung hinzufügen
+  Remove measurement: Messung entfernen
+  Curve: Kennlinie
+  Picture: Bild
+  What to mind: Worauf zu achten ist
+contexts:
+  picture:
+    none: keines
+  type code:
+    none: keiner
+  choice list:
+    none: keine

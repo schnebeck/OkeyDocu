@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/rlo_helpers.py
+# OkeyDocu - tests/rlo_helpers.py
 # RLO measurements and photos as the report tests use them.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -10,9 +10,9 @@ from datetime import datetime, timedelta
 
 from PIL import Image
 
-from easymeasurement.devices.profitest_prime.polarity import by_direction
-from easymeasurement.model import MeterMeasurement, Quantity, ResultValue, Verdict
-from easymeasurement.reporting.context import ReportMeasurement
+from okeydocu.devices.profitest_prime.polarity import by_direction
+from okeydocu.model import MeterMeasurement, Quantity, ResultValue, Verdict
+from okeydocu.reporting.context import ReportMeasurement
 
 T0 = datetime(2026, 3, 1, 10, 0)
 

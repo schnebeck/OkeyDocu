@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_logo_editor.py
+# OkeyDocu - tests/test_logo_editor.py
 # Placing a logo in the template editor, up to the archived report.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -15,12 +15,12 @@ from PIL import Image
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtTest import QTest
 
-from easymeasurement.__main__ import build_context
-from easymeasurement.model import Quantity, ResultValue
-from easymeasurement.reporting.logo import decode_logo
-from easymeasurement.reporting.template import parse_template
-from easymeasurement.ui import template_logo_form
-from easymeasurement.ui.main_window import MainWindow
+from okeydocu.__main__ import build_context
+from okeydocu.model import Quantity, ResultValue
+from okeydocu.reporting.logo import decode_logo
+from okeydocu.reporting.template import parse_template
+from okeydocu.ui import template_logo_form
+from okeydocu.ui.main_window import MainWindow
 
 from .logo_helpers import png
 

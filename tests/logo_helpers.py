@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/logo_helpers.py
+# OkeyDocu - tests/logo_helpers.py
 # A synthetic image for the logo tests.
 #
 # Producer: thorsten.schnebeck@gmx.net

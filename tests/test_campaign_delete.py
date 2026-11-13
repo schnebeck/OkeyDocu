@@ -1,4 +1,4 @@
-# EasyMeasurement - tests/test_campaign_delete.py
+# OkeyDocu - tests/test_campaign_delete.py
 # Deleting an open campaign: asked first, gone completely, and nothing of it left for the next one.
 #
 # Producer: thorsten.schnebeck@gmx.net
@@ -11,10 +11,10 @@ from datetime import datetime
 
 import pytest
 
-from easymeasurement.model import Quantity, ResultValue, Verdict
-from easymeasurement.campaign.seal import SealState
-from easymeasurement.store import CampaignClosed
-from easymeasurement.ui.campaign_delete import loss_text
+from okeydocu.model import Quantity, ResultValue, Verdict
+from okeydocu.campaign.seal import SealState
+from okeydocu.store import CampaignClosed
+from okeydocu.ui.campaign_delete import loss_text
 
 from .workspace_helpers import start, with_asset
 
@@ -54,7 +54,7 @@ def _sealed_pair(app, asset):
 
 
 def test_a_sealed_campaign_goes_with_its_reports(app, asset):
-    from easymeasurement.reporting.template import default_template_text
+    from okeydocu.reporting.template import default_template_text
     first, second = _sealed_pair(app, asset)
     app.archive.generate(first, "Standard", default_template_text(), "de")
     app.service.delete_campaign(first)
@@ -127,7 +127,7 @@ def _shown(window, app, campaign):
 
 
 def test_saying_no_keeps_the_campaign(window, app, campaign, monkeypatch):
-    monkeypatch.setattr("easymeasurement.ui.campaign_confirm.ask_delete", lambda *_: False)
+    monkeypatch.setattr("okeydocu.ui.campaign_confirm.ask_delete", lambda *_: False)
     page = _shown(window, app, campaign)
     page.delete_action.trigger()
     assert app.service.campaign(campaign) is not None
@@ -135,9 +135,9 @@ def test_saying_no_keeps_the_campaign(window, app, campaign, monkeypatch):
 
 
 def test_deleting_returns_to_the_overview(window, app, campaign, monkeypatch):
-    monkeypatch.setattr("easymeasurement.ui.campaign_confirm.ask_delete", lambda *_: True)
+    monkeypatch.setattr("okeydocu.ui.campaign_confirm.ask_delete", lambda *_: True)
     trashed = []
-    monkeypatch.setattr("easymeasurement.ui.campaign_confirm.dispose",
+    monkeypatch.setattr("okeydocu.ui.campaign_confirm.dispose",
                         lambda folder: trashed.append(folder) or True)
     page = _shown(window, app, campaign)
     page.delete_action.trigger()
@@ -150,8 +150,8 @@ def test_deleting_returns_to_the_overview(window, app, campaign, monkeypatch):
 
 
 def test_files_that_stay_are_named(window, app, campaign, monkeypatch):
-    monkeypatch.setattr("easymeasurement.ui.campaign_confirm.ask_delete", lambda *_: True)
-    monkeypatch.setattr("easymeasurement.ui.campaign_confirm.dispose", lambda _: False)
+    monkeypatch.setattr("okeydocu.ui.campaign_confirm.ask_delete", lambda *_: True)
+    monkeypatch.setattr("okeydocu.ui.campaign_confirm.dispose", lambda _: False)
     page = _shown(window, app, campaign)
     page.delete_action.trigger()
     assert "Ihre Dateien liegen noch in" in page.notice.text()
@@ -162,8 +162,8 @@ def test_deleting_the_campaign_measuring_disconnects_first(window, app, monkeypa
     start(window, monkeypatch, simulated=True)
     page = window.campaign
     live = page.live_id
-    monkeypatch.setattr("easymeasurement.ui.campaign_confirm.ask_delete", lambda *_: True)
-    monkeypatch.setattr("easymeasurement.ui.campaign_confirm.dispose", lambda _: True)
+    monkeypatch.setattr("okeydocu.ui.campaign_confirm.ask_delete", lambda *_: True)
+    monkeypatch.setattr("okeydocu.ui.campaign_confirm.dispose", lambda _: True)
     page.delete_action.trigger()
     assert page.session is None and page.live_id is None
     assert app.service.campaign(live) is None
@@ -173,8 +173,8 @@ def test_a_closed_campaign_can_be_deleted_too(window, app, campaign, monkeypatch
     app.service.close(campaign)
     page = _shown(window, app, campaign)
     assert page.menu_actions()[-1] is page.delete_action
-    monkeypatch.setattr("easymeasurement.ui.campaign_confirm.ask_delete", lambda *_: True)
-    monkeypatch.setattr("easymeasurement.ui.campaign_confirm.dispose", lambda _: True)
+    monkeypatch.setattr("okeydocu.ui.campaign_confirm.ask_delete", lambda *_: True)
+    monkeypatch.setattr("okeydocu.ui.campaign_confirm.dispose", lambda _: True)
     page.delete_action.trigger()
     assert app.service.campaign(campaign) is None
 
