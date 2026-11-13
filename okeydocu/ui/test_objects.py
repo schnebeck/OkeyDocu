@@ -11,35 +11,13 @@ probe reaches it: from below (+1) or from above (-1)."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
-from PySide6.QtCore import QPointF, QRectF, Qt
+from PySide6.QtCore import QPointF, QRectF
 from PySide6.QtGui import QColor, QFont, QPainter, QPen
 
 from ..l10n import tr
-
-INK, LINE = QColor("#1f2933"), QColor("#55595e")
-BODY, SCREW = QColor("#f4f5f6"), QColor("#c9cdd1")
-PE_BAR, PE_SCREW = QColor("#c8a43a"), QColor("#3aa845")
-CENTER = Qt.AlignmentFlag.AlignCenter
-
-
-@dataclass(frozen=True)
-class Anchor:
-    point: QPointF
-    side: int  # +1: the probe comes from below, -1: from above
-
-
-def _screw(painter: QPainter, centre: QPointF, label: str, above: bool) -> None:
-    painter.setPen(QPen(LINE, 1.2))
-    painter.setBrush(SCREW)
-    painter.drawEllipse(centre, 7, 7)
-    painter.setPen(QPen(LINE, 1.5))
-    painter.drawLine(QPointF(centre.x() - 4, centre.y()), QPointF(centre.x() + 4, centre.y()))
-    painter.setPen(INK)
-    offset = 8 if above else -22
-    painter.drawText(QRectF(centre.x() - 10, centre.y() + offset, 20, 14), CENTER, label)
-
+from .test_object_parts import BODY, CENTER, INK, Anchor, bold_font, pe_bar, screw, side_label
+from .test_object_plug import cee_plug
+from .test_object_switch import main_switch
 
 TERMINALS = {2: (("1", "2"), ("N", "N")),
              4: (("1", "2"), ("3", "4"), ("5", "6"), ("N", "N"))}
@@ -68,37 +46,25 @@ def rcd(painter: QPainter, box: QRectF, lines: list[str], poles: int = 2,
     painter.drawEllipse(button, 7, 7)
     painter.setPen(INK)
     painter.drawText(QRectF(button.x() - 7, button.y() - 7, 14, 14), CENTER, "T")
-    bold = QFont(painter.font())
-    bold.setBold(True)
-    painter.setFont(bold)
+    painter.setFont(bold_font(painter))
     for index, text in enumerate(lines[:2]):
         painter.drawText(QRectF(module.left(), module.top() + 72 + 16 * index, module.width(),
                                 16), CENTER, text)
     painter.setFont(QFont())
     for index, (top, low) in enumerate(terminals):
         x = module.left() + 26 + index * PITCH
-        _screw(painter, QPointF(x, module.top() + 12), top, True)
-        _screw(painter, QPointF(x, module.bottom() - 12), low, False)
-    painter.drawText(QRectF(module.left() - 96, module.top() - 2, 90, 18),
-                     Qt.AlignmentFlag.AlignRight, tr("Incoming"))
-    painter.drawText(QRectF(module.left() - 96, module.bottom() - 20, 90, 18),
-                     Qt.AlignmentFlag.AlignRight, tr("Outgoing"))
-    painter.setPen(QPen(LINE, 1.2))
-    painter.setBrush(PE_BAR)
-    painter.drawRoundedRect(bar, 3, 3)
-    painter.setBrush(PE_SCREW)
-    for index in range(6):
-        painter.drawEllipse(QPointF(bar.left() + 14 + index * 24, bar.center().y()), 5, 5)
-    painter.setPen(INK)
-    painter.drawText(QRectF(bar.left(), bar.bottom() + 4, bar.width(), 16), CENTER,
-                     tr("PE bar"))
+        screw(painter, QPointF(x, module.top() + 12), top, True)
+        screw(painter, QPointF(x, module.bottom() - 12), low, False)
+    side_label(painter, module, True, tr("Incoming"))
+    side_label(painter, module, False, tr("Outgoing"))
+    pe = pe_bar(painter, bar)
     n_index = 0 if n_left else len(terminals) - 1
     l_index = 1 if n_left else 0
     l_x = module.left() + 26 + l_index * PITCH
     n_x = module.left() + 26 + n_index * PITCH
     return {"out_l": Anchor(QPointF(l_x, module.bottom() - 12), 1),
             "out_n": Anchor(QPointF(n_x, module.bottom() - 12), 1),
-            "pe": Anchor(QPointF(bar.left() + 40, bar.top() + 4), -1)}
+            "pe": pe}
 
 
-DRAWINGS = {"rcd": rcd}
+DRAWINGS = {"rcd": rcd, "main_switch": main_switch, "cee_plug": cee_plug}

@@ -42,5 +42,6 @@ class DriverInfo:
     pairing: Pairing | None = None
     panel: object | None = None  # its front panel as drawn, for guided measurements
     guide: Callable[[str], object] | None = None  # function key to its guide, or None
+    guided: tuple[str, ...] = ()  # the functions it has a guide for
     preparing: str = PREPARING  # shown while the program gets the instrument ready
     simulated: bool = False  # random readings: shown as such, never signed

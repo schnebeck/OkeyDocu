@@ -12,7 +12,6 @@ texts:
   Next ▶: Weiter ▶
   Done ▶: Fertig ▶
   Connected – next ▶: Angeschlossen – weiter ▶
-  This station follows.: Diese Station folgt.
   "Leads {plugs} are plugged into their rows of sockets.": "Die Kabel {plugs} stecken in ihren Buchsenreihen."
   RCD tripping test IΔN: RCD-Auslöseprüfung IΔN
   RCD, outgoing side: FI-Schutzschalter, Abgangsseite
@@ -49,3 +48,47 @@ texts:
   a position without a measurement: eine Stellung ohne Messung
   "The instrument is set to {position}.": "Das Messgerät steht auf {position}."
   Turned – next ▶: Gedreht – weiter ▶
+  Ask the instrument again: Gerät erneut abfragen
+  Take it ▶: Übernehmen ▶
+  Set – next ▶: Eingestellt – weiter ▶
+  repeat measurement: Wiederholmessung
+  "Press the softkey beside a setting, choose the value with the arrow keys, confirm it and take it over with ✓.": "Softkey neben der Einstellung drücken, den Wert mit den Pfeiltasten wählen, bestätigen und mit ✓ übernehmen."
+  Received: Empfangen
+  Further measurements of this kind go straight to the chosen element.: Weitere Messungen dieser Art gehen direkt an das gewählte Element.
+  This measurement needs the mains.: Diese Messung braucht Netzversorgung.
+  "Plug the mains lead into the inlet at the top right and switch on: 0 → I.": "Netzkabel oben rechts einstecken und einschalten: 0 → I."
+  The MAINS lamp lights up.: Die Lampe MAINS leuchtet.
+  The battery is enough for this measurement.: Für diese Messung reicht der Akku.
+  Look at the BAT symbol at the top of the display. With a nearly empty battery plug in the mains lead and switch on.: Das Symbol BAT oben im Display ansehen. Ist der Akku fast leer, Netzkabel einstecken und einschalten.
+  "{element} states:": "{element} gibt an:"
+  Waiting for the result …: Warte auf das Ergebnis …
+  Machine housing: Maschinengehäuse
+  bare metal: blankes Metall
+  CEE plug, contact side: CEE-Stecker, Kontaktseite
+  Main switch: Hauptschalter
+  "Limits: set them as the test basis requires.": "Grenzwerte: so einstellen, wie es die Prüfgrundlage verlangt."
+  "Store the result with MEM: OkeyDocu receives it at once.": "Ergebnis mit MEM speichern: OkeyDocu empfängt es sofort."
+  The voltage is measured on the live supply.: Die Spannung wird an der eingeschalteten Versorgung gemessen.
+  Main switch, incoming terminals: Hauptschalter, Zuleitungsklemmen
+  "Live parts are exposed: touch only the grips of the probes.": "Spannungsführende Teile liegen frei: Prüfspitzen nur an den Griffen anfassen."
+  CEE plug and housing of the machine: CEE-Stecker und Gehäuse der Maschine
+  "Measure only dead: the plug is pulled.": "Nur spannungsfrei messen: Der Stecker ist gezogen."
+  Measures the voltage between the probes and its frequency.: Misst die Spannung zwischen den Prüfspitzen und ihre Frequenz.
+  Measures the resistance of the protective conductor with 200 mA.: Misst den Widerstand des Schutzleiters mit 200 mA.
+  Place probe L (L1) on the incoming line conductor L1.: Spitze L (L1) an den zugeführten Außenleiter L1 setzen.
+  Place probe N (L3) on the incoming N, where there is one.: Spitze N (L3) an den zugeführten N setzen, sofern vorhanden.
+  Place probe L (L1) on the PE contact of the CEE plug.: Spitze L (L1) an den PE-Kontakt des CEE-Steckers setzen.
+  Place probe PE (L2) on a bare metal spot of the housing.: Spitze PE (L2) an eine blanke Metallstelle des Gehäuses setzen.
+  "RCD: rated residual current IΔN, type and rated current IN, as the RCD states them.": "RCD: Bemessungsdifferenzstrom IΔN, Typ und Bemessungsstrom IN, wie der FI sie angibt."
+  "Test current: waveform, 1 × IΔN and the earthing system.": "Prüfstrom: Kurvenform, 1 × IΔN und Netzform."
+  "Press ON/START: the touch voltage is measured, the RCD does not trip yet.": "ON/START drücken: Die Berührungsspannung wird gemessen, der FI löst noch nicht aus."
+  "Press IΔN: the RCD trips and the tripping time is measured.": "IΔN drücken: Der FI löst aus, die Auslösezeit wird gemessen."
+  "Measuring path: AUTO measures L-PE, N-PE and L-N one after the other; without N choose L-PE.": "Messstrecke: AUTO misst L-PE, N-PE und L-N nacheinander; ohne N L-PE wählen."
+  "Hold the probes in place: the voltage is shown at once.": "Prüfspitzen halten: Die Spannung erscheint sofort."
+  Switch off and pull the plug: Ausschalten und Stecker ziehen
+  The protective conductor is measured without voltage.: Der Schutzleiter wird spannungsfrei gemessen.
+  Find a bare metal spot: Blanke Metallstelle suchen
+  Paint and rust falsify the result.: Lack und Rost verfälschen das Ergebnis.
+  "Polarity: both directions, the larger value counts.": "Polarität: beide Richtungen, der größere Wert zählt."
+  "With an extension lead: compensate it first (ROFFSET).": "Mit Verlängerungsleitung: diese zuerst kompensieren (ROFFSET)."
+  Press ON/START and hold the probes until the result stands.: ON/START drücken und die Prüfspitzen halten, bis das Ergebnis steht.

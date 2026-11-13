@@ -49,5 +49,40 @@ def leads_text(guide: Guide) -> str:
     return f"<p>{escape(plugged)}</p><ol>{steps}</ol>{caution}"
 
 
-def later_text() -> str:
-    return f"<i>{escape(tr('This station follows.'))}</i>"
+def supply_text(guide: Guide) -> str:
+    if guide.mains:
+        lines = (tr("This measurement needs the mains."),
+                 tr("Plug the mains lead into the inlet at the top right and switch on: 0 → I."),
+                 tr("The MAINS lamp lights up."))
+    else:
+        lines = (tr("The battery is enough for this measurement."),
+                 tr("Look at the BAT symbol at the top of the display. With a nearly empty"
+                    " battery plug in the mains lead and switch on."))
+    return "".join(f"<p>{escape(line)}</p>" for line in lines)
+
+
+def mode_text(guide: Guide, settings: list[tuple[str, str]], element: str) -> str:
+    """`settings` are what the element states for the measurement, as (name, value)."""
+    how = escape(tr("Press the softkey beside a setting, choose the value with the arrow"
+                    " keys, confirm it and take it over with ✓."))
+    items = "".join(f"<li>{escape(tr(action.text))}</li>" for action in guide.settings)
+    stated = "".join(f"<li>{escape(name)}: <b>{escape(value)}</b></li>"
+                     for name, value in settings)
+    html = f"<ol>{items}</ol><p>{how}</p>"
+    if stated:
+        title = escape(tr("{element} states:", element=element))
+        html += f"<p><b>{title}</b></p><ul>{stated}</ul>"
+    return html
+
+
+def measure_text(guide: Guide, reading=None) -> str:
+    steps = "".join(f"<li>{escape(tr(action.text))}</li>" for action in guide.steps)
+    if reading is None:
+        waiting = escape(tr("Waiting for the result …"))
+        return f"<ol>{steps}</ol><p><i>{waiting}</i></p>"
+    values = "&nbsp;&nbsp; ".join(f"{escape(r.label)} <b>{escape(r.quantity.raw)}</b>"
+                                  for r in reading.measurement.results[:3])
+    received = escape(tr("Received"))
+    done = escape(tr("Further measurements of this kind go straight to the chosen element."))
+    return (f"<ol>{steps}</ol><p style='color:{RIGHT}'><b>✓ {received}:</b> {values}</p>"
+            f"<p>{done}</p>")

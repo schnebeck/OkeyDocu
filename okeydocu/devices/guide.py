@@ -19,7 +19,7 @@ from ..l10n import N_
 
 STATIONS = (N_("Installation"), N_("Rotary switch"), N_("Test leads"), N_("Supply"),
             N_("Mode and limits"), N_("Measure"))
-PLACE, DIAL, LEADS = 0, 1, 2  # index of the stations: place, rotary switch, test leads
+PLACE, DIAL, LEADS, SUPPLY, MODE, MEASURE = range(len(STATIONS))
 
 
 @dataclass(frozen=True)
@@ -29,6 +29,12 @@ class Lead:
     probe: str  # marking on the probe
     terminal: str  # where on the test point the probe goes
     text: str  # what the tester does, to be translated
+
+
+@dataclass(frozen=True)
+class Action:
+    parts: tuple[str, ...]  # what the tester works with, as named in the panel drawing
+    text: str  # what to do with it, to be translated
 
 
 @dataclass(frozen=True)
@@ -46,6 +52,15 @@ class Guide:
     preparation: tuple[tuple[str, str], ...] = ()  # what to do beforehand: heading, text
     selector_label: str = ""  # the target position as printed on the dial
     selector_note: str = ""  # what the position measures, to be translated
+    mains: bool = False  # whether the measurement needs the mains, not only the battery
+    settings: tuple[Action, ...] = ()  # what to set before measuring
+    steps: tuple[Action, ...] = ()  # how to measure and store, in order
+    results: tuple[str, ...] = ()  # functions of a reading that ends the measurement
+    drawing_features: tuple[str, ...] = ()  # what the drawing of the test point prints
+
+    def ended_by(self, function: str) -> bool:
+        """Whether a reading of `function` is the result this measurement waits for."""
+        return function == self.function or function in self.results
 
 
 @dataclass(frozen=True)

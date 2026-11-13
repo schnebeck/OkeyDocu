@@ -10,7 +10,7 @@
 reports is a ring around its label, green where it serves the measurement and red elsewhere.
 Parts named in `point_at` pulse, so a guide can show the socket, key or detent that comes
 next. A click on a detent asks for that position. `zoom_dial` moves in on the dial and back
-out to the whole panel."""
+out to the whole panel, `zoom_parts` in on other parts, such as display and softkeys."""
 
 from __future__ import annotations
 
@@ -90,6 +90,21 @@ class FrontPanel(QWidget):
             goal = QRectF(x - reach, y - reach, 2 * reach, 2 * reach)
         else:
             goal = whole
+        self._zoom_to(goal)
+
+    def zoom_parts(self, *ids: str) -> None:
+        """Close in on the parts named, with some of the panel around them."""
+        found = [self._bounds(i) for i in ids if self.front.elementExists(i)]
+        if not found:
+            self.zoom_dial(False)
+            return
+        goal = found[0]
+        for bounds in found[1:]:
+            goal = goal.united(bounds)
+        margin = max(goal.width(), goal.height()) * (_ZOOM_MARGIN - 1)
+        self._zoom_to(goal.adjusted(-margin, -margin, margin, margin))
+
+    def _zoom_to(self, goal: QRectF) -> None:
         self._zoom.stop()
         self._zoom.setStartValue(QRectF(self.view))
         self._zoom.setEndValue(goal)
@@ -123,11 +138,14 @@ class FrontPanel(QWidget):
         return QRectF(corner.x() + rect.x() * scale, corner.y() + rect.y() * scale,
                       rect.width() * scale, rect.height() * scale)
 
+    def _bounds(self, element: str) -> QRectF:
+        """Where a part is in the drawing."""
+        return self.front.transformForElement(element).mapRect(
+            self.front.boundsOnElement(element))
+
     def part_rect(self, element: str) -> QRectF:
         """Where a part of the drawing is in the widget."""
-        bounds = self.front.transformForElement(element).mapRect(
-            self.front.boundsOnElement(element))
-        return self._to_widget(bounds)
+        return self._to_widget(self._bounds(element))
 
     def _dial_centre(self) -> QPointF:
         return self._to_widget(QRectF(*self.drawing.dial, 0, 0)).topLeft()

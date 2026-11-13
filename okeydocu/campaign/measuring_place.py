@@ -56,8 +56,11 @@ class MeasuringPlace:
         noted = str(self.features.get("n_terminal") or "").strip()
         return "left" in (noted, source_of(noted))
 
-    def lines(self) -> list[str]:
-        """What an RCD drawing prints: rated residual current and type, rated current."""
+    def lines(self, keys: tuple[str, ...] = ()) -> list[str]:
+        """What the drawing prints: the features named by `keys` that are stated, or for an
+        RCD rated residual current and type, rated current."""
+        if keys:
+            return [self.stated(key) for key in keys if self.stated(key)]
         first = " · ".join(text for text in (self.stated("rated_residual_current"),
                                              str(self.features.get("rcd_type") or "")) if text)
         return [first or "? mA", self.stated("rated_current") or "? A"]

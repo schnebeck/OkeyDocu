@@ -130,19 +130,25 @@ class BenchView(QWidget):
         scale = self.panel._frame()[0]
         field = self.panel.part_rect("socket-1").left()
         rows = sorted({lead.row for lead in self.guide.leads})
-        # Leads reaching their terminal from below turn the deeper the further right it is,
-        # so a lead passing beneath another probe never crosses that probe's lead.
-        below = sorted((lead for lead in self.guide.leads
-                        if self.anchors[lead.terminal].side > 0),
-                       key=lambda lead: self.anchors[lead.terminal].point.x())
+        # Leads reaching their terminal from the same side turn the further out the further
+        # right it is, so a lead passing another probe never crosses that probe's lead.
+        below = self._side(1)
+        above = self._side(-1)
         for index, lead in enumerate(self.guide.leads):
             anchor = self.anchors[lead.terminal]
             row = self.panel.part_rect(lead.row)
             plug = QRectF(row.left() - 4 * scale, row.top() - 3 * scale,
                           PLUG[0] * scale, PLUG[1] * scale)
             lane = field - LANE_GAP * (len(rows) - rows.index(lead.row))
-            depth = 18 + 16 * below.index(lead) if lead in below else 34
+            same = below if lead in below else above
+            depth = 18 + 16 * same.index(lead)
             path = route(QPointF(plug.left(), plug.center().y()), lane, anchor, depth)
-            left = anchor.side > 0 and lead is below[0]
+            left = len(same) > 1 and lead is same[0]
             paint_lead(painter, plug, lead.plug, path, anchor, lead.probe, left,
                        self.progress - index)
+
+    def _side(self, side: int) -> list:
+        """The leads reaching their terminal from `side`, left to right."""
+        return sorted((lead for lead in self.guide.leads
+                       if self.anchors[lead.terminal].side == side),
+                      key=lambda lead: self.anchors[lead.terminal].point.x())

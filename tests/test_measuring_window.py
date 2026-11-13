@@ -107,14 +107,14 @@ def test_leads_cross_only_where_plugs_and_terminals_force_it(window, poles, n_le
 
 def test_the_window_opens_on_the_first_station_and_goes_on_without_waiting(window):
     assert window.station == 0 and not window.back.isEnabled()
-    assert "Anlage" in window.chips[0].text()
+    assert "Anlage" in window.bar.chips[0].text()
     window.next.click()
     window.next.click()
     assert window.station == LEADS
     assert window.bench._lay.state() == window.bench._lay.State.Running
     window.next.click()
     assert window.bench.progress == len(window.guide.leads)
-    assert window.chips[LEADS].text().startswith("✓")
+    assert window.bar.chips[LEADS].text().startswith("✓")
 
 
 def test_the_leads_station_names_every_probe_in_order(window):
