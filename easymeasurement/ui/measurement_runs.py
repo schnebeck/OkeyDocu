@@ -22,6 +22,7 @@ from ..reporting.context import VERDICT_TEXT
 from .common import MEMBERS, POINT_ID, ROW_ID, RUN_ID, function_short
 from .measurement_cells import PLACE, VALUES, VERDICT, sort_key, values_text
 from .measurement_detail import capture_text
+from .setting_warning import mark_row
 from .table_columns import GROUP, HEAD, ORDER, SortItem
 from .verdict_marks import verdict_icon
 
@@ -41,6 +42,7 @@ class Line:
     head: list | None = None  # a step sorts among other lines as its head does
     opened: bool = False
     point: int | None = None  # a point of a repeat inspection still to be taken
+    warning: str = ""  # settings that differ from the element, for this line or its steps
 
 
 def _place(path: list[str], area: list[str]) -> str:
@@ -87,16 +89,18 @@ def _head(run_id: int, steps: list[Line], rows: list, opened: bool) -> Line:
 
 
 def table_lines(rows, opened: set[int], show_time: Callable[[datetime], str], area: list[str],
-                paths) -> list[Line]:
+                paths, warnings: dict[int, str] | None = None) -> list[Line]:
     """Rows as the search gave them; each run becomes a head, its steps follow if opened.
 
-    `show_time` writes the time of a row.
+    `show_time` writes the time of a row; `warnings` says, by measurement, which settings
+    differ from the element. A run's head carries the first of its steps'.
     """
     lines: list[Line | int] = []  # a run's number keeps the place of its head
     runs: dict[int, list[tuple[Line, object]]] = {}
     for row, path in zip(rows, paths):
         line = _measurement(row, datetime.fromisoformat(row["local_time"]), show_time,
                             _place(path, area))
+        line.warning = (warnings or {}).get(row["id"], "")
         run_id = row["run_id"]
         if run_id is None:
             lines.append(line)
@@ -113,6 +117,7 @@ def table_lines(rows, opened: set[int], show_time: Callable[[datetime], str], ar
         steps = [step for step, _ in runs[line]]
         members = [row for _, row in runs[line]]
         head = _head(line, steps, members, line in opened)
+        head.warning = next((step.warning for step in steps if step.warning), "")
         result.append(head)
         if head.opened:
             keys = [key if key is not None else text.casefold()
@@ -164,6 +169,8 @@ def write_line(table: QTableWidget, index: int, line: Line) -> None:
         font = cell.font()
         font.setBold(True)
         cell.setFont(font)
+    if line.warning:
+        mark_row(table, index, line.warning)
     first = table.item(index, 0)
     if line.point is not None:
         first.setData(POINT_ID, line.point)

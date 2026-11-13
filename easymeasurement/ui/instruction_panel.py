@@ -32,6 +32,7 @@ class InstructionPanel(QWidget):
     """Follows the last reading and the switch, and any function can be chosen by hand."""
 
     read_requested = Signal()
+    element: tuple = ((), "")  # what the chosen element states, and its designation
 
     def __init__(self):
         super().__init__()
@@ -75,6 +76,10 @@ class InstructionPanel(QWidget):
             self.wiring.show_step(None)
             self.text.setText(tr(NO_INSTRUCTION))
 
+    def show_element(self, expected: list[tuple[str, str]], element: str) -> None:
+        self.element = (expected, element)
+        self._show()
+
     def show_selector(self, position) -> None:
         """A position that names no function leaves the instruction where it is."""
         if position.functions:
@@ -91,7 +96,7 @@ class InstructionPanel(QWidget):
         self.wiring.show_step(step if step.wiring else None, connected=True, locked=True)
         parts = (
             step_text.title_html(step), step_text.warnings_html(step),
-            step_text.settings_html(step), step_text.instructions_html(step),
+            step_text.settings_html(step, *self.element), step_text.instructions_html(step),
             step_text.source_html(step),
         )
         self.text.setText("<br>".join(part for part in parts if part))

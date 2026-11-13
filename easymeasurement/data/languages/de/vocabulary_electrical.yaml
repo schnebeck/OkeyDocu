@@ -66,3 +66,6 @@ texts:
   "yes": ja
   "no": nein
   Conductors: Leiter
+  RCD type: RCD-Typ
+  Rated residual current: Bemessungsdifferenzstrom
+  Rated current: Nennstrom

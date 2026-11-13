@@ -8,7 +8,10 @@
 
 from __future__ import annotations
 
+from shiboken6 import isValid
+
 from ..campaign.service import read_instrument
+from ..campaign.setting_check import SettingCheck
 from ..devices import Cancelled, DeviceError
 from ..l10n import tr
 from .campaign_dialog import CampaignDialog
@@ -17,10 +20,13 @@ from .common import run_busy, show_error
 from .instrument_prepare import prepare_if_needed
 from .live_session import LiveSession
 from .measurement_detail import pick_images
+from .setting_warning import SettingsWarning
 
 
 class CampaignActions(CampaignTasks):
     """Starting a campaign, the live session it measures in, and all that follows."""
+
+    settings_warning = None  # the card about the last reading's settings, while it is open
 
     # Starting ------------------------------------------------------------
 
@@ -140,7 +146,8 @@ class CampaignActions(CampaignTasks):
 
     def _received(self, campaign_id: int, reading) -> None:
         """Stored first. Everything else can wait, this value exists nowhere else."""
-        self.app.service.receive(campaign_id, reading, self.place_target(campaign_id))
+        measurement_id = self.app.service.receive(campaign_id, reading,
+                                                  self.place_target(campaign_id))
         self.list.update_campaign(campaign_id)
         self._refresh_home()
         if campaign_id == self.campaign_id:
@@ -152,6 +159,21 @@ class CampaignActions(CampaignTasks):
             self._refresh_photos()
         self._update()
         self.changed.emit()
+        if measurement_id is not None:
+            self._warn_settings(measurement_id)
+
+    def _warn_settings(self, measurement_id: int) -> None:
+        """At once, while the tester can still set the instrument right; a newer warning
+        takes the place of one still open."""
+        row = self.app.db.one("SELECT * FROM measurements WHERE id=?", measurement_id)
+        found = SettingCheck(self.app.db).of_row(row)
+        if not found:
+            return
+        previous = self.settings_warning
+        if previous is not None and isValid(previous) and previous.isVisible():
+            previous.accept()
+        self.settings_warning = SettingsWarning(found, self)
+        self.settings_warning.open()
 
     def _selector_read(self, position) -> None:
         if self.live_id == self.campaign_id:

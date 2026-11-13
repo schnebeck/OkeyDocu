@@ -7,9 +7,11 @@ also_accepts:
 - rcd_touch
 - rcd_current
 selector: IΔN
+element_settings:
+- rated_residual_current
+- rcd_type
+- rated_current
 settings:
-- Rated residual current IΔN: according to the RCD
-- RCD type: according to the RCD
 - Touch voltage UL: 50 V
 warnings:
 - The tripping test switches the circuit off. Secure loads beforehand.

@@ -51,6 +51,7 @@ from .measurement_runs import table_lines, write_line
 from .photo_gallery import PhotoGallery
 from .photo_shared import shared_thumbs
 from .report_signing import settings
+from .setting_warning import warnings_of
 from .table_columns import TableColumns
 from .verdict_marks import MARK_SIZE
 
@@ -185,7 +186,8 @@ class MeasurementView(RowMenu, MeasurementDetail, QWidget):
         area = shared_start(paths) if len(rows) > 1 else []
         # On a single day the date stands above the table, so a row tells only the time.
         show_time = _clock if one_day else partial(moment, seconds=True)
-        lines = table_lines(rows, self.open_runs, show_time, area, paths)
+        lines = table_lines(rows, self.open_runs, show_time, area, paths,
+                            warnings_of(self.app.db, rows))
         points = self.point_lines(area)
         lines += points
         with filling(self.table):

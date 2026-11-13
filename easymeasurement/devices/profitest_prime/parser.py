@@ -22,7 +22,14 @@ from ...model import (
     Verdict,
 )
 from ...vocabulary import plain, vocabulary
-from .mapping import conductor, function_key, is_conductor_setting, outcome, result_key
+from .mapping import (
+    conductor,
+    function_key,
+    is_conductor_setting,
+    outcome,
+    result_key,
+    setting_key,
+)
 from .polarity import by_direction
 
 # The instrument has one voltage function. A three-phase reading is what makes
@@ -104,7 +111,7 @@ def _parameter(node: ET.Element) -> Parameter:
     code, value = node.get("description", ""), node.get("value", "")
     if is_conductor_setting(code):
         return Parameter(CONDUCTOR, conductor(value))
-    return Parameter(code, value)
+    return Parameter(setting_key(code), value)
 
 
 def _function(code: str, results: tuple[ResultValue, ...]) -> str:

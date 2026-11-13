@@ -14,6 +14,7 @@ from ..campaign.clock import CLOCK_SET_ACCURACY_S
 from ..l10n import signed_seconds, tr
 from .campaign_edit import PLAN, TESTER, CampaignEditOverlay
 from .campaign_views import AssignPlanOverlay, TesterOverlay
+from .setting_warning import campaign_note
 
 
 class CampaignTasks:
@@ -98,8 +99,9 @@ class CampaignTasks:
     def fetch(self) -> None:
         result = self.instrument.fetch(self.campaign_id)
         if result is not None:
-            self.notice.setText(tr("{count} new measurements from the instrument.",
-                                   count=result["added"]))
+            fetched = tr("{count} new measurements from the instrument.", count=result["added"])
+            note = campaign_note(self.app.db, self.campaign_id)
+            self.notice.setText(f"{fetched}  {note}".strip())
             self.guided.reload()
             self._data_changed()
 

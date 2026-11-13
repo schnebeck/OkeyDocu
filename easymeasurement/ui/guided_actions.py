@@ -17,6 +17,7 @@ from ..l10n import tr
 from .common import run_busy, selected_id, show_error
 from .guided_pages import ReasonOverlay
 from .instrument_prepare import prepare_if_needed
+from .setting_warning import campaign_note
 
 
 class GuidedActions:
@@ -78,9 +79,10 @@ class GuidedActions:
         result = self.instrument.fetch(self.campaign_id)
         if result is None:
             return False
-        self.status.setText(tr("{added} new, {assigned} assigned, {open} open.",
-                               added=result["added"], assigned=result["assigned"],
-                               open=result["open"]))
+        fetched = tr("{added} new, {assigned} assigned, {open} open.", added=result["added"],
+                     assigned=result["assigned"], open=result["open"])
+        note = campaign_note(self.app.db, self.campaign_id)
+        self.status.setText(f"{fetched}  {note}".strip())
         self._fill_steps()
         self.changed.emit()
         return True

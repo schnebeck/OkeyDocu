@@ -60,8 +60,6 @@ texts:
   "Circuit (live)": "Stromkreis (unter Spannung)"
   "Line conductor L1 / L2 / L3": "Außenleiter L1 / L2 / L3"
   "RCD – tripping test": "RCD – Auslöseprüfung"
-  "Rated residual current IΔN": "Nennfehlerstrom IΔN"
-  "according to the RCD": "nach RCD"
   "RCD type": "RCD-Typ"
   "The tripping test switches the circuit off. Secure loads beforehand.": "Die Auslöseprüfung schaltet den Stromkreis ab. Vorher Verbraucher sichern."
   "A test with smooth DC residual current also needs probe 2(N) on N.": "Prüfung mit Gleichfehlerstrom braucht zusätzlich Sonde 2(N) an N."

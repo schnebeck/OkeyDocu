@@ -31,6 +31,7 @@ from .measurement_search import MeasurementsPage
 from .photo_shared import shared_thumbs
 from .plan_editor import PlanEditorPage
 from .reports import ReportsPage
+from .setting_warning import campaign_note
 from .settings_dialog import SettingsOverlay
 from .templates import TemplatesPage
 from .users import UsersOverlay
@@ -182,7 +183,8 @@ class MainWindow(MainMenus, QMainWindow):
         self.campaign.refresh()
         self.campaign.show_campaign(result.campaign_id)
         imported = tr("{count} measurements imported.", count=result.measurements)
-        self.campaign.notice.setText(imported)
+        note = campaign_note(self.app.db, result.campaign_id)
+        self.campaign.notice.setText(f"{imported}  {note}".strip())
 
     # Window --------------------------------------------------------------
 

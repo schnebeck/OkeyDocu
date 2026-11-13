@@ -101,6 +101,9 @@ CONDUCTORS = {
     "TS1445": "L1-L3",
 }
 
+# Settings the vocabulary knows; they are held against the element they were set for.
+SETTINGS = {"TS1228": "rated_residual_current", "TS1230": "rated_current", "TS1238": "rcd_type"}
+
 # The program's languages onto the instrument's; one it lacks falls back to English.
 CULTURES = {"de": "de-DE", "en": "en-GB", "es": "es-ES"}
 FALLBACK_CULTURE = "en-GB"
@@ -120,6 +123,10 @@ def outcome(code: str) -> str:
 
 def is_conductor_setting(code: str) -> bool:
     return code in CONDUCTOR_SETTINGS
+
+
+def setting_key(code: str) -> str:
+    return SETTINGS.get(code, code)
 
 
 def conductor(code: str) -> str:

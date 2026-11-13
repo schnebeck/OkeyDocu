@@ -105,3 +105,6 @@ outcomes:
 
 settings:
   conductor: {name: Conductors}
+  rcd_type: {name: RCD type}
+  rated_residual_current: {name: Rated residual current}
+  rated_current: {name: Rated current}

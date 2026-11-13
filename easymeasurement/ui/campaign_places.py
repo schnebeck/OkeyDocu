@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+from ..campaign.setting_check import SettingCheck
 from .element_form import ElementOverlay
 from .structure_tree import UNPLACED
 
@@ -30,9 +31,18 @@ class CampaignPlaces:
         campaign = self._campaign()
         if campaign is None:
             self.place.show_element(None, None, False)
+            self._show_settings_for(None)
             return
         self.place.show_element(asset_id or campaign["asset_id"], campaign["id"],
                                 campaign["status"] == "open")
+        self._show_settings_for(asset_id or campaign["asset_id"])
+
+    def _show_settings_for(self, asset_id: int | None) -> None:
+        """The instructions name what the element that readings go to states for them."""
+        check = SettingCheck(self.app.db)
+        expected, element = check.expected(asset_id), check.element(asset_id)
+        self.guided.show_element(expected, element)
+        self.free.instruction.show_element(expected, element)
 
     def place_target(self, campaign_id: int) -> int:
         """Where a reading for that campaign is booked: the chosen element, or the whole."""

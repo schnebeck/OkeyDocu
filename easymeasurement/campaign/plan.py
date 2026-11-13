@@ -64,6 +64,7 @@ class PlanStep:
     function: str = ""  # neutral function key
     selector: str = ""  # rotary switch position
     settings: tuple[tuple[str, str], ...] = ()
+    element_settings: tuple[str, ...] = ()  # set as the element states, by vocabulary key
     wiring: Wiring | None = None
     instructions: tuple[str, ...] = ()
     warnings: tuple[str, ...] = ()
@@ -100,6 +101,7 @@ class PlanStep:
             function=data.get("function", ""),
             selector=data.get("selector", ""),
             settings=tuple(tuple(item) for item in data.get("settings", ())),
+            element_settings=tuple(data.get("element_settings", ())),
             wiring=Wiring(
                 object_label=wiring["object_label"],
                 terminals=tuple(Terminal(**t) for t in wiring["terminals"]),

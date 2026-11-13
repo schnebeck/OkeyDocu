@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from ..devices.profitest_prime.mapping import is_conductor_setting, result_key
+from ..devices.profitest_prime.mapping import is_conductor_setting, result_key, setting_key
 from ..devices.profitest_prime.polarity import by_direction
 from ..l10n import N_
 from ..model import (
@@ -131,7 +131,7 @@ def _parameter(item: dict) -> Parameter:
     value = str(item.get("Value", ""))
     if is_conductor_setting(code):
         return Parameter(CONDUCTOR, value)
-    return Parameter(code or item.get("Name", ""), value)
+    return Parameter(setting_key(code) if code else item.get("Name", ""), value)
 
 
 def _check_measurement(step, data: dict, location: tuple[str, ...]) -> MeterMeasurement:

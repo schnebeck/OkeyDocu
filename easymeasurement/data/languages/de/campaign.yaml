@@ -240,6 +240,18 @@ texts:
   Instrument not connected: Messgerät nicht verbunden
   "Rotary switch: {selector}": "Drehschalter: {selector}"
   Set on the instrument: Am Gerät einstellen
+  "Set on the instrument for {element}": "Am Gerät einstellen für {element}"
+  as on the rating plate: laut Typenschild
+  "Set for {element}:  {settings}": "Einstellen für {element}:  {settings}"
+  "{setting}: {used} on the instrument, {expected} at {element}": "{setting}: am Gerät {used}, laut {element} {expected}"
+  "The instrument was set differently from the element:": "Das Gerät war anders eingestellt, als das Element angibt:"
+  Instrument settings differ from the element: Geräteeinstellung weicht vom Element ab
+  "The reading is stored. The instrument was set differently from what the element states:": "Der Messwert ist gespeichert. Das Gerät war anders eingestellt, als das Element angibt:"
+  "Check the setting on the instrument, or the element's data, before the next measurement.": "Vor der nächsten Messung die Einstellung am Gerät oder die Daten des Elements prüfen."
+  Understood: Verstanden
+  "{count} set differently": "{count} abweichend eingestellt"
+  "{count} measurement was set differently from its element; it is marked orange.": "{count} Messung war anders eingestellt, als ihr Element angibt; sie ist orange markiert."
+  "{count} measurements were set differently from their element; they are marked orange.": "{count} Messungen waren anders eingestellt, als ihr Element angibt; sie sind orange markiert."
   Caution: Achtung
   Device under test: Prüfling
   Procedure: Vorgehen

@@ -12,9 +12,11 @@ from ..model import Verdict
 from ..campaign.repeat import REPEAT
 from ..l10n import plural, tr
 from .common import POINT_ID, ROW_ID
+from .setting_warning import differing
 from .structure_tree import UNPLACED
 
 UNPLACED_LINK, FAILED_LINK, POINTS_LINK, STACK_LINK = "unplaced", "failed", "points", "stack"
+SETTINGS_LINK = "settings"
 ALERT, DONE, NOTE = "#c0392b", "#27ae60", "#d35400"
 
 
@@ -40,6 +42,10 @@ class CampaignChecks:
         if failed:
             text = plural(failed, "{count} defect", "{count} defects")
             parts.append(f'<a href="{FAILED_LINK}" style="color:{ALERT}">{text}</a>')
+        set_apart = len(differing(self.app.db, campaign["id"]))
+        if set_apart:
+            text = plural(set_apart, "{count} set differently", "{count} set differently")
+            parts.append(f'<a href="{SETTINGS_LINK}" style="color:{NOTE}">{text}</a>')
         if campaign["plan_key"] == REPEAT:
             missing = sum(row["status"] in ("pending", "active")
                           for row, _ in self.app.service.points(campaign["id"]))
@@ -72,6 +78,8 @@ class CampaignChecks:
             self._next_point()
         elif link == STACK_LINK:
             self.show_stack()
+        elif link == SETTINGS_LINK:
+            self._next_of(differing(self.app.db, self.campaign_id))
 
     def _next_point(self) -> None:
         """Each click goes on to the next open point, the whole campaign in view."""
@@ -85,10 +93,13 @@ class CampaignChecks:
 
     def _next_defect(self) -> None:
         """Each click goes on to the next defect, in the order they were measured."""
-        rows = self.app.db.query(
+        self._next_of(self.app.db.query(
             "SELECT id, asset_id FROM measurements WHERE campaign_id = ? AND verdict = ?"
             " ORDER BY local_time, id", self.campaign_id, Verdict.FAILED.value,
-        )
+        ))
+
+    def _next_of(self, rows: list) -> None:
+        """The measurement after the one shown, among `rows`; after the last, the first."""
         if not rows:
             return
         ids = [row["id"] for row in rows]

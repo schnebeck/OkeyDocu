@@ -26,8 +26,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..campaign.setting_check import SettingCheck
 from ..devices import setting_words
 from ..l10n import day, tr
+from ..vocabulary import setting_name
 from .common import AppContext
 from .growing_edit import GrowingEdit
 from .guided_pages import ReasonOverlay
@@ -145,14 +147,7 @@ class RepeatPoint(QWidget):
             self.place.show_asset(step.asset_id, False)
         self.question.setText(step.question if check and step.question != step.title else "")
         self.question.setVisible(bool(self.question.text()))
-        words = setting_words(self.app.db)
-        settings = ["{}: {}".format(*words.say(key, value)[:2]) for key, value in step.parameters]
-        settings += [tr("Limit {label}: {limits}", label=label,
-                        limits=" ".join(p for p in (low, up) if p))
-                     for _, label, low, up in step.limits]
-        self.settings.setText(tr("As last time:  {settings}", settings="  ·  ".join(settings))
-                              if settings else "")
-        self.settings.setVisible(bool(settings))
+        self._show_settings(step)
         origin = self.app.service.origin_measurement(step)
         closed = datetime.fromisoformat(origin["closed_at"]) if origin else None
         self.hint_from.setText(tr("Hint from the inspection of {day}", day=day(closed))
@@ -169,6 +164,24 @@ class RepeatPoint(QWidget):
         self.skip_button.setVisible(not skipped)
         self.reopen_button.setVisible(skipped)
         self.answer_note.clear()
+
+    def _show_settings(self, step) -> None:
+        """Settings the element states come from the element, the others as last time."""
+        check = SettingCheck(self.app.db)
+        expected = check.expected(step.asset_id)
+        words = setting_words(self.app.db)
+        settings = ["{}: {}".format(*words.say(key, value)[:2]) for key, value in step.parameters
+                    if key not in dict(expected)]
+        settings += [tr("Limit {label}: {limits}", label=label,
+                        limits=" ".join(p for p in (low, up) if p))
+                     for _, label, low, up in step.limits]
+        lines = [tr("Set for {element}:  {settings}", element=check.element(step.asset_id),
+                    settings="  ·  ".join(f"{setting_name(key)}: {value}"
+                                          for key, value in expected))] if expected else []
+        if settings:
+            lines.append(tr("As last time:  {settings}", settings="  ·  ".join(settings)))
+        self.settings.setText("\n".join(lines))
+        self.settings.setVisible(bool(lines))
 
     def _show_photos(self, origin) -> None:
         self.photos.clear()

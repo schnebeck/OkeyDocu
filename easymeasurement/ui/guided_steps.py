@@ -24,6 +24,9 @@ FAILED_MARK = "✗"
 class GuidedSteps:
     """Keeps the step shown, its setup and the buttons in line with the stored steps."""
 
+    # What the chosen element states for the settings it decides, and its designation.
+    element: tuple = ((), "")
+
     # Steps ---------------------------------------------------------------
 
     def _fill_steps(self) -> None:
@@ -52,6 +55,14 @@ class GuidedSteps:
             )
             self.steps.setCurrentRow(keep if 0 <= keep < len(rows) else first_open)
         self._show_step()
+
+    def show_element(self, expected: list[tuple[str, str]], element: str) -> None:
+        """The settings of a measuring step follow the element readings go to."""
+        self.element = (expected, element)
+        row = self._step()
+        step = self.app.service.plan_step(row) if row is not None else None
+        if step is not None and step.kind == "measure":
+            self.settings_text.setText(step_text.settings_html(step, *self.element))
 
     def select_step(self, step_id: int) -> None:
         for row in range(self.steps.count()):
@@ -110,7 +121,7 @@ class GuidedSteps:
             step if step.wiring else None, connected=status == "active", locked=status != "pending"
         )
         self.step_title.setText(step_text.title_html(step))
-        self.settings_text.setText(step_text.settings_html(step))
+        self.settings_text.setText(step_text.settings_html(step, *self.element))
         self.warnings_text.setText(step_text.warnings_html(step))
         self.instructions_text.setText(step_text.instructions_html(step))
         self.source_text.setText(step_text.source_html(step))
