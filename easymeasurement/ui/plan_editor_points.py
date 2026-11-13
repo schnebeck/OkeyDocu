@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import uuid
 
+from ..l10n import in_language
 from .common import function_short
 
 MARKS = {"check": "?", "measure": "≈", "note": "i"}
@@ -25,7 +26,8 @@ class PlanEditorPoints:
     def _step_text(self, step: dict) -> str:
         function = step.get("function", "")
         known = self.instructions.get(function)
-        title = step.get("title") or (known.title if known else function_short(function))
+        title = in_language(step.get("title", "")) or (known.title if known
+                                                        else function_short(function))
         return f"{MARKS[step.get('kind', 'measure')]}   {title}"
 
     def _fill_steps(self, select: int) -> None:

@@ -28,7 +28,7 @@ from ..l10n import in_language, tr
 from .board import GutterSplitter
 from .common import ROW_ID, AppContext
 from .plan_editor_points import PlanEditorPoints, new_key
-from .plan_step_form import PlanStepForm
+from .plan_step_form import PlanStepForm, kept
 from .plan_test_run import PlanTestRun
 
 SAVE_DELAY_MS = 300
@@ -146,7 +146,8 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
         self.title.blockSignals(True)
         self.released.blockSignals(True)
         # A shipped plan keeps its title in the source language; it is shown in this one.
-        self.title.setText(in_language(self.data["title"]) if self.data else "")
+        self.stored_title = self.data["title"] if self.data else ""
+        self.title.setText(in_language(self.stored_title))
         self.released.setChecked(bool(self.data and self.data.get("released")))
         self.title.blockSignals(False)
         self.released.blockSignals(False)
@@ -191,7 +192,8 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
 
     def _edited(self) -> None:
         if self.data is not None:
-            self.data["title"] = self.title.text().strip() or tr("Untitled")
+            typed = self.title.text().strip() or tr("Untitled")
+            self.data["title"] = kept(self.stored_title, typed)
             self.data["released"] = self.released.isChecked()
             self.state.setText(tr("Saving …"))
             self._saving.start()
@@ -203,7 +205,7 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
             self.state.setText(tr("Saved"))
             item = self.plans.currentItem()
             if item is not None and item.data(ROW_ID) == self.data["key"]:
-                item.setText(self.data["title"])
+                item.setText(in_language(self.data["title"]))
 
     def hideEvent(self, event) -> None:
         self.save()

@@ -15,6 +15,7 @@ from pathlib import Path
 
 from ..model import DeviceIdentity, MeterMeasurement, Parameter, Quantity, ResultValue, Verdict
 from .plan import PlanStep
+from .plan_language import told
 
 MANUAL = "manual"
 IMPORTED = "izytron"
@@ -75,7 +76,8 @@ class ReadingMixin:
         )
 
     def plan_step(self, step_row) -> PlanStep:
-        return PlanStep.from_dict(json.loads(step_row["plan_json"]))
+        """In the current language, as far as a catalogue knows its texts."""
+        return PlanStep.from_dict(told(json.loads(step_row["plan_json"])))
 
     def measurements(self, campaign_id: int, step_id: int | None = None):
         if step_id is None:

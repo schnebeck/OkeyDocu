@@ -219,3 +219,19 @@ def test_a_plan_written_by_hand_keeps_its_words():
         plan = parse_plan("key: x\ntitle: Eigener Plan\nreleased: true\nsteps:\n"
                           "- {key: a, kind: check, title: Schalter geprüft}")
     assert plan.title == "Eigener Plan" and plan.steps[0].title == "Schalter geprüft"
+
+
+def test_a_shipped_step_speaks_the_language_shown_not_the_one_it_was_assigned_in(service,
+                                                                                 asset_id):
+    from easymeasurement.l10n import speaking, tr
+
+    campaign = service.create(asset_id, "Sichtprüfung", "Prüfer")
+    with speaking("de"):
+        visual = next(plan for plan in load_plans() if plan.key == "visual_inspection")
+        service.assign_plan(campaign, visual)
+        german = service.plan_step(service.steps(campaign)[0]).title
+    with speaking("en"):
+        english = service.plan_step(service.steps(campaign)[0]).title
+    assert english == "Documentation"
+    with speaking("de"):
+        assert german == tr("Documentation") != english

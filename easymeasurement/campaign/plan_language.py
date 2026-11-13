@@ -20,6 +20,15 @@ TEXT_FIELDS = ("title", "selector", "source", "text", "dut", "question")
 LIST_FIELDS = ("instructions", "warnings")
 
 
+def _setting(item, change: Callable[[str], str]):
+    """A setting as a plan file writes it, `{name: value}`, or as a stored step keeps it,
+    `[name, value]`."""
+    if isinstance(item, dict):
+        return {change(str(key)): change(str(value)) for key, value in item.items()}
+    key, value = item
+    return [change(str(key)), change(str(value))]
+
+
 def _changed(raw: dict, change: Callable[[str], str]) -> dict:
     data = dict(raw)
     for name in TEXT_FIELDS:
@@ -29,8 +38,7 @@ def _changed(raw: dict, change: Callable[[str], str]) -> dict:
         if name in data:
             data[name] = [change(str(item)) for item in data[name] or ()]
     if "settings" in data:
-        data["settings"] = [{change(str(key)): change(str(value)) for key, value in item.items()}
-                            for item in data["settings"] or ()]
+        data["settings"] = [_setting(item, change) for item in data["settings"] or ()]
     wiring = data.get("wiring")
     if wiring:
         data["wiring"] = {

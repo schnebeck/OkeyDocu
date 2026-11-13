@@ -12,7 +12,7 @@ from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox, QFormLayout, QLabel, QLineEdit, QWidget
 
 from ..campaign.plan import load_instructions
-from ..l10n import N_, tr
+from ..l10n import N_, in_language, tr
 from ..vocabulary import function_keys
 from .common import function_short
 from .growing_edit import GrowingEdit
@@ -20,6 +20,12 @@ from .growing_edit import GrowingEdit
 KIND_TEXT = {"check": N_("Check question"), "measure": N_("Measurement"), "note": N_("Hint")}
 TITLE_LABELS = {"check": N_("Question"), "measure": N_("Title"), "note": N_("Heading")}
 TEXT_LABELS = {"check": N_("Explanation"), "note": N_("Text")}
+
+
+def kept(stored: str, typed: str) -> str:
+    """A shipped text is shown in the current language; left as shown, it stays in the
+    language it is kept in, so every other language still finds its translation."""
+    return stored if typed == in_language(stored) else typed
 
 
 class PlanStepForm(QWidget):
@@ -30,6 +36,7 @@ class PlanStepForm(QWidget):
     def __init__(self):
         super().__init__()
         self.step: dict | None = None
+        self.stored: dict[str, str] = {}  # the texts as kept, before the language shows them
         self.instructions = load_instructions()
         self.heading = QLabel()
         font = self.heading.font()
@@ -72,11 +79,12 @@ class PlanStepForm(QWidget):
         self._set_row(self.instruction_state, kind == "measure")
         self._set_row(self.text, kind in TEXT_LABELS, TEXT_LABELS.get(kind, ""))
         self._set_row(self.expected, kind == "check")
+        self.stored = {key: step.get(key, "") for key in ("title", "text")} if step else {}
         if step:
-            self.title.setText(step.get("title", ""))
+            self.title.setText(in_language(self.stored["title"]))
             self.function.setCurrentIndex(max(self.function.findData(step.get("function")), 0))
             self.text.blockSignals(True)
-            self.text.setPlainText(step.get("text", ""))
+            self.text.setPlainText(in_language(self.stored["text"]))
             self.text.blockSignals(False)
             self.expected.setCurrentIndex(max(self.expected.findData(step.get("expected")), 0))
             self._show_instruction()
@@ -95,14 +103,14 @@ class PlanStepForm(QWidget):
         if self.step is None:
             return
         kind = self.step.get("kind", "measure")
-        self.step["title"] = self.title.text().strip()
+        self.step["title"] = kept(self.stored["title"], self.title.text().strip())
         if kind == "measure":
             self.step["function"] = self.function.currentData()
             if not self.step["title"]:
                 del self.step["title"]
             self._show_instruction()
         else:
-            self.step["text"] = self.text.toPlainText().strip()
+            self.step["text"] = kept(self.stored["text"], self.text.toPlainText().strip())
         if kind == "check":
             self.step["expected"] = self.expected.currentData()
         self.changed.emit()

@@ -13,6 +13,7 @@ from easymeasurement.campaign.plan import load_plans, parse_plan
 from easymeasurement.devices import SelectorPosition
 from easymeasurement.l10n import tr
 from easymeasurement.ui.campaign_views import AssignPlanOverlay
+from easymeasurement.ui.common import ROW_ID
 from easymeasurement.ui.instruction_panel import NO_INSTRUCTION, InstructionPanel
 from easymeasurement.ui.plan_editor import PlanEditorPage
 from easymeasurement.ui.plan_test_run import PlanTestRun
@@ -233,3 +234,23 @@ def test_free_measuring_offers_the_instruction_on_request(window, app, asset):
     assert not free.instruction.isVisible()
     free.instruction_action.trigger()
     assert free.instruction.isVisible()
+
+
+def test_a_shipped_plan_is_edited_in_this_language_and_kept_in_its_own(app, editor):
+    rows = [editor.plans.item(i) for i in range(editor.plans.count())]
+    editor.plans.setCurrentItem(next(i for i in rows if i.data(ROW_ID) == "visual_inspection"))
+    shown = tr("Visual inspection to DIN VDE 0100-600")
+    assert editor.title.text() == shown
+    first = tr("Documentation")
+    assert first in editor.steps.item(0).text()
+    editor.steps.setCurrentRow(0)
+    assert editor.form.title.text() == first
+    editor.form.title.textEdited.emit(first)  # touched, but left as shown
+    editor.released.setChecked(True)  # saves the head as well
+    editor.save()
+    body = next(r for r in app.db.plans() if r["key"] == "visual_inspection")["body"]
+    assert "title: Visual inspection to DIN VDE 0100-600" in body
+    assert "title: Documentation" in body
+    editor.form.title.setText("Unterlagen")
+    editor.form.title.textEdited.emit("Unterlagen")
+    assert editor.data["steps"][0]["title"] == "Unterlagen"  # a text of its own stays as typed
