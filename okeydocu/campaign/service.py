@@ -99,7 +99,7 @@ class CampaignService(
         self._key: bytes | None = None
 
     def seal_key(self) -> bytes | None:
-        """Reading KWallet can take a while, so call this off the GUI thread first."""
+        """Reading the password store can take a while, so call this off the GUI thread first."""
         if self._key is None and self.key_store is not None:
             self._key = self.key_store.key()
         return self._key

@@ -105,8 +105,9 @@ is checked beforehand; if something fails after that, the record stays sealed an
 be made later under “Reports”.
 
 Closing seals the record (`campaign/seal.py`): a SHA-256 sum is formed over all contents
-and authenticated with a key from KWallet (HMAC). Every seal contains the
-previous one. Master data are not part of it; a renamed customer is no manipulation. Before every
+and authenticated with a key from the desktop's password store (HMAC), reached through the
+freedesktop Secret Service (`campaign/secret_key.py`), as served by KWallet or GNOME Keyring.
+Every seal contains the previous one. Master data are not part of it; a renamed customer is no manipulation. Before every
 report and every signature the seal is checked; a modified record is rejected.
 
 Limits: whoever has the key can forge a seal. The disappearance of the latest campaign

@@ -12,7 +12,7 @@ import signal
 import sys
 
 from . import APP_NAME
-from .campaign.seal import KWalletKeyStore
+from .campaign.secret_key import SecretKeyStore
 from .l10n import tr
 from .campaign.service import CampaignService
 from .paths import data_dir
@@ -30,7 +30,7 @@ def build_context():
     if not db.templates():
         for file, name in SHIPPED.items():
             db.save_template(tr(name), in_program_language(shipped_template_text(file)))
-    service = CampaignService(db, root, KWalletKeyStore())
+    service = CampaignService(db, root, SecretKeyStore())
     service.seed_plans()
     return AppContext(db, service, ReportArchive(service))
 

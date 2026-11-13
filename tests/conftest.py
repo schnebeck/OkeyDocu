@@ -19,7 +19,7 @@ from PySide6.QtWidgets import QMessageBox
 
 from okeydocu.__main__ import build_context
 from okeydocu.campaign.plan import load_plans
-from okeydocu.campaign.seal import KWalletKeyStore
+from okeydocu.campaign.secret_key import SecretKeyStore
 from okeydocu.campaign.service import CampaignService
 from okeydocu.l10n import set_language
 from okeydocu.store import Database
@@ -48,9 +48,9 @@ def own_thumbnails(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
-def no_real_wallet(monkeypatch):
-    """Tests must never touch the wallet of the person running them."""
-    monkeypatch.setattr(KWalletKeyStore, "key", lambda self: b"test" * 8)
+def no_real_password_store(monkeypatch):
+    """Tests must never touch the password store of the person running them."""
+    monkeypatch.setattr(SecretKeyStore, "key", lambda self: b"test" * 8)
 
 
 @pytest.fixture(autouse=True)

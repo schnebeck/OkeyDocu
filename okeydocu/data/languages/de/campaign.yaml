@@ -33,7 +33,7 @@ texts:
   "{count} point open": "{count} Punkt offen"
   "{count} points open": "{count} Punkte offen"
   "✓ ready to confirm": "✓ bereit zum Bestätigen"
-  "The record is closed, but the key from KWallet could not be reached.\n\nSo the seal only detects accidental changes, not deliberate tampering.": "Der Datensatz ist abgeschlossen, aber der Schlüssel aus KWallet war nicht erreichbar.\n\nDas Siegel erkennt damit nur zufällige Änderungen, keine gezielte Manipulation."
+  "The record is closed, but the seal key could not be fetched from the password store.\n\nSo the seal only detects accidental changes, not deliberate tampering.": "Der Datensatz ist abgeschlossen, aber der Siegelschlüssel war im Passwortspeicher nicht erreichbar.\n\nDas Siegel erkennt damit nur zufällige Änderungen, keine gezielte Manipulation."
   Creating the report …: Erstelle das Protokoll …
   The report can be created and signed again under “Reports”.: Das Protokoll lässt sich unter „Protokolle“ erneut erstellen und signieren.
   Fetching the seal key …: Hole den Siegelschlüssel …

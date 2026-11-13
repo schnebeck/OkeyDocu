@@ -21,7 +21,7 @@ from .confirm_overlay import ConfirmOverlay
 from .report_signing import open_report, settings
 
 WEAK_SEAL = N_(
-    "The record is closed, but the key from KWallet could not be reached.\n\n"
+    "The record is closed, but the seal key could not be fetched from the password store.\n\n"
     "So the seal only detects accidental changes, not deliberate tampering."
 )
 DRAWING = N_("Creating the report …")

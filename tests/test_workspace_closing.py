@@ -201,7 +201,7 @@ def test_closing_without_a_key_is_said_out_loud(window, app, monkeypatch):
     monkeypatch.setattr("okeydocu.ui.campaign_confirm.show_error", lambda _, t: errors.append(t))
     monkeypatch.setattr(app.service, "seal_key", lambda: None)
     campaign = finished_campaign(window, app, monkeypatch)
-    assert "KWallet" in errors[0]
+    assert "Passwortspeicher" in errors[0]
     assert "ohne Schlüssel" in window.campaign.list.items[campaign].text(0)
 
 

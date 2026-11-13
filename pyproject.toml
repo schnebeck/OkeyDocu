@@ -23,6 +23,7 @@ dependencies = [
     "Pillow>=10",
     "pyHanko>=0.25",
     "cryptography>=42",
+    "secretstorage>=3.5",
 ]
 
 [project.optional-dependencies]

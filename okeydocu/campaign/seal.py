@@ -10,7 +10,8 @@
 
 The database refuses changes to a closed campaign, but anyone with the file can
 remove those rules. So closing also computes a digest over everything recorded
-and authenticates it with a key kept outside the database, in KWallet. Without
+and authenticates it with a key kept outside the database, in the desktop's
+password store (`secret_key.py`). Without
 the key a valid seal cannot be made, even with full access to the file.
 
 Each seal also contains the one before it, so a sealed campaign cannot vanish
@@ -23,21 +24,12 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
-import logging
 import re
-import secrets
-import subprocess
 from dataclasses import dataclass
 from enum import Enum
 from typing import Protocol
 
-log = logging.getLogger(__name__)
-
-WALLET_FOLDER = "OkeyDocu"
-WALLET_ENTRY = "seal-key"
-DEFAULT_WALLET = "kdewallet"
-WALLET_TIMEOUT_S = 60
-_KEY_RE = re.compile(r"[0-9a-f]{64}")
+KEY_PATTERN = re.compile(r"[0-9a-f]{64}")  # a key as stored: 32 bytes in hex
 
 
 class SealState(Enum):
@@ -61,33 +53,6 @@ class SealCheck:
 class KeyStore(Protocol):
     def key(self) -> bytes | None:
         """The key, created on first use. None if it cannot be reached."""
-
-
-class KWalletKeyStore:
-    def __init__(self, wallet: str = DEFAULT_WALLET):
-        self._wallet = wallet
-
-    def _run(self, *arguments: str, text: str | None = None) -> str | None:
-        command = ["kwallet-query", "-f", WALLET_FOLDER, *arguments, self._wallet]
-        try:
-            result = subprocess.run(
-                command, input=text, capture_output=True, text=True, timeout=WALLET_TIMEOUT_S,
-                check=False,
-            )
-        except (OSError, subprocess.TimeoutExpired) as err:
-            log.info("KWallet not reachable: %s", err)
-            return None
-        return result.stdout.strip() if result.returncode == 0 else None
-
-    def key(self) -> bytes | None:
-        stored = self._run("-r", WALLET_ENTRY)
-        if stored and _KEY_RE.fullmatch(stored):
-            return bytes.fromhex(stored)
-        created = secrets.token_hex(32)
-        if self._run("-w", WALLET_ENTRY, text=created) is None:
-            return None
-        # Only a key that can be read back is worth sealing with.
-        return bytes.fromhex(created) if self._run("-r", WALLET_ENTRY) == created else None
 
 
 def _rows(db, sql: str, *arguments) -> list[dict]:
