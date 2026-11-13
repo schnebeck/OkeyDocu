@@ -48,9 +48,6 @@ folder.
 
     .venv/bin/python -m pytest
 
-All test data is invented. Real instrument downloads contain customer data and do not belong in
-this repository.
-
 ## Photos
 
 Photos are assigned to a measurement by the time they were taken. The time comes from the EXIF
