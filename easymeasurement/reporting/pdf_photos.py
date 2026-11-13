@@ -104,12 +104,16 @@ class Footnoted(Flowable):
         above = 0 if first else part.getSpaceBefore()
         return above + inner.wrap(width, self.page_height)[1] + part.getSpaceAfter()
 
-    def _measure(self, parts: list[Flowable], width: float) -> tuple[float, int]:
-        height = sum(self._height(part, width, index == 0) for index, part in enumerate(parts))
+    def _measure(self, parts: list[Flowable], width: float,
+                 loose: bool = False) -> tuple[float, int]:
+        """Drawn whole, the first part's room above is this flowable's own; handed to the
+        frame one by one (`loose`), the frame gives it that room as to any other."""
+        height = sum(self._height(part, width, index == 0 and not loose)
+                     for index, part in enumerate(parts))
         return height, sum(isinstance(part, PhotoRow) for part in parts)
 
     def _fits(self, parts: list[Flowable], width: float, height: float) -> bool:
-        needed, photos = self._measure(parts, width)
+        needed, photos = self._measure(parts, width, loose=True)
         return needed <= height and photos <= self.budget.rows_left
 
     def wrap(self, availWidth, availHeight):

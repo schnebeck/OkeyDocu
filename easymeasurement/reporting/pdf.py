@@ -68,9 +68,9 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
     head_cell = ParagraphStyle("headcell", parent=cell, fontName=bold)
     heading = {
         1: ParagraphStyle("h1", parent=body, fontName=bold, fontSize=18, leading=22, spaceAfter=8),
-        2: ParagraphStyle("h2", parent=body, fontName=bold, fontSize=12, leading=15, spaceBefore=12,
+        2: ParagraphStyle("h2", parent=body, fontName=bold, fontSize=12, leading=15, spaceBefore=16,
                           spaceAfter=5),
-        3: ParagraphStyle("h3", parent=body, fontName=bold, fontSize=9.5, leading=12, spaceBefore=6,
+        3: ParagraphStyle("h3", parent=body, fontName=bold, fontSize=9.5, leading=12, spaceBefore=10,
                           spaceAfter=3),
     }
     alert = ParagraphStyle("alert", parent=body, fontName=bold, textColor=_ALERT)
@@ -193,7 +193,10 @@ def render_pdf(nodes: list[Node], target: Path | io.BytesIO, footer: str = "") -
         # long table or a row of photos starts on a new page unless its beginning still fits.
         if isinstance(node, Table):
             above = sum(item.wrap(usable, A4[1])[1] for item in headings)
-            story.append(CondPageBreak(_KEEP_TABLE + above))
+            # A table of up to half a page is not split; a longer one keeps its beginning.
+            whole = flowable.wrap(usable, page_height)[1]
+            story.append(CondPageBreak((whole if whole <= page_height / 2 else _KEEP_TABLE)
+                                       + above))
             story.extend(headings)
             story.append(flowable)
         elif headings:

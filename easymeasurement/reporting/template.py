@@ -137,7 +137,8 @@ def _resolve_blocks(blocks: list[dict], values: dict, nodes: list[Node]) -> None
         elif kind == "signature":
             nodes.append(SignatureLine(
                 [_render(label, values) for label in block.get("labels", ["Place, date", "Inspector"])],
-                values.get("campaign", {}).get("signature"),
+                # A draft is no valid report, so it carries no signature.
+                None if values["campaign"].get("draft") else values["campaign"].get("signature"),
                 _render(block.get("result", ""), values), values.get("verdict_tone", ""),
                 [_render(text, values).strip() for text in block.get("fills", [])],
             ))

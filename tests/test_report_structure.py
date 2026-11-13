@@ -19,6 +19,7 @@ from easymeasurement.reporting.context import (
     build_context,
 )
 from easymeasurement.reporting.footnotes import Footnotes
+from easymeasurement.reporting.language import speaking
 from easymeasurement.reporting.measurement_table import group_nodes
 from easymeasurement.reporting.nodes import Fields, Heading, plain
 from easymeasurement.reporting.template import resolve
@@ -206,5 +207,34 @@ def test_a_setting_is_named_without_the_group_the_instrument_puts_before_it():
     assert _without_group(named) == [("Typ", "B"), ("Nennstrom", "63 A"),
                                      ("RISO/RLO Messdauer", "AUTO")]
     twice = [("RCD - Typ", "B"), ("Netz - Typ", "TN"), ("RCD - Faktor", "1x")]
-    assert _without_group(twice) == [("RCD\xa0-\xa0Typ", "B"), ("Netz\xa0-\xa0Typ", "TN"),
-                                     ("Faktor", "1x")]
+    assert _without_group(twice) == [("RCD-Typ", "B"), ("Netz-Typ", "TN"), ("Faktor", "1x")]
+
+
+def test_a_setting_writes_its_numbers_as_the_language_does():
+    from easymeasurement.reporting.measurement_words import in_decimals
+
+    with speaking("de"):
+        assert in_decimals("gL/gG <0.2s") == "gL/gG <0,2s"
+        assert in_decimals("1.0x IΔN") == "1,0x IΔN"
+        assert in_decimals("13.02.2023") == "13.02.2023"
+    with speaking("en"):
+        assert in_decimals("1.0x IΔN") == "1.0x IΔN"
+
+
+def test_a_lower_and_an_upper_limit_read_as_a_range():
+    from easymeasurement.reporting.measurement_table import limit_markup
+
+    assert limit_markup("t", "> 0 ms < 300 ms") == "0 ms &lt; t &lt; 300 ms"
+    assert limit_markup("R", "< 1,00 Ω") == "R &lt; 1,00 Ω"
+
+
+def test_photos_of_an_element_that_say_the_same_share_a_row():
+    from easymeasurement.reporting.summary import _merged, numbers_text
+
+    assert numbers_text([3]) == "[3]"
+    assert numbers_text([3, 4]) == "[3], [4]"
+    assert numbers_text([3, 4, 5, 9]) == "[3]–[5], [9]"
+    rows = [("Schrank", 1, "lösen"), ("Schrank", 2, "lösen"), ("Schrank", 3, "lösen"),
+            ("Schrank", 4, "anders"), ("Tür", 5, "anders")]
+    assert _merged(rows) == [["Schrank", "[1]–[3]", "lösen"], ["Schrank", "[4]", "anders"],
+                             ["Tür", "[5]", "anders"]]

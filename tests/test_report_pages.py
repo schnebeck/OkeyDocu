@@ -95,6 +95,37 @@ def test_the_letterhead_names_the_later_pages():
 
     head = Letterhead("Prüfprotokoll", ["Prüfung", "Maschine: Presse", "Prüfung vom 01.03.2026"],
                       [], [])
-    assert running_head([head]) == ("Prüfprotokoll · Prüfung · Maschine: Presse",
+    assert running_head([head]) == (["Prüfprotokoll", "Prüfung", "Maschine: Presse"],
                                     "Prüfung vom 01.03.2026")
-    assert running_head([]) == ("", "")
+    assert running_head([]) == ([], "")
+
+
+def test_a_long_head_shortens_its_title_and_keeps_what_was_tested():
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+
+    from easymeasurement.reporting.pdf_pages import ELLIPSIS, fitted_head
+
+    title = "Prüfprotokoll nach einer sehr langen Prüfgrundlage mit vielen Normen " * 3
+    parts = [title.strip(), "Wiederholungsprüfung nach Umzug", "Maschine: Presse"]
+    right = "Prüfung vom 01.03.2026"
+    left = fitted_head(parts, right, "Helvetica")
+    assert left.endswith("Wiederholungsprüfung nach Umzug · Maschine: Presse")
+    assert ELLIPSIS in left
+    room = 595.276 - 2 * (18 * 72 / 25.4 + 6)
+    assert stringWidth(left + right, "Helvetica", 7.5) < room
+    assert fitted_head(["Kurz", "Presse"], right, "Helvetica") == "Kurz · Presse"
+
+
+def test_parts_handed_to_the_frame_count_the_room_above_their_heading():
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.platypus import Paragraph, Spacer
+
+    from easymeasurement.reporting.pdf_photos import Footnoted, PageBudget
+
+    heading = Paragraph("Schrank", ParagraphStyle("h", spaceBefore=16))
+    footnoted = Footnoted(lambda rows, last: Spacer(1, 10 * len(rows)), [1, 2], [0, 0], [],
+                          400, PageBudget(), 700, lead=[heading])
+    parts = footnoted.parts(2)
+    whole, _ = footnoted._measure(parts, 400)
+    loose, _ = footnoted._measure(parts, 400, loose=True)
+    assert loose == whole + 16

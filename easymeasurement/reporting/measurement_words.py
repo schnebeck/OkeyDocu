@@ -11,11 +11,13 @@ from __future__ import annotations
 import re
 
 from ..l10n import N_, in_language, tr
+from ..l10n.formats import pattern
 from ..model import is_conductor
 from ..vocabulary import outcome_text
 from .language import moment, value_text
 
 GROUP = re.compile(r"^[A-Z][A-Za-z0-9]{0,7} - ")  # a short group name before the setting
+_POINT = re.compile(r"(?<![\d.])(\d+)\.(\d+)(?![\d.])")  # one decimal point, as in 0.2s
 
 
 def marks(measurement) -> str:
@@ -59,15 +61,21 @@ def said_settings(words, parameters) -> list[tuple[str, str]]:
     for parameter in parameters:
         name, value, said = words.say(parameter.key, parameter.value)
         if not is_conductor(parameter) and said:
-            found.append((name, value))
+            found.append((name, in_decimals(value)))
     return _without_group(found)
+
+
+def in_decimals(text: str) -> str:
+    """An instrument writes its numbers with a point; the report writes them as its language
+    does. A date or a version with several points stays as it is."""
+    return _POINT.sub(lambda found: found[1] + pattern("decimal") + found[2], text)
 
 
 def _without_group(found: list[tuple[str, str]]) -> list[tuple[str, str]]:
     """An instrument may name a setting with the group it belongs to, as in "RCD - Type". The
     measurement already says which function it is, so the group is left out; a name that would
-    then stand twice, as the type of the RCD and of the mains, keeps its group, held to its
-    name by spaces that do not break."""
+    then stand twice, as the type of the RCD and of the mains, keeps its group, joined to it
+    as one word: RCD-Typ."""
     short = [GROUP.sub("", name) for name, _ in found]
-    return [(full.replace(" - ", "\xa0-\xa0") if short.count(name) > 1 else name, value)
+    return [(full.replace(" - ", "-", 1) if short.count(name) > 1 else name, value)
             for (full, value), name in zip(found, short)]

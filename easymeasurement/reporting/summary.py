@@ -61,6 +61,34 @@ def _photos(measured, role: str, notes: Footnotes) -> list[tuple]:
     return found
 
 
+def numbers_text(numbers: list[int]) -> str:
+    """Photo numbers as `[3]`, `[3], [4]` or, for three and more in a row, `[3]–[5]`."""
+    runs: list[list[int]] = []
+    for number in numbers:
+        if runs and number == runs[-1][-1] + 1:
+            runs[-1].append(number)
+        else:
+            runs.append([number])
+    parts = []
+    for run in runs:
+        if len(run) > 2:
+            parts.append(f"[{run[0]}]–[{run[-1]}]")
+        else:
+            parts += [f"[{number}]" for number in run]
+    return ", ".join(parts)
+
+
+def _merged(rows: list[tuple[str, int, str]]) -> list[list[str]]:
+    """Photos of one element that say the same share a row."""
+    merged: list[list] = []
+    for title, number, texts in rows:
+        if merged and merged[-1][0] == title and merged[-1][2] == texts:
+            merged[-1][1].append(number)
+        else:
+            merged.append([title, [number], texts])
+    return [[title, numbers_text(numbers), texts] for title, numbers, texts in merged]
+
+
 def _failed_row(title: str, measurement, notes: Footnotes) -> list:
     columns = Columns([measurement])
     numbers = [(notes.numbers[str(p)], []) for p in measurement.photos if str(p) in notes.numbers]
@@ -82,8 +110,8 @@ def summary_nodes(values: dict) -> list[Node]:
     nodes.append(Heading(tr(DEFECTS), 3))
     headers = [tr(ELEMENT), tr("Measurement"), tr("Result"), tr("Limit"), tr("Remark")]
     nodes.append(Table(headers, failed, [], 4) if failed else Paragraph(tr(NO_DEFECTS)))
-    hints = [[level.title, f"[{number}]", texts] for level in levels
-             for number, texts in _photos(level.measurements, "hint", notes)]
+    hints = _merged([(level.title, number, texts) for level in levels
+                     for number, texts in _photos(level.measurements, "hint", notes)])
     if hints:
         nodes += [Heading(tr(NOTICES), 3), Table([tr(ELEMENT), tr("Photo"), tr("Remark")], hints,
                                                  [], 2)]

@@ -16,6 +16,7 @@ figure is named in the remark. A remark says what restricted or explained a meas
 which photos and notes in them belong to it."""
 from __future__ import annotations
 
+import re
 from xml.sax.saxutils import escape
 
 from ..l10n import N_, tr
@@ -57,6 +58,19 @@ def limit_text(result) -> str:
     setpoint = f"{tr('expected')} {word(result.setpoint)}" if result.setpoint else ""
     limits = (value_text(result.lower_limit), value_text(result.upper_limit), setpoint)
     return " ".join(part for part in limits if part)
+
+
+_RANGE = re.compile(r"^>\s*([^<>]+?)\s*<\s*([^<>]+)$")  # a lower and an upper limit
+
+
+def limit_markup(symbol: str, text: str) -> str:
+    """A limit after its symbol; a lower and an upper one as the range between them, as in
+    `0 ms < ta < 300 ms`."""
+    found = _RANGE.match(text)
+    if found is None:
+        return f"{symbol} {escape(text)}"
+    lower, upper = found.groups()
+    return f"{escape(lower)} &lt; {symbol} &lt; {escape(upper)}"
 
 
 def _shared(values: list[str | None], present: bool = False) -> str | None:
@@ -106,7 +120,7 @@ class Columns:
             CONDITIONS: [f"{self.symbol(k)} = {escape(value_text(v))}"
                          for k, v in self.shared_conditions.items() if v],
             # A figure named beside the one it stands for is not judged on its own.
-            LIMITS: [f"{self.symbol(k)} {escape(v)}" for k, v in self.shared_limits.items()
+            LIMITS: [limit_markup(self.symbol(k), v) for k, v in self.shared_limits.items()
                      if v and not stands_for(k)],
         }
 
