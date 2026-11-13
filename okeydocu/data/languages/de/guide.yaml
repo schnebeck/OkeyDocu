@@ -1,0 +1,22 @@
+# OkeyDocu - German texts of the guided first measurement.
+texts:
+  Test leads: Messleitungen
+  Supply: Versorgung
+  Mode and limits: Modus und Grenzwerte
+  Measure: Messen
+  Outgoing: Abgang
+  Incoming: Zuleitung
+  "for {element}": "für {element}"
+  first measurement: erste Messung
+  ◀ Back: ◀ Zurück
+  Next ▶: Weiter ▶
+  Done ▶: Fertig ▶
+  Connected – next ▶: Angeschlossen – weiter ▶
+  This station follows.: Diese Station folgt.
+  "Leads {plugs} are plugged into their rows of sockets.": "Die Kabel {plugs} stecken in ihren Buchsenreihen."
+  RCD tripping test IΔN: RCD-Auslöseprüfung IΔN
+  RCD, outgoing side: FI-Schutzschalter, Abgangsseite
+  Place probe PE (L2) on the PE bar.: Spitze PE (L2) an die PE-Schiene setzen.
+  Place probe L (L1) on outgoing terminal 2 of the RCD.: Spitze L (L1) an Abgangsklemme 2 des FI setzen.
+  Place probe N (L3) on outgoing terminal N of the RCD.: Spitze N (L3) an Abgangsklemme N des FI setzen.
+  The test switches the circuit off. Secure the loads beforehand.: Der Test schaltet den Stromkreis ab. Verbraucher vorher sichern.

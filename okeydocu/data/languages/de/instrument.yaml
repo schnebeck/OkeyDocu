@@ -11,7 +11,7 @@ texts:
   Clock: Uhr
   is exact: geht genau
   "is {offset} s off, set when a measurement starts": "weicht {offset} s ab, wird beim Messstart gestellt"
-  Rotary switch: Drehrad
+  Rotary switch: Drehschalter
   an unknown position: unbekannter Stellung
   "set to {position}": "steht auf {position}"
   Push & Print: Push & Print
@@ -41,7 +41,7 @@ texts:
   Instruments: Messgeräte
   No instrument set up yet. Instruments connected by USB appear by themselves.: Noch kein Messgerät eingerichtet. Per USB angeschlossene Geräte erscheinen von selbst.
   Set up …: Einrichten …
-  Checks what the instrument already has here and transfers what is missing. Rotary switch to Setup.: Prüft, was das Messgerät hier schon hat, und überträgt, was fehlt. Drehrad dafür auf Setup.
+  Checks what the instrument already has here and transfers what is missing. Rotary switch to Setup.: Prüft, was das Messgerät hier schon hat, und überträgt, was fehlt. Drehschalter dafür auf Setup.
   Test …: Testen …
   Connects briefly and checks the instrument without setting or measuring anything. The result goes into the instrument log.: Verbindet kurz und prüft das Messgerät, ohne etwas zu stellen oder zu messen. Das Ergebnis kommt ins Geräteprotokoll.
   Instrument log …: Geräteprotokoll …

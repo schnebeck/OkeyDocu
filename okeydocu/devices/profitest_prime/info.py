@@ -13,9 +13,10 @@ from typing import Callable
 from ...l10n import N_
 from ..driver_info import DriverInfo, Pairing
 from ..naming import InstrumentWords
-from . import mapping, pairing
+from . import mapping, pairing, panel
 from .discovery import DRIVER_KEY, LABEL, find_instruments
 from .driver import ProfitestPrimeDriver
+from .guides import guide_for
 
 PAIRING_BUTTON = N_("Set up {instrument} via Bluetooth …")
 PAIRING_STEPS = N_(
@@ -44,5 +45,7 @@ DRIVER = DriverInfo(
     words=InstrumentWords(DRIVER_KEY, mapping.is_code, mapping.culture),
     instructions=mapping.instruction_folder(),
     pairing=Pairing(PAIRING_BUTTON, PAIRING_STEPS, _pair, pairing.DEFAULT_PIN),
+    panel=panel.DRAWING,
+    guide=guide_for,
     preparing=PREPARING,
 )

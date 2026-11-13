@@ -12,6 +12,8 @@ instrument reports for it."""
 
 from importlib import resources
 
+from ...guide import PanelDrawing
+
 FOLDER = resources.files(__name__)
 FRONT = FOLDER / "front.svg"
 KNOB = FOLDER / "knob.svg"
@@ -32,3 +34,6 @@ def angle_of(value: int) -> float | None:
 def value_at(degrees: float) -> int:
     """The detent nearest to an angle, clockwise from the top."""
     return VALUES[round((degrees % 360) / STEP_DEGREES) % len(VALUES)]
+
+
+DRAWING = PanelDrawing(FRONT, KNOB, DIAL, KNOB_RADIUS, DIAL_REACH, angle_of, value_at)

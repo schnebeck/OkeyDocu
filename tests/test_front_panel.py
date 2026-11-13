@@ -15,7 +15,7 @@ from okeydocu.ui.front_panel import FrontPanel
 
 
 def test_every_detent_has_a_place_in_the_drawing(qtbot):
-    widget = FrontPanel()
+    widget = FrontPanel(panel.DRAWING)
     qtbot.addWidget(widget)
     assert all(widget.front.elementExists(f"pos-{value}") for value in panel.VALUES)
     for part in ("socket-1", "socket-2", "socket-3", "socket-clamp", "key-start", "key-idn",
@@ -31,7 +31,7 @@ def test_a_detent_is_found_by_its_angle_and_back(value, degrees):
 
 
 def test_the_knob_takes_the_short_way_round(qtbot):
-    widget = FrontPanel()
+    widget = FrontPanel(panel.DRAWING)
     qtbot.addWidget(widget)
     widget.turn_to(34)
     qtbot.waitUntil(lambda: widget._turn.state() == widget._turn.State.Stopped, timeout=3000)
@@ -39,7 +39,7 @@ def test_the_knob_takes_the_short_way_round(qtbot):
 
 
 def test_a_click_on_a_detent_asks_for_it(qtbot):
-    widget = FrontPanel()
+    widget = FrontPanel(panel.DRAWING)
     qtbot.addWidget(widget)
     widget.resize(1180, 600)
     label = widget.part_rect("pos-18").center()
@@ -50,7 +50,7 @@ def test_a_click_on_a_detent_asks_for_it(qtbot):
 
 
 def test_a_click_beside_the_dial_asks_for_nothing(qtbot):
-    widget = FrontPanel()
+    widget = FrontPanel(panel.DRAWING)
     qtbot.addWidget(widget)
     widget.resize(1180, 600)
     with qtbot.assertNotEmitted(widget.position_chosen):
@@ -58,7 +58,7 @@ def test_a_click_beside_the_dial_asks_for_nothing(qtbot):
 
 
 def test_only_parts_of_the_drawing_are_pointed_at(qtbot):
-    widget = FrontPanel()
+    widget = FrontPanel(panel.DRAWING)
     qtbot.addWidget(widget)
     widget.point_at("key-idn", "no-such-part")
     assert widget.pointed == ("key-idn",)

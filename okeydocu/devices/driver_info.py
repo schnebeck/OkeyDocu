@@ -40,5 +40,7 @@ class DriverInfo:
     words: InstrumentWords | None = None  # how its codes are put in words
     instructions: object | None = None  # folder of how to set it up for each function
     pairing: Pairing | None = None
+    panel: object | None = None  # its front panel as drawn, for guided measurements
+    guide: Callable[[str], object] | None = None  # function key to its guide, or None
     preparing: str = PREPARING  # shown while the program gets the instrument ready
     simulated: bool = False  # random readings: shown as such, never signed

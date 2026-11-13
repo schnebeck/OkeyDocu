@@ -20,7 +20,7 @@ from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
-from ..devices.profitest_prime import panel
+from ..devices.guide import PanelDrawing
 
 _POINT = QColor("#ff9f1c")
 _MATCH = QColor("#3ec46d")
@@ -32,10 +32,11 @@ _PULSE_MS = 1100
 class FrontPanel(QWidget):
     position_chosen = Signal(int)
 
-    def __init__(self, parent=None):
+    def __init__(self, drawing: PanelDrawing, parent=None):
         super().__init__(parent)
-        self.front = QSvgRenderer(str(panel.FRONT), self)
-        self.knob = QSvgRenderer(str(panel.KNOB), self)
+        self.drawing = drawing
+        self.front = QSvgRenderer(str(drawing.front), self)
+        self.knob = QSvgRenderer(str(drawing.knob), self)
         self.target: int | None = None
         self.actual: int | None = None
         self.pointed: tuple[str, ...] = ()
@@ -55,7 +56,7 @@ class FrontPanel(QWidget):
     def turn_to(self, value: int | None) -> None:
         """The knob turns the short way round to the detent the guide asks for."""
         self.target = value
-        goal = panel.angle_of(value) if value is not None else None
+        goal = self.drawing.angle_of(value) if value is not None else None
         if goal is None:
             self.update()
             return
@@ -99,7 +100,7 @@ class FrontPanel(QWidget):
         return self._to_widget(bounds)
 
     def _dial_centre(self) -> QPointF:
-        return self._to_widget(QRectF(*panel.DIAL, 0, 0)).topLeft()
+        return self._to_widget(QRectF(*self.drawing.dial, 0, 0)).topLeft()
 
     # Drawing ------------------------------------------------------------------
 
@@ -120,7 +121,7 @@ class FrontPanel(QWidget):
                                           box.height() * scale))
         self._paint_actual(painter)
         self._paint_pointed(painter)
-        centre, radius = self._dial_centre(), panel.KNOB_RADIUS * scale
+        centre, radius = self._dial_centre(), self.drawing.knob_radius * scale
         painter.translate(centre)
         painter.rotate(self.angle)
         self.knob.render(painter, QRectF(-radius, -radius, 2 * radius, 2 * radius))
@@ -150,9 +151,9 @@ class FrontPanel(QWidget):
         scale, _ = self._frame()
         offset = event.position() - self._dial_centre()
         distance = math.hypot(offset.x(), offset.y())
-        if distance > panel.DIAL_REACH * scale or distance < 12 * scale:
+        if distance > self.drawing.dial_reach * scale or distance < 12 * scale:
             return
         degrees = math.degrees(math.atan2(offset.x(), -offset.y()))
-        value = panel.value_at(degrees)
+        value = self.drawing.value_at(degrees)
         self.turn_to(value)
         self.position_chosen.emit(value)
