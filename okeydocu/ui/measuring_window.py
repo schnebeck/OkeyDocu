@@ -8,14 +8,14 @@
 
 """No station can be skipped, but each can be left at once: "Next" does not wait for the
 instrument, the tester confirms by going on. Leaving the installation station stores what was
-entered at the element and draws the bench from it; entering the leads station lays the
-leads."""
+entered at the element, making it first where it is new, and draws the bench from it;
+entering the leads station lays the leads."""
 
 from __future__ import annotations
 
 from html import escape
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QDialog,
     QFrame,
@@ -26,12 +26,18 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from ..campaign.measuring_place import candidates, measuring_place
+from ..campaign.measuring_place import (
+    candidates,
+    make_place,
+    measuring_place,
+    new_place,
+    places,
+)
 from ..devices import driver_info
 from ..devices.guide import LEADS, PLACE, STATIONS
 from ..l10n import tr
 from .bench_view import BenchView
-from .place_form import PlaceForm
+from .place_form import NEW, PlaceForm
 from .place_scene import PlaceScene
 
 DONE = "background:#2e8b57;color:white"
@@ -41,13 +47,18 @@ CAUTION = "#b03a2e"
 
 
 class MeasuringWindow(QDialog):
+    place_made = Signal(int)  # an element made on the way, readings now go there
+    parent_chosen = Signal(int)  # where new elements hang, kept until changed
+
     def __init__(self, app, campaign_id: int, driver: str, function: str,
-                 asset_id: int | None, parent=None):
+                 asset_id: int | None, new_parent: int | None = None, parent=None):
         super().__init__(parent)
         info = driver_info(driver)
         self.app = app
         self.guide = info.guide(function)
         self.root = app.service.campaign(campaign_id)["asset_id"]
+        self.parent_id = next((place for place in (new_parent, asset_id)
+                               if place is not None), self.root)
         self.station = 0
         self.setWindowTitle(tr(self.guide.title))
         self.resize(1440, 1020)
@@ -64,6 +75,8 @@ class MeasuringWindow(QDialog):
         self.left.addWidget(self.bench)
         self.form = PlaceForm(app)
         self.form.element_chosen.connect(self.show_place)
+        self.form.edited.connect(self._preview)
+        self.form.parent_chosen.connect(self._hang_below)
         self.step_text = QLabel()
         self.step_text.setWordWrap(True)
         self.step_text.setTextFormat(Qt.TextFormat.RichText)
@@ -102,24 +115,58 @@ class MeasuringWindow(QDialog):
         layout.addLayout(body, 1)
 
     def show_place(self, asset_id: int | None) -> None:
-        self.place = measuring_place(self.app.service, self.guide, asset_id, self.root)
-        self.scene.show_place(self.guide, self.place)
-        self.form.show_place(self.guide, self.place,
-                             candidates(self.app.service, self.guide, self.root))
-        self.bench.show_guide(self.guide, self.place.lines(), self.place.poles,
-                              self.place.n_left)
-        where = self.place.title or tr("no element chosen")
+        service = self.app.service
+        found = None if asset_id == NEW else measuring_place(service, self.guide, asset_id,
+                                                              self.root)
+        if found is None or found.asset_id is None:
+            found = new_place(service, self.guide, self.parent_id, self.root)
+        self.place = found
+        self.form.show_place(self.guide, self.place, candidates(service, self.guide, self.root),
+                             places(service, self.root), self.parent_id)
+        self._preview()
+
+    def _hang_below(self, parent_id: int) -> None:
+        """A new element hangs below another one; what was entered stays."""
+        self.parent_id = parent_id
+        moved = new_place(self.app.service, self.guide, parent_id, self.root)
+        self.place = moved.entered(self.place.features)
+        self._preview()
+        self.parent_chosen.emit(parent_id)
+
+    def _shown(self):
+        """The place as entered so far, a new one under a name of its own."""
+        if not self.place.is_new:
+            return self.place.entered(self.form.entered())
+        return self.place.entered(self.form.entered(),
+                                  tr("{title} (new)", title=self.form.title()))
+
+    def _preview(self) -> None:
+        shown = self._shown()
+        self.scene.show_place(self.guide, shown)
+        self.bench.show_guide(self.guide, shown.lines(), shown.poles, shown.n_left)
+        where = shown.title or tr("no element chosen")
         self.head.setText(f"<b style='font-size:15pt'>{escape(tr(self.guide.title))}</b>"
                           f"&nbsp;&nbsp;<span style='color:gray'>"
                           f"{escape(tr('for {element}', element=where))}"
                           f" · {escape(tr('first measurement'))}</span>")
 
+    def _keep_place(self) -> None:
+        if self.place.is_new:
+            made = self.place.entered(self.form.entered())
+            name = self.form.name.text().strip() or self.form.name.placeholderText()
+            asset_id = make_place(self.app.service, made, self.parent_id, name,
+                                  self.form.identifier.text().strip())
+            self.show_place(asset_id)
+            self.place_made.emit(asset_id)
+        elif self.form.store():
+            self.show_place(self.place.asset_id)
+
     def go(self, station: int) -> None:
         if station >= len(STATIONS):
             self.accept()
             return
-        if self.station == PLACE and station > PLACE and self.form.store():
-            self.show_place(self.place.asset_id)
+        if self.station == PLACE and station > PLACE:
+            self._keep_place()
         if self.station == LEADS and station != LEADS:
             self.bench.finish()
         self.station = max(station, 0)

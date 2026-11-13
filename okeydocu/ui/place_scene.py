@@ -55,7 +55,7 @@ class PlaceScene(QWidget):
         if self.guide is None:
             return
         self._paint_title(painter, box)
-        if self.place.asset_id is not None:
+        if self.place.asset_id is not None or self.place.kind:
             painter.save()
             painter.translate(box.left() + 10, box.top() + 90)
             painter.scale(SCALE, SCALE)

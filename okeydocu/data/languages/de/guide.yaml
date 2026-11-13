@@ -33,8 +33,12 @@ texts:
   No element chosen yet: Noch kein Element gewählt
   no element chosen: kein Element gewählt
   Where do we measure?: Wo messen wir?
-  — choose —: — wählen —
   Choose the element this test is for.: Das Element wählen, für das dieser Test ist.
   Details from the rating plate: Angaben vom Typenschild
   Missing details are stored at the element. Without them the drawing shows the usual layout.: Fehlende Angaben werden am Element gespeichert. Ohne sie zeigt die Zeichnung die übliche Bauform.
   Prepared – next ▶: Vorbereitet – weiter ▶
+  "＋ New {kind} …": "＋ {kind} neu anlegen …"
+  "{title} (new)": "{title} (neu)"
+  New element: Neues Element
+  Parent element: Übergeordnetes Element
+  "The element the new one is placed below in the structure, such as the distribution board the RCD sits in. The choice stays for every further new element of this campaign until it is changed.": "Das Element, unter dem das neue im Strukturbaum eingeordnet wird, etwa der Verteiler, in dem der FI sitzt. Die Wahl bleibt für alle weiteren neuen Elemente dieser Kampagne stehen, bis sie geändert wird."

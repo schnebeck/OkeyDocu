@@ -16,6 +16,7 @@ from okeydocu.devices.profitest_prime.info import DRIVER_KEY
 from okeydocu.l10n import speaking
 from okeydocu.ui.lead_art import route
 from okeydocu.ui.measuring_window import MeasuringWindow
+from okeydocu.ui.place_form import NEW
 from okeydocu.ui.test_objects import DRAWINGS
 
 
@@ -147,7 +148,8 @@ def test_the_rcd_above_the_chosen_place_is_the_test_point(window, plant):
     assert window.place.path == ("Presse", "Schrank =K1")
     assert window.place.lines() == ["30 mA · A", "25 A"] and window.place.poles == 4
     assert window.form.choice.currentData() == plant["switch"]
-    assert window.form.choice.count() == 2
+    assert window.form.choice.count() == 3
+    assert window.form.choice.itemData(2) == NEW
 
 
 def test_a_missing_detail_is_marked_and_does_not_stop_the_tester(window):
@@ -172,8 +174,46 @@ def test_another_element_can_be_chosen(window, plant):
     assert window.place.lines() == ["? mA", "? A"]
 
 
-def test_without_an_rcd_the_station_asks_for_one(qtbot, app, plant):
+def test_without_an_rcd_the_station_makes_one_on_the_way(qtbot, app, plant):
     window = opened(qtbot, app, plant, plant["machine"])
-    assert window.place.asset_id is None
-    assert window.form.choice.currentData() is None
-    assert "wählen" in window.form.hint.text()
+    made = []
+    window.place_made.connect(made.append)
+    assert window.place.is_new and window.form.choice.currentData() == NEW
+    window.form.identifier.setText("=K2-F1")
+    window.form.fields["rcd_type"].setEditText("B")
+    window.form.fields["rated_residual_current"].setEditText("300")
+    window.next.click()
+    element = app.db.asset(made[0])
+    assert (element["identifier"], element["name"], element["parent_id"]) == \
+        ("=K2-F1", "RCD", plant["machine"])
+    assert app.db.asset_features(made[0]) == {"rcd_type": "B", "rated_residual_current": "300"}
+    assert window.place.asset_id == made[0] and not window.place.is_new
+
+
+def test_a_new_element_hangs_where_it_was_put_and_that_place_is_kept(qtbot, app, plant):
+    window = opened(qtbot, app, plant, plant["machine"])
+    kept = []
+    window.parent_chosen.connect(kept.append)
+    window.form.fields["rcd_type"].setEditText("A")
+    box = window.form.parent_box
+    box.setCurrentIndex(box.findData(plant["switch"]))
+    box.activated.emit(box.currentIndex())
+    assert kept == [plant["switch"]]
+    assert window.place.path[-1] == "FI Steuerung =K1-F1"
+    assert window.form.entered()["rcd_type"] == "A"
+    again = opened(qtbot, app, plant, plant["machine"])
+    assert again.parent_id == plant["machine"]
+    with speaking("de"):
+        chosen = MeasuringWindow(app, plant["campaign"], DRIVER_KEY, "rcd_time",
+                                 plant["machine"], new_parent=plant["switch"])
+    qtbot.addWidget(chosen)
+    assert chosen.parent_id == plant["switch"]
+
+
+def test_a_detail_loses_its_mark_once_entered(qtbot, app, plant):
+    window = opened(qtbot, app, plant, plant["machine"])
+    field = window.form.fields["rated_current"]
+    assert "fde2c4" in field.styleSheet()
+    field.setEditText("40")
+    assert field.styleSheet() == ""
+    assert "40 A" in window._shown().lines()

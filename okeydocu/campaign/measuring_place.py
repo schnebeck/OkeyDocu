@@ -9,12 +9,13 @@
 """A guide that names an owner feature, such as an RCD type, is taken at the nearest element
 at or above the chosen place whose kind has that feature; any other guide at the place itself.
 What the element does not state is missing, never guessed: the drawing then shows the usual
-layout and says so."""
+layout and says so. Where no such element exists yet, the place is one still to be made: its
+kind and where it will hang are known, everything else is entered on the way."""
 
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from ..devices.guide import Guide
 from ..l10n.catalog import source_of
@@ -27,6 +28,16 @@ class MeasuringPlace:
     path: tuple[str, ...] = ()  # names from the installation down to the element's parent
     features: dict[str, str] = field(default_factory=dict)
     units: dict[str, str] = field(default_factory=dict)
+    kind: str = ""
+
+    @property
+    def is_new(self) -> bool:
+        return self.asset_id is None and bool(self.kind)
+
+    def entered(self, features: dict[str, str], title: str = "") -> "MeasuringPlace":
+        """The place as it reads with what has been entered so far."""
+        return replace(self, features={**self.features, **features},
+                       title=title or self.title)
 
     def stated(self, key: str) -> str:
         value = str(self.features.get(key) or "").strip()
@@ -99,7 +110,34 @@ def measuring_place(service, guide: Guide, asset_id: int | None,
     path = _path(db, row["parent_id"], root_id) if found != root_id else ()
     units = {r["key"]: r["unit"] for r in db.query(
         "SELECT key, unit FROM kind_features WHERE kind=?", row["kind"])}
-    return MeasuringPlace(found, title, path, json.loads(row["features_json"] or "{}"), units)
+    return MeasuringPlace(found, title, path, json.loads(row["features_json"] or "{}"), units,
+                          row["kind"])
+
+
+def _owner_kind(db, guide: Guide) -> str:
+    rows = db.query("SELECT f.kind FROM kind_features f JOIN asset_kinds k ON k.key = f.kind"
+                    " WHERE f.key=? ORDER BY k.position", guide.owner_feature)
+    return rows[0]["kind"] if rows else ""
+
+
+def new_place(service, guide: Guide, parent_id: int, root_id: int) -> MeasuringPlace:
+    """An element still to be made below `parent_id`, of the kind the guide is taken at."""
+    db = service.db
+    kind = _owner_kind(db, guide) if guide.owner_feature else ""
+    units = {r["key"]: r["unit"] for r in db.query(
+        "SELECT key, unit FROM kind_features WHERE kind=?", kind)}
+    return MeasuringPlace(None, "", _path(db, parent_id, root_id), {}, units, kind)
+
+
+def make_place(service, place: MeasuringPlace, parent_id: int, name: str,
+               identifier: str) -> int:
+    """Makes the element entered on the way; its id."""
+    db = service.db
+    parent = db.asset(parent_id)
+    asset_id = db.add_asset(parent["customer_id"], place.kind, name, parent_id,
+                            identifier=identifier)
+    db.set_asset_features(asset_id, {k: str(v) for k, v in place.features.items()})
+    return asset_id
 
 
 def candidates(service, guide: Guide, root_id: int) -> list[tuple[int, str]]:
@@ -112,3 +150,10 @@ def candidates(service, guide: Guide, root_id: int) -> list[tuple[int, str]]:
         if kinds is None or row["kind"] in kinds:
             found.append((asset_id, " ".join(p for p in (row["identifier"], row["name"]) if p)))
     return found
+
+
+def places(service, root_id: int) -> list[tuple[int, str]]:
+    """Every element of an installation with its path, for hanging a new one below it."""
+    db = service.db
+    return [(asset_id, " › ".join(_path(db, asset_id, root_id)))
+            for asset_id in service.subtree(root_id)]
