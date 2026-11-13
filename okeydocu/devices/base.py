@@ -78,10 +78,12 @@ class SelectorPosition:
 
     `label` is what the switch says, empty if it stands on no measuring function.
     `functions` is what this position can produce, empty if it does not tell.
+    `value` is what the instrument reported, for a drawing of its dial; None if unknown.
     """
 
     label: str = ""
     functions: frozenset[str] = frozenset()
+    value: int | None = None
 
     def rules_out(self, function: str) -> bool:
         return bool(self.functions) and function not in self.functions

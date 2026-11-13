@@ -10,7 +10,7 @@ import pytest
 from PySide6.QtCore import QPointF, QRectF
 from PySide6.QtGui import QImage, QPainter, QPainterPathStroker
 
-from okeydocu.devices.guide import LEADS, STATIONS
+from okeydocu.devices.guide import DIAL, LEADS, STATIONS
 from okeydocu.devices.profitest_prime.guides import GUIDES, guide_for
 from okeydocu.devices.profitest_prime.info import DRIVER_KEY
 from okeydocu.l10n import speaking
@@ -217,3 +217,40 @@ def test_a_detail_loses_its_mark_once_entered(qtbot, app, plant):
     field.setEditText("40")
     assert field.styleSheet() == ""
     assert "40 A" in window._shown().lines()
+
+
+# Station "Rotary switch" -------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("value, right", [(18, True), (19, True), (17, False), (13, False)])
+def test_a_position_that_also_measures_the_function_counts_as_right(value, right):
+    from okeydocu.devices.profitest_prime.selector import selector_position
+    from okeydocu.ui.station_texts import fits
+
+    assert fits(guide_for("rcd_time"), selector_position(value)) is right
+    assert selector_position(value).value == value
+
+
+def test_the_dial_station_zooms_in_and_goes_on_once_the_switch_is_right(window, qtbot):
+    from okeydocu.devices.profitest_prime.selector import selector_position
+
+    window.go(DIAL)
+    qtbot.waitUntil(lambda: window.bench.panel.view.width() < 400, timeout=3000)
+    assert window.bench.panel.pointed == ("pos-18",)
+    window.show_selector(selector_position(17))
+    assert "Das Messgerät steht auf" in window.step_text.text()
+    assert window.bench.panel.actual == 17 and window.bench.panel.fits is False
+    qtbot.wait(1200)
+    assert window.station == DIAL
+    window.show_selector(selector_position(18))
+    assert "steht richtig" in window.step_text.text()
+    qtbot.waitUntil(lambda: window.station == LEADS, timeout=3000)
+    qtbot.waitUntil(lambda: window.bench.panel.view.width() > 1000, timeout=3000)
+
+
+def test_without_an_instrument_the_dial_station_waits_for_the_tester(window):
+    window.go(DIAL)
+    assert "Kein Messgerät verbunden" in window.step_text.text()
+    assert window.next.text() == "Gedreht – weiter ▶"
+    window.next.click()
+    assert window.station == LEADS

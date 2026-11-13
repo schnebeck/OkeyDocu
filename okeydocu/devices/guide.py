@@ -19,7 +19,7 @@ from ..l10n import N_
 
 STATIONS = (N_("Installation"), N_("Rotary switch"), N_("Test leads"), N_("Supply"),
             N_("Mode and limits"), N_("Measure"))
-PLACE, LEADS = 0, 2  # index of the stations choosing the place and connecting the leads
+PLACE, DIAL, LEADS = 0, 1, 2  # index of the stations: place, rotary switch, test leads
 
 
 @dataclass(frozen=True)
@@ -44,6 +44,8 @@ class Guide:
     element_features: tuple[str, ...] = ()  # what the guide needs that element to state
     live: bool = True  # whether the installation stays energised while measuring
     preparation: tuple[tuple[str, str], ...] = ()  # what to do beforehand: heading, text
+    selector_label: str = ""  # the target position as printed on the dial
+    selector_note: str = ""  # what the position measures, to be translated
 
 
 @dataclass(frozen=True)

@@ -75,6 +75,14 @@ class BenchView(QWidget):
         self._lay.setDuration(LAY_MS * count)
         self._lay.start()
 
+    def clear_leads(self) -> None:
+        """No lead plugged in, as before the leads station."""
+        self._lay.stop()
+        self.progress = 0.0
+        self.panel.point_at()
+        self.update()
+        self.leads_layer.update()
+
     def finish(self) -> None:
         """Every lead laid at once, for a tester who goes on without watching."""
         self._lay.stop()

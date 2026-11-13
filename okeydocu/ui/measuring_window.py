@@ -8,14 +8,16 @@
 
 """No station can be skipped, but each can be left at once: "Next" does not wait for the
 instrument, the tester confirms by going on. Leaving the installation station stores what was
-entered at the element, making it first where it is new, and draws the bench from it;
-entering the leads station lays the leads."""
+entered at the element, making it first where it is new, and draws the bench from it. The
+dial station turns the knob to the position wanted and goes on by itself, a moment after the
+instrument reports a position that serves the measurement; entering the leads station lays
+the leads."""
 
 from __future__ import annotations
 
 from html import escape
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtWidgets import (
     QDialog,
     QFrame,
@@ -34,16 +36,17 @@ from ..campaign.measuring_place import (
     places,
 )
 from ..devices import driver_info
-from ..devices.guide import LEADS, PLACE, STATIONS
+from ..devices.guide import DIAL, LEADS, PLACE, STATIONS
 from ..l10n import tr
 from .bench_view import BenchView
 from .place_form import NEW, PlaceForm
 from .place_scene import PlaceScene
+from .station_texts import dial_text, fits, later_text, leads_text
 
 DONE = "background:#2e8b57;color:white"
 NOW = "background:#ff9f1c;color:#1f2933;font-weight:bold"
 LATER = "background:#d5dadf;color:#555"
-CAUTION = "#b03a2e"
+AUTO_MS = 900  # a right dial position is shown that long before the guide goes on
 
 
 class MeasuringWindow(QDialog):
@@ -60,6 +63,7 @@ class MeasuringWindow(QDialog):
         self.parent_id = next((place for place in (new_parent, asset_id)
                                if place is not None), self.root)
         self.station = 0
+        self.position = None  # the dial position the instrument reported last
         self.setWindowTitle(tr(self.guide.title))
         self.resize(1440, 1020)
         self.head = QLabel()
@@ -80,6 +84,7 @@ class MeasuringWindow(QDialog):
         self.step_text = QLabel()
         self.step_text.setWordWrap(True)
         self.step_text.setTextFormat(Qt.TextFormat.RichText)
+        self.step_text.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         self.right = QStackedWidget()
         self.right.addWidget(self.form)
         self.right.addWidget(self.step_text)
@@ -169,6 +174,7 @@ class MeasuringWindow(QDialog):
             self._keep_place()
         if self.station == LEADS and station != LEADS:
             self.bench.finish()
+        self.bench.panel.zoom_dial(station == DIAL)
         self.station = max(station, 0)
         for index, (chip, name) in enumerate(zip(self.chips, STATIONS)):
             state = DONE if index < self.station else NOW if index == self.station else LATER
@@ -185,16 +191,32 @@ class MeasuringWindow(QDialog):
         self.next.setText(tr("Done ▶") if last else tr("Next ▶"))
         if self.station == PLACE:
             self.next.setText(tr("Prepared – next ▶"))
+        if self.station == DIAL:
+            self.next.setText(tr("Turned – next ▶"))
+            self.bench.clear_leads()
+            self.bench.panel.point_at(f"pos-{self.guide.selector}")
+            self._show_dial()
         if self.station == LEADS:
             self.next.setText(tr("Connected – next ▶"))
             self.bench.lay_leads()
 
+    def show_selector(self, position) -> None:
+        """A dial position read from the instrument."""
+        self.position = position
+        if self.station == DIAL:
+            self._show_dial()
+
+    def _show_dial(self) -> None:
+        right = fits(self.guide, self.position)
+        value = self.position.value if self.position is not None else None
+        self.bench.panel.show_actual(value, right if self.position is not None else None)
+        self.step_text.setText(dial_text(self.guide, self.position))
+        if right:
+            QTimer.singleShot(AUTO_MS, self._dial_done)
+
+    def _dial_done(self) -> None:
+        if self.station == DIAL and fits(self.guide, self.position):
+            self.go(DIAL + 1)
+
     def _station_text(self) -> str:
-        if self.station != LEADS:
-            return f"<i>{escape(tr('This station follows.'))}</i>"
-        steps = "".join(f"<li>{escape(tr(lead.text))}</li>" for lead in self.guide.leads)
-        plugs = ", ".join(lead.plug for lead in sorted(self.guide.leads, key=lambda l: l.plug))
-        caution = (f"<p style='color:{CAUTION}'>⚠ {escape(tr(self.guide.caution))}</p>"
-                   if self.guide.caution else "")
-        plugged = tr("Leads {plugs} are plugged into their rows of sockets.", plugs=plugs)
-        return f"<p>{escape(plugged)}</p><ol>{steps}</ol>{caution}"
+        return leads_text(self.guide) if self.station == LEADS else later_text()

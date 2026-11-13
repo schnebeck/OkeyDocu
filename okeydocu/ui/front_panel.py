@@ -7,9 +7,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 """The knob shows where the dial has to go and turns there; the position the instrument
-reports is a ring around its label, green where it matches and red elsewhere. Parts named in `point_at` pulse,
-so a guide can show the socket, key or detent that comes next. A click on a detent asks for
-that position."""
+reports is a ring around its label, green where it serves the measurement and red elsewhere.
+Parts named in `point_at` pulse, so a guide can show the socket, key or detent that comes
+next. A click on a detent asks for that position. `zoom_dial` moves in on the dial and back
+out to the whole panel."""
 
 from __future__ import annotations
 
@@ -26,6 +27,8 @@ _POINT = QColor("#ff9f1c")
 _MATCH = QColor("#3ec46d")
 _ELSEWHERE = QColor("#e74c3c")
 _TURN_MS = 700
+_ZOOM_MS = 500
+_ZOOM_MARGIN = 1.25  # of the dial's reach, around the dial when zoomed in
 _PULSE_MS = 1100
 
 
@@ -39,6 +42,7 @@ class FrontPanel(QWidget):
         self.knob = QSvgRenderer(str(drawing.knob), self)
         self.target: int | None = None
         self.actual: int | None = None
+        self.fits: bool | None = None
         self.pointed: tuple[str, ...] = ()
         self.angle = 0.0
         self.pulse = 0.0
@@ -48,6 +52,10 @@ class FrontPanel(QWidget):
         self._pulse = QVariantAnimation(self, startValue=0.0, endValue=1.0, duration=_PULSE_MS)
         self._pulse.setLoopCount(-1)
         self._pulse.valueChanged.connect(self._pulsed)
+        self.view = self.front.viewBoxF()
+        self._zoom = QVariantAnimation(self, duration=_ZOOM_MS)
+        self._zoom.setEasingCurve(QEasingCurve.Type.InOutCubic)
+        self._zoom.valueChanged.connect(self._zoomed)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setMinimumSize(472, 240)
 
@@ -66,8 +74,29 @@ class FrontPanel(QWidget):
         self._turn.setEndValue(self.angle + delta)
         self._turn.start()
 
-    def show_actual(self, value: int | None) -> None:
+    def show_actual(self, value: int | None, fits: bool | None = None) -> None:
+        """`fits` says whether the reported position serves the measurement; by default only
+        the target itself does."""
         self.actual = value
+        self.fits = fits
+        self.update()
+
+    def zoom_dial(self, close: bool) -> None:
+        """Close in on the dial, or show the whole panel again."""
+        whole = self.front.viewBoxF()
+        if close:
+            reach = self.drawing.dial_reach * _ZOOM_MARGIN
+            x, y = self.drawing.dial
+            goal = QRectF(x - reach, y - reach, 2 * reach, 2 * reach)
+        else:
+            goal = whole
+        self._zoom.stop()
+        self._zoom.setStartValue(QRectF(self.view))
+        self._zoom.setEndValue(goal)
+        self._zoom.start()
+
+    def _zoomed(self, value) -> None:
+        self.view = QRectF(value)
         self.update()
 
     def point_at(self, *ids: str) -> None:
@@ -81,11 +110,12 @@ class FrontPanel(QWidget):
     # Geometry -----------------------------------------------------------------
 
     def _frame(self) -> tuple[float, QPointF]:
-        """Scale and top left corner of the drawing, kept in proportion and centred."""
-        box = self.front.viewBoxF()
-        scale = min(self.width() / box.width(), self.height() / box.height())
-        corner = QPointF((self.width() - box.width() * scale) / 2,
-                         (self.height() - box.height() * scale) / 2)
+        """Scale and top left corner of the drawing, so the part in view fills the widget in
+        proportion, centred."""
+        view = self.view
+        scale = min(self.width() / view.width(), self.height() / view.height())
+        corner = QPointF((self.width() - view.width() * scale) / 2 - view.x() * scale,
+                         (self.height() - view.height() * scale) / 2 - view.y() * scale)
         return scale, corner
 
     def _to_widget(self, rect: QRectF) -> QRectF:
@@ -130,7 +160,8 @@ class FrontPanel(QWidget):
         if self.actual is None or not self.front.elementExists(f"pos-{self.actual}"):
             return
         rect = self.part_rect(f"pos-{self.actual}").adjusted(-6, -5, 6, 5)
-        color = _MATCH if self.actual == self.target else _ELSEWHERE
+        fits = self.actual == self.target if self.fits is None else self.fits
+        color = _MATCH if fits else _ELSEWHERE
         painter.setPen(QPen(color, 2.5))
         painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawRoundedRect(rect, 6, 6)

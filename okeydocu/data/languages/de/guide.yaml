@@ -42,3 +42,10 @@ texts:
   New element: Neues Element
   Parent element: Übergeordnetes Element
   "The element the new one is placed below in the structure, such as the distribution board the RCD sits in. The choice stays for every further new element of this campaign until it is changed.": "Das Element, unter dem das neue im Strukturbaum eingeordnet wird, etwa der Verteiler, in dem der FI sitzt. Die Wahl bleibt für alle weiteren neuen Elemente dieser Kampagne stehen, bis sie geändert wird."
+  "Turn the rotary switch to {position}.": "Drehschalter auf {position} stellen."
+  "Measures the touch voltage and the tripping time at the rated residual current.": "Misst die Berührspannung und die Auslösezeit beim Bemessungsdifferenzstrom."
+  "No instrument connected: turn the switch, then go on.": "Kein Messgerät verbunden: Schalter drehen, dann weiter."
+  The switch is set right.: Der Drehschalter steht richtig.
+  a position without a measurement: eine Stellung ohne Messung
+  "The instrument is set to {position}.": "Das Messgerät steht auf {position}."
+  Turned – next ▶: Gedreht – weiter ▶

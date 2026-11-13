@@ -51,5 +51,7 @@ def selector_position(value: int) -> SelectorPosition:
     """Named as printed on the dial, in the current language where the dial words it.
     Positions without a measuring function, such as
     Setup, rule nothing out; an unknown value has no name."""
-    label, functions = _POSITIONS.get(value, ("", ()))
-    return SelectorPosition(tr(label) if label else "", frozenset(functions))
+    if value not in _POSITIONS:
+        return SelectorPosition()
+    label, functions = _POSITIONS[value]
+    return SelectorPosition(tr(label) if label else "", frozenset(functions), value)

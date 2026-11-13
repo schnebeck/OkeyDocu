@@ -38,7 +38,8 @@ GUIDES = {
         "rcd_time", N_("RCD tripping test IΔN"), 18, "rcd",
         N_("RCD, outgoing side"), RCD_LEADS,
         N_("The test switches the circuit off. Secure the loads beforehand."),
-        "rcd_type", RCD_FEATURES, True, LIVE_RCD),
+        "rcd_type", RCD_FEATURES, True, LIVE_RCD, "IΔN",
+        N_("Measures the touch voltage and the tripping time at the rated residual current.")),
 }
 
 
