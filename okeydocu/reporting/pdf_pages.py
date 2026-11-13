@@ -32,12 +32,13 @@ ELLIPSIS = "…"
 
 
 def running_head(nodes: list[Node]) -> tuple[list[str], str]:
-    """Title, what was tested and the occasion for the head, the day for the middle of the
-    foot, as the letterhead of the first page says them."""
+    """The head reads the letterhead of the first page from its last line upwards: what was
+    tested, then the occasion, the kind of report last; the day goes to the middle of the
+    foot."""
     head = next((node for node in nodes if isinstance(node, Letterhead)), None)
     if head is None:
         return [], ""
-    left = [part for part in (head.title, *head.lines[:-1]) if part]
+    left = [part for part in (*reversed(head.lines[:-1]), head.title) if part]
     return left, head.lines[-1] if len(head.lines) > 1 else ""
 
 
@@ -50,19 +51,18 @@ def _cut(text: str, font: str, width: float) -> str:
     return text.rstrip(" ·") + ELLIPSIS if text else ""
 
 
-def fitted_head(parts: list[str], right: str, font: str) -> str:
-    """The head in the room `right` leaves beside it. The title, often a long test basis, is
+def fitted_head(parts: list[str], font: str) -> tuple[str, str]:
+    """The head as a left and a right-aligned part: what was tested and the occasion on the
+    left, the title of the report on the right. The title, often a long test basis, is
     shortened first; what was tested stays whole while it can."""
-    room = A4[0] - 2 * _EDGE - (stringWidth(right, font, _HEAD_SIZE) + _HEAD_SPACE if right
-                                else 0)
-    whole = " · ".join(parts)
-    if stringWidth(whole, font, _HEAD_SIZE) <= room or len(parts) < 2:
-        return _cut(whole, font, room)
-    rest = " · " + " · ".join(parts[1:])
-    title_room = room - stringWidth(rest, font, _HEAD_SIZE)
-    if title_room < room / 4:  # too little left for the title to say anything
-        return _cut(" · ".join(parts[1:]), font, room)
-    return _cut(parts[0], font, title_room) + rest
+    room = A4[0] - 2 * _EDGE
+    if len(parts) < 2:
+        return _cut(" · ".join(parts), font, room), ""
+    left, title = " · ".join(parts[:-1]), parts[-1]
+    title_room = room - stringWidth(left, font, _HEAD_SIZE) - _HEAD_SPACE
+    if title_room >= room / 4:
+        return left, _cut(title, font, title_room)
+    return _cut(left, font, room * 3 / 4 - _HEAD_SPACE), _cut(title, font, room / 4)
 
 
 def _head(canvas, font: str, left: str, right: str, top: float) -> None:
@@ -95,7 +95,7 @@ def page_painters(nodes: list[Node], logos: list, budget, font: str,
     """What the first page and the later pages draw before their text; `top` is where the
     text of a page begins, from the bottom of the sheet."""
     parts, _ = running_head(nodes)
-    left = fitted_head(parts, "", font)
+    left, right = fitted_head(parts, font)
     every_page = [logo for logo in logos if logo.every_page]
 
     def first_page(canvas, _) -> None:
@@ -106,6 +106,6 @@ def page_painters(nodes: list[Node], logos: list, budget, font: str,
     def later_page(canvas, _) -> None:
         budget.new_page()
         _draw_logos(canvas, every_page)
-        _head(canvas, font, left, "", top)
+        _head(canvas, font, left, right, top)
 
     return first_page, later_page

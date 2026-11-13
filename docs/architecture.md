@@ -674,8 +674,9 @@ and 4 measurements. Data are inserted from a list, display conditions are chosen
 
 ### Letterhead and closing
 
-The pages after the first carry a head with title, campaign and installation, shortened from
-the title if it is too long (`reporting/pdf_pages.py`); the day of the inspection stands in the
+The pages after the first carry a head with installation and campaign on the left, read from
+the letterhead's lines upwards, and the title aligned right, shortened first if it is too long
+(`reporting/pdf_pages.py`); the day of the inspection stands in the
 middle of every foot, between the identifier and the page number. The name of a standard such as
 DIN EN 60204-1 never breaks across lines (`kept_standards` in `reporting/pdf_tables.py`). A lower
 and an upper limit read as a range, `0 ms < ta < 300 ms`; instrument settings write their numbers

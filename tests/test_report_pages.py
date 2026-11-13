@@ -95,7 +95,7 @@ def test_the_letterhead_names_the_later_pages():
 
     head = Letterhead("Prüfprotokoll", ["Prüfung", "Maschine: Presse", "Prüfung vom 01.03.2026"],
                       [], [])
-    assert running_head([head]) == (["Prüfprotokoll", "Prüfung", "Maschine: Presse"],
+    assert running_head([head]) == (["Maschine: Presse", "Prüfung", "Prüfprotokoll"],
                                     "Prüfung vom 01.03.2026")
     assert running_head([]) == ([], "")
 
@@ -106,14 +106,14 @@ def test_a_long_head_shortens_its_title_and_keeps_what_was_tested():
     from okeydocu.reporting.pdf_pages import ELLIPSIS, fitted_head
 
     title = "Prüfprotokoll nach einer sehr langen Prüfgrundlage mit vielen Normen " * 3
-    parts = [title.strip(), "Wiederholungsprüfung nach Umzug", "Maschine: Presse"]
-    right = "Prüfung vom 01.03.2026"
-    left = fitted_head(parts, right, "Helvetica")
-    assert left.endswith("Wiederholungsprüfung nach Umzug · Maschine: Presse")
-    assert ELLIPSIS in left
+    parts = ["Maschine: Presse", "Wiederholungsprüfung nach Umzug", title.strip()]
+    left, right = fitted_head(parts, "Helvetica")
+    assert left == "Maschine: Presse · Wiederholungsprüfung nach Umzug"
+    assert right.startswith("Prüfprotokoll") and right.endswith(ELLIPSIS)
     room = 595.276 - 2 * (18 * 72 / 25.4 + 6)
     assert stringWidth(left + right, "Helvetica", 7.5) < room
-    assert fitted_head(["Kurz", "Presse"], right, "Helvetica") == "Kurz · Presse"
+    assert fitted_head(["Presse", "Kurz"], "Helvetica") == ("Presse", "Kurz")
+    assert fitted_head(["Kurz"], "Helvetica") == ("Kurz", "")
 
 
 def test_parts_handed_to_the_frame_count_the_room_above_their_heading():
