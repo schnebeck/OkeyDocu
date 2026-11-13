@@ -2,60 +2,64 @@
 
 *Field testing and documentation on the go*
 
-Messdatenablage und Protokollerstellung für den Linux-Plasma-Desktop.
+Measurement records and test reports for the Linux Plasma desktop.
 
-**Producer:** Thorsten Schnebeck (Urheber, Rechteinhaber und Verantwortung)
+**Producer:** Thorsten Schnebeck (author, rights holder and responsible person)
 
-Alles dreht sich um eine Kette:
+Everything revolves around one chain:
 
-    Kunde → Anlage → Messkampagne → Messung → Messwert → Protokoll
+    Customer → Installation → Campaign → Measurement → Value → Report
 
-- **Geführte Messung:** Verkabelung als interaktive Grafik, Aufbau bestätigen, beliebig viele
-  Messungen. Ein Simulator liefert Zufallswerte, wenn kein Messgerät angeschlossen ist.
-- **Stammdaten:** Kunden und ihre Anlagen, Maschinen und Geräte als Baum
-- **Messwerte:** Zahl mit Einheit oder Text, dazu Fotos je Messung mit nummerierten
-  Markierungen und der Einstufung als Hinweis oder Mangel.
-- **Suchen und Filtern:** Volltext, Kunde, Anlage samt Unteranlagen, Kampagne, Messgröße,
-  Bewertung, Zeitraum, Wertebereich mit Einheit (`max 1MΩ`), nur mit Foto
-- **Protokolle:** aus Vorlagen, die 0, 1 oder n Messungen je Datensatz darstellen können. Die
-  Vorlagen entstehen in einem grafischen Editor mit Live-Vorschau, ein Logo lässt sich importieren,
-  skalieren und frei platzieren.
-- **Ablage:** Abgeschlossene Kampagnen sind gesperrt. Archivierte PDFs tragen eine Prüfsumme
-  und behalten die verwendete Vorlage.
-- **Signatur:** PAdES mit X.509-Zertifikat aus einer PKCS#12-Datei, auch S/MIME
-- **Messgeräte:** austauschbar hinter einer Abstraktionsschicht. Messwerte lassen sich auch
-  ohne Gerät von Hand erfassen.
+- **Guided measurement:** an animated guide in its own window leads through the first
+  measurement of a kind, step by step: test point, rotary switch, measuring leads. The structure
+  grows while measuring; elements are created on the way. A simulator delivers random values
+  when no instrument is connected.
+- **Master data:** customers and their installations, machines and devices as a tree
+- **Values:** a number with its unit or a text, plus photos per measurement with numbered
+  marks, each classed as a note or a defect.
+- **Search and filter:** full text, customer, installation with its sub-installations,
+  campaign, quantity, rating, period, value range with unit (`max 1MΩ`), only with photo
+- **Reports:** from templates that can show 0, 1 or n measurements per record. Templates are
+  made in a graphical editor with live preview; a logo can be imported, scaled and placed
+  freely.
+- **Archive:** closed campaigns are locked. Archived PDFs carry a checksum and keep the
+  template they were made with.
+- **Signature:** PAdES with an X.509 certificate from a PKCS#12 file or from an NSS database
+  (such as the one of Firefox or Thunderbird), S/MIME certificates included. Where pinentry is
+  installed, it asks for the key password.
+- **Instruments:** exchangeable behind an abstraction layer. Values can also be entered by hand
+  without an instrument.
 
-## Starten
+## Running
 
     tools/setup-venv.sh
     .venv/bin/python -m okeydocu
 
-Ins Startmenü kommt das Programm mit `tools/install-desktop-entry.sh`: Das Skript trägt den
-Start aus diesem Checkout und das Programmsymbol für den angemeldeten Nutzer ein
-(`--remove` nimmt beides wieder heraus).
+`tools/install-desktop-entry.sh` adds the program to the start menu: the script registers the
+launch from this checkout and the program icon for the logged-in user (`--remove` takes both
+out again).
 
-Die `.venv` ist isoliert und nutzt die festen Versionen aus `requirements.txt`. Nur PySide6 kommt
-aus der Distribution (Paket `python3-pyside6`), weil es zum System-Qt passen muss, damit der
-Plasma-Stil geladen wird. Daten liegen unter
-`~/.local/share/OkeyDocu`; `OKEYDOCU_DATA` wählt einen anderen Ordner.
+The `.venv` is isolated and uses the pinned versions from `requirements.txt`. Only PySide6 comes
+from the distribution (package `python3-pyside6`), because it has to match the system Qt for the
+Plasma style to load. Data is kept in `~/.local/share/OkeyDocu`; `OKEYDOCU_DATA` selects another
+folder.
 
 ## Tests
 
     .venv/bin/python -m pytest
 
-Alle Testdaten sind erfunden. Echte Geräteabrufe enthalten Kundendaten und gehören nicht in
-dieses Repository.
+All test data is invented. Real instrument downloads contain customer data and do not belong in
+this repository.
 
-## Fotos
+## Photos
 
-Fotos werden über den Aufnahmezeitpunkt einer Messung zugeordnet. Der Zeitpunkt kommt aus den
-EXIF-Daten, ersatzweise aus dem Dateinamen. Messenger entfernen EXIF-Daten: Fotos besser per USB
-oder KDE Connect übertragen. Ein Foto ohne eindeutige Zuordnung bleibt als eigener Eintrag
-erhalten und lässt sich suchen.
+Photos are assigned to a measurement by the time they were taken. The time comes from the EXIF
+data, otherwise from the file name. Messengers strip EXIF data: better transfer photos over USB
+or KDE Connect. A photo without a clear assignment is kept as an entry of its own and can be
+searched for.
 
-Mehr dazu in [docs/architecture.md](docs/architecture.md).
+More in [docs/architecture.md](docs/architecture.md).
 
-## Lizenz
+## License
 
-GPL-3.0-or-later, siehe [LICENSES](LICENSES/GPL-3.0-or-later.txt).
+GPL-3.0-or-later, see [LICENSES](LICENSES/GPL-3.0-or-later.txt).
