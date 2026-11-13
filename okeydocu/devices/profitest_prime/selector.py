@@ -14,6 +14,8 @@ from ..base import SelectorPosition
 SELECTOR_COMMAND = "SYS:GET:ROTATIONWHEEL"
 
 _ZLOOP = ("zloop", "zloop_dc", "zloop_rlo", "zloop_half")
+_RCD_CURRENT = ("rcd_current", "rcd_ramp_touch")
+_RCD_TIME = ("rcd_time", "rcd_touch")
 
 # Position to label and the functions it can produce. No functions means the position
 # says nothing about the measurement: Extra and HV hold a list, a sequence brings its own.
@@ -22,25 +24,25 @@ _POSITIONS = {
     13: ("RLO", ("rlo",)),
     14: ("RLO-25A", ("rlo_25a",)),
     15: ("RISO", ("riso",)),
-    16: (N_("RISO ramp"), ("riso_ramp",)),
-    17: ("IF", ("rcd_current", "rcd_ramp_touch")),
-    18: ("IΔN", ("rcd_time", "rcd_touch")),
-    19: ("I_RAMP", ("i_ramp",)),
+    16: ("RISO◢", ("riso_ramp",)),
+    17: ("IF◢", _RCD_CURRENT),
+    18: ("IΔN", _RCD_TIME),
+    19: ("IF◢+IΔN", _RCD_CURRENT + _RCD_TIME + ("i_ramp",)),  # 17 and 18 in one run
     20: ("ZLOOP", _ZLOOP),
     21: ("ZLOOP+DC", _ZLOOP),
     22: ("ZLOOP+RLO", _ZLOOP),
     23: (N_("ZLOOP+0.5x"), _ZLOOP),
-    24: ("URES", ("ures",)),
+    24: ("Ures", ("ures",)),
     25: ("IMD", ("imd",)),
     26: ("RCM", ("rcm_touch",)),
     27: ("IL", ("il",)),
     28: (N_("I_CLAMP"), ("i_clamp",)),
-    29: ("T%rH", ()),
+    29: ("T, %r.H.", ()),
     30: ("Extra", ()),
     31: ("HV", ()),
     32: ("Auto", ()),  # test sequences: the step decides what is measured
     33: ("Setup", ()),
-    34: (N_("Battery state"), ()),
+    34: (N_("Fast charge"), ()),
     35: ("OFF", ()),
 }
 

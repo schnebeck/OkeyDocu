@@ -113,7 +113,14 @@ def test_an_unknown_position_has_no_label(value):
 
 
 @pytest.mark.parametrize("value, label", [
-    (32, "Auto"), (33, "Setup"), (34, "Batteriezustand"), (35, "OFF"),
+    (16, "RISO◢"), (17, "IF◢"), (18, "IΔN"), (19, "IF◢+IΔN"), (24, "Ures"), (29, "T, %r.H."),
+])
+def test_symbols_are_taken_from_the_dial(value, label):
+    assert selector_position(value).label == label
+
+
+@pytest.mark.parametrize("value, label", [
+    (32, "Auto"), (33, "Setup"), (34, "Schnell laden"), (35, "OFF"),
 ])
 def test_the_last_positions_are_named_as_printed_and_rule_out_nothing(value, label):
     position = selector_position(value)
@@ -129,6 +136,13 @@ def test_a_position_rules_out_what_it_cannot_measure():
 @pytest.mark.parametrize("value", [29, 30, 31, 32])
 def test_positions_holding_a_list_rule_out_nothing(value):
     assert not selector_position(value).rules_out("riso")
+
+
+def test_the_combined_rcd_position_serves_every_rcd_step():
+    position = selector_position(19)
+    assert position.label == "IF◢+IΔN"
+    assert position.functions >= selector_position(17).functions | selector_position(18).functions
+    assert selector_position(18).rules_out("rcd_current")
 
 
 @pytest.mark.parametrize("value", [20, 21, 22, 23])
