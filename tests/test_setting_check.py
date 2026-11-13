@@ -134,7 +134,7 @@ def test_a_differing_push_warns_at_once_and_stays_orange(window, app, rcd):
     assert table.item(0, 0).background().color() == ORANGE
     assert "=K1-F1" in table.item(0, 0).toolTip()
     with speaking("de"):
-        assert "1 RCD-Test passt nicht zu seinem RCD" in campaign_note(app.db, campaign)
+        assert "1 RCD-Messung passt nicht zu ihrem RCD" in campaign_note(app.db, campaign)
 
 
 def test_a_matching_push_raises_no_warning(window, app, rcd):

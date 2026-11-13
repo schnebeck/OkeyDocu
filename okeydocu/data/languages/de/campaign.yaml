@@ -250,13 +250,13 @@ texts:
   "Before the next measurement, correct the instrument, the RCD's data or the place the reading is booked on.": "Vor der nächsten Messung das Gerät, die Daten des RCD oder den Messpunkt korrigieren."
   "Not booked on an RCD: the settings cannot be checked. Book the reading on the RCD it tests.": "Nicht an einem RCD gebucht: Die Einstellungen lassen sich nicht prüfen. Den Messwert an dem RCD buchen, den er prüft."
   "{element} does not state {settings}: not checked. Enter it at the element.": "{element} nennt nichts zu {settings}: nicht geprüft. Bitte am Element eintragen."
-  "No RCD chosen: choose the RCD this test is for as the place of the reading.": "Kein RCD gewählt: Als Messpunkt den RCD wählen, den dieser Test prüft."
+  "No RCD chosen: choose the RCD this test is for as the place of the reading.": "Kein RCD gewählt: Als Messpunkt den RCD wählen, den diese Messung prüft."
   "Enter what the rating plate says at {element}, so the next reading can be checked against it.": "Die Angaben vom Typenschild bei {element} eintragen, damit der nächste Messwert dagegen geprüft werden kann."
   Understood: Verstanden
-  "{count} RCD test to check": "{count} RCD-Test zu prüfen"
-  "{count} RCD tests to check": "{count} RCD-Tests zu prüfen"
-  "{count} RCD test does not match its RCD; it is marked orange.": "{count} RCD-Test passt nicht zu seinem RCD; er ist orange markiert."
-  "{count} RCD tests do not match their RCD; they are marked orange.": "{count} RCD-Tests passen nicht zu ihrem RCD; sie sind orange markiert."
+  "{count} RCD test to check": "{count} RCD-Messung zu prüfen"
+  "{count} RCD tests to check": "{count} RCD-Messungen zu prüfen"
+  "{count} RCD test does not match its RCD; it is marked orange.": "{count} RCD-Messung passt nicht zu ihrem RCD; sie ist orange markiert."
+  "{count} RCD tests do not match their RCD; they are marked orange.": "{count} RCD-Messungen passen nicht zu ihrem RCD; sie sind orange markiert."
   Caution: Achtung
   Device under test: Prüfling
   Procedure: Vorgehen
