@@ -13,6 +13,7 @@ import pytest
 from easymeasurement.campaign.plan import load_instructions
 from easymeasurement.campaign.setting_check import SettingCheck, same
 from easymeasurement.devices import LiveReading
+from easymeasurement.devices.profitest_prime.info import DRIVER_KEY
 from easymeasurement.devices.profitest_prime.parser import parse_event
 from easymeasurement.importing.izytron_measurements import _parameter
 from easymeasurement.l10n import speaking
@@ -49,6 +50,9 @@ def test_settings_are_compared_in_base_units_and_by_their_last_word():
     assert same("63 A", "25 A") is False
     assert same("Typ B", "B") is True
     assert same("B", "A") is False
+    assert same("A - EV", "A-EV") is True
+    assert same("A - EV", "A") is False
+    assert same("B+", "B") is False
     assert same("63 A", "A") is None
     assert same("", "A") is None
 
@@ -72,6 +76,14 @@ def test_the_rcd_above_the_measured_element_decides(app, rcd):
                               ("rated_residual_current", "30mA")], rcd["circuit"])
     assert [(m.key, m.used, m.expected) for m in found] == [("rcd_type", "B", "A"),
                                                            ("rated_current", "63A", "25 A")]
+
+
+def test_a_code_is_judged_by_the_instruments_own_word(app, rcd):
+    app.db.save_device_texts(DRIVER_KEY, "1.0", "1", {"de-DE": {"TS1463": "B"},
+                                                      "en-GB": {"TS1463": "B"}})
+    with speaking("de"):
+        found = SettingCheck(app.db).mismatches([("rcd_type", "TS1463")], rcd["circuit"])
+    assert [(m.used, m.expected) for m in found] == [("B", "A")]
 
 
 def test_a_code_without_words_is_not_judged(app, rcd):

@@ -9,13 +9,15 @@
 """A setting keyed like a feature of an element is compared with that feature. The settings
 of an RCD test describe the RCD: the nearest element at or above the measured one that has an
 RCD type. Numbers are compared in base units, so 30 mA on the instrument meets 30 at a feature
-counted in mA; words by their last part, so `Typ B` meets `B`. A value that is not known or
+counted in mA; words without spaces, dashes and a leading `Typ`, so `Typ B` meets `B` and
+`A - EV` meets `A-EV` but not `A`. A value that is not known or
 cannot be read, on either side, is not compared: the check never claims what it cannot tell."""
 
 from __future__ import annotations
 
 import json
 import math
+import re
 from dataclasses import dataclass
 
 from ..devices.registry import setting_words
@@ -45,9 +47,13 @@ def _number(text: str) -> float | None:
     return quantity.base_value if quantity is not None else None
 
 
-def _last_word(text: str) -> str:
-    words = text.split()
-    return words[-1].upper() if words else ""
+_SPACING = re.compile(r"[\s\-_]+")
+_TYPE = re.compile(r"^(TYPE|TYP)(?=.)")
+
+
+def _word(text: str) -> str:
+    """Upper case without spaces, dashes and a leading `Type`: `Typ A - EV` reads `AEV`."""
+    return _TYPE.sub("", _SPACING.sub("", text.upper()))
 
 
 def same(used: str, expected: str) -> bool | None:
@@ -57,7 +63,7 @@ def same(used: str, expected: str) -> bool | None:
         return math.isclose(*numbers, rel_tol=1e-6)
     if numbers != (None, None):
         return None
-    used, expected = _last_word(used), _last_word(expected)
+    used, expected = _word(used), _word(expected)
     return used == expected if used and expected else None
 
 

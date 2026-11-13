@@ -266,7 +266,7 @@ against the element.
 **Settings against the element** (`campaign/setting_check.py`): the RCD settings of a measurement
 describe the nearest element at or above the measured one that has an RCD type. Each setting that
 element states as a feature is compared with it: numbers in base units, so 30 mA meets a feature of
-30 in mA; words by their last part. A value that is not known, or a code without words, is not
+30 in mA; words without spaces, dashes and a leading “Typ”, so “A - EV” is not “A”. A value that is not known, or a code without words, is not
 compared. Before measuring, the instructions name the values of the chosen element (“RCD type: A”),
 or “as on the rating plate” where it states none; a point of a repeat inspection takes them from the
 element instead of from the measurement back then. A pushed measurement that differs opens a card at
