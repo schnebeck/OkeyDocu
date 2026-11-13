@@ -36,7 +36,7 @@ texts:
   Hint: Hinweis
   Discard: Verwerfen
   Apply: Übernehmen
-  Import from IZYTRON: Aus IZYTRON importieren
+  Import from IZYTRONIQ: Aus IZYTRONIQ importieren
   Import: Importieren
   "If the instrument's clock was wrong back then: by how many seconds ahead (+) or behind (−)? With a correct clock this stays 0.": "Wenn die Uhr des Messgeräts damals falsch ging: um wie viele Sekunden vor (+) oder nach (−)? Bei richtiger Uhr bleibt hier 0."
   Clock offset: Uhrenversatz

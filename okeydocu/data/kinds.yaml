@@ -2,7 +2,7 @@
 # The kinds of structure elements a new database starts with. All of it can be changed
 # under Settings → Structure kinds.
 #
-# izytron:  object type code in an IZYTRON.IQ database, for the import
+# izytron:  object type code in an IZYTRONIQ database, for the import
 # interval: months until the next inspection is due, 0 for none
 # features: "Label|unit", or {key, label, unit, list} where a feature needs its own key or
 #           a list of its own (null for none); features left empty are not shown anywhere

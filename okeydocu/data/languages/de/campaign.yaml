@@ -272,12 +272,12 @@ texts:
   Structure kinds: Strukturtypen
   About {name}: Über {name}
   Guided measurements, test reports and archive.: Geführte Messungen, Prüfprotokolle und Archiv.
-  Choose a copy of the IZYTRON database: Kopie der IZYTRON-Datenbank wählen
+  Choose a copy of the IZYTRONIQ database: Kopie der IZYTRONIQ-Datenbank wählen
   "SQLite database (*.sqlite *.db);;All (*)": "SQLite-Datenbank (*.sqlite *.db);;Alle (*)"
-  This file is not a readable IZYTRON database.: Diese Datei ist keine lesbare IZYTRON-Datenbank.
+  This file is not a readable IZYTRONIQ database.: Diese Datei ist keine lesbare IZYTRONIQ-Datenbank.
   "{count} measurements imported.": "{count} Messungen importiert."
   "&Campaign": "&Kampagne"
-  Import from IZYTRON …: Aus IZYTRON importieren …
+  Import from IZYTRONIQ …: Aus IZYTRONIQ importieren …
   Quit {name}: "{name} beenden"
   "&Edit": "&Bearbeiten"
   "&View": "&Ansicht"

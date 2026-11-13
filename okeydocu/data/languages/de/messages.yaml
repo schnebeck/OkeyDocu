@@ -50,7 +50,7 @@ texts:
   The database holds no inspections.: Die Datenbank enthält keine Prüfungen.
   These inspections have already been imported.: Diese Prüfungen wurden schon importiert.
   Unnamed: Ohne Namen
-  "Inspection of {day} (from IZYTRON)": "Prüfung vom {day} (aus IZYTRON)"
+  "Inspection of {day} (from IZYTRONIQ)": "Prüfung vom {day} (aus IZYTRONIQ)"
   "Exactly one customer is expected, found: {count}.": "Erwartet wird genau ein Kunde, gefunden: {count}."
   The installation tree holds nodes without a reachable parent.: Der Anlagenbaum enthält Knoten ohne erreichbaren Elternknoten.
   The clock of this instrument cannot be set.: Die Uhr dieses Messgeräts lässt sich nicht stellen.

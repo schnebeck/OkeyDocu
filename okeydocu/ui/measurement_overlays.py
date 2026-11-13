@@ -35,10 +35,10 @@ from .value_rows import QuietCombo, verdict_combo
 
 
 class ImportOverlay(Overlay):
-    """IZYTRON stored the instrument's time. Only the operator knows how far off it was."""
+    """IZYTRONIQ stored the instrument's time. Only the operator knows how far off it was."""
 
     def __init__(self, parent=None):
-        super().__init__(tr("Import from IZYTRON"), parent, width=460)
+        super().__init__(tr("Import from IZYTRONIQ"), parent, width=460)
         self.ok_button.setText(tr("Import"))
         self.offset = QSpinBox()
         self.offset.setRange(-86400, 86400)

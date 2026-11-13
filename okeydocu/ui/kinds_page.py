@@ -80,7 +80,7 @@ class KindsPage(QWidget):
         form = QFormLayout()
         form.addRow(tr("Label"), self.label)
         form.addRow(tr("Icon"), self.icon)
-        form.addRow(tr("IZYTRON type code"), self.izytron)
+        form.addRow(tr("IZYTRONIQ type code"), self.izytron)
         form.addRow(tr("Inspection interval"), self.interval)
         self.editor = QWidget()
         right = QVBoxLayout(self.editor)

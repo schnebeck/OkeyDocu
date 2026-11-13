@@ -31,9 +31,9 @@ towards the overall result.
 ## Structure
 
 The structure of a customer is a tree of any depth (`assets`), freely nestable as in
-IZYTRON. The kinds of the elements are in `asset_kinds`, their features in `kind_features`; both can be
+IZYTRONIQ. The kinds of the elements are in `asset_kinds`, their features in `kind_features`; both can be
 changed under Settings → Structure kinds (`ui/kinds_page.py`). The kinds from `data/kinds.yaml` are
-supplied. Every kind names its IZYTRON kind code for the import and a test interval. Feature values are
+supplied. Every kind names its IZYTRONIQ kind code for the import and a test interval. Feature values are
 collected at the element (`features_json`); empty ones are not stored and are shown nowhere. When a
 kind is deleted, its elements get a substitute kind, and their values stay stored invisibly.
 A feature can offer a choice list (`kind_features.choice_list`); the element form then shows
@@ -251,14 +251,14 @@ Instrument accesses run through `run_busy()` outside the GUI thread. The databas
 the GUI thread, so the workers only read from the instrument and storing follows afterwards.
 
 **Instrument texts:** measurements keep the TS codes the instrument sends for measured quantities and
-settings, as IZYTRON does too (there with the prefix `PROFITEST_`). The words for them are in the
+settings, as IZYTRONIQ does too (there with the prefix `PROFITEST_`). The words for them are in the
 translation file of the instrument (`DATABASEXML:GET:TRANSLATIONFILE`, 12 languages, about one minute over
 Bluetooth). When setting up through “Settings → Instruments”, over Bluetooth after pairing or over
 USB with “Set up …”, the program checks what is present and transfers what is missing
 (`ui/instrument_prepare.py`, tables `device_texts` and `device_text_sets`). The texts apply to the
 firmware with which they were read; if a campaign start finds a different firmware, the same
 comparison follows with a waiting window. Settings are shown in words, such as “RLO - Polung: Automatische
-Umpolung”; without texts the code stays. The IZYTRON import keys settings by code in the same way,
+Umpolung”; without texts the code stays. The IZYTRONIQ import keys settings by code in the same way,
 conductor references neutrally as `conductor`. The manufacturer texts belong to the local data, never into the repo.
 Settings the vocabulary knows are stored under its key instead of the code (`mapping.SETTINGS`):
 the RCD type, the rated residual current and the rated current of an RCD test, so they can be held
@@ -324,14 +324,14 @@ connection comes back by another route, the app asks to switch the instrument of
 - `passed` only counts next to a limit. Pure information values such as the mains voltage come
   with `passed="false"` even in passed measurements.
 
-## Import from IZYTRON
+## Import from IZYTRONIQ
 
-`importing/izytron.py` reads a copy of the IZYTRON database read-only and creates one test day as a
+`importing/izytron.py` reads a copy of the IZYTRONIQ database read-only and creates one test day as a
 closed campaign, with installation tree, measurements and visual inspection. The offset of the instrument clock
 on that day is given by the call; it depends on the date. Times from visual inspections are already local time.
 Department and contact person come along: the department of the installation (`Abstract_Device.Department`),
 otherwise that of the contact person, and the first active contact person of the customer (`Contact`) with
-phone, as a substitute mobile number, and e-mail. The cost centre that IZYTRON keeps per test object
+phone, as a substitute mobile number, and e-mail. The cost centre that IZYTRONIQ keeps per test object
 belongs to the customer; it is not taken over, because the cost centre of a campaign is the own one.
 
     python -m okeydocu.importing.izytron KOPIE.sqlite --offset -120
@@ -401,7 +401,7 @@ Measuring function, measurement and test run are three levels. The measuring fun
 (RISO, RLO). A measurement is a result, a measured value or the answer to a question. A
 test run (table `runs`, `campaign/runs.py`) is a named sequence of such steps, for example a
 visual inspection by questionnaire: the measurement points to it with `run_id` and names in `step_name`
-its step (“Accessibility”). The IZYTRON import creates a test run for every inspection entered at the PC;
+its step (“Accessibility”). The IZYTRONIQ import creates a test run for every inspection entered at the PC;
 measurements from the instrument stay single. In the table a test run is one
 row with name, number of steps and defects (`ui/measurement_runs.py`); a click on the time
 folds the steps open below it. When sorting they stay below their head, whatever the
@@ -654,7 +654,7 @@ in its own words and checked per item against at least two independent sources; 
 its clause. Yes means in order, No is a defect, skipping needs a reason, as with
 a sequence of the instrument.
 
-An imported sequence, for example a visual inspection from IZYTRON, becomes a draft plan in the own database
+An imported sequence, for example a visual inspection from IZYTRONIQ, becomes a draft plan in the own database
 through the context menu of the table, “Take over as test plan” (`campaign/runs.py`): every question
 an inspection question, every measurement a measuring step of its function.
 

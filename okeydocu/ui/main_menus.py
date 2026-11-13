@@ -30,7 +30,7 @@ class MainMenus:
         campaign.new_action.setShortcut(QKeySequence.StandardKey.New)
         menu.addAction(campaign.new_action)
         menu.addAction(campaign.next_order_action)
-        self.import_action = menu.addAction(tr("Import from IZYTRON …"))
+        self.import_action = menu.addAction(tr("Import from IZYTRONIQ …"))
         self.import_action.triggered.connect(self._import_izytron)
         menu.addSeparator()
         menu.addAction(campaign.resume_action)

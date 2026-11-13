@@ -1,5 +1,5 @@
 # OkeyDocu - okeydocu/importing/izytron_source.py
-# Reads an IZYTRON.IQ database read-only and rebuilds its asset tree.
+# Reads an IZYTRONIQ database read-only and rebuilds its asset tree.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
@@ -22,7 +22,7 @@ FALLBACK_KIND = "measuring_point"
 
 
 def kinds_by_code(db) -> dict[int, str]:
-    """IZYTRON object types onto the kinds that name them in the settings."""
+    """IZYTRONIQ object types onto the kinds that name them in the settings."""
     return {kind.izytron_type: kind.key for kind in db.kinds() if kind.izytron_type}
 
 

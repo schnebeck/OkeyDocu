@@ -1,5 +1,5 @@
 # OkeyDocu - okeydocu/importing/izytron_measurements.py
-# Converts IZYTRON.IQ test steps into measurements.
+# Converts IZYTRONIQ test steps into measurements.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
@@ -26,7 +26,7 @@ from ..vocabulary import plain, vocabulary
 
 RANGE_MARKS = {1: ">", 2: "<"}  # RangerResult: the reading lies beyond the measuring range
 ROTATION = {"rechts": "right", "links": "left"}
-# IZYTRON names the function in the language it runs in.
+# IZYTRONIQ names the function in the language it runs in.
 FUNCTIONS = {
     "IΔN-UIΔN": "rcd_touch",
     "IΔN-ta": "rcd_time",
@@ -125,7 +125,7 @@ def _device_measurement(step, data: dict, location: tuple[str, ...]) -> MeterMea
 
 
 def _parameter(item: dict) -> Parameter:
-    """Keyed by the instrument's code, as a push is, so both read the same; IZYTRON keeps
+    """Keyed by the instrument's code, as a push is, so both read the same; IZYTRONIQ keeps
     the value as German text, which is shown as it stands."""
     code = (item.get("TsKey") or "").removeprefix("PROFITEST_")
     value = str(item.get("Value", ""))

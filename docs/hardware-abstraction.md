@@ -105,7 +105,7 @@ reference in the column of `rlo` with its own symbol beside the value, such as
 430 mΩ (R_LO⁻), and names the lower in the remark, such as R_LO⁺ = 340 mΩ.
 
 The PROFITEST PRIME measures both directions itself and sends them always;
-`profitest_prime/polarity.py` brings that into the contract, and the IZYTRON import uses the
+`profitest_prime/polarity.py` brings that into the contract, and the IZYTRONIQ import uses the
 same function. An instrument that measures one direction at a time would have its driver join
 two readings into one measurement.
 
@@ -185,7 +185,7 @@ Nothing in `ui/`, `store/`, `campaign/` or `reporting/` changes for a new instru
 - Device codes appear only in `devices/<instrument>/mapping.py`.
 - Nothing outside `devices/` imports a driver package; the application asks the registry.
   Two places know a driver by design: the UI drives the simulator itself (demos, test runs of
-  a plan), and the IZYTRON import reads results a PROFITEST PRIME took, with its mapping.
+  a plan), and the IZYTRONIQ import reads results a PROFITEST PRIME took, with its mapping.
 - The instrument's record is kept as `raw`; an unknown code stays the key.
 - New keys exist in `data/vocabulary/`, new names in every language catalogue.
 - Only commands from the instrument's documented reference are sent, through an allowlist.

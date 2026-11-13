@@ -63,7 +63,7 @@ class RepeatCheckMixin:
                 found.append(tr("Limit {label}: {now} instead of {before}",
                                 label=label, now=now, before=_range(lower, upper)))
         row = self.db.one("SELECT parameters_json FROM measurements WHERE id=?", measurement_id)
-        # Both sides in words: a push sends codes, an import from IZYTRON brings German text.
+        # Both sides in words: a push sends codes, an import from IZYTRONIQ brings German text.
         words = setting_words(self.db)
         now = {}
         for item in json.loads(row["parameters_json"] or "[]"):

@@ -1,5 +1,5 @@
 # OkeyDocu - okeydocu/importing/izytron.py
-# Imports one day of testing from a copy of an IZYTRON.IQ database as a campaign.
+# Imports one day of testing from a copy of an IZYTRONIQ database as a campaign.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
@@ -74,7 +74,7 @@ def import_day(
     tester = max(testers, key=len) if testers else ""
     tested = day(_time(steps[0]["Date"]).date())
     campaign_id = service.create(
-        root, title or tr("Inspection of {day} (from IZYTRON)", day=tested), tester, None,
+        root, title or tr("Inspection of {day} (from IZYTRONIQ)", day=tested), tester, None,
         IMPORTED, identity, clock_offset_s,
     )
     service.db.execute(
@@ -125,7 +125,7 @@ def _text(row, key: str) -> str:
 def _contact(source, customer_id: str, root_key: str) -> tuple[str, str, str, str]:
     """Department of the installation, else of the person, and the customer's contact.
 
-    IZYTRON keeps a cost centre at each object as well; it is the customer's, while a
+    IZYTRONIQ keeps a cost centre at each object as well; it is the customer's, while a
     campaign's cost centre is the contractor's own, so it stays behind.
     """
     person = source.contact(customer_id)

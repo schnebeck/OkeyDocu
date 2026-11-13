@@ -160,7 +160,7 @@ class MainWindow(MainMenus, QMainWindow):
 
     def _import_izytron(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
-            self, tr("Choose a copy of the IZYTRON database"), "",
+            self, tr("Choose a copy of the IZYTRONIQ database"), "",
             tr("SQLite database (*.sqlite *.db);;All (*)")
         )
         if not path:
@@ -177,7 +177,7 @@ class MainWindow(MainMenus, QMainWindow):
             show_error(self, str(err))
             return
         except (OSError, sqlite3.Error):
-            show_error(self, tr("This file is not a readable IZYTRON database."))
+            show_error(self, tr("This file is not a readable IZYTRONIQ database."))
             return
         self.master_data.refresh()
         self.campaign.refresh()

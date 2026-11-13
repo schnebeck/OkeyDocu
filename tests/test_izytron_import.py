@@ -1,5 +1,5 @@
 # OkeyDocu - tests/test_izytron_import.py
-# Importing a day of testing from an IZYTRON database. All data here is invented.
+# Importing a day of testing from an IZYTRONIQ database. All data here is invented.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5

@@ -19,7 +19,7 @@ from okeydocu.l10n import qt_moment, speaking
 
 PACKAGE = Path(okeydocu.__file__).parent
 DRIVER_IMPORT = re.compile(r"devices\.(profitest_prime|simulator)\b|from \.(profitest_prime|simulator)")
-# The UI drives the simulator itself; the IZYTRON import reads a PROFITEST PRIME's results.
+# The UI drives the simulator itself; the IZYTRONIQ import reads a PROFITEST PRIME's results.
 KNOWS_A_DRIVER = {
     "ui/common.py",
     "ui/plan_test_run.py",

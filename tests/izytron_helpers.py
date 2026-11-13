@@ -1,5 +1,5 @@
 # OkeyDocu - tests/izytron_helpers.py
-# An invented IZYTRON database for the import tests.
+# An invented IZYTRONIQ database for the import tests.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
