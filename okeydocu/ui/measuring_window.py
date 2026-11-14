@@ -34,7 +34,8 @@ from .station_texts import leads_text, measure_text, mode_text, supply_text
 
 
 class MeasuringWindow(PlaceStation, DialStation, QDialog):
-    place_made = Signal(int)  # an element made on the way, readings now go there
+    place_made = Signal(int)  # an element made on the way
+    place_kept = Signal(int)  # the element readings now go to, made on the way or chosen
     parent_chosen = Signal(int)  # where new elements hang, kept until changed
     selector_wanted = Signal()  # the guide would like to know where the switch stands
 

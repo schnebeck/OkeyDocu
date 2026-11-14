@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..campaign.measuring_place import measured_functions
 from ..campaign.plan import says_draft
 from ..campaign.service import IMPORTED
 from ..devices import Capability
@@ -28,6 +29,7 @@ from ..devices.simulator import SIMULATED_FUNCTIONS
 from ..l10n import N_, tr
 from .campaign_items import count_text
 from .common import AppContext, function_short
+from .guide_starter import GuideStarter
 from .instruction_panel import InstructionPanel
 from .overlay import Overlay
 from .status_badges import BAD, GOOD
@@ -130,8 +132,10 @@ class FreeRunView(QWidget):
         self.instruction.hide()
         self.instruction_action.toggled.connect(self._toggle_instruction)
         self.instruction.read_requested.connect(self._read_selector)
+        self.starter = GuideStarter()
         row = QHBoxLayout()
         row.addWidget(self.guidance, 1)
+        row.addWidget(self.starter)
         row.addWidget(self.simulate_function)
         row.addWidget(self.simulate_button)
         layout = QVBoxLayout(self)
@@ -148,6 +152,8 @@ class FreeRunView(QWidget):
         )
         self.simulate_function.setVisible(simulated)
         self.simulate_button.setVisible(simulated)
+        self.starter.show_campaign(campaign["driver"] if driver is not None else "",
+                                   measured_functions(self.app.db, campaign["id"]))
         if driver is None:
             self._say(IMPORT_GUIDANCE if campaign["driver"] == IMPORTED else MANUAL_GUIDANCE)
 

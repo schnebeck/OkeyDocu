@@ -160,3 +160,10 @@ def places(service, root_id: int) -> list[tuple[int, str]]:
     db = service.db
     return [(asset_id, " › ".join(_path(db, asset_id, root_id)))
             for asset_id in service.subtree(root_id)]
+
+
+def measured_functions(db, campaign_id: int) -> set[str]:
+    """The functions a campaign has readings of."""
+    rows = db.query("SELECT DISTINCT function FROM measurements WHERE campaign_id=?",
+                    campaign_id)
+    return {row["function"] for row in rows}

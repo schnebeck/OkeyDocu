@@ -70,3 +70,5 @@ class PlaceStation:
             self.place_made.emit(asset_id)
         elif self.form.store():
             self.show_place(self.place.asset_id)
+        if self.place.asset_id is not None:
+            self.place_kept.emit(self.place.asset_id)

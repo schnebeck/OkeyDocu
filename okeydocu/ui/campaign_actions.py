@@ -148,6 +148,7 @@ class CampaignActions(CampaignTasks):
         """Stored first. Everything else can wait, this value exists nowhere else."""
         measurement_id = self.app.service.receive(campaign_id, reading,
                                                   self.place_target(campaign_id))
+        self.guide_reading(campaign_id, reading)
         self.list.update_campaign(campaign_id)
         self._refresh_home()
         if campaign_id == self.campaign_id:
@@ -179,9 +180,11 @@ class CampaignActions(CampaignTasks):
         if self.live_id == self.campaign_id:
             self.guided.show_selector(position)
             self.free.instruction.show_selector(position)
+            self.guide_selector(position)
 
     def _end_session(self) -> None:
         session, self.session = self.session, None
+        self.close_guide()
         if session is not None:
             self.instrument.unbroken.discard(session.campaign_id)
         self.instrument.session = None

@@ -18,6 +18,7 @@ from .campaign_checks import CampaignChecks
 from .campaign_confirm import CampaignConfirm
 from .campaign_detail import CampaignDetail
 from .campaign_display import CampaignDisplay
+from .campaign_guide import CampaignGuide
 from .campaign_header import CampaignHeader
 from .campaign_list import CampaignList
 from .campaign_photos import CampaignPhotos
@@ -40,7 +41,8 @@ from .status_badges import ClockBadge, LinkBadge
 
 
 class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPhotos,
-                   CampaignDetail, CampaignPlaces, CampaignPlans, CampaignChecks, QWidget):
+                   CampaignDetail, CampaignPlaces, CampaignPlans, CampaignChecks, CampaignGuide,
+                   QWidget):
     """Choosing a campaign only shows it. The instrument stays with the one measuring."""
 
     changed = Signal()
@@ -167,6 +169,7 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.place.properties_requested.connect(self._edit_element)
         self.place_files.changed.connect(self.changed)
         self._connect_photos()
+        self.free.starter.requested.connect(self.open_guide)
         self.guided.started.connect(self._started)
         self.guided.changed.connect(self._data_changed)
         self.guided.step_shown.connect(self.values.show_step)

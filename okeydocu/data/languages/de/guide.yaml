@@ -92,3 +92,7 @@ texts:
   "Polarity: both directions, the larger value counts.": "Polarität: beide Richtungen, der größere Wert zählt."
   "With an extension lead: compensate it first (ROFFSET).": "Mit Verlängerungsleitung: diese zuerst kompensieren (ROFFSET)."
   Press ON/START and hold the probes until the result stands.: ON/START drücken und die Prüfspitzen halten, bis das Ergebnis steht.
+  Guided measurement …: Geführt messen …
+  Next element …: Nächstes Element …
+  Leads through the first measurement of this kind step by step.: Führt Schritt für Schritt durch die erste Messung dieser Art.
+  Chooses or makes the element the next readings go to.: Wählt oder legt das Element an, an das die nächsten Messwerte gehen.
