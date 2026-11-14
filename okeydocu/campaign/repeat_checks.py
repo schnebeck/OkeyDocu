@@ -82,7 +82,7 @@ class RepeatCheckMixin:
     def comparison(self, step: PlanStep, measurement_id: int) -> tuple[str, list[str]]:
         """Last time's values in a line, and those that have changed notably since."""
         origin = self.origin_measurement(step)
-        if origin is None:
+        if origin is None or not origin["closed_at"]:  # a point added on the way has no past
             return "", []
         before = {value["key"]: value for value in self.values(origin["id"])}
         parts, notable = [], []
@@ -105,8 +105,9 @@ class RepeatCheckMixin:
         closed = day(datetime.fromisoformat(origin["closed_at"]))
         return tr("Last time on {day}: {values}", day=closed, values="  ·  ".join(parts)), notable
 
-    def repeat_blockers(self, campaign_id: int) -> list[str]:
-        """Open points, and settings that differ from last time without a reason given."""
+    def repeat_blockers(self, campaign_id: int, strict: bool = True) -> list[str]:
+        """Open points, and, `strict`, settings that differ from last time without a reason
+        given. An open template asks no reasons."""
         points = self.points(campaign_id)
         missing = sum(row["status"] in ("pending", "active") for row, _ in points)
         problems = []
@@ -116,7 +117,8 @@ class RepeatCheckMixin:
                 "{count} points of the repeat open: measure them or skip them with a reason"))
         for row, step in points:
             taken = self.point_measurement(row["id"]) if row["status"] == "done" else None
-            if taken is not None and not row["note"] and self.deviations(step, taken["id"]):
+            if strict and taken is not None and not row["note"] and \
+                    self.deviations(step, taken["id"]):
                 problems.append(
                     tr("Different setting at “{title}” without a reason", title=step.title))
         return problems

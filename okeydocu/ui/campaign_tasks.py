@@ -35,6 +35,8 @@ class CampaignTasks:
         self.next_order_action = self._action(tr("Next order …"), self.next_order)
         self.next_order_action.setToolTip(tr("A new order on the same installation that repeats"
                                              " this one, with its contact person"))
+        self.template_action = self._action(tr("Save as campaign template …"),
+                                            self.save_as_template)
         self.photos_action = self._action(tr("Import photos …"), self.import_photos)
         # The timeline is a tool for placing photos: shown on asking, gone once they are placed.
         self.timeline_action = QAction(tr("Assign photos"), self, checkable=True, shortcut="F7")

@@ -45,6 +45,9 @@ from .plan import Plan
 from .repeat import RepeatMixin
 from .repeat_checks import RepeatCheckMixin
 from .runs import RunMixin
+from .template_learning import TemplateLearningMixin
+from .template_use import TemplateUseMixin
+from .templates import TemplateMixin
 from .records import (
     EDITABLE_FIELDS,
     EDITABLE_VALUE_FIELDS,
@@ -91,6 +94,7 @@ class CampaignService(
     ReadingMixin, ClockMixin, FilingMixin, EditingMixin, PhotoMixin, AttachmentMixin, PlanStepMixin,
     PlanBlockMixin, ClosingMixin, OverviewMixin, StructureMixin, DueMixin, RunMixin, RepeatMixin,
     RepeatCheckMixin, PhotoMarkMixin, ProxyMixin, CarryOverMixin, InstrumentHistoryMixin,
+    TemplateMixin, TemplateUseMixin, TemplateLearningMixin,
 ):
     def __init__(self, db: Database, archive_root: Path, key_store: KeyStore | None = None):
         self.db = db

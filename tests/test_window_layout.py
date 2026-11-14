@@ -202,3 +202,16 @@ def test_a_column_width_set_by_hand_comes_back(qtbot, app, window):
     header.resizeSection(4, 333)
     again = reopened(qtbot, app, window)
     assert again.campaign.values.table.horizontalHeader().sectionSize(4) == 333
+
+
+def test_a_page_window_closes_by_button_and_keys(qtbot, window):
+    from PySide6.QtCore import Qt
+
+    window.open_page(window.master_data)
+    page_window = window.page_windows[window.master_data]
+    assert page_window.isVisible()
+    page_window.close_button.click()
+    assert not page_window.isVisible()
+    window.open_page(window.master_data)
+    qtbot.keyClick(page_window, Qt.Key.Key_Escape)
+    assert not page_window.isVisible()

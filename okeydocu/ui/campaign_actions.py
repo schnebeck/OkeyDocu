@@ -47,6 +47,10 @@ class CampaignActions(CampaignTasks):
         asset, plan = dialog.asset.currentData(), dialog.plan.currentData()
         title, instrument = dialog.title.text().strip(), dialog.source.currentData()
         tester, user = dialog.tester.current_name(), dialog.tester.current_id()
+        template = dialog.template.currentData()
+        names = self.template_names(template, asset)
+        if names is None:
+            return
         self._end_session()  # the instrument is about to be asked for by the new campaign
         if plan is not None:
             self.guided.start_campaign(
@@ -64,6 +68,9 @@ class CampaignActions(CampaignTasks):
             self.app.service.mark_follow_up(created, follows)
         if dialog.repeat.isChecked() and dialog.previous is not None and created > newest:
             self.app.service.make_repeat(created, dialog.previous["id"])
+            self.show_campaign(created)
+        if template and created > newest:
+            self.app.service.use_template(created, template, names)
             self.show_campaign(created)
         self.list.refresh()
         self._update()
@@ -149,6 +156,7 @@ class CampaignActions(CampaignTasks):
         measurement_id = self.app.service.receive(campaign_id, reading,
                                                   self.place_target(campaign_id))
         self.guide_reading(campaign_id, reading)
+        self.follow_points(campaign_id, measurement_id)
         self.list.update_campaign(campaign_id)
         self._refresh_home()
         if campaign_id == self.campaign_id:

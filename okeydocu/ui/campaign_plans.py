@@ -12,7 +12,7 @@ where it was."""
 from __future__ import annotations
 
 from ..campaign.plan_blocks import PlanBlock
-from ..campaign.repeat import REPEAT
+from ..campaign.point_plans import has_points
 from ..l10n import tr
 from .guided_pages import ReasonOverlay
 from .plan_list import PlanList, ask_remove
@@ -33,7 +33,7 @@ class CampaignPlans:
 
     def _has_plans(self, campaign) -> bool:
         """A repeat inspection is filled in any order; it is no plan to be led through."""
-        return bool(campaign["plan_key"]) and campaign["plan_key"] != REPEAT
+        return bool(campaign["plan_key"]) and not has_points(campaign["plan_key"])
 
     def running_block(self) -> PlanBlock | None:
         run = self.plan_runs.get(self.campaign_id) if self.campaign_id else None

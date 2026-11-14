@@ -1,0 +1,33 @@
+# OkeyDocu - German texts of campaign templates.
+texts:
+  "Leave out: {title}": "Weglassen: {title}"
+  "New point: {title}": "Neuer Punkt: {title}"
+  "New hint at {title}: {text}": "Neuer Hinweis bei {title}: {text}"
+  Take over the order as measured: Reihenfolge wie gemessen übernehmen
+  Without template: Ohne Vorlage
+  Campaign template: Kampagnenvorlage
+  Take over as point: Als Punkt übernehmen
+  "The reading becomes a point of this campaign; on confirming, the template can keep it": "Der Messwert wird ein Punkt dieser Kampagne; beim Bestätigen kann die Vorlage ihn übernehmen"
+  Save as campaign template …: Als Kampagnenvorlage speichern …
+  "Campaign template “{title}” saved.": "Kampagnenvorlage „{title}“ gespeichert."
+  Campaign templates …: Kampagnenvorlagen …
+  ▲ Earlier: ▲ Früher
+  ▼ Later: ▼ Später
+  Remove point: Punkt entfernen
+  "The point leaves this campaign; on confirming, the template can leave it out as well.": "Der Punkt fällt aus dieser Kampagne; beim Bestätigen kann ihn auch die Vorlage weglassen."
+  "Delete the campaign template “{title}”?": "Kampagnenvorlage „{title}“ löschen?"
+  Campaign templates: Kampagnenvorlagen
+  Delete template …: Vorlage löschen …
+  Mode: Modus
+  Points: Punkte
+  Save a confirmed campaign as a template first.: Zuerst eine bestätigte Kampagne als Vorlage speichern.
+  "open: learns from every campaign": "offen: lernt aus jeder Kampagne"
+  "series: points fixed, deviations need a reason": "Serie: Punkte fest, Abweichungen brauchen einen Grund"
+  Save as campaign template: Als Kampagnenvorlage speichern
+  Keeps the structure of the installation and every point measured, in the order measured, without the values.: Behält die Struktur der Anlage und jeden gemessenen Punkt in der Reihenfolge der Messung, ohne die Messwerte.
+  "Elements for {installation}": "Elemente für {installation}"
+  Make them: Anlegen
+  The template's tree is made below this installation.: Der Baum der Vorlage wird unter dieser Anlage angelegt.
+  "Improve the template “{title}”": "Vorlage „{title}“ verbessern"
+  Not now: Jetzt nicht
+  "This campaign went differently from its template:": "Diese Kampagne lief anders als ihre Vorlage:"

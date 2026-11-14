@@ -14,7 +14,7 @@ import tempfile
 from pathlib import Path
 
 from PySide6.QtCore import QEvent
-from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QWidget
 
 from .. import APP_NAME, TAGLINE, __version__
 from ..importing.izytron import ImportFailed, import_day
@@ -28,6 +28,7 @@ from .measurement_overlays import ImportOverlay
 from .choice_lists_page import ChoiceListsPage
 from .kinds_page import KindsPage
 from .measurement_search import MeasurementsPage
+from .page_window import PageWindow
 from .photo_shared import shared_thumbs
 from .plan_editor import PlanEditorPage
 from .reports import ReportsPage
@@ -90,13 +91,7 @@ class MainWindow(MainMenus, QMainWindow):
         self.choice_lists.changed.connect(self.master_data.refresh)
 
     def _page_window(self, page: QWidget, title: str, width: int, height: int) -> QWidget:
-        window = QWidget()
-        window.setWindowTitle(f"{title} – {APP_NAME}")
-        window.resize(width, height)
-        layout = QVBoxLayout(window)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(page)
-        return window
+        return PageWindow(page, title, width, height)
 
     def open_page(self, page: QWidget) -> None:
         if page is self.measurements:

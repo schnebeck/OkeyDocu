@@ -65,6 +65,11 @@ class CampaignDialog(Overlay):
         for plan in plans or ():
             self.plan.addItem(plan.label, plan)
         self.plan.addItem(tr("Without plan"), None)
+        self.template = QComboBox()
+        self.template.addItem(tr("Without template"), None)
+        for kept in app.service.templates():
+            self.template.addItem(kept.title, kept.key)
+        self.template.currentIndexChanged.connect(lambda _: self._template_chosen())
         self.asset = QComboBox()
         fill_assets(self.asset, app)
         self.tester = UserChoice(app, app.service.last_user_id())
@@ -88,6 +93,8 @@ class CampaignDialog(Overlay):
         form.addRow(tr("Inspector"), self.tester)
         form.addRow("", self.repeat)
         form.addRow(tr("Test plan"), self.plan)
+        if self.template.count() > 1:
+            form.addRow(tr("Campaign template"), self.template)
         form.addRow(tr("Title"), self.title)
         form.addRow(tr("Instrument"), self.source)
         self.order = OrderFields(form, {})
@@ -133,10 +140,20 @@ class CampaignDialog(Overlay):
         return chosen if chosen is not None and chosen["asset_id"] == asset else None
 
     def _repeat_toggled(self, on: bool) -> None:
-        """A repeat inspection brings its own list; a plan beside it would lead elsewhere."""
+        """A repeat inspection brings its own list; a plan or template beside it would lead
+        elsewhere."""
         if on:
             self.plan.setCurrentIndex(self.plan.findData(None))
-        self.plan.setEnabled(not on)
+            self.template.setCurrentIndex(0)
+        self.plan.setEnabled(not on and self.template.currentData() is None)
+
+    def _template_chosen(self) -> None:
+        """A template brings its own points, like a repeat inspection."""
+        chosen = self.template.currentData() is not None
+        if chosen:
+            self.repeat.setChecked(False)
+            self.plan.setCurrentIndex(self.plan.findData(None))
+        self.plan.setEnabled(not chosen and not self.repeat.isChecked())
 
     def first_field(self):
         return self.title

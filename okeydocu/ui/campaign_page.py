@@ -25,6 +25,7 @@ from .campaign_photos import CampaignPhotos
 from .campaign_places import CampaignPlaces
 from .campaign_plans import CampaignPlans
 from .campaign_reports import CampaignReports
+from .campaign_templates import CampaignTemplates
 from .campaign_values import CampaignValues
 from .campaign_views import FreeRunView
 from .common import AppContext
@@ -42,7 +43,7 @@ from .status_badges import ClockBadge, LinkBadge
 
 class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPhotos,
                    CampaignDetail, CampaignPlaces, CampaignPlans, CampaignChecks, CampaignGuide,
-                   QWidget):
+                   CampaignTemplates, QWidget):
     """Choosing a campaign only shows it. The instrument stays with the one measuring."""
 
     changed = Signal()

@@ -8,14 +8,17 @@
 
 from __future__ import annotations
 
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 
-from ..campaign.repeat import REPEAT
+from ..campaign.point_plans import has_points
 from ..campaign.service import LOCATION_SEPARATOR
+from ..l10n import tr
 from ..model import Verdict
-from .common import POINT_ID
+from .common import POINT_ID, selected_id
 from .measurement_overlays import MeasurementOverlay
 from .measurement_runs import point_line
+from .point_edit import is_open_template
 from .repeat_compare import RepeatCompare
 from .repeat_point import RepeatPoint
 
@@ -29,6 +32,10 @@ class CampaignPoints:
         for widget in (self.point, self.compare):
             widget.changed.connect(self._after_change)
         self.point.by_hand.connect(self._point_by_hand)
+        self.point_action = QAction(tr("Take over as point"), self)
+        self.point_action.setToolTip(tr("The reading becomes a point of this campaign; on"
+                                        " confirming, the template can keep it"))
+        self.point_action.triggered.connect(self._take_as_point)
         self.point.hide()
         holder = QWidget()
         column = QVBoxLayout(holder)
@@ -39,13 +46,27 @@ class CampaignPoints:
         self.detail = holder
         self.readings, self.files = self.editor.take_out()
 
+    def point_actions(self) -> tuple:
+        """“Take over as point” for a reading without one, where the template is open."""
+        chosen = selected_id(self.table)
+        if chosen is None or not is_open_template(self.app, self.campaign_id):
+            return ()
+        row = self.app.db.one("SELECT step_id FROM measurements WHERE id=?", chosen)
+        return (self.point_action, None) if row and row["step_id"] is None else ()
+
+    def _take_as_point(self) -> None:
+        chosen = selected_id(self.table)
+        if chosen is not None:
+            self.app.service.add_point_from(chosen)
+            self._after_change()
+
     def current_point(self) -> int | None:
         current = self.table.currentItem()
         return self.table.item(current.row(), 0).data(POINT_ID) if current else None
 
     def point_lines(self, area: list[str]) -> list:
         campaign = self.app.service.campaign(self.campaign_id) if self.campaign_id else None
-        if campaign is None or campaign["plan_key"] != REPEAT:
+        if campaign is None or not has_points(campaign["plan_key"]):
             return []
         below = (set(self.app.service.subtree(self.point_id))
                  if self.point_id is not None else None)

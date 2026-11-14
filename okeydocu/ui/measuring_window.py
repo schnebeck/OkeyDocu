@@ -27,6 +27,7 @@ from ..l10n import tr
 from ..vocabulary import setting_name
 from .bench_view import BenchView
 from .dial_station import DialStation
+from .footer_bar import FooterBar
 from .place_form import PlaceForm
 from .place_scene import PlaceScene
 from .place_station import PlaceStation
@@ -96,11 +97,10 @@ class MeasuringWindow(PlaceStation, DialStation, QDialog):
         column.addWidget(self.right)
         column.addWidget(self.ask)
         column.addStretch(1)
-        nav = QHBoxLayout()
-        nav.addWidget(self.back)
-        nav.addStretch(1)
-        nav.addWidget(self.next)
-        column.addLayout(nav)
+        self.footer = FooterBar()
+        self.footer.add_leading(self.back)
+        self.footer.add(self.next)
+        column.addWidget(self.footer)
         body = QHBoxLayout()
         body.addWidget(self.left, 3)
         body.addWidget(side, 1)

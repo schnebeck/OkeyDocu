@@ -14,7 +14,8 @@ from pathlib import Path
 
 from ..l10n import N_, plural, tr
 from .records import IMPORTED, _iso
-from .repeat import REPEAT
+from .point_plans import has_points
+from .templates import OPEN
 from .seal import SealCheck, SealState, authenticate, deletion_mark, digest, genuine
 
 # What a file of a closed campaign can lack: missing, or changed.
@@ -41,8 +42,9 @@ class ClosingMixin:
         steps = self.steps(campaign_id)
         if not steps:
             return []
-        if self.campaign(campaign_id)["plan_key"] == REPEAT:
-            return self.repeat_blockers(campaign_id)
+        plan_key = self.campaign(campaign_id)["plan_key"]
+        if has_points(plan_key):
+            return self.repeat_blockers(campaign_id, self.template_mode(plan_key) != OPEN)
         problems = [
             tr("Step open: {title}", title=self.plan_step(step).title)
             for step in steps

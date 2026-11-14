@@ -10,16 +10,10 @@ from __future__ import annotations
 
 from PySide6.QtCore import QEvent, QEventLoop, QRect, Qt
 from PySide6.QtGui import QColor, QPainter
-from PySide6.QtWidgets import (
-    QFrame,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QFrame, QLabel, QPushButton, QVBoxLayout, QWidget
 
 from ..l10n import tr
+from .footer_bar import FooterBar
 from .pending_marks import PendingMarks
 
 MARGIN = 24
@@ -56,23 +50,19 @@ class Overlay(QWidget):
         font.setBold(True)
         heading.setFont(font)
         self.body = QVBoxLayout()
-        self.hint = QLabel()  # says what is still missing, so a grey button explains itself
-        self.hint.setWordWrap(True)
-        self.ok_button = QPushButton(tr("Save"))
+        self.footer = FooterBar()
+        self.hint = self.footer.hint  # says what is still missing, so a grey button explains itself
+        self.cancel_button = self.footer.add(QPushButton(tr("Cancel")))
+        self.cancel_button.clicked.connect(self.reject)
+        self.ok_button = self.footer.add(QPushButton(tr("Save")))
         self.ok_button.setDefault(True)
         self.ok_button.clicked.connect(self.accept)
-        self.cancel_button = QPushButton(tr("Cancel"))
-        self.cancel_button.clicked.connect(self.reject)
-        buttons = QHBoxLayout()
-        buttons.addWidget(self.hint, 1)
-        buttons.addWidget(self.cancel_button)
-        buttons.addWidget(self.ok_button)
         column = QVBoxLayout(self.card)
         column.setContentsMargins(20, 16, 20, 16)
         column.setSpacing(12)
         column.addWidget(heading)
         column.addLayout(self.body, 1)
-        column.addLayout(buttons)
+        column.addWidget(self.footer)
         if self.host is None:  # no window to lie over
             outer = QVBoxLayout(self)
             outer.addWidget(self.card)

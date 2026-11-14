@@ -124,7 +124,9 @@ class MasterDataMixin:
     # Plans ---------------------------------------------------------------
 
     def plans(self) -> list[sqlite3.Row]:
-        return self.query("SELECT * FROM plans ORDER BY title COLLATE NOCASE")
+        """Test plans; campaign templates lie in the same table under keys of their own."""
+        return self.query("SELECT * FROM plans WHERE key NOT LIKE 'template!_%' ESCAPE '!'"
+                          " ORDER BY title COLLATE NOCASE")
 
     def save_plan(self, key: str, title: str, body: str) -> None:
         self.execute(

@@ -30,6 +30,7 @@ from .common import ROW_ID, AppContext
 from .plan_editor_points import PlanEditorPoints, new_key
 from .plan_step_form import PlanStepForm, kept
 from .plan_test_run import PlanTestRun
+from .template_editor import TemplateEditor
 
 SAVE_DELAY_MS = 300
 
@@ -63,6 +64,9 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
         left_layout = QVBoxLayout(left)
         left_layout.addWidget(self.plans, 1)
         left_layout.addLayout(plan_buttons)
+        templates = QPushButton(tr("Campaign templates …"))
+        templates.clicked.connect(lambda: TemplateEditor(self.app, self).exec())
+        left_layout.addWidget(templates)
 
         self.title = QLineEdit()
         self.title.setPlaceholderText(tr("Name of the test plan"))

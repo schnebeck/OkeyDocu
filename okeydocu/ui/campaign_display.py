@@ -98,7 +98,7 @@ class CampaignDisplay:
             [self.resume_action, self.pause_action],
             [self.edit_action, self.tester_action, self.assign_action],
             [self.draft_action, self.finish_action, self.report_action],
-            [self.next_order_action],
+            [self.next_order_action, self.template_action],
             [self.delete_action],
         ]
         result = []
@@ -150,6 +150,8 @@ class CampaignDisplay:
         self.tester_action.setEnabled(is_open)
         self.edit_action.setEnabled(is_open)
         self.delete_action.setEnabled(bool(campaign))
+        self.template_action.setEnabled(bool(campaign) and
+                                        not self.app.service.is_empty(campaign["id"]))
         self.header.edit_button.setVisible(is_open)
         self.assign_action.setEnabled(is_open)
         self.report_action.setEnabled(bool(campaign) and not is_open)

@@ -43,6 +43,7 @@ class MainMenus:
         menu.addAction(campaign.finish_action)
         campaign.report_action.setShortcut(QKeySequence.StandardKey.Print)
         menu.addAction(campaign.report_action)
+        menu.addAction(campaign.template_action)
         menu.addSeparator()
         menu.addAction(campaign.delete_action)
         menu.addSeparator()

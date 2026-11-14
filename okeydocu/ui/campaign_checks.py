@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 from ..campaign.line_conductors import ConductorBook, failed_counts
-from ..campaign.repeat import REPEAT
+from ..campaign.point_plans import has_points
 from ..l10n import plural, tr
 from ..model import Verdict
 from .common import POINT_ID, ROW_ID
@@ -47,7 +47,7 @@ class CampaignChecks:
         if set_apart:
             text = plural(set_apart, "{count} RCD test to check", "{count} RCD tests to check")
             parts.append(f'<a href="{SETTINGS_LINK}" style="color:{NOTE}">{text}</a>')
-        if campaign["plan_key"] == REPEAT:
+        if has_points(campaign["plan_key"]):
             missing = sum(row["status"] in ("pending", "active")
                           for row, _ in self.app.service.points(campaign["id"]))
             if missing:

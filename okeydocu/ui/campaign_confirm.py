@@ -95,6 +95,7 @@ class CampaignConfirm:
             show_error(self, tr(WEAK_SEAL))
         if outcome:
             self.notice.setText(f'{outcome} <a href="report">{tr("Open")}</a>')
+        self.learn_from(closing)
 
     def _file_protocol(self, campaign_id: int, overlay: ConfirmOverlay) -> str:
         """The record is closed already, so a failure here loses nothing."""

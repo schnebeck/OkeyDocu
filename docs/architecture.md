@@ -557,6 +557,40 @@ The guide follows the statement: one line conductor draws L and N at the main sw
 three-pole CEE plug, without N the N lead is left out, and the settings station advises
 choosing the measuring path by hand where AUTO would measure conductors that are not there.
 
+## Campaign templates
+
+A campaign template (`campaign/templates.py`) keeps the element tree below the installation it
+was made on, its blueprint, and every point measured there in the order measured, without a
+measured value. A point is the point of a repeat inspection tied to a blueprint node instead of
+an element. Templates lie in the table `plans` under keys beginning with `template_`; the list of
+test plans leaves them out. “Save as campaign template …” makes one from a campaign that holds
+something; “Campaign templates …” on the test plans page edits title, mode, the order of the
+points and their hints (`ui/template_editor.py`).
+
+A new campaign may take a template (`campaign/template_use.py`). On the installation it was made
+on, each node is the element it came from; one deleted since is made again. On another
+installation the tree below it is made anew, after its names and identifiers were shown for
+editing. The points then lie in the campaign like those of a repeat inspection and take arriving
+readings at their element in any order (`has_points` in `campaign/point_plans.py`). After a
+reading took a point, readings go on to the element of the next open point, so following the
+template's order needs no click on the laptop; the order is a suggestion and nothing is blocked.
+
+A template is open or series. Open, the campaign may move, remove and add points on the way (a
+reading that took no point is taken over as one), skipping needs no reason and differing limits or
+settings need none either. On confirming, a card lists what the campaign did differently: new
+points, points left out, the order as measured, new hints (`campaign/template_learning.py`); each
+line is taken into the template on its own, which then remembers the campaign. In series mode the
+points are fixed and the rules of the repeat inspection apply.
+
+## Windows, cards and their footer
+
+Every card over the window and every page in a window of its own ends in the same footer
+(`ui/footer_bar.py`): a hint on the left that says what is missing, the buttons on the right,
+the main one last. Buttons stand side by side; only where the footer is too narrow they stack, in
+the same order, and the hint stands above them. The page windows (`ui/page_window.py`) close with
+“Close”, Esc or Ctrl+W; a field being edited is left first, so a page that stores a field when it
+is left keeps what was typed. The measuring window uses the same footer for Back and Next.
+
 ## Photos and attachments
 
 A photo is not a measured value but is in its own table `photos`. Its capture time stays

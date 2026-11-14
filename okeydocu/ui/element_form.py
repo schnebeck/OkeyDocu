@@ -29,6 +29,7 @@ from .common import AppContext, show_error
 from .kind_catalog import KindCatalog
 from .overlay import Overlay
 from .suited_methods import context_of
+from .wrapping_label import WrappingLabel
 
 TEXTS = {"name": N_("Designation"), "identifier": N_("Identifier"),
          "manufacturer": N_("Manufacturer"), "type": N_("Type designation"),
@@ -66,9 +67,9 @@ class ElementForm(QWidget):
         form.addRow(tr("Kind"), self.kind)
         for key in ("identifier", "manufacturer", "type", "serial_no", "comment", "basis"):
             form.addRow(tr(TEXTS[key]), self.fields[key])
-        self.basis_hint = QLabel(tr("The top element needs a test basis; those below follow it."))
+        self.basis_hint = WrappingLabel(
+            tr("The top element needs a test basis; those below follow it."))
         self.basis_hint.setStyleSheet("color: #c0392b;")
-        self.basis_hint.setWordWrap(True)
         self.basis_hint.hide()
         form.addRow("", self.basis_hint)
         repeat = QHBoxLayout()

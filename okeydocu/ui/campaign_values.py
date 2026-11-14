@@ -170,8 +170,8 @@ class CampaignValues(CampaignPoints, MeasurementView):
 
     def _menu_actions(self) -> tuple:
         taken = (self.plan_action, None) if self.menu_run is not None else ()
-        return (self.details_action, None, *taken, self.edit_action, self.photo_action,
-                self.move_action, None, self.delete_action)
+        return (self.details_action, None, *taken, *self.point_actions(), self.edit_action,
+                self.photo_action, self.move_action, None, self.delete_action)
 
     def _move_to(self) -> None:
         ids = selected_ids(self.table)

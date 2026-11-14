@@ -16,8 +16,8 @@ from ..l10n import day, tr
 from ..model import SIGHT_CHECK_FUNCTION, Parameter, conductor_of
 from ..vocabulary import function_symbol
 from .plan import Plan, PlanStep
+from .point_plans import REPEAT, has_points
 
-REPEAT = "repeat"  # the plan key of a campaign whose steps came from the last inspection
 
 _LAST_RECORD = """
 SELECT m.*, r.name AS run_name, r.kind AS run_kind FROM measurements m
@@ -81,7 +81,8 @@ class RepeatMixin:
         A point whose measurement went elsewhere or was deleted is open again.
         """
         campaign = self.campaign(campaign_id)
-        if campaign is None or campaign["plan_key"] != REPEAT or campaign["status"] != "open":
+        if campaign is None or not has_points(campaign["plan_key"]) or \
+                campaign["status"] != "open":
             return
         points = self.points(campaign_id)
         by_step = {row["id"]: step for row, step in points}

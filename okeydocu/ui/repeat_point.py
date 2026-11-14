@@ -36,6 +36,7 @@ from .guided_pages import ReasonOverlay
 from .overlay import Overlay
 from .photo_shared import shared_thumbs
 from .place_line import PlaceLine
+from .point_edit import PointEdit, is_open_template
 
 HINT_STYLE = ("#hint { border-left: 3px solid palette(mid); padding-left: 6px; }")
 
@@ -125,16 +126,22 @@ class RepeatPoint(QWidget):
         buttons.addStretch(1)
         buttons.addWidget(self.skip_button)
         buttons.addWidget(self.reopen_button)
+        self.edit = PointEdit(app)
+        self.edit.changed.connect(self.changed)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         for widget in (self.title, self.state, self.place, self.question, self.settings,
                        self.hint_box, self.remark, self.photos, self.answer_note):
             layout.addWidget(widget)
         layout.addLayout(buttons)
+        layout.addWidget(self.edit)
 
     def show_point(self, step_id: int) -> None:
         self.row = self.app.db.one("SELECT * FROM steps WHERE id=?", step_id)
         self.step = step = self.app.service.plan_step(self.row)
+        self.edit.show_for(self.row)
+        asks = not is_open_template(self.app, self.row["campaign_id"])
+        self.skip_button.setText(tr("Skip …") if asks else tr("Skip"))
         skipped = self.row["status"] == "skipped"
         check = step.kind == "check"
         self.title.setText(step.title)
@@ -205,6 +212,11 @@ class RepeatPoint(QWidget):
         self.changed.emit()
 
     def _skip(self) -> None:
+        """An open template skips at once; a repeat or series asks for the reason."""
+        if is_open_template(self.app, self.row["campaign_id"]):
+            self.app.service.skip_step(self.row["id"], "")
+            self.changed.emit()
+            return
         overlay = ReasonOverlay(self, tr("Skip point"))
         if overlay.exec():
             self.app.service.skip_step(self.row["id"], overlay.reason.toPlainText().strip())
