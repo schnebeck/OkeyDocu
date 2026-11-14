@@ -135,6 +135,9 @@ def test_the_context_menu_offers_what_an_open_campaign_allows(window, app, place
     campaign = app.service.create(places["press"], "Prüfung", "Prüfer")
     page = window.campaign
     page.refresh()
+    assert "Protokoll bestätigen …" not in [a.text() for a in page.campaign_menu(campaign)
+                                           .actions()]
+    _measure_at(app, campaign, places["press"])
     menu = page.campaign_menu(campaign)
     shown = [action.text() for action in menu.actions() if not action.isSeparator()]
     assert page.campaign_id == campaign

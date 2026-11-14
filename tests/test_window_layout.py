@@ -11,7 +11,7 @@ from PySide6.QtWidgets import QApplication
 from okeydocu.ui.board import GUTTER
 from okeydocu.ui.main_window import MainWindow
 
-from .workspace_helpers import plan_title, start, with_asset
+from .workspace_helpers import plan_title, record, start, with_asset
 
 
 def test_status_stays_in_sight_in_the_status_bar(window, app, monkeypatch):
@@ -39,6 +39,8 @@ def test_menu_entries_follow_the_state_of_the_campaign(window, app, monkeypatch)
     assert not page.report_action.isEnabled()
     with_asset(window, app)
     start(window, monkeypatch)
+    assert not page.finish_action.isEnabled()  # nothing recorded: deleted, not confirmed
+    record(window, app)
     assert page.finish_action.isEnabled()
     assert not page.report_action.isEnabled()
     assert not page.clock_action.isEnabled()  # typed in by hand, there is no instrument

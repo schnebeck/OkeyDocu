@@ -40,6 +40,7 @@ CARD_WIDTH = 280
 
 # What the button on a card does, sent with the campaign it belongs to.
 SHOW, RESUME, OPEN_REPORT, MAKE_REPORT = "show", "resume", "open_report", "make_report"
+MENU = "menu"  # what the campaign list offers on a right click
 
 
 def when_text(moment: datetime, today: date | None = None) -> str:
@@ -196,6 +197,10 @@ class CampaignCard(QFrame):
 
     def _act(self) -> None:
         self.requested.emit(self.action, self.summary.id)
+
+    def contextMenuEvent(self, event) -> None:
+        self.requested.emit(MENU, self.summary.id)
+        event.accept()
 
     def mouseReleaseEvent(self, event) -> None:
         inside = self.rect().contains(event.position().toPoint())

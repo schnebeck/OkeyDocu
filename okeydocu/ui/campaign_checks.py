@@ -58,7 +58,9 @@ class CampaignChecks:
                 parts.append(f'<span style="color:{ALERT}">{text}</span>')
         elif blockers:
             parts.append(plural(len(blockers), "{count} point open", "{count} points open"))
-        if not blockers:
+        if self.app.service.is_empty(campaign["id"]):
+            parts.append(tr("nothing recorded yet"))
+        elif not blockers:
             text = tr("✓ ready to confirm")
             parts.append(f'<span style="color:{DONE}">{text}</span>')
         label.setText("  ·  ".join(parts))

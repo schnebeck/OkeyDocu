@@ -23,7 +23,7 @@ from okeydocu.reporting.template import (
 from okeydocu.ui.confirm_overlay import ConfirmOverlay
 
 from .test_report_signing import smime_identity
-from .workspace_helpers import plan_title, start, with_asset
+from .workspace_helpers import plan_title, record, start, with_asset
 
 
 # Confirming ------------------------------------------------------------------
@@ -41,6 +41,7 @@ def confirm(monkeypatch, fill=None):
 def test_confirming_closes_and_files_the_protocol(window, app, monkeypatch):
     with_asset(window, app)
     start(window, monkeypatch)
+    record(window, app)
     campaign = window.campaign.campaign_id
     confirm(monkeypatch)
     window.campaign.header.finish_button.click()
@@ -55,6 +56,7 @@ def test_confirming_closes_and_files_the_protocol(window, app, monkeypatch):
 def test_declining_to_confirm_stays_in_the_open_campaign(window, app, monkeypatch):
     with_asset(window, app)
     start(window, monkeypatch)
+    record(window, app)
     monkeypatch.setattr(ConfirmOverlay, "exec", lambda self: 0)
     window.campaign.header.finish_button.click()
     assert app.service.campaign(window.campaign.campaign_id)["status"] == "open"
@@ -77,6 +79,7 @@ def test_confirming_signs_with_the_certificate(window, app, monkeypatch, tmp_pat
     smime_identity(certificate, "geheim")
     with_asset(window, app)
     start(window, monkeypatch)
+    record(window, app)
     campaign = window.campaign.campaign_id
 
     def fill(overlay):
@@ -96,6 +99,7 @@ def test_a_wrong_password_closes_nothing(window, app, monkeypatch, tmp_path, qtb
     smime_identity(certificate, "geheim")
     with_asset(window, app)
     start(window, monkeypatch)
+    record(window, app)
     overlay = ConfirmOverlay(app, app.service.campaign(window.campaign.campaign_id))
     qtbot.addWidget(overlay)
     overlay.sign.setChecked(True)
@@ -112,6 +116,7 @@ def test_a_failure_after_closing_says_what_is_done(window, app, monkeypatch):
     monkeypatch.setattr(app.archive, "generate", lambda *_: (_ for _ in ()).throw(ReportError("kaputt")))
     with_asset(window, app)
     start(window, monkeypatch)
+    record(window, app)
     confirm(monkeypatch)
     window.campaign.finish()
     assert app.service.campaign(window.campaign.campaign_id)["status"] == "closed"
@@ -123,6 +128,7 @@ def test_the_draft_shows_the_open_campaign_without_archiving(window, app, monkey
     monkeypatch.setattr(QDesktopServices, "openUrl", lambda url: opened.append(url.toLocalFile()))
     with_asset(window, app)
     start(window, monkeypatch)
+    record(window, app)
     campaign = window.campaign.campaign_id
     window.campaign.header.draft_button.click()
     assert opened and opened[0].endswith("entwurf.pdf")
@@ -233,6 +239,7 @@ def test_the_filed_protocol_opens_from_the_notice(window, app, monkeypatch):
 def test_a_pending_edit_goes_into_the_seal(window, app, monkeypatch):
     with_asset(window, app)
     start(window, monkeypatch)
+    record(window, app)
     campaign = window.campaign.campaign_id
     app.service.add_measurement(campaign, "other", [])
     window.campaign.refresh()

@@ -36,3 +36,12 @@ def start(window, monkeypatch, plan="Ohne Plan", simulated=False):
 
 def plan_title(window):
     return window.guided.plans[0].label  # as the start dialog lists it
+
+
+def record(window, app, campaign_id=None):
+    """A value typed in by hand, so the campaign holds something to confirm."""
+    from okeydocu.model import Quantity, ResultValue
+
+    campaign_id = campaign_id or window.campaign.campaign_id
+    app.service.add_measurement(campaign_id, "u", [ResultValue("u", "U", Quantity.parse("230V"))])
+    window.campaign.show_campaign(campaign_id)

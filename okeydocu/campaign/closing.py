@@ -25,6 +25,17 @@ ATTACHMENT_PROBLEMS = (N_("Attachment missing: {name}"), N_("Attachment changed:
 class ClosingMixin:
     """From an open campaign to a sealed record."""
 
+    def is_empty(self, campaign_id: int) -> bool:
+        """Nothing was recorded: no measurement, photo, note or file, report or worked step."""
+        found = self.db.one(
+            "SELECT (SELECT count(*) FROM measurements WHERE campaign_id=?)"
+            " + (SELECT count(*) FROM photos WHERE campaign_id=?)"
+            " + (SELECT count(*) FROM attachments WHERE campaign_id=?)"
+            " + (SELECT count(*) FROM reports WHERE campaign_id=?)"
+            " + (SELECT count(*) FROM steps WHERE campaign_id=?"
+            "    AND (note != '' OR status IN ('done', 'skipped'))) AS n", *[campaign_id] * 5)
+        return found["n"] == 0
+
     def blockers(self, campaign_id: int) -> list[str]:
         """What still prevents closing the campaign."""
         steps = self.steps(campaign_id)

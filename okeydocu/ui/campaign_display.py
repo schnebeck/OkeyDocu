@@ -10,13 +10,14 @@ from __future__ import annotations
 
 from html import escape
 
+from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QMenu, QWidget
 
 from .. import APP_NAME
 from ..campaign.service import NO_INSTRUMENT
 from ..l10n import tr
 from .campaign_items import SEPARATOR, count_text, order_line
-from .dashboard_card import MAKE_REPORT, OPEN_REPORT, RESUME
+from .dashboard_card import MAKE_REPORT, MENU, OPEN_REPORT, RESUME
 from .report_signing import open_report
 
 
@@ -78,6 +79,9 @@ class CampaignDisplay:
             self.home.refresh()
 
     def _from_home(self, request: str, campaign_id: int) -> None:
+        if request == MENU:
+            self._campaign_menu(campaign_id, QCursor.pos())
+            return
         if request == MAKE_REPORT:
             self.report_requested.emit(campaign_id)
             return
@@ -139,7 +143,8 @@ class CampaignDisplay:
         self._show_link()
         self.resume_action.setEnabled(instrument and not here)
         self.pause_action.setEnabled(self.session is not None)
-        self.finish_action.setEnabled(is_open)
+        empty = is_open and self.app.service.is_empty(campaign["id"])
+        self.finish_action.setEnabled(is_open and not empty)
         self.draft_open = is_open
         self._proxies_changed()
         self.tester_action.setEnabled(is_open)
@@ -158,7 +163,8 @@ class CampaignDisplay:
         self.header.resume_button.setVisible(instrument and not here)
         self.header.pause_button.setVisible(here)
         self.header.photos_button.setVisible(is_open)
-        self.header.finish_button.setVisible(is_open)
+        self.header.finish_button.setVisible(is_open and not empty)
+        self.header.delete_button.setVisible(empty)
         # Once nothing is left to do, confirming is the next step and looks like it.
         ready = is_open and campaign["plan_key"] and not self.app.service.blockers(campaign["id"])
         self.header.finish_button.setStyleSheet("font-weight: bold;" if ready else "")

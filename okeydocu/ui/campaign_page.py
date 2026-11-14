@@ -161,6 +161,7 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.header.assign_button.clicked.connect(
             lambda: self.timeline_action.setChecked(self.header.assign_button.isChecked()))
         self.header.finish_button.clicked.connect(self.finish)
+        self.header.delete_button.clicked.connect(self.delete_campaign)
         self.header.draft_button.clicked.connect(self.show_draft)
         self.header.report_button.clicked.connect(self.make_report)
         self.structure.chosen.connect(self._place_chosen)

@@ -128,6 +128,7 @@ def _shown(window, app, campaign):
 
 def test_saying_no_keeps_the_campaign(window, app, campaign, monkeypatch):
     monkeypatch.setattr("okeydocu.ui.campaign_confirm.ask_delete", lambda *_: False)
+    _measure(app, campaign)
     page = _shown(window, app, campaign)
     page.delete_action.trigger()
     assert app.service.campaign(campaign) is not None
@@ -182,3 +183,30 @@ def test_a_closed_campaign_can_be_deleted_too(window, app, campaign, monkeypatch
 def test_the_context_menu_ends_with_deleting(window, app, campaign):
     page = _shown(window, app, campaign)
     assert page.menu_actions()[-1] is page.delete_action
+
+
+def test_an_empty_campaign_goes_without_asking_and_offers_no_confirming(window, app, asset,
+                                                                          monkeypatch):
+    asked = []
+    monkeypatch.setattr("okeydocu.ui.campaign_confirm.ask_delete",
+                        lambda *_: asked.append(True) or False)
+    empty = app.service.create(asset, "Leer", "Prüfer")
+    page = _shown(window, app, empty)
+    assert page.header.delete_button.isVisibleTo(page)
+    assert not page.header.finish_button.isVisibleTo(page)
+    assert not page.finish_action.isEnabled()
+    page.header.delete_button.click()
+    assert app.service.campaign(empty) is None and asked == []
+
+
+def test_a_card_on_the_overview_offers_the_campaigns_menu(window, app, campaign, monkeypatch):
+    from PySide6.QtCore import QPoint
+    from PySide6.QtGui import QContextMenuEvent
+
+    page = _shown(window, app, campaign)
+    page.show_home()
+    asked = []
+    monkeypatch.setattr(page, "_campaign_menu", lambda chosen, where: asked.append(chosen))
+    card = page.home.cards[0]
+    card.contextMenuEvent(QContextMenuEvent(QContextMenuEvent.Reason.Mouse, QPoint(5, 5)))
+    assert asked == [campaign]

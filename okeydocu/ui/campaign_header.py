@@ -68,6 +68,9 @@ class CampaignHeader(QWidget):
         self.checks.setTextFormat(Qt.TextFormat.RichText)
         self.checks.linkActivated.connect(self.check_requested)
         self.report_button = QPushButton(tr("Create report …"))
+        self.delete_button = QPushButton(QIcon.fromTheme("edit-delete"), tr("Delete"))
+        self.delete_button.setToolTip(tr("Nothing has been recorded yet. An empty campaign is"
+                                         " deleted, not confirmed."))
         text = QVBoxLayout()
         text.setSpacing(0)
         title = QHBoxLayout()
@@ -81,7 +84,7 @@ class CampaignHeader(QWidget):
         buttons.addStretch(1)
         for button in (self.resume_button, self.pause_button, self.photos_button,
                        self.assign_button, self.draft_button, self.finish_button,
-                       self.report_button):
+                       self.delete_button, self.report_button):
             buttons.addWidget(button)
             # Shown by the campaign that needs them; hidden pages keep their first layout.
             button.hide()

@@ -47,8 +47,12 @@ class CampaignConfirm:
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
 
     def delete_campaign(self) -> None:
+        """An empty campaign goes at once; one holding anything is asked about first."""
         campaign = self._campaign()
-        if campaign is None or not ask_delete(self, self.app, campaign):
+        if campaign is None:
+            return
+        if not self.app.service.is_empty(campaign["id"]) and \
+                not ask_delete(self, self.app, campaign):
             return
         if campaign["status"] == "closed":
             run_busy(self, tr("Fetching the seal key …"), self.app.service.seal_key)
@@ -66,8 +70,11 @@ class CampaignConfirm:
                                    title=campaign["title"], folder=folder))
 
     def finish(self) -> None:
+        """An empty campaign is never confirmed; it is deleted instead."""
         campaign = self._campaign()
         if campaign is None or campaign["status"] != "open":
+            return
+        if self.app.service.is_empty(campaign["id"]):
             return
         self.values.editor.apply()  # nothing typed may be lost to the seal
         overlay = ConfirmOverlay(self.app, campaign, self)
