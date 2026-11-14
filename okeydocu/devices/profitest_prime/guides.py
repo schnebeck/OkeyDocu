@@ -23,6 +23,7 @@ PE_LEAD = ("3", "socket-3", "PE (L2)")
 STORE = Action(("key-mem",), N_("Store the result with MEM: OkeyDocu receives it at once."))
 LIMITS = N_("Limits: set them as the test basis requires.")
 LIVE = (N_("Leave it switched on"), N_("The voltage is measured on the live supply."))
+CONDUCTORS = ("line_conductors", "n_conductor")  # what reaches the test point
 
 RCD_FEATURES = ("rcd_type", "rated_residual_current", "rated_current", "number_of_poles",
                 "n_terminal")
@@ -58,13 +59,13 @@ VOLTAGE = Guide(
      Lead(*L_LEAD, "in_l1", N_("Place probe L (L1) on the incoming line conductor L1.")),
      Lead(*N_LEAD, "in_n", N_("Place probe N (L3) on the incoming N, where there is one."))),
     N_("Live parts are exposed: touch only the grips of the probes."),
-    live=True, preparation=(LIVE,), selector_label="U",
+    element_features=CONDUCTORS, live=True, preparation=(LIVE,), selector_label="U",
     selector_note=N_("Measures the voltage between the probes and its frequency."),
     settings=(Action(("soft-1",), N_("Measuring path: AUTO measures L-PE, N-PE and L-N one"
                                      " after the other; without N choose L-PE.")),),
     steps=(Action(("key-start",), N_("Hold the probes in place: the voltage is shown at"
                                      " once.")), STORE),
-    drawing_features=("nominal_voltage", "rated_current"))
+    drawing_features=("nominal_voltage", "rated_current"), every_path=True)
 
 PROTECTIVE_CONDUCTOR = Guide(
     "rlo", N_("Protective conductor resistance"), 13, "cee_plug",
@@ -72,7 +73,7 @@ PROTECTIVE_CONDUCTOR = Guide(
     (Lead(*L_LEAD, "pe_pin", N_("Place probe L (L1) on the PE contact of the CEE plug.")),
      Lead(*PE_LEAD, "body", N_("Place probe PE (L2) on a bare metal spot of the housing."))),
     N_("Measure only dead: the plug is pulled."),
-    live=False,
+    element_features=CONDUCTORS, live=False,
     preparation=((N_("Switch off and pull the plug"),
                   N_("The protective conductor is measured without voltage.")),
                  (N_("Find a bare metal spot"), N_("Paint and rust falsify the result."))),

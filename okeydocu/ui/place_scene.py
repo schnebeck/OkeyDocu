@@ -60,8 +60,9 @@ class PlaceScene(QWidget):
             painter.translate(box.left() + 10, box.top() + 90)
             painter.scale(SCALE, SCALE)
             painter.setFont(_font(8))
+            lines = self.place.lines(self.guide.drawing_features)
             DRAWINGS[self.guide.test_object](
-                painter, QRectF(0, 0, (box.width() - 20) / SCALE, 230), self.place.lines(),
+                painter, QRectF(0, 0, (box.width() - 20) / SCALE, 230), lines,
                 self.place.poles, self.place.n_left)
             painter.restore()
         state = QRectF(box.left() + 24, box.top() + 400, box.width() * 0.42, 220)

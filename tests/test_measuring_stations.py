@@ -110,3 +110,29 @@ def test_voltage_and_protective_conductor_have_their_own_test_points(qtbot, app,
     assert window.guide.test_object == kind
     assert set(window.bench.anchors) >= terminals
     assert window.place.asset_id == plant["machine"]
+
+
+def test_one_line_conductor_without_n_leaves_the_n_lead_and_advises_against_auto(
+        qtbot, app, plant):
+    app.db.set_asset_features(plant["machine"], {"line_conductors": "1",
+                                                 "n_conductor": "without N"})
+    window = opened(qtbot, app, plant, "u", "machine")
+    assert window.place.poles == 2 and window.place.has_n is False
+    assert [lead.plug for lead in window.guide.leads] == ["3", "1"]
+    with speaking("de"):
+        window.go(MODE)
+    assert "Messstrecke von Hand wählen" in window.step_text.text()
+
+
+def test_what_is_stated_above_stands_in_the_empty_field(qtbot, app, plant):
+    hall = app.db.asset(plant["machine"])["parent_id"]
+    cabinet = app.db.add_asset(app.db.asset(plant["machine"])["customer_id"],
+                               "distribution_board", "Schrank", plant["machine"])
+    app.db.set_asset_features(plant["machine"], {"line_conductors": "3"})
+    plant["cabinet"] = cabinet
+    with speaking("de"):
+        window = opened(qtbot, app, plant, "u", "cabinet")
+    field = window.form.fields["line_conductors"]
+    assert field.lineEdit().placeholderText() == "3, wie übergeordnet angegeben"
+    assert "fde2c4" not in field.styleSheet()
+    assert hall is None and window.place.poles == 4

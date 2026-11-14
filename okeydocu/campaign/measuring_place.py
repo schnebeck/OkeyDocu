@@ -19,6 +19,8 @@ from dataclasses import dataclass, field, replace
 
 from ..devices.guide import Guide
 from ..l10n.catalog import source_of
+from .line_conductors import ABSENT, LINE_CONDUCTORS, N_CONDUCTOR, PRESENT, ConductorBook, \
+    neutral_of
 
 
 @dataclass(frozen=True)
@@ -29,6 +31,7 @@ class MeasuringPlace:
     features: dict[str, str] = field(default_factory=dict)
     units: dict[str, str] = field(default_factory=dict)
     kind: str = ""
+    inherited: dict[str, str] = field(default_factory=dict)  # stated above, not at the element
 
     @property
     def is_new(self) -> bool:
@@ -40,7 +43,7 @@ class MeasuringPlace:
                        title=title or self.title)
 
     def stated(self, key: str) -> str:
-        value = str(self.features.get(key) or "").strip()
+        value = str(self.features.get(key) or self.inherited.get(key) or "").strip()
         unit = self.units.get(key, "")
         return f"{value} {unit}".strip() if value else ""
 
@@ -49,7 +52,16 @@ class MeasuringPlace:
 
     @property
     def poles(self) -> int:
+        """Two for one line conductor, four for three, as stated or by the poles."""
+        lines = self.stated(LINE_CONDUCTORS)
+        if lines in ("1", "3"):
+            return 2 if lines == "1" else 4
         return 4 if str(self.features.get("number_of_poles") or "") in ("3", "4") else 2
+
+    @property
+    def has_n(self) -> bool | None:
+        """Whether N reaches the test point; None where nothing says."""
+        return neutral_of(self.stated(N_CONDUCTOR))
 
     @property
     def n_left(self) -> bool:
@@ -86,6 +98,17 @@ def _measured_at(db, guide: Guide, asset_id: int | None) -> int | None:
     return None
 
 
+def _from_above(db, parent_id: int | None) -> dict[str, str]:
+    """The conductors elements above state, in the words their lists hold."""
+    known = ConductorBook(db).at(parent_id)
+    found = {}
+    if known.lines is not None:
+        found[LINE_CONDUCTORS] = str(known.lines)
+    if known.neutral is not None:
+        found[N_CONDUCTOR] = PRESENT if known.neutral else ABSENT
+    return found
+
+
 def _title(row) -> str:
     return " ".join(part for part in (row["name"], row["identifier"]) if part)
 
@@ -114,7 +137,7 @@ def measuring_place(service, guide: Guide, asset_id: int | None,
     units = {r["key"]: r["unit"] for r in db.query(
         "SELECT key, unit FROM kind_features WHERE kind=?", row["kind"])}
     return MeasuringPlace(found, title, path, json.loads(row["features_json"] or "{}"), units,
-                          row["kind"])
+                          row["kind"], _from_above(db, row["parent_id"]))
 
 
 def _owner_kind(db, guide: Guide) -> str:
@@ -129,7 +152,8 @@ def new_place(service, guide: Guide, parent_id: int, root_id: int) -> MeasuringP
     kind = _owner_kind(db, guide) if guide.owner_feature else ""
     units = {r["key"]: r["unit"] for r in db.query(
         "SELECT key, unit FROM kind_features WHERE kind=?", kind)}
-    return MeasuringPlace(None, "", _path(db, parent_id, root_id), {}, units, kind)
+    return MeasuringPlace(None, "", _path(db, parent_id, root_id), {}, units, kind,
+                          _from_above(db, parent_id))
 
 
 def make_place(service, place: MeasuringPlace, parent_id: int, name: str,

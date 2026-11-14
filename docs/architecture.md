@@ -510,6 +510,53 @@ active step or leaves it open. The connection is exclusive: for fetching from th
 and the clock check the session briefly steps aside (`ui/instrument_control.py`). Before closing
 it is disconnected, so that no reading hits a closed record.
 
+## Guided measurement
+
+Measuring without a plan, the campaign offers the measurements the instrument's driver has a
+guide for (`ui/guide_starter.py`). The first measurement of a kind in a campaign opens its own
+window (`ui/measuring_window.py`) that leads through six stations; no station can be skipped,
+but “Next” never waits for the instrument, the tester confirms by going on. A later measurement
+of the same kind only shows the first station, the element the next readings go to.
+
+1. **Installation** (`ui/place_station.py`): the element measured at, chosen or made on the way.
+   A guide that names an owner feature, such as the RCD type, is taken at the nearest element
+   of a kind with that feature; where none exists yet it is made below the element chosen as
+   parent, which is kept per campaign. What the guide needs the element to state is entered
+   here and stored at the element. The element kept becomes where the campaign's readings go.
+2. **Rotary switch** (`ui/dial_station.py`): the drawn knob turns to the position wanted. The
+   instrument is asked for its switch on entering the station and on request, never in a
+   steady stream; a position that serves the measurement moves on by itself.
+3. **Test leads**: plug over its row of sockets, grey lead, probe on its terminal, laid one
+   after the other. The test point is a drawing of its own per kind (`ui/test_object*.py`): an
+   RCD, the incoming terminals of a main switch, a CEE plug with the machine housing.
+4. **Supply**: whether the battery is enough or the measurement needs the mains.
+5. **Mode and limits**: the panel closes in on display and softkeys; what to set with each
+   softkey, and what the element states for it.
+6. **Measure**: the keys in order; the window waits for the result of its own function and
+   shows it once it has arrived. Results go on being stored by the campaign as usual.
+
+The driver describes its side in `devices/guide.py`: stations, leads, softkeys, keys and which
+functions end the measurement. The front panel is a drawing of the driver package
+(`devices/profitest_prime/panel/`); the application never imports a driver for it.
+
+## Line conductors at a test point
+
+An electrical element states how many line conductors reach it (`line_conductors`, 1 or 3)
+and whether N does (`n_conductor`, with N or without N). What it leaves open it takes from the
+nearest element above that states it (`campaign/line_conductors.py`); an empty field in the
+guide shows the value from above as its placeholder.
+
+The PROFITEST PRIME has no measurement for a single line conductor: AUTO measures every pair of
+conductors, whether they are there or not. A reading whose conductor path, such as L2-PE or
+N-PE, needs a conductor the element lacks is not applicable. It stays stored as it came and is
+shown grey with “not applicable” in the table, but it counts towards no verdict, no defect and
+no report. The mark is worked out whenever it is needed, so it follows the element when its
+statement changes. Readings without a conductor path are never marked.
+
+The guide follows the statement: one line conductor draws L and N at the main switch and a
+three-pole CEE plug, without N the N lead is left out, and the settings station advises
+choosing the measuring path by hand where AUTO would measure conductors that are not there.
+
 ## Photos and attachments
 
 A photo is not a measured value but is in its own table `photos`. Its capture time stays
@@ -726,10 +773,13 @@ a logo in the middle of the page does not displace any text.
 
 ## Signature
 
-Signing is done as PAdES with an X.509 certificate from a PKCS#12 file. This can also be an
-S/MIME certificate, for example exported from Thunderbird or Kleopatra. The file stays where
-it is. The program only remembers its path in `settings.ini`; key and password are stored
-nowhere. Before signing, a dialog shows name, e-mail, issuer and validity.
+Signing is done as PAdES with an X.509 certificate from a PKCS#12 file or from an NSS
+database, such as the one of Firefox or Thunderbird (`reporting/nss.py`). This can also be an
+S/MIME certificate. The file or database stays where it is; an NSS database is opened read-only
+through the NSS softoken over PKCS#11, and its folder is free to choose. The program only
+remembers the reference in `settings.ini`; key and password are stored nowhere. Where pinentry
+is installed it asks for the key password (`ui/pinentry.py`), up to three times; otherwise the
+password is typed into the form. Before signing, a dialog shows name, e-mail, issuer and validity.
 Expired certificates and pure encryption certificates are rejected.
 
 An e-mail certificate gives a technically valid signature. Whether a PDF program shows it as

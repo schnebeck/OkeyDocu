@@ -5,6 +5,12 @@ texts:
   Where the RCD has its N terminals, seen from the front.: Wo der FI seine N-Klemmen hat, von vorn gesehen.
   right: rechts
   left: links
+  Line conductors: Außenleiter
+  "How many line conductors reach the test point: 1 for single-phase, 3 for three-phase. Readings between line conductors that are not there are marked as not applicable.": "Wie viele Außenleiter an der Prüfstelle ankommen: 1 bei Wechselstrom, 3 bei Drehstrom. Messwerte zwischen Außenleitern, die es nicht gibt, werden als „entfällt“ markiert."
+  N conductor: Neutralleiter
+  "Whether the N conductor reaches the test point. Without it, readings against N are marked as not applicable.": "Ob der Neutralleiter an der Prüfstelle ankommt. Ohne ihn werden Messwerte gegen N als „entfällt“ markiert."
+  with N: mit N
+  without N: ohne N
   Protective device: Schutzeinrichtung
   Instantaneous trip: Unverzögerte Auslösung
   Disconnecting current Iₐ: Abschaltstrom Iₐ

@@ -61,14 +61,25 @@ def supply_text(guide: Guide) -> str:
     return "".join(f"<p>{escape(line)}</p>" for line in lines)
 
 
-def mode_text(guide: Guide, settings: list[tuple[str, str]], element: str) -> str:
-    """`settings` are what the element states for the measurement, as (name, value)."""
+def conductors_text(guide: Guide, lines: str, has_n: bool | None) -> str:
+    """Advice where AUTO would measure conductors the test point lacks."""
+    if not guide.every_path or (lines != "1" and has_n is not False):
+        return ""
+    advice = tr("The test point lacks conductors AUTO would measure: choose the measuring path"
+                " by hand. Readings against missing conductors are marked as not applicable.")
+    return f"<p style='color:{CAUTION}'>⚠ {escape(advice)}</p>"
+
+
+def mode_text(guide: Guide, settings: list[tuple[str, str]], element: str,
+              advice: str = "") -> str:
+    """`settings` are what the element states for the measurement, as (name, value);
+    `advice` stands below the settings."""
     how = escape(tr("Press the softkey beside a setting, choose the value with the arrow"
                     " keys, confirm it and take it over with ✓."))
     items = "".join(f"<li>{escape(tr(action.text))}</li>" for action in guide.settings)
     stated = "".join(f"<li>{escape(name)}: <b>{escape(value)}</b></li>"
                      for name, value in settings)
-    html = f"<ol>{items}</ol><p>{how}</p>"
+    html = f"<ol>{items}</ol><p>{how}</p>{advice}"
     if stated:
         title = escape(tr("{element} states:", element=element))
         html += f"<p><b>{title}</b></p><ul>{stated}</ul>"

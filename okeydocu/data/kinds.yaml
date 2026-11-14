@@ -16,24 +16,29 @@
 
 kinds:
   - {key: installation, label: Installation, icon: installation, interval: 48,
-     features: [Operator, Person responsible, Installer, Year of installation, Network operator,
+     features: [Line conductors, N conductor,
+                Operator, Person responsible, Installer, Year of installation, Network operator,
                 Earthing system type, "Supply voltage|V", "Supply frequency|Hz", "Rated current|A",
                 Cable type, "Cross-section|mm²", "Cable length|m"]}
   - {key: machine, label: Machine, icon: machine, izytron: 231, interval: 12,
-     features: [CE marking, IP rating, Protection class, "Nominal voltage|V", Earthing system type,
+     features: [Line conductors, N conductor,
+                CE marking, IP rating, Protection class, "Nominal voltage|V", Earthing system type,
                 Supply cable, "Rated current|A", "Rated power|kW", Number of cores, Power factor,
                 Characteristic, "Cross-section|mm²", Ex number, Ex zone,
                 Type of ignition protection, "Cable length|m"]}
   - {key: device, label: Device, icon: device, interval: 12,
-     features: [Protection class, "Nominal voltage|V", "Rated current|A", "Rated power|kW"]}
+     features: [Line conductors, N conductor,
+                Protection class, "Nominal voltage|V", "Rated current|A", "Rated power|kW"]}
   - {key: distribution_board, label: Distribution board, icon: distribution_board,
      izytron: 232, interval: 48,
-     features: [Board type, IP rating, Material, Installation method, Protection class,
+     features: [Line conductors, N conductor,
+                Board type, IP rating, Material, Installation method, Protection class,
                 Earthing system type, "Cable length|m"]}
   - {key: field, label: Field (+EXT), icon: element}
   - {key: construction_distributor, label: Construction site distribution board,
      icon: construction_distributor, interval: 3,
-     features: [Material number, Insulation class, Year of manufacture, Phases, Number of poles,
+     features: [Material number, Insulation class, Year of manufacture, Line conductors,
+                N conductor, Number of poles,
                 "Rated current|A", "Rated voltage|V", "Rated power|kW", "Weight|kg"]}
   - {key: rcd, label: RCD, icon: rcd, izytron: 233, interval: 6,
      features: [RCD type, {key: number_of_poles, label: Poles of the protective device},
@@ -49,7 +54,8 @@ kinds:
      features: [IMD type, "Nominal system voltage|V", "Measuring voltage|V",
                 "Measuring current|mA", "Warning value|kΩ", "Alarm value|kΩ"]}
   - {key: circuit, label: Circuit, icon: circuit, izytron: 236,
-     features: [Cable type, Characteristic, {key: number_of_cores, label: Cores of the cable},
+     features: [Line conductors, N conductor,
+                Cable type, Characteristic, {key: number_of_cores, label: Cores of the cable},
                 "Rated current|A", "Cross-section|mm²",
                 {key: number_of_poles, label: Poles of the protective device}, "Cable length|m"]}
   - {key: cable, label: Cable, icon: cable,
@@ -62,26 +68,31 @@ kinds:
                 "Cross-section|mm²", "Cable length|m"]}
   - {key: equipment, label: Equipment, icon: equipment, izytron: 237,
      interval: 12,
-     features: [Equipment type, Cable type, Degree of protection, Number of cores,
+     features: [Line conductors, N conductor,
+                Equipment type, Cable type, Degree of protection, Number of cores,
                 Protection class, "Cross-section|mm²", "Cable length|m"]}
   - {key: electric_engine, label: Electric motor, icon: electric_engine,
      interval: 12,
-     features: [IP rating, Insulation class, Year of manufacture, Gearbox, Number of poles, Phases,
+     features: [IP rating, Insulation class, Year of manufacture, Gearbox, Number of poles,
+                Line conductors, N conductor,
                 "Rated voltage|V", "Rated current|A", "Rated power|kW", Duty type, "Speed|1/min",
                 Power factor]}
   - {key: generator, label: Generator, icon: generator, interval: 12,
-     features: [IP rating, Thermal class, Insulation class, Phases, Year of manufacture,
+     features: [IP rating, Thermal class, Insulation class, Line conductors, N conductor,
+                Year of manufacture,
                 "Rated voltage|V", "Rated current|A", "Active power|kW", "Apparent power|kVA",
                 Duty type, "Speed|1/min"]}
   - {key: wind_power, label: Wind turbine, icon: wind_power, interval: 12,
-     features: [IP rating, Thermal class, Phases, Year of manufacture, "Rated voltage|V",
-                "Rated current|A", "Active power|kW", "Apparent power|kVA", "Speed|1/min"]}
+     features: [IP rating, Thermal class, Line conductors, N conductor, Year of manufacture,
+                "Rated voltage|V", "Rated current|A", "Active power|kW", "Apparent power|kVA",
+                "Speed|1/min"]}
   - {key: photovoltaic, label: PV system, icon: photovoltaic, interval: 48,
      features: [Module type, "Rated power|kWp", "Nominal voltage|V", "Rated current|A",
                 "Open-circuit voltage|V", "Short-circuit current|A", Connector, Cells per module]}
   - {key: charging_station, label: Charging station, icon: charging_station,
      interval: 12,
-     features: [Charging equipment, "Total power|kW", Charging mode, Charging type,
+     features: [Line conductors, N conductor,
+                Charging equipment, "Total power|kW", Charging mode, Charging type,
                 "Charging current|A", "DC charging voltage|V", Plug type,
                 Three-phase charging points, Single-phase charging points]}
   - {key: battery, label: Battery, icon: battery, interval: 12,
@@ -132,7 +143,8 @@ lists:
   Cores of the cable: cores
   Number of poles: number_of_poles
   Number of cores: cores
-  Phases: phases
+  Line conductors: line_conductors
+  N conductor: n_conductor
   Earthing system type: earthing_system
   IP rating: ip_rating
   Degree of protection: ip_rating

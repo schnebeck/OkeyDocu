@@ -57,6 +57,7 @@ class Guide:
     steps: tuple[Action, ...] = ()  # how to measure and store, in order
     results: tuple[str, ...] = ()  # functions of a reading that ends the measurement
     drawing_features: tuple[str, ...] = ()  # what the drawing of the test point prints
+    every_path: bool = False  # AUTO measures every pair of conductors, there or not
 
     def ended_by(self, function: str) -> bool:
         """Whether a reading of `function` is the result this measurement waits for."""

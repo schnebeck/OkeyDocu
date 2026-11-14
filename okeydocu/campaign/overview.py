@@ -11,15 +11,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from ..model import Verdict
+from .line_conductors import failed_counts
 
 # Correlated subqueries keep each figure independent; joins would multiply the counts.
 _OVERVIEW = """
 SELECT c.id, c.title, c.status, c.driver, c.tester, c.plan_title, c.plan_key,
        a.name AS asset, a.kind AS kind, k.name AS customer, k.city AS city,
        (SELECT count(*) FROM measurements m WHERE m.campaign_id = c.id) AS measured,
-       (SELECT count(*) FROM measurements m WHERE m.campaign_id = c.id AND m.verdict = ?)
-           AS failed,
        (SELECT count(*) FROM steps s WHERE s.campaign_id = c.id) AS steps,
        (SELECT count(*) FROM steps s WHERE s.campaign_id = c.id
             AND s.status IN ('done', 'skipped')) AS steps_done,
@@ -68,14 +66,15 @@ class CampaignSummary:
 class OverviewMixin:
     def summaries(self) -> list[CampaignSummary]:
         """Every campaign, the one worked on last first."""
-        rows = self.db.query(_OVERVIEW, Verdict.FAILED.value)
+        rows = self.db.query(_OVERVIEW)
+        failed = failed_counts(self.db)
         result = [
             CampaignSummary(
                 id=row["id"], title=row["title"], is_open=row["status"] == "open",
                 driver=row["driver"], tester=row["tester"],
                 plan_title=row["plan_title"] if row["plan_key"] else "",
                 customer=row["customer"], city=row["city"] or "", asset=row["asset"],
-                measured=row["measured"], failed=row["failed"], steps=row["steps"],
+                measured=row["measured"], failed=failed.get(row["id"], 0), steps=row["steps"],
                 steps_done=row["steps_done"], loose=row["loose"], reports=row["reports"],
                 active_at=datetime.fromisoformat(row["active_at"]), kind=row["kind"],
             )

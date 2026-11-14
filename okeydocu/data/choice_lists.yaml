@@ -422,9 +422,18 @@ lists:
   cores:
     label: Cores of the cable
     values: ["1", "2", "3", "4", "5", "6", "7", "8", "10"]
-  phases:
-    label: Phases
+  line_conductors:
+    label: Line conductors
+    help: >-
+      How many line conductors reach the test point: 1 for single-phase, 3 for three-phase.
+      Readings between line conductors that are not there are marked as not applicable.
     values: ["1", "3"]
+  n_conductor:
+    label: N conductor
+    help: >-
+      Whether the N conductor reaches the test point. Without it, readings against N are
+      marked as not applicable.
+    values: [with N, without N]
   n_terminal:
     label: N terminal
     help: Where the RCD has its N terminals, seen from the front.

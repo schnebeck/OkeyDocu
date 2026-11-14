@@ -8,9 +8,10 @@
 
 from __future__ import annotations
 
-from ..model import Verdict
+from ..campaign.line_conductors import ConductorBook, failed_counts
 from ..campaign.repeat import REPEAT
 from ..l10n import plural, tr
+from ..model import Verdict
 from .common import POINT_ID, ROW_ID
 from .setting_warning import differing
 from .structure_tree import UNPLACED
@@ -29,7 +30,7 @@ class CampaignChecks:
             label.setText("")
             return
         unplaced = self._count(campaign["id"], "asset_id IS NULL")
-        failed = self._count(campaign["id"], "verdict = ?", Verdict.FAILED.value)
+        failed = failed_counts(self.app.db, campaign["id"]).get(campaign["id"], 0)
         blockers = self.app.service.blockers(campaign["id"])
         parts = []
         if unplaced:
@@ -93,10 +94,13 @@ class CampaignChecks:
 
     def _next_defect(self) -> None:
         """Each click goes on to the next defect, in the order they were measured."""
-        self._next_of(self.app.db.query(
-            "SELECT id, asset_id FROM measurements WHERE campaign_id = ? AND verdict = ?"
-            " ORDER BY local_time, id", self.campaign_id, Verdict.FAILED.value,
-        ))
+        rows = self.app.db.query(
+            "SELECT id, asset_id, parameters_json FROM measurements"
+            " WHERE campaign_id = ? AND verdict = ? ORDER BY local_time, id",
+            self.campaign_id, Verdict.FAILED.value,
+        )
+        book = ConductorBook(self.app.db)
+        self._next_of([row for row in rows if not book.omitted(row)])
 
     def _next_of(self, rows: list) -> None:
         """The measurement after the one shown, among `rows`; after the last, the first."""

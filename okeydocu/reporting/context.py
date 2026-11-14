@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
 
+from ..campaign.line_conductors import ConductorBook
 from ..campaign.photo_view import PhotoView
 from ..campaign.repeat import REPEAT
 from ..campaign.service import MANUAL, CampaignService
@@ -127,12 +128,15 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
             hint=row["hint"],
         )
 
+    # Readings between conductors the test point lacks are not applicable and not reported.
+    book = ConductorBook(service.db)
     steps = []
     loose: dict[str, list[ReportMeasurement]] = {}
     repeat = campaign["plan_key"] == REPEAT
     for row in service.steps(campaign_id):
         plan_step = service.plan_step(row)
-        measured = [load(m) for m in service.measurements(campaign_id, row["id"])]
+        measured = [load(m) for m in service.measurements(campaign_id, row["id"])
+                    if not book.omitted(m)]
         if plan_step.kind == "note":
             continue
         if plan_step.kind == "check" and row["status"] == "done":
@@ -152,7 +156,8 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
 
     # Without a plan, measurements are simply grouped by what was measured.
     for row in service.open_measurements(campaign_id):
-        loose.setdefault(row["function"], []).append(load(row))
+        if not book.omitted(row):
+            loose.setdefault(row["function"], []).append(load(row))
     for function, measured in loose.items():
         title = Markup(function_markup(function))
         steps.append(ReportStep(title, function, "done", "", measured))

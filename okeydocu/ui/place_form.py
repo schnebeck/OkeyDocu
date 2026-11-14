@@ -20,6 +20,7 @@ from ..campaign.measuring_place import MeasuringPlace
 from ..devices.guide import Guide
 from ..l10n import N_, tr
 from .choice_box import feature_field, field_text
+from .choice_tips import choice_text
 from .pending_marks import PendingMarks
 
 MISSING_STYLE = "background:#fde2c4"
@@ -114,8 +115,12 @@ class PlaceForm(QWidget):
                 continue
             field = feature_field(features[key], str(place.features.get(key) or ""), lists)
             field.setStyleSheet(MISSING_STYLE if key in place.missing([key]) else "")
+            above = place.inherited.get(key, "")
+            if above and not place.features.get(key):
+                edit = field.lineEdit() if isinstance(field, QComboBox) else field
+                edit.setPlaceholderText(tr("{value}, as stated above", value=choice_text(above)))
             edits = field.editTextChanged if isinstance(field, QComboBox) else field.textEdited
-            edits.connect(lambda text, field=field: self._typed(field, text))
+            edits.connect(lambda text, field=field, above=above: self._typed(field, text, above))
             self.fields[key] = field
             unit = features[key].unit
             self.form.addRow(tr(features[key].label) + (f" ({unit})" if unit else ""), field)
@@ -125,8 +130,8 @@ class PlaceForm(QWidget):
         self.hint.setText(f"<span style='color:{HINT}'>{hint}</span>" if missing else "")
         self.pending_marks.watch()
 
-    def _typed(self, field, text: str) -> None:
-        field.setStyleSheet("" if text.strip() else MISSING_STYLE)
+    def _typed(self, field, text: str, above: str = "") -> None:
+        field.setStyleSheet("" if text.strip() or above else MISSING_STYLE)
         self.edited.emit()
 
     def entered(self) -> dict[str, str]:

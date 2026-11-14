@@ -11,6 +11,7 @@ new, and the bench is drawn from it."""
 
 from __future__ import annotations
 
+from dataclasses import replace
 from html import escape
 
 from ..campaign.measuring_place import candidates, make_place, measuring_place, new_place, \
@@ -50,6 +51,10 @@ class PlaceStation:
 
     def _preview(self) -> None:
         shown = self._shown()
+        # Without N at the test point the N lead stays where it is.
+        leads = tuple(lead for lead in self.base_guide.leads
+                      if not (shown.has_n is False and lead.probe.startswith("N")))
+        self.guide = replace(self.base_guide, leads=leads)
         self.scene.show_place(self.guide, shown)
         self.bench.show_guide(self.guide, shown.lines(self.guide.drawing_features),
                               shown.poles, shown.n_left)

@@ -20,6 +20,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QPushButton, \
     QStackedWidget, QVBoxLayout
 
+from ..campaign.line_conductors import LINE_CONDUCTORS
 from ..devices import driver_info
 from ..devices.guide import DIAL, LEADS, MEASURE, MODE, PLACE, STATIONS, SUPPLY
 from ..l10n import tr
@@ -30,7 +31,8 @@ from .place_form import PlaceForm
 from .place_scene import PlaceScene
 from .place_station import PlaceStation
 from .station_bar import StationBar
-from .station_texts import leads_text, measure_text, mode_text, supply_text
+from .station_texts import conductors_text, leads_text, measure_text, mode_text, \
+    supply_text
 
 
 class MeasuringWindow(PlaceStation, DialStation, QDialog):
@@ -45,7 +47,7 @@ class MeasuringWindow(PlaceStation, DialStation, QDialog):
         super().__init__(parent)
         info = driver_info(driver)
         self.app = app
-        self.guide = info.guide(function)
+        self.base_guide = self.guide = info.guide(function)
         self.repeat = repeat
         self.root = app.service.campaign(campaign_id)["asset_id"]
         self.parent_id = next((place for place in (new_parent, asset_id)
@@ -157,8 +159,10 @@ class MeasuringWindow(PlaceStation, DialStation, QDialog):
             panel.zoom_parts("lcd", *parts)
             panel.point_at(*parts)
             self.next.setText(tr("Set – next ▶"))
-            self.step_text.setText(mode_text(self.guide, self._settings(),
-                                             self.place.title))
+            advice = conductors_text(self.guide, self.place.stated(LINE_CONDUCTORS),
+                                     self.place.has_n)
+            self.step_text.setText(mode_text(self.guide, self._settings(), self.place.title,
+                                             advice))
         elif station == MEASURE:
             panel.point_at(*(part for action in self.guide.steps for part in action.parts))
             self.step_text.setText(measure_text(self.guide, self.reading))

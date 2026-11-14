@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..campaign.line_conductors import ConductorBook
 from ..campaign.service import LOCATION_SEPARATOR
 from ..l10n import day, moment, plural, tr
 from ..store.search import MeasurementFilter, search_measurements
@@ -187,7 +188,8 @@ class MeasurementView(RowMenu, MeasurementDetail, QWidget):
         # On a single day the date stands above the table, so a row tells only the time.
         show_time = _clock if one_day else partial(moment, seconds=True)
         lines = table_lines(rows, self.open_runs, show_time, area, paths,
-                            warnings_of(self.app.db, rows))
+                            warnings_of(self.app.db, rows),
+                            ConductorBook(self.app.db).omitted_ids(rows))
         points = self.point_lines(area)
         lines += points
         with filling(self.table):

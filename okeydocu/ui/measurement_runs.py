@@ -16,7 +16,7 @@ from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QTableWidget
 
 from ..campaign.service import LOCATION_SEPARATOR
-from ..l10n import plural, tr
+from ..l10n import N_, plural, tr
 from ..model import Parameter, Verdict, conductor_of
 from ..reporting.context import VERDICT_TEXT
 from .common import MEMBERS, POINT_ID, ROW_ID, RUN_ID, function_short
@@ -27,6 +27,9 @@ from .table_columns import GROUP, HEAD, ORDER, SortItem
 from .verdict_marks import verdict_icon
 
 STEP_INDENT = "   "
+NOT_APPLICABLE = N_("not applicable")
+NOT_APPLICABLE_TIP = N_("Measured between conductors the test point does not have, as the"
+                        " element states. Left out of the verdict and the report.")
 POINT_GREY = "#8a8f94"
 
 
@@ -43,6 +46,7 @@ class Line:
     opened: bool = False
     point: int | None = None  # a point of a repeat inspection still to be taken
     warning: str = ""  # settings that differ from the element, for this line or its steps
+    omitted: bool = False  # between conductors the test point lacks: not applicable
 
 
 def _place(path: list[str], area: list[str]) -> str:
@@ -69,12 +73,14 @@ def _verdict(rows) -> str:
 
 
 def _head(run_id: int, steps: list[Line], rows: list, opened: bool) -> Line:
-    """What the run's steps share, and how many there are, with the defects among them."""
+    """What the run's steps share, and how many there are, with the defects among them; steps
+    that are not applicable do not count towards the verdict."""
     first = rows[0]
-    line = Line(list(steps[0].texts), list(steps[0].keys), _verdict(rows), None, run_id,
+    counted = [row for row, step in zip(rows, steps) if not step.omitted]
+    line = Line(list(steps[0].texts), list(steps[0].keys), _verdict(counted), None, run_id,
                 [row["id"] for row in rows], opened=opened)
     places = {step.texts[PLACE] for step in steps}
-    failed = sum(row["verdict"] == Verdict.FAILED.value for row in rows)
+    failed = sum(row["verdict"] == Verdict.FAILED.value for row in counted)
     summary = f"{first['run_name']}  ·  " + plural(len(rows), "{count} step", "{count} steps")
     if failed:
         summary += "  ·  " + plural(failed, "{count} defect", "{count} defects")
@@ -89,11 +95,13 @@ def _head(run_id: int, steps: list[Line], rows: list, opened: bool) -> Line:
 
 
 def table_lines(rows, opened: set[int], show_time: Callable[[datetime], str], area: list[str],
-                paths, warnings: dict[int, str] | None = None) -> list[Line]:
+                paths, warnings: dict[int, str] | None = None,
+                omitted: set[int] = frozenset()) -> list[Line]:
     """Rows as the search gave them; each run becomes a head, its steps follow if opened.
 
     `show_time` writes the time of a row; `warnings` says, by measurement, which settings
-    differ from the element. A run's head carries the first of its steps'.
+    differ from the element. A run's head carries the first of its steps'. `omitted` are the
+    measurements that are not applicable.
     """
     lines: list[Line | int] = []  # a run's number keeps the place of its head
     runs: dict[int, list[tuple[Line, object]]] = {}
@@ -101,6 +109,9 @@ def table_lines(rows, opened: set[int], show_time: Callable[[datetime], str], ar
         line = _measurement(row, datetime.fromisoformat(row["local_time"]), show_time,
                             _place(path, area))
         line.warning = (warnings or {}).get(row["id"], "")
+        if row["id"] in omitted:
+            line.omitted = True
+            line.texts[VERDICT] = tr(NOT_APPLICABLE)
         run_id = row["run_id"]
         if run_id is None:
             lines.append(line)
@@ -163,7 +174,11 @@ def write_line(table: QTableWidget, index: int, line: Line) -> None:
             if line.head is not None:
                 item.setData(HEAD, line.head[column])
         table.setItem(index, column, item)
-    if line.verdict == Verdict.FAILED.value:
+    if line.omitted:
+        for column in range(len(line.texts)):
+            table.item(index, column).setForeground(QColor(POINT_GREY))
+        table.item(index, VERDICT).setToolTip(tr(NOT_APPLICABLE_TIP))
+    elif line.verdict == Verdict.FAILED.value:
         cell = table.item(index, VERDICT)
         cell.setForeground(QColor("#c0392b"))
         font = cell.font()
@@ -178,7 +193,8 @@ def write_line(table: QTableWidget, index: int, line: Line) -> None:
             table.item(index, column).setForeground(QColor(POINT_GREY))
     first.setData(ROW_ID, line.row_id)
     head = line.row_id is None and line.run_id is not None
-    first.setIcon(verdict_icon(line.verdict, line.opened if head else None))
+    shown = Verdict.NOT_EVALUATED.value if line.omitted else line.verdict
+    first.setIcon(verdict_icon(shown, line.opened if head else None))
     if line.row_id is None and line.run_id is not None:
         first.setData(RUN_ID, line.run_id)
         first.setData(MEMBERS, line.members)

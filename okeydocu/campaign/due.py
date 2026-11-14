@@ -12,7 +12,7 @@ from calendar import monthrange
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
-from ..model import Verdict
+from .line_conductors import failed_counts
 
 LEAD_DAYS = 30  # this far ahead an inspection counts as due
 
@@ -84,19 +84,19 @@ class DueMixin:
         """Closed campaigns with failed measurements that no follow-up campaign refers to."""
         rows = self.db.query(
             "SELECT c.id, c.title, c.closed_at, a.id AS asset_id, a.name, a.kind,"
-            " cu.name AS customer, (SELECT count(*) FROM measurements m"
-            "   WHERE m.campaign_id = c.id AND m.verdict = ?) AS failed"
+            " cu.name AS customer"
             " FROM campaigns c JOIN assets a ON a.id = c.asset_id"
             " JOIN customers cu ON cu.id = a.customer_id"
             " WHERE c.status='closed'"
             " AND NOT EXISTS (SELECT 1 FROM campaigns f WHERE f.follows_id = c.id)"
-            " ORDER BY c.closed_at", Verdict.FAILED.value,
+            " ORDER BY c.closed_at",
         )
+        failed = failed_counts(self.db)
         return [
             OpenFollowUp(row["id"], row["title"], row["asset_id"], row["name"], row["kind"],
-                         row["customer"], row["failed"],
+                         row["customer"], failed[row["id"]],
                          datetime.fromisoformat(row["closed_at"]).date())
-            for row in rows if row["failed"]
+            for row in rows if failed.get(row["id"])
         ]
 
     def mark_follow_up(self, campaign_id: int, follows_id: int) -> None:
