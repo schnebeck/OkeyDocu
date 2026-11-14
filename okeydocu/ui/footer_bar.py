@@ -16,7 +16,7 @@ from PySide6.QtWidgets import QBoxLayout, QHBoxLayout, QPushButton, QVBoxLayout,
 
 from .wrapping_label import WrappingLabel
 
-HINT_ROOM = 160  # the hint keeps at least this much beside the buttons
+HINT_ROOM = 160  # a hint keeps at least this much beside the buttons
 
 
 class FooterBar(QWidget):
@@ -51,7 +51,8 @@ class FooterBar(QWidget):
     def _needed(self) -> int:
         shown = [b for b in self.leading + self.buttons if not b.isHidden()]
         spacing = self.row.spacing() * max(len(shown) - 1, 0)
-        return sum(b.sizeHint().width() for b in shown) + spacing + HINT_ROOM
+        room = HINT_ROOM if self.hint.text() else 0
+        return sum(b.sizeHint().width() for b in shown) + spacing + room
 
     def _arrange(self) -> None:
         stack = self.width() < self._needed()
