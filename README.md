@@ -1,6 +1,6 @@
-# OkeyDocu
+![OkeyDocu – Field testing and documentation on the go](docs/images/banner.png)
 
-*Field testing and documentation on the go*
+# OkeyDocu
 
 OkeyDocu is for the people who keep electrical installations and machines safe: electricians,
 inspectors and service engineers who spend their day between control cabinets, motors and RCDs.
@@ -18,7 +18,9 @@ the order of the points, the hints and the remarks are just right.
 
 OkeyDocu is free software under the GPL. It is made for the Linux desktop, keeps all data on the
 inspector's own computer and talks to the instrument over USB or Bluetooth. It is built and tried
-on real inspections with a GOSSEN METRAWATT PROFITEST PRIME; instruments are kept behind a driver
+on real inspections with the [GOSSEN METRAWATT](https://www.gossenmetrawatt.com) PROFITEST PRIME
+and uses its Push/Print mode: the inspector measures and saves on the instrument as always, and
+the instrument sends each result to OkeyDocu right away. Instruments are kept behind a driver
 interface, so others can follow.
 
 ![The overview: open and completed campaigns, master data, plans and templates](docs/images/overview.png)
@@ -32,8 +34,9 @@ them; the tree counts what has been measured this time against last time.
 
 ![A campaign following a template: structure, readings, open points and the chosen element](docs/images/campaign.png)
 
-**Live readings from the instrument.** With the PROFITEST PRIME connected, each saved
-measurement arrives at once over Push/Print and is stored before anything else happens. The
+**Live readings by Push/Print.** The PROFITEST PRIME sends every measurement the moment it is
+saved on the instrument; OkeyDocu stores it before anything else happens and books it on the
+element chosen. The measurement itself stays on the instrument, started and run there. The
 instrument clock is set at the start of a campaign. Readings stored on the instrument while the
 link was down are fetched later. RCD tests are checked against the RCD they are booked on; a
 setting that differs from the rating plate raises a warning while the inspector can still repeat
@@ -115,5 +118,9 @@ instrument layer in [docs/hardware-abstraction.md](docs/hardware-abstraction.md)
 
 ## License
 
-Written by Thorsten Schnebeck. GPL-3.0-or-later, see [LICENSES](LICENSES/GPL-3.0-or-later.txt).
-The screenshots show invented data.
+OkeyDocu is written by Thorsten Schnebeck, who holds all rights to it. The code is programmed
+with Claude by Anthropic, used as a coding agent under his direction.
+
+GPL-3.0-or-later, see [LICENSES](LICENSES/GPL-3.0-or-later.txt). The screenshots show invented
+data. PROFITEST PRIME and GOSSEN METRAWATT are names of their owner; IZYTRONIQ belongs to
+IZYTRON. OkeyDocu is not affiliated with either.
