@@ -22,6 +22,7 @@ from ..model import (
 from ..l10n import N_, tr
 from ..vocabulary import function_symbol
 from .base import Capability, DeviceError, LiveReading, MeterDriver, SelectorPosition
+from . import simulator_guides
 from .driver_info import DriverInfo
 
 _READINGS = {
@@ -167,4 +168,5 @@ class SimulatedMeter(MeterDriver):
         return measurement
 
 
-DRIVER = DriverInfo("simulator", N_("Simulator (no hardware)"), SimulatedMeter, simulated=True)
+DRIVER = DriverInfo("simulator", N_("Simulator (no hardware)"), SimulatedMeter, simulated=True,
+                    guide=simulator_guides.guide_for, guided=tuple(simulator_guides.GUIDES))

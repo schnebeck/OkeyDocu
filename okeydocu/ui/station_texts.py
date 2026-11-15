@@ -49,18 +49,6 @@ def leads_text(guide: Guide) -> str:
     return f"<p>{escape(plugged)}</p><ol>{steps}</ol>{caution}"
 
 
-def supply_text(guide: Guide) -> str:
-    if guide.mains:
-        lines = (tr("This measurement needs the mains."),
-                 tr("Plug the mains lead into the inlet at the top right and switch on: 0 → I."),
-                 tr("The MAINS lamp lights up."))
-    else:
-        lines = (tr("The battery is enough for this measurement."),
-                 tr("Look at the BAT symbol at the top of the display. With a nearly empty"
-                    " battery plug in the mains lead and switch on."))
-    return "".join(f"<p>{escape(line)}</p>" for line in lines)
-
-
 def conductors_text(guide: Guide, lines: str, has_n: bool | None) -> str:
     """Advice where AUTO would measure conductors the test point lacks."""
     if not guide.every_path or (lines != "1" and has_n is not False):
@@ -70,16 +58,19 @@ def conductors_text(guide: Guide, lines: str, has_n: bool | None) -> str:
     return f"<p style='color:{CAUTION}'>⚠ {escape(advice)}</p>"
 
 
-def mode_text(guide: Guide, settings: list[tuple[str, str]], element: str,
+def actions_text(actions) -> str:
+    """What a station asks for, one paragraph each."""
+    return "".join(f"<p>{escape(tr(action.text))}</p>" for action in actions)
+
+
+def mode_text(guide: Guide, how, settings: list[tuple[str, str]], element: str,
               advice: str = "") -> str:
-    """`settings` are what the element states for the measurement, as (name, value);
-    `advice` stands below the settings."""
-    how = escape(tr("Press the softkey beside a setting, choose the value with the arrow"
-                    " keys, confirm it and take it over with ✓."))
+    """`how` are the station's own actions, such as how its keys set a value; `settings` what
+    the element states for the measurement, as (name, value); `advice` stands below."""
     items = "".join(f"<li>{escape(tr(action.text))}</li>" for action in guide.settings)
     stated = "".join(f"<li>{escape(name)}: <b>{escape(value)}</b></li>"
                      for name, value in settings)
-    html = f"<ol>{items}</ol><p>{how}</p>{advice}"
+    html = (f"<ol>{items}</ol>" if items else "") + actions_text(how) + advice
     if stated:
         title = escape(tr("{element} states:", element=element))
         html += f"<p><b>{title}</b></p><ul>{stated}</ul>"

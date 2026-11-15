@@ -52,7 +52,7 @@ def test_the_first_measurement_of_a_kind_is_guided_and_lands_where_it_was_made(p
     made = window.place.asset_id
     assert app.db.asset(made)["identifier"] == "=F1"
     assert page.place_target(page.campaign_id) == made
-    window.go(MEASURE)
+    window.go_to(MEASURE)
     meter_of(page).simulate_measurement("rcd_time")
     stored = app.service.measurements(page.campaign_id)
     assert [row["asset_id"] for row in stored] == [made]
@@ -73,7 +73,7 @@ def test_a_repeat_only_asks_for_the_element_and_where_new_ones_hang_is_kept(page
     root = app.service.campaign(page.campaign_id)["asset_id"]
     first.parent_chosen.emit(root)
     first.next.click()
-    first.go(MEASURE)
+    first.go_to(MEASURE)
     meter_of(page).simulate_measurement("rcd_time")
     first.next.click()
     starter.button.click()

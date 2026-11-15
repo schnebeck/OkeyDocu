@@ -100,3 +100,7 @@ texts:
   Measured between conductors the test point does not have, as the element states. Left out of the verdict and the report.: Zwischen Leitern gemessen, die es an der Prüfstelle laut Element nicht gibt. Zählt nicht zur Bewertung und steht nicht im Protokoll.
   "{value}, as stated above": "{value}, wie übergeordnet angegeben"
   "The test point lacks conductors AUTO would measure: choose the measuring path by hand. Readings against missing conductors are marked as not applicable.": "An der Prüfstelle fehlen Leiter, die AUTO messen würde: Messstrecke von Hand wählen. Messwerte gegen fehlende Leiter werden als „entfällt“ markiert."
+  Function: Funktion
+  Preparation: Vorbereitung
+  "Choose the measurement in the campaign window, beside “Simulate measurement”.": "Die Messung im Kampagnenfenster neben „Messung simulieren“ wählen."
+  "Click “Simulate measurement”: the simulator sends a random result.": "„Messung simulieren“ klicken: Der Simulator sendet ein Zufallsergebnis."

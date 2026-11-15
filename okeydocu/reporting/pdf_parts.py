@@ -21,7 +21,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.pdfmetrics import registerFontFamily
+from reportlab.pdfbase.pdfmetrics import registerFontFamily, stringWidth
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.platypus import Flowable, Image
@@ -59,6 +59,35 @@ def _register_fonts() -> tuple[str, str]:
     raise RuntimeError(tr("The font DejaVu Sans is missing (package fonts-dejavu-core)."))
 
 
+FOOT_SIZE = 7.5
+FOOT_EDGE = 18 * mm + 6  # where the text of a page starts
+FOOT_GAP = 6 * mm  # at least between two parts of the foot
+
+
+def _width(text: str, font: str) -> float:
+    return stringWidth(text, font, FOOT_SIZE)
+
+
+def foot_layout(left: str, middle: str, right: str, font: str) -> tuple[str, float]:
+    """The left part as it fits and where the middle part starts. The middle stands centred
+    while it keeps its distance to both sides; otherwise it moves up to the right part, and
+    only where even that is too little the left part is shortened, with an ellipsis."""
+    start, end = FOOT_EDGE, A4[0] - FOOT_EDGE - _width(right, font)
+    width = _width(middle, font)
+    centred = (A4[0] - width) / 2
+    if not middle:
+        return left, centred
+    if start + _width(left, font) + FOOT_GAP <= centred and centred + width + FOOT_GAP <= end:
+        return left, centred
+    middle_x = end - FOOT_GAP - width
+    room = middle_x - FOOT_GAP - start
+    if _width(left, font) <= room:
+        return left, middle_x
+    while left and _width(left + "…", font) > room:
+        left = left[:-1]
+    return (left + "…" if left else ""), middle_x
+
+
 class _NumberedCanvas(pdf_canvas.Canvas):
     """Holds pages back so the footer can say "page x of y"."""
 
@@ -78,12 +107,13 @@ class _NumberedCanvas(pdf_canvas.Canvas):
         total = len(self._pages)
         for state in self._pages:
             self.__dict__.update(state)
-            self.setFont(self.font, 7.5)
+            self.setFont(self.font, FOOT_SIZE)
             self.setFillColor(colors.HexColor("#5b6670"))
-            self.drawString(18 * mm + 6, 10 * mm, self.footer)  # where the text of the page starts
-            self.drawCentredString(A4[0] / 2, 10 * mm, self.middle)
             page = tr("Page {page} of {total}", page=self._pageNumber, total=total)
-            self.drawRightString(A4[0] - 18 * mm - 6, 10 * mm, page)
+            left, middle_x = foot_layout(self.footer, self.middle, page, self.font)
+            self.drawString(FOOT_EDGE, 10 * mm, left)
+            self.drawString(middle_x, 10 * mm, self.middle)
+            self.drawRightString(A4[0] - FOOT_EDGE, 10 * mm, page)
             super().showPage()
         super().save()
 

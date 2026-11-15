@@ -6,9 +6,14 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""A driver describes its instrument's side of a measurement: which test lead goes into which
-row of sockets, how its probe is marked and where on the test point it goes. The test point is
-named by a kind of drawing, so the app can draw what the tester has in front of them."""
+"""A driver describes its instrument's side of a measurement: the stations its flow runs
+through, which test lead goes into which row of sockets, how its probe is marked and where on
+the test point it goes. The test point is named by a kind of drawing, so the app can draw what
+the tester has in front of them.
+
+A flow is a list of stations of the kinds the application knows, in any number and order; the
+first is always the element measured at. A kind new to the application is added there once and
+is then open to every driver."""
 
 from __future__ import annotations
 
@@ -17,9 +22,10 @@ from dataclasses import dataclass
 
 from ..l10n import N_
 
-STATIONS = (N_("Installation"), N_("Rotary switch"), N_("Test leads"), N_("Supply"),
-            N_("Mode and limits"), N_("Measure"))
-PLACE, DIAL, LEADS, SUPPLY, MODE, MEASURE = range(len(STATIONS))
+PLACE, SELECT, CONNECT, PREPARE, CONFIGURE, MEASURE = (
+    "place", "select", "connect", "prepare", "configure", "measure")
+KIND_TITLES = {PLACE: N_("Installation"), SELECT: N_("Function"), CONNECT: N_("Test leads"),
+               PREPARE: N_("Preparation"), CONFIGURE: N_("Settings"), MEASURE: N_("Measure")}
 
 
 @dataclass(frozen=True)
@@ -38,10 +44,29 @@ class Action:
 
 
 @dataclass(frozen=True)
+class Station:
+    """One station of a flow. `select` turns a drawn dial where the guide names a position and
+    the panel has one, and otherwise lists its actions; `prepare` and `configure` list their
+    actions and point at the parts they name; `zoom` closes the panel in on parts."""
+
+    kind: str
+    title: str = ""  # to be translated; empty: the kind's own name
+    actions: tuple[Action, ...] = ()
+    zoom: tuple[str, ...] = ()
+
+    def heading(self) -> str:
+        return self.title or KIND_TITLES[self.kind]
+
+
+DEFAULT_FLOW = tuple(Station(kind) for kind in (PLACE, SELECT, CONNECT, PREPARE, CONFIGURE,
+                                                 MEASURE))
+
+
+@dataclass(frozen=True)
 class Guide:
     function: str
     title: str
-    selector: int  # the dial position the instrument reports for it
+    selector: int | None  # the dial position the instrument reports for it; None: no dial
     test_object: str  # kind of drawing of the test point
     test_point: str  # what the test point is, to be translated
     leads: tuple[Lead, ...]  # in the order the probes are placed
@@ -52,12 +77,15 @@ class Guide:
     preparation: tuple[tuple[str, str], ...] = ()  # what to do beforehand: heading, text
     selector_label: str = ""  # the target position as printed on the dial
     selector_note: str = ""  # what the position measures, to be translated
-    mains: bool = False  # whether the measurement needs the mains, not only the battery
     settings: tuple[Action, ...] = ()  # what to set before measuring
     steps: tuple[Action, ...] = ()  # how to measure and store, in order
     results: tuple[str, ...] = ()  # functions of a reading that ends the measurement
     drawing_features: tuple[str, ...] = ()  # what the drawing of the test point prints
     every_path: bool = False  # AUTO measures every pair of conductors, there or not
+    flow: tuple[Station, ...] = DEFAULT_FLOW
+
+    def kinds(self) -> tuple[str, ...]:
+        return tuple(station.kind for station in self.flow)
 
     def ended_by(self, function: str) -> bool:
         """Whether a reading of `function` is the result this measurement waits for."""

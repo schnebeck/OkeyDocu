@@ -9,13 +9,13 @@
 """The instrument is asked for its switch on entering the station and whenever the tester
 asks again, never in a steady stream: an answer could otherwise land inside a result being
 sent. A moment after the instrument reports a position that serves the measurement, the
-guide goes on by itself."""
+guide goes on by itself, with or without a dial drawn."""
 
 from __future__ import annotations
 
 from PySide6.QtCore import QTimer
 
-from ..devices.guide import DIAL
+from ..devices.guide import SELECT
 from .station_texts import dial_text, fits
 
 AUTO_MS = 900  # a right dial position is shown that long before the guide goes on
@@ -33,8 +33,10 @@ class DialStation:
     def show_selector(self, position) -> None:
         """A dial position read from the instrument."""
         self.position = position
-        if self.station == DIAL:
+        if self.kind == SELECT and self.has_dial:
             self._show_dial()
+        elif self.kind == SELECT and fits(self.guide, position):
+            QTimer.singleShot(AUTO_MS, self._dial_done)
 
     def _show_dial(self) -> None:
         right = fits(self.guide, self.position)
@@ -46,5 +48,5 @@ class DialStation:
             QTimer.singleShot(AUTO_MS, self._dial_done)
 
     def _dial_done(self) -> None:
-        if self.station == DIAL and fits(self.guide, self.position):
-            self.go(DIAL + 1)
+        if self.kind == SELECT and fits(self.guide, self.position):
+            self.go(self.index + 1)

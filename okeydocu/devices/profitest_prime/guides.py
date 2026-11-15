@@ -9,18 +9,39 @@
 """Every test lead fills all three sockets of its row. Plug and probe are marked differently:
 plug 1 carries probe L (L1), plug 2 probe N (L3), plug 3 probe PE (L2); the conductor in
 brackets is the one the lead takes for a phase sequence test. The softkeys are numbered from
-the top of the column right of the display; storing a result sends it over Push/Print."""
+the top of the column right of the display; storing a result sends it over Push/Print. The
+measurements guided here run on the battery; one needing the mains says so at its supply."""
 
 from __future__ import annotations
 
 from ...l10n import N_
-from ..guide import Action, Guide, Lead
+from ..guide import CONFIGURE, CONNECT, MEASURE, PLACE, PREPARE, SELECT, Action, Guide, \
+    Lead, Station
 
 L_LEAD = ("1", "socket-1", "L (L1)")
 N_LEAD = ("2", "socket-2", "N (L3)")
 PE_LEAD = ("3", "socket-3", "PE (L2)")
 
 STORE = Action(("key-mem",), N_("Store the result with MEM: OkeyDocu receives it at once."))
+BATTERY = (Action(("lcd",), N_("The battery is enough for this measurement.")),
+           Action((), N_("Look at the BAT symbol at the top of the display. With a nearly empty"
+                         " battery plug in the mains lead and switch on.")))
+MAINS = (Action(("mains-inlet", "mains-switch"), N_("This measurement needs the mains.")),
+         Action((), N_("Plug the mains lead into the inlet at the top right and switch on:"
+                       " 0 → I.")),
+         Action(("led-mains",), N_("The MAINS lamp lights up.")))
+SOFTKEYS = Action((), N_("Press the softkey beside a setting, choose the value with the arrow"
+                         " keys, confirm it and take it over with ✓."))
+
+
+def flow(supply=BATTERY) -> tuple[Station, ...]:
+    """The PROFITEST PRIME's six stations; `supply` says what the instrument runs on."""
+    return (Station(PLACE), Station(SELECT, N_("Rotary switch")), Station(CONNECT),
+            Station(PREPARE, N_("Supply"), supply),
+            Station(CONFIGURE, N_("Mode and limits"), (SOFTKEYS,), zoom=("lcd",)),
+            Station(MEASURE))
+
+
 LIMITS = N_("Limits: set them as the test basis requires.")
 LIVE = (N_("Leave it switched on"), N_("The voltage is measured on the live supply."))
 CONDUCTORS = ("line_conductors", "n_conductor")  # what reaches the test point
@@ -51,7 +72,7 @@ RCD_TIME = Guide(
         Action(("key-idn",), N_("Press IΔN: the RCD trips and the tripping time is"
                                 " measured.")),
         STORE),
-    results=("rcd_touch",))
+    results=("rcd_touch",), flow=flow())
 
 VOLTAGE = Guide(
     "u", N_("Voltage"), 12, "main_switch", N_("Main switch, incoming terminals"),
@@ -65,7 +86,7 @@ VOLTAGE = Guide(
                                      " after the other; without N choose L-PE.")),),
     steps=(Action(("key-start",), N_("Hold the probes in place: the voltage is shown at"
                                      " once.")), STORE),
-    drawing_features=("nominal_voltage", "rated_current"), every_path=True)
+    drawing_features=("nominal_voltage", "rated_current"), every_path=True, flow=flow())
 
 PROTECTIVE_CONDUCTOR = Guide(
     "rlo", N_("Protective conductor resistance"), 13, "cee_plug",
@@ -85,7 +106,7 @@ PROTECTIVE_CONDUCTOR = Guide(
                                      " (ROFFSET)."))),
     steps=(Action(("key-start",), N_("Press ON/START and hold the probes until the result"
                                      " stands.")), STORE),
-    drawing_features=("rated_current",))
+    drawing_features=("rated_current",), flow=flow())
 
 GUIDES = {guide.function: guide for guide in (RCD_TIME, VOLTAGE, PROTECTIVE_CONDUCTOR)}
 

@@ -6,11 +6,12 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""No station can be skipped, but each can be left at once: "Next" does not wait for the
-instrument, the tester confirms by going on. The leads stay laid once they are, through
-supply, settings and measuring. The last station waits for the result; once it is there,
-"Done" ends the guide. A repeat measurement only has the first station: the element the
-readings go to, chosen or made on the way."""
+"""The stations are the driver's flow for the measurement, in its order. No station can be
+skipped, but each can be left at once: "Next" does not wait for the instrument, the tester
+confirms by going on. The leads stay laid once they are. The measure station waits for the
+result; once it is there, "Done" ends the guide. A repeat measurement only has the first
+station: the element the readings go to, chosen or made on the way. An instrument without a
+drawing of its panel shows the test point instead of the bench."""
 
 from __future__ import annotations
 
@@ -20,11 +21,9 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QPushButton, \
     QStackedWidget, QVBoxLayout
 
-from ..campaign.line_conductors import LINE_CONDUCTORS
 from ..devices import driver_info
-from ..devices.guide import DIAL, LEADS, MEASURE, MODE, PLACE, STATIONS, SUPPLY
+from ..devices.guide import CONFIGURE, CONNECT, MEASURE, PLACE, SELECT
 from ..l10n import tr
-from ..vocabulary import setting_name
 from .bench_view import BenchView
 from .dial_station import DialStation
 from .footer_bar import FooterBar
@@ -32,11 +31,25 @@ from .place_form import PlaceForm
 from .place_scene import PlaceScene
 from .place_station import PlaceStation
 from .station_bar import StationBar
-from .station_texts import conductors_text, leads_text, measure_text, mode_text, \
-    supply_text
+from .station_kinds import StationKinds
+from .station_texts import measure_text
 
 
-class MeasuringWindow(PlaceStation, DialStation, QDialog):
+class Absent:
+    """Stands for the bench of an instrument without a panel drawing: whatever is asked of it
+    does nothing."""
+
+    def __getattr__(self, _name):
+        return self
+
+    def __call__(self, *args, **kwargs):
+        return self
+
+    def __bool__(self) -> bool:
+        return False
+
+
+class MeasuringWindow(PlaceStation, DialStation, StationKinds, QDialog):
     place_made = Signal(int)  # an element made on the way
     place_kept = Signal(int)  # the element readings now go to, made on the way or chosen
     parent_chosen = Signal(int)  # where new elements hang, kept until changed
@@ -53,18 +66,20 @@ class MeasuringWindow(PlaceStation, DialStation, QDialog):
         self.root = app.service.campaign(campaign_id)["asset_id"]
         self.parent_id = next((place for place in (new_parent, asset_id)
                                if place is not None), self.root)
-        self.station = 0
+        self.flow = self.guide.flow
+        self.index = 0
         self.position = None  # the dial position the instrument reported last
         self.reading = None  # the result the last station waits for
         self.setWindowTitle(tr(self.guide.title))
         self.resize(1440, 1020)
         self.head = QLabel()
-        self.bar = StationBar(STATIONS)
+        self.bar = StationBar(tuple(station.heading() for station in self.flow))
         self.scene = PlaceScene()
-        self.bench = BenchView(info.panel)
+        self.bench = BenchView(info.panel) if info.panel is not None else Absent()
         self.left = QStackedWidget()
         self.left.addWidget(self.scene)
-        self.left.addWidget(self.bench)
+        if self.bench:
+            self.left.addWidget(self.bench)
         self.form = PlaceForm(app)
         self.form.element_chosen.connect(self.show_place)
         self.form.edited.connect(self._preview)
@@ -82,8 +97,8 @@ class MeasuringWindow(PlaceStation, DialStation, QDialog):
         self.back = QPushButton(tr("◀ Back"))
         self.next = QPushButton()
         self.next.setDefault(True)
-        self.back.clicked.connect(lambda: self.go(self.station - 1))
-        self.next.clicked.connect(lambda: self.go(self.station + 1))
+        self.back.clicked.connect(lambda: self.go(self.index - 1))
+        self.next.clicked.connect(lambda: self.go(self.index + 1))
         self._lay_out()
         self.show_place(asset_id)
         self.go(0)
@@ -112,72 +127,50 @@ class MeasuringWindow(PlaceStation, DialStation, QDialog):
     @property
     def count(self) -> int:
         """How many stations this run has."""
-        return 1 if self.repeat else len(STATIONS)
+        return 1 if self.repeat else len(self.flow)
 
-    def go(self, station: int) -> None:
-        if station >= self.count:
-            if self.station == PLACE:
+    @property
+    def kind(self) -> str:
+        return self.flow[self.index].kind
+
+    @property
+    def has_dial(self) -> bool:
+        return bool(self.bench) and self.guide.selector is not None
+
+    def go_to(self, kind: str) -> None:
+        self.go(self.guide.kinds().index(kind))
+
+    def go(self, index: int) -> None:
+        if index >= self.count:
+            if self.kind == PLACE:
                 self._keep_place()
             self.accept()
             return
-        if self.station == PLACE and station > PLACE:
+        if self.kind == PLACE and index > self.index:
             self._keep_place()
-        if self.station == LEADS and station > LEADS:
+        if self.kind == CONNECT and index > self.index:
             self.bench.finish()
-        self.station = max(station, 0)
-        self.bar.show_station(self.station, self.count)
-        self.step_title.setText(f"<b style='font-size:13pt'>{self.station + 1} · "
-                                f"{escape(tr(STATIONS[self.station]))}</b>")
-        self.left.setCurrentWidget(self.scene if self.station == PLACE else self.bench)
-        self.right.setCurrentWidget(self.form if self.station == PLACE else self.step_text)
-        self.back.setEnabled(self.station > 0)
+        self.index = max(index, 0)
+        station = self.flow[self.index]
+        self.bar.show_station(self.index, self.count)
+        self.step_title.setText(f"<b style='font-size:13pt'>{self.index + 1} · "
+                                f"{escape(tr(station.heading()))}</b>")
+        here = self.kind == PLACE or not self.bench
+        self.left.setCurrentWidget(self.scene if here else self.bench)
+        self.right.setCurrentWidget(self.form if self.kind == PLACE else self.step_text)
+        self.back.setEnabled(self.index > 0)
         self.ask.hide()
-        self._enter(self.station)
-
-    def _enter(self, station: int) -> None:
-        panel = self.bench.panel
-        panel.zoom_dial(station == DIAL)
-        self.bench.leads_layer.setVisible(station != MODE)  # a close view has no room for them
-        last = station == self.count - 1
+        self.bench.panel.zoom_dial(self.kind == SELECT and self.has_dial)
+        self.bench.leads_layer.setVisible(self.kind != CONFIGURE)  # no room in a close view
+        last = self.index == self.count - 1
         self.next.setText(tr("Done ▶") if last else tr("Next ▶"))
-        if station == PLACE:
-            self.next.setText(tr("Take it ▶") if self.repeat else tr("Prepared – next ▶"))
-        elif station == DIAL:
-            self.next.setText(tr("Turned – next ▶"))
-            self._enter_dial()
-        elif station == LEADS:
-            self.next.setText(tr("Connected – next ▶"))
-            self.step_text.setText(leads_text(self.guide))
-            self.bench.lay_leads()
-        elif station == SUPPLY:
-            parts = ("mains-inlet", "mains-switch", "led-mains") if self.guide.mains \
-                else ("lcd",)
-            panel.point_at(*parts)
-            self.step_text.setText(supply_text(self.guide))
-        elif station == MODE:
-            parts = [part for action in self.guide.settings for part in action.parts]
-            panel.zoom_parts("lcd", *parts)
-            panel.point_at(*parts)
-            self.next.setText(tr("Set – next ▶"))
-            advice = conductors_text(self.guide, self.place.stated(LINE_CONDUCTORS),
-                                     self.place.has_n)
-            self.step_text.setText(mode_text(self.guide, self._settings(), self.place.title,
-                                             advice))
-        elif station == MEASURE:
-            panel.point_at(*(part for action in self.guide.steps for part in action.parts))
-            self.step_text.setText(measure_text(self.guide, self.reading))
-
-    def _settings(self) -> list[tuple[str, str]]:
-        """What the element states that is set on the instrument for this measurement."""
-        keys = self.guide.element_features if self.guide.owner_feature else ()
-        return [(setting_name(key) or key, self.place.stated(key)) for key in keys
-                if self.place.stated(key) and setting_name(key)]
+        getattr(self, f"_enter_{station.kind}")(station)
 
     def show_reading(self, reading) -> None:
         """A result from the instrument; the one this measurement waits for ends it."""
         if not self.guide.ended_by(reading.measurement.function):
             return
         self.reading = reading
-        if self.station == MEASURE:
+        if self.kind == MEASURE:
             self.bench.panel.point_at()
             self.step_text.setText(measure_text(self.guide, reading))

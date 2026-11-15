@@ -90,6 +90,13 @@ range.
 **Data import.** A day of testing from an IZYTRONIQ database copy is imported as a campaign,
 with its structure, measurements and inspections.
 
+**German and English, made for Full HD.** The user interface speaks German or English, with
+dates and numbers written the way the language writes them; reports can be made in German,
+English or Spanish, whatever language the program runs in. The layout is made for Full HD
+screens (1920 × 1080), the usual display of a laptop taken into the field.
+
+![The same campaign in English and in German](docs/images/languages.png)
+
 ## Status
 
 OkeyDocu is in active development and has not had its first release. The test plans and limits

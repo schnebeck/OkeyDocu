@@ -514,30 +514,37 @@ it is disconnected, so that no reading hits a closed record.
 
 Measuring without a plan, the campaign offers the measurements the instrument's driver has a
 guide for (`ui/guide_starter.py`). The first measurement of a kind in a campaign opens its own
-window (`ui/measuring_window.py`) that leads through six stations; no station can be skipped,
-but “Next” never waits for the instrument, the tester confirms by going on. A later measurement
-of the same kind only shows the first station, the element the next readings go to.
+window (`ui/measuring_window.py`) that leads through the stations of the guide; no station can be
+skipped, but “Next” never waits for the instrument, the tester confirms by going on. A later
+measurement of the same kind only shows the first station, the element the next readings go to.
 
-1. **Installation** (`ui/place_station.py`): the element measured at, chosen or made on the way.
-   A guide that names an owner feature, such as the RCD type, is taken at the nearest element
-   of a kind with that feature; where none exists yet it is made below the element chosen as
-   parent, which is kept per campaign. What the guide needs the element to state is entered
-   here and stored at the element. The element kept becomes where the campaign's readings go.
-2. **Rotary switch** (`ui/dial_station.py`): the drawn knob turns to the position wanted. The
-   instrument is asked for its switch on entering the station and on request, never in a
-   steady stream; a position that serves the measurement moves on by itself.
-3. **Test leads**: plug over its row of sockets, grey lead, probe on its terminal, laid one
-   after the other. The test point is a drawing of its own per kind (`ui/test_object*.py`): an
-   RCD, the incoming terminals of a main switch, a CEE plug with the machine housing.
-4. **Supply**: whether the battery is enough or the measurement needs the mains.
-5. **Mode and limits**: the panel closes in on display and softkeys; what to set with each
-   softkey, and what the element states for it.
-6. **Measure**: the keys in order; the window waits for the result of its own function and
-   shows it once it has arrived. Results go on being stored by the campaign as usual.
+The guide belongs to the driver, because every instrument chooses, connects, sets and measures
+in its own way. A guide (`devices/guide.py`) names a flow: stations of the kinds the application
+knows, in any number and order. The application shows each kind in one way
+(`ui/station_kinds.py`); the words, the parts of the panel to point at and the test point come
+from the driver. A kind new to the application is added there once and is then open to every
+driver; the user interface never imports a driver.
 
-The driver describes its side in `devices/guide.py`: stations, leads, softkeys, keys and which
-functions end the measurement. The front panel is a drawing of the driver package
-(`devices/profitest_prime/panel/`); the application never imports a driver for it.
+- **place** (`ui/place_station.py`), always first: the element measured at, chosen or made on
+  the way. A guide that names an owner feature, such as the RCD type, is taken at the nearest
+  element of a kind with that feature; where none exists yet it is made below the element chosen
+  as parent, which is kept per campaign. The element kept becomes where the readings go.
+- **select** (`ui/dial_station.py`): with a drawn dial and a position named, the knob turns there;
+  otherwise the station says what to choose. The instrument is asked where it stands on entering
+  the station and on request, never in a steady stream; a position that serves the measurement
+  moves on by itself.
+- **connect**: plug over its row of sockets, grey lead, probe on its terminal, laid one after the
+  other. The test point is a drawing of its own per kind (`ui/test_object*.py`): an RCD, the
+  incoming terminals of a main switch, a CEE plug with the machine housing.
+- **prepare** and **configure**: what to do and which parts of the panel to use; configure can
+  close in on parts, such as display and softkeys, and lists what the element states.
+- **measure**: the keys in order; the station waits for the result of its own function and shows
+  it once it has arrived. Results go on being stored by the campaign as usual.
+
+The PROFITEST PRIME runs six stations: installation, rotary switch, test leads, supply, mode and
+limits, measure. The simulator runs three: installation, function, measure; it has no panel
+drawing, so the window shows the test point instead of the bench. The front panel is a drawing
+of the driver package (`devices/profitest_prime/panel/`).
 
 ## Line conductors at a test point
 

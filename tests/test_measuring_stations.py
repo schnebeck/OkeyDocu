@@ -12,7 +12,8 @@ from datetime import datetime
 import pytest
 
 from okeydocu.devices.base import LiveReading
-from okeydocu.devices.guide import MEASURE, MODE, PLACE, SUPPLY
+from okeydocu.devices.guide import CONFIGURE, MEASURE, PLACE, PREPARE
+from okeydocu.devices.profitest_prime.guides import MAINS, flow
 from okeydocu.devices.profitest_prime.info import DRIVER_KEY
 from okeydocu.devices.simulator import SimulatedMeter
 from okeydocu.l10n import speaking
@@ -47,12 +48,13 @@ def reading(function: str) -> LiveReading:
 def test_the_battery_is_enough_unless_the_guide_needs_the_mains(qtbot, app, plant):
     window = opened(qtbot, app, plant)
     with speaking("de"):
-        window.go(SUPPLY)
+        window.go_to(PREPARE)
     assert window.bench.panel.pointed == ("lcd",)
     assert "reicht der Akku" in window.step_text.text()
-    window.guide = replace(window.guide, mains=True)
+    window.guide = replace(window.guide, flow=flow(MAINS))
+    window.flow = window.guide.flow
     with speaking("de"):
-        window.go(SUPPLY)
+        window.go_to(PREPARE)
     assert window.bench.panel.pointed == ("mains-inlet", "mains-switch", "led-mains")
     assert "Netzversorgung" in window.step_text.text()
 
@@ -60,7 +62,7 @@ def test_the_battery_is_enough_unless_the_guide_needs_the_mains(qtbot, app, plan
 def test_the_settings_name_what_the_rcd_states_and_close_in_on_the_display(qtbot, app, plant):
     window = opened(qtbot, app, plant)
     with speaking("de"):
-        window.go(MODE)
+        window.go_to(CONFIGURE)
     text = window.step_text.text()
     assert "=K1-F1 FI Steuerung gibt an" in text
     assert "<b>A</b>" in text and "<b>30 mA</b>" in text and "<b>25 A</b>" in text
@@ -68,14 +70,14 @@ def test_the_settings_name_what_the_rcd_states_and_close_in_on_the_display(qtbot
     assert window.bench.leads_layer.isHidden()
     whole = window.bench.panel.front.viewBoxF()
     assert window.bench.panel._zoom.endValue().width() < whole.width() / 2
-    window.go(MEASURE)
+    window.go_to(MEASURE)
     assert not window.bench.leads_layer.isHidden()
 
 
 def test_the_last_station_waits_for_the_result_of_its_own_measurement(qtbot, app, plant):
     window = opened(qtbot, app, plant)
     with speaking("de"):
-        window.go(MEASURE)
+        window.go_to(MEASURE)
         assert "Warte auf das Ergebnis" in window.step_text.text()
         assert window.bench.panel.pointed == ("key-start", "key-idn", "key-mem")
         window.show_reading(reading("rlo"))
@@ -92,7 +94,7 @@ def test_a_repeat_only_asks_for_the_element(qtbot, app, plant):
     assert not chips[0].isHidden() and all(chip.isHidden() for chip in chips[1:])
     assert "Wiederholmessung" in window.head.text()
     with speaking("de"):
-        window.go(PLACE)
+        window.go_to(PLACE)
     assert window.next.text() == "Übernehmen ▶"
     window.form.fields["n_terminal"].setEditText("links")
     window.next.click()
@@ -105,7 +107,7 @@ def test_a_repeat_only_asks_for_the_element(qtbot, app, plant):
 def test_voltage_and_protective_conductor_have_their_own_test_points(qtbot, app, plant,
                                                                       function, kind, terminals):
     window = opened(qtbot, app, plant, function, "machine")
-    window.go(MEASURE)
+    window.go_to(MEASURE)
     window.bench.grab()
     assert window.guide.test_object == kind
     assert set(window.bench.anchors) >= terminals
@@ -120,7 +122,7 @@ def test_one_line_conductor_without_n_leaves_the_n_lead_and_advises_against_auto
     assert window.place.poles == 2 and window.place.has_n is False
     assert [lead.plug for lead in window.guide.leads] == ["3", "1"]
     with speaking("de"):
-        window.go(MODE)
+        window.go_to(CONFIGURE)
     assert "Messstrecke von Hand wählen" in window.step_text.text()
 
 

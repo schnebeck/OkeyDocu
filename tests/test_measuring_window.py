@@ -10,7 +10,7 @@ import pytest
 from PySide6.QtCore import QPointF, QRectF
 from PySide6.QtGui import QImage, QPainter, QPainterPathStroker
 
-from okeydocu.devices.guide import DIAL, LEADS, STATIONS
+from okeydocu.devices.guide import CONNECT, SELECT
 from okeydocu.devices.profitest_prime.guides import GUIDES, guide_for
 from okeydocu.devices.profitest_prime.info import DRIVER_KEY
 from okeydocu.l10n import speaking
@@ -80,7 +80,7 @@ def test_n_stands_after_the_line_conductors_or_first(n_left, order):
 def test_leads_cross_only_where_plugs_and_terminals_force_it(window, poles, n_left, crossing):
     """Plugs stacked L over N, terminals side by side L before N: one bridge is unavoidable.
     With N first on the RCD the orders agree and nothing crosses; PE never crosses."""
-    window.go(LEADS)
+    window.go_to(CONNECT)
     window.bench.show_guide(guide_for("rcd_time"), ["30 mA"], poles, n_left)
     window.bench.finish()
     window.bench.repaint()
@@ -106,20 +106,20 @@ def test_leads_cross_only_where_plugs_and_terminals_force_it(window, poles, n_le
 
 
 def test_the_window_opens_on_the_first_station_and_goes_on_without_waiting(window):
-    assert window.station == 0 and not window.back.isEnabled()
+    assert window.index == 0 and not window.back.isEnabled()
     assert "Anlage" in window.bar.chips[0].text()
     window.next.click()
     window.next.click()
-    assert window.station == LEADS
+    assert window.kind == CONNECT
     assert window.bench._lay.state() == window.bench._lay.State.Running
     window.next.click()
     assert window.bench.progress == len(window.guide.leads)
-    assert window.bar.chips[LEADS].text().startswith("✓")
+    assert window.bar.chips[2].text().startswith("✓")
 
 
 def test_the_leads_station_names_every_probe_in_order(window):
     with speaking("de"):
-        window.go(LEADS)
+        window.go_to(CONNECT)
         text = window.step_text.text()
     assert "Die Kabel 1, 2, 3 stecken in ihren Buchsenreihen." in text
     assert text.index("PE (L2)") < text.index("L (L1)") < text.index("N (L3)")
@@ -128,14 +128,14 @@ def test_the_leads_station_names_every_probe_in_order(window):
 
 
 def test_laying_lights_up_the_rows_of_the_leads_laid_so_far(window):
-    window.go(LEADS)
+    window.go_to(CONNECT)
     window.bench._laid(1.2)
     assert window.bench.panel.pointed == ("socket-3", "socket-1")
     assert window.bench.panel.target == 18
 
 
 def test_the_last_station_closes_the_window(window):
-    window.go(len(STATIONS) - 1)
+    window.go(len(window.flow) - 1)
     window.next.click()
     assert window.result() == window.DialogCode.Accepted
 
@@ -157,7 +157,7 @@ def test_a_missing_detail_is_marked_and_does_not_stop_the_tester(window):
     assert "fde2c4" in field.styleSheet()
     assert "Fehlende Angaben" in window.form.hint.text()
     window.next.click()
-    assert window.station == 1
+    assert window.index == 1
 
 
 def test_what_is_entered_is_stored_at_the_element_as_the_list_holds_it(window, app, plant):
@@ -234,23 +234,23 @@ def test_a_position_that_also_measures_the_function_counts_as_right(value, right
 def test_the_dial_station_zooms_in_and_goes_on_once_the_switch_is_right(window, qtbot):
     from okeydocu.devices.profitest_prime.selector import selector_position
 
-    window.go(DIAL)
+    window.go_to(SELECT)
     qtbot.waitUntil(lambda: window.bench.panel.view.width() < 400, timeout=3000)
     assert window.bench.panel.pointed == ("pos-18",)
     window.show_selector(selector_position(17))
     assert "Das Messgerät steht auf" in window.step_text.text()
     assert window.bench.panel.actual == 17 and window.bench.panel.fits is False
     qtbot.wait(1200)
-    assert window.station == DIAL
+    assert window.kind == SELECT
     window.show_selector(selector_position(18))
     assert "steht richtig" in window.step_text.text()
-    qtbot.waitUntil(lambda: window.station == LEADS, timeout=3000)
+    qtbot.waitUntil(lambda: window.kind == CONNECT, timeout=3000)
     qtbot.waitUntil(lambda: window.bench.panel.view.width() > 1000, timeout=3000)
 
 
 def test_without_an_instrument_the_dial_station_waits_for_the_tester(window):
-    window.go(DIAL)
+    window.go_to(SELECT)
     assert "Kein Messgerät verbunden" in window.step_text.text()
     assert window.next.text() == "Gedreht – weiter ▶"
     window.next.click()
-    assert window.station == LEADS
+    assert window.kind == CONNECT
