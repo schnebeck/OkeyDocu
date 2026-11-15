@@ -72,7 +72,7 @@ along the way and offers what a campaign did differently when it is confirmed; i
 points are fixed and deviations need a reason.
 
 **Reports.** Reports are made from templates in a graphical editor with live preview, letterhead
-and logo, in German, English or Spanish, chosen for each report. A template block can show none,
+and logo, in German or English, chosen for each report. A template block can show none,
 one or many measurements per element. Confirming a campaign seals the record;
 archived PDFs carry a checksum and keep the template they were made with. Reports can be signed
 as PAdES with an X.509 certificate from a PKCS#12 file or straight from an NSS database such as
@@ -95,7 +95,7 @@ dates and numbers written the way the language writes them. Everything the progr
 follows the language, kinds of elements, their features, quantities and verdicts; names the
 inspector types in stay as they were written. The language of a report is chosen on its own,
 independent of the program's language: an inspection worked in German can go to the customer as
-a report in English or Spanish. The layout is made for Full HD screens (1920 × 1080), the usual
+a report in English. The layout is made for Full HD screens (1920 × 1080), the usual
 display of a laptop taken into the field.
 
 ![The same campaign in English and in German, each with names typed in its language](docs/images/languages.png)
