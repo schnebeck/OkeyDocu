@@ -19,9 +19,10 @@ the order of the points, the hints and the remarks are just right.
 OkeyDocu is free software under the GPL. It is made for the Linux desktop, keeps all data on the
 inspector's own computer and talks to the instrument over USB or Bluetooth. It is built and tried
 on real inspections with the [GOSSEN METRAWATT](https://www.gossenmetrawatt.com) PROFITEST PRIME
-and uses its Push/Print mode: the inspector measures and saves on the instrument as always, and
-the instrument sends each result to OkeyDocu right away. Instruments are kept behind a driver
-interface, so others can follow.
+and uses its Push/Print mode: the inspector measures on the instrument as always, and where the
+store key would keep the result in the instrument's memory, the instrument prints it to its
+interface instead, straight to OkeyDocu. Instruments are kept behind a driver interface, so others
+can follow.
 
 ![The overview: open and completed campaigns, master data, plans and templates](docs/images/overview.png)
 
@@ -34,20 +35,30 @@ them; the tree counts what has been measured this time against last time.
 
 ![A campaign following a template: structure, readings, open points and the chosen element](docs/images/campaign.png)
 
-**Live readings by Push/Print.** The PROFITEST PRIME sends every measurement the moment it is
-saved on the instrument; OkeyDocu stores it before anything else happens and books it on the
-element chosen. The measurement itself stays on the instrument, started and run there. The
-instrument clock is set at the start of a campaign. Readings stored on the instrument while the
-link was down are fetched later. RCD tests are checked against the RCD they are booked on; a
-setting that differs from the rating plate raises a warning while the inspector can still repeat
-the measurement. Values can also be entered by hand, and a built-in simulator delivers random
+**Live readings by Push/Print.** In Push/Print mode the PROFITEST PRIME keeps nothing in its
+own memory: the store key prints the result to the interface. The result therefore exists only in
+OkeyDocu, which stores it before anything else happens and books it on the element chosen. The
+measurement itself is started and run on the instrument. The instrument clock is set at the start
+of a campaign. Readings the inspector stored in the instrument's memory while the link was down
+are fetched later. Values can also be entered by hand, and a built-in simulator delivers random
 readings for trying everything out without an instrument.
 
-**Guided first measurement.** The first measurement of a kind leads through six stations:
-installation, rotary switch, test leads, supply, mode and limits, measure. The program reads the
-position of the rotary switch, lays the leads one by one from the sockets to the terminals of the
-test point (an RCD, a main switch, a CEE plug), names the softkeys to set and waits for the result.
-Elements missing on the way are made there.
+**Settings checked against the equipment.** An RCD test arrives with the settings the instrument
+was set to: rated residual current, type and rated current. OkeyDocu holds them against what the
+RCD states on its rating plate, the RCD at the measured element or the nearest one above it. A
+difference raises a warning the moment the reading arrives, while the inspector still stands at
+the RCD and can measure again. The reading stays stored, marked in the table and named in the
+checks above it until the instrument, the RCD's data or the booking is put right. A setting the
+RCD does not state is named instead of judged.
+
+![An RCD tested with 300 mA and type AC, where the RCD states 30 mA and type A](docs/images/settings-check.png)
+
+**Guided first measurement.** The first measurement of a kind is guided station by station, and
+each instrument brings its own flow. With the PROFITEST PRIME there are six: installation, rotary
+switch, test leads, supply, mode and limits, measure. The program reads the position of the rotary
+switch, lays the leads one by one from the sockets to the terminals of the test point (an RCD, a
+main switch, a CEE plug), names the softkeys to set and waits for the result. Elements missing on
+the way are made there.
 
 ![Station 2: the knob turns to IΔN, the instrument still reports IF](docs/images/guide-dial.png)
 
@@ -58,10 +69,22 @@ down the tree. The instrument's AUTO runs measure every pair of conductors; read
 conductor that is not there are kept but marked as not applicable and left out of verdict and
 report.
 
-**Photos.** Photos from a phone or camera are assigned to measurements by their time, from the
-EXIF data or the file name. A timeline shows photos and measurements side by side for checking
-and moving. Photos carry numbered marks classed as a note or a defect, and they appear in the
-report with their marks.
+**Photos, placed by the time they were taken.** Photos from a phone or a camera are added to a
+campaign in one go, and each finds its measurement by the time it was taken, read from its EXIF
+data or its file name. A timeline shows measurements and photos as tracks, like in video editing,
+with a line from every photo to its measurement. Where the camera's clock is off, dragging one
+photo sideways moves all of them until they sit on their measurements; dragging a photo up onto a
+measurement ties just this one; a gap moves everything after a pause. A photo that fits nowhere
+waits on a stack and can be dropped onto a row of the table later.
+
+![The camera's clock was 2½ minutes fast: one drag and every photo sits on its measurement](docs/images/photo-timeline.gif)
+
+In the photo view a rectangle dragged across the photo becomes a numbered mark with its text, and
+the photo is classed as documentation, notice or defect. It can be turned and cut; the original
+file stays untouched as the evidence. The report prints the marks into the photo, the texts below
+it, a defect in red.
+
+![A photo of an RCD with two numbered marks, classed as a defect](docs/images/photo-marks.png)
 
 **Test plans, repeat inspections and campaign templates.** A test plan leads through questions
 and measurements in a wizard; a visual inspection to DIN VDE 0100-600 and an electrical machine

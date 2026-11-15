@@ -22,7 +22,8 @@ L_LEAD = ("1", "socket-1", "L (L1)")
 N_LEAD = ("2", "socket-2", "N (L3)")
 PE_LEAD = ("3", "socket-3", "PE (L2)")
 
-STORE = Action(("key-mem",), N_("Store the result with MEM: OkeyDocu receives it at once."))
+STORE = Action(("key-mem",), N_("Press MEM: the instrument prints the result to OkeyDocu"
+                                 " instead of keeping it."))
 BATTERY = (Action(("lcd",), N_("The battery is enough for this measurement.")),
            Action((), N_("Look at the BAT symbol at the top of the display. With a nearly empty"
                          " battery plug in the mains lead and switch on.")))

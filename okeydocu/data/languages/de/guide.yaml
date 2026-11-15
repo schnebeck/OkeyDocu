@@ -67,7 +67,7 @@ texts:
   CEE plug, contact side: CEE-Stecker, Kontaktseite
   Main switch: Hauptschalter
   "Limits: set them as the test basis requires.": "Grenzwerte: so einstellen, wie es die Prüfgrundlage verlangt."
-  "Store the result with MEM: OkeyDocu receives it at once.": "Ergebnis mit MEM speichern: OkeyDocu empfängt es sofort."
+  "Press MEM: the instrument prints the result to OkeyDocu instead of keeping it.": "MEM drücken: Das Gerät druckt das Ergebnis an OkeyDocu, statt es zu speichern."
   The voltage is measured on the live supply.: Die Spannung wird an der eingeschalteten Versorgung gemessen.
   Main switch, incoming terminals: Hauptschalter, Zuleitungsklemmen
   "Live parts are exposed: touch only the grips of the probes.": "Spannungsführende Teile liegen frei: Prüfspitzen nur an den Griffen anfassen."
