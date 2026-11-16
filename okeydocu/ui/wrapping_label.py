@@ -21,10 +21,11 @@ class WrappingLabel(QLabel):
         self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum)
 
     def _fit(self) -> None:
-        """The minimum height takes part in `heightForWidth`, so it is cleared first."""
+        """The minimum height takes part in `heightForWidth`, so it is cleared first. An empty
+        label answers -1, which counts as no height."""
         if self.width() > 0:
             self.setMinimumHeight(0)
-            self.setMinimumHeight(self.heightForWidth(self.width()))
+            self.setMinimumHeight(max(0, self.heightForWidth(self.width())))
 
     def setText(self, text: str) -> None:
         super().setText(text)
