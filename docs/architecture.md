@@ -820,7 +820,12 @@ S/MIME certificate. The file or database stays where it is; an NSS database is o
 through the NSS softoken over PKCS#11, and its folder is free to choose. The program only
 remembers the reference in `settings.ini`; key and password are stored nowhere. Where pinentry
 is installed it asks for the key password (`ui/pinentry.py`), up to three times; otherwise the
-password is typed into the form. Before signing, a dialog shows name, e-mail, issuer and validity.
+password is typed into the form.
+
+Signing turns an archived report into a signed one: the entry takes the signed file, its checksum
+and the signer, and keeps its date. The unsigned file goes, since the signed PDF holds it byte for
+byte as its first revision. Confirming with a signature therefore files exactly one report; if
+signing fails, the unsigned report stays and can be signed later from the archive. Before signing, a dialog shows name, e-mail, issuer and validity.
 Expired certificates and pure encryption certificates are rejected.
 
 An e-mail certificate gives a technically valid signature. Whether a PDF program shows it as

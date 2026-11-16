@@ -43,17 +43,20 @@ def make_certificate(path, passphrase):
 
 
 @pytest.mark.skipif(shutil.which("pdfsig") is None, reason="pdfsig not installed")
-def test_signature_is_valid_and_leaves_the_original(service, asset_id, plan, tmp_path):
+def test_signing_turns_the_report_into_a_signed_one(service, asset_id, plan, tmp_path):
     campaign = closed_campaign(service, asset_id, plan, driver_key="profitest-prime")
     archive = ReportArchive(service)
     report_id = archive.generate(campaign, "Standard", default_template_text())
+    unsigned_path = archive.path(service.db.one("SELECT * FROM reports WHERE id=?", report_id))
+    unsigned = unsigned_path.read_bytes()
     certificate = tmp_path / "test.p12"
     make_certificate(certificate, "geheim")
-    signed_id = archive.sign(report_id, Pkcs12Signer(certificate, "geheim"))
-    original = service.db.one("SELECT * FROM reports WHERE id=?", report_id)
-    signed = service.db.one("SELECT * FROM reports WHERE id=?", signed_id)
-    assert archive.is_intact(original) and archive.is_intact(signed)
-    assert "Test Prüfer" in signed["signed_by"]
+    assert archive.sign(report_id, Pkcs12Signer(certificate, "geheim")) == report_id
+    assert len(archive.reports(campaign)) == 1
+    signed = service.db.one("SELECT * FROM reports WHERE id=?", report_id)
+    assert archive.is_intact(signed) and "Test Prüfer" in signed["signed_by"]
+    assert not unsigned_path.exists()
+    assert archive.path(signed).read_bytes().startswith(unsigned)  # its first revision
     result = subprocess.run(
         ["pdfsig", str(archive.path(signed))], capture_output=True, text=True
     ).stdout
@@ -194,7 +197,7 @@ def test_signing_remembers_the_path_but_never_the_passphrase(
     monkeypatch.setattr(report_signing.SignOverlay, "exec", fill)
     page._sign()
 
-    assert page.table.rowCount() == 2
+    assert page.table.rowCount() == 1
     assert "Max Muster" in owners[0] and "S/MIME" in owners[0]
     report_signing.settings().sync()
     stored = (data_dir() / "settings.ini").read_text()

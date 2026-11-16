@@ -113,7 +113,8 @@ class ReportArchive:
         return path
 
     def sign(self, report_id: int, signer: PdfSigner) -> int:
-        """Sign a report. The signed file is a new archive entry; the original stays."""
+        """Sign a report in place: the entry takes the signed file and its checksum. The
+        unsigned file goes, as the signed one holds it unchanged as its first revision."""
         report = self.db.one("SELECT * FROM reports WHERE id=?", report_id)
         campaign = self.service.campaign(report["campaign_id"])
         if is_simulated(campaign["driver"]):
@@ -128,10 +129,7 @@ class ReportArchive:
         with speaking(report["language"]):
             reason = f"{tr('Test report')} {campaign['title']}"
         signed_by = signer.sign(source, target, reason=reason)
-        return self.db.execute(
-            "INSERT INTO reports (campaign_id, template_name, template_body, file_name, sha256,"
-            " created_at, signed_by, language) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            report["campaign_id"], report["template_name"], report["template_body"], target.name,
-            _sha256(target), datetime.now().isoformat(timespec="seconds"), signed_by,
-            report["language"],
-        )
+        self.db.execute("UPDATE reports SET file_name=?, sha256=?, signed_by=? WHERE id=?",
+                        target.name, _sha256(target), signed_by, report_id)
+        source.unlink(missing_ok=True)
+        return report_id

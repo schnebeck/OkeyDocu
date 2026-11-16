@@ -109,7 +109,7 @@ def test_a_template_can_give_its_own_words_per_language(app, asset):
     assert texts(app, campaign, "de", template) == ["Abnahme"]
 
 
-def test_the_language_stays_with_the_protocol_and_its_signed_copy(app, asset, tmp_path):
+def test_the_language_stays_with_the_protocol_once_signed(app, asset, tmp_path):
     from okeydocu.reporting.sign import Pkcs12Signer
 
     from .test_report_signing import smime_identity
@@ -121,7 +121,8 @@ def test_the_language_stays_with_the_protocol_and_its_signed_copy(app, asset, tm
     certificate = tmp_path / "mail.p12"
     smime_identity(certificate, "x")
     app.archive.sign(report, Pkcs12Signer(certificate, "x"))
-    assert [r["language"] for r in app.archive.reports(campaign)] == ["en", "en"]
+    assert [(r["language"], bool(r["signed_by"])) for r in app.archive.reports(campaign)] == \
+        [("en", True)]
 
 
 def test_the_language_is_left_after_the_protocol(app, asset):

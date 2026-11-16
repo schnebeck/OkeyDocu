@@ -90,7 +90,7 @@ def test_confirming_signs_with_the_certificate(window, app, monkeypatch, tmp_pat
     confirm(monkeypatch, fill)
     window.campaign.finish()
     reports = app.archive.reports(campaign)
-    assert [bool(r["signed_by"]) for r in reports] == [True, False]
+    assert [bool(r["signed_by"]) for r in reports] == [True]
     assert window.campaign.notice.text().startswith("Protokoll abgelegt und signiert.")
 
 
