@@ -61,6 +61,9 @@ class CampaignTasks:
             self.new_campaign(repeat_of=campaign["id"])
 
     def assign_plan(self) -> None:
+        campaign = self._campaign()
+        if campaign is None or campaign["status"] != "open" or not self.takes_plans(campaign):
+            return
         overlay = AssignPlanOverlay(self.app.service.plans(), self)
         if overlay.exec():
             self.app.service.assign_plan(self.campaign_id, overlay.plan.currentData())

@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
 
 from ..l10n import tr
 from .campaign_items import heading
+from .wrapping_label import WrappingLabel
 
 
 class CampaignHeader(QWidget):
@@ -41,6 +42,7 @@ class CampaignHeader(QWidget):
         self.home_button.setAutoRaise(True)
         self.home_button.clicked.connect(self.home_requested)
         self.title = heading("", 15)
+        self.title.setWordWrap(True)
         self.edit_button = QToolButton()
         fallback = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogDetailedView)
         self.edit_button.setIcon(QIcon.fromTheme("document-edit", fallback))
@@ -48,7 +50,7 @@ class CampaignHeader(QWidget):
         self.edit_button.setToolTip(tr("Change title, installation and contact person"))
         self.edit_button.setAutoRaise(True)
         self.edit_button.clicked.connect(self.edit_requested)
-        self.details = QLabel()
+        self.details = WrappingLabel()
         self.details.setTextFormat(Qt.TextFormat.RichText)
         self.details.linkActivated.connect(lambda _: self.tester_requested.emit())
         self.resume_button = QPushButton(tr("Resume measuring"))

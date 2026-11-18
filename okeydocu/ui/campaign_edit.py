@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..campaign.editing import CONTACT_COLUMNS, ORDER_COLUMNS
+from ..campaign.point_plans import has_points
 from ..l10n import tr
 from .campaign_dialog import fill_assets
 from .campaign_order import OrderFields
@@ -51,7 +52,11 @@ class CampaignEditOverlay(Overlay):
         tester = campaign["tester"] or tr("Inspector missing")
         form.addRow(tr("Inspector"), self._link(tester, tr("Change …"), TESTER))
         plan = campaign["plan_title"] if campaign["plan_key"] else tr("Without test plan")
-        form.addRow(tr("Test plan"), self._link(plan, tr("Assign another …"), PLAN))
+        if has_points(campaign["plan_key"]):
+            form.addRow(tr("Test plan"), QLabel(plan))
+        else:
+            more = tr("Assign another …") if campaign["plan_key"] else tr("Assign test plan …")
+            form.addRow(tr("Test plan"), self._link(plan, more, PLAN))
         # Both sides of the job, named as in the report's letterhead.
         self.order = OrderFields(form, dict(campaign))
         self.body.addLayout(form)

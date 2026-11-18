@@ -718,7 +718,9 @@ settings, warnings, connection diagram, procedure and the operation of the devic
 takes them over through its function. The free measurement shows the same instructions on request and there follows
 the rotary switch and the last measured value. For a function without instructions the app says so; it never shows anything unrelated.
 
-A campaign gets a plan at its start; more are added through “Assign test plan”. Every point
+A campaign gets a plan at its start, or none; more are added through “Assign test plan”, in the
+side panel or the campaign menu, at any time while it is open. A campaign with points (a repeat
+inspection or a campaign template) takes no plans: its steps are those points. Every point
 is recorded as a copy in `steps`, so a corrected plan does not change any campaign.
 The steps of one assignment lie next to each other and carry its title; so every assignment stays
 a plan of its own (`campaign/plan_blocks.py`), even if the same plan is assigned twice.
@@ -726,8 +728,11 @@ a plan of its own (`campaign/plan_blocks.py`), even if the same plan is assigned
 The campaign always shows structure and measurements. Its plans are in the side panel under
 “Test plans” with their progress (`ui/plan_list.py`). “Run” puts the plan in the place of
 structure and table (`ui/plan_run.py`); a campaign started with a plan begins with it straight away.
+Nothing fixes the order: any plan may be run at any time, and running one sets a running plan
+aside as “Pause plan” does; inside a plan every point can be chosen in the list.
 “Pause plan” leaves everything as it is; a step that is measuring then waits for its setup again;
-“Continue” goes on at the first open step. “End plan” asks for a reason with which
+“Continue” goes on at the first open step. A point already answered, measured or skipped is
+answered again or measured again (“Measure step again”) in place of what it had. “End plan” asks for a reason with which
 every step still open counts as skipped. “Remove” names what goes with it and, after
 asking, deletes the steps with all measurements and answers booked on them.
 

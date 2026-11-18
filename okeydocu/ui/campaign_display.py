@@ -153,7 +153,7 @@ class CampaignDisplay:
         self.template_action.setEnabled(bool(campaign) and
                                         not self.app.service.is_empty(campaign["id"]))
         self.header.edit_button.setVisible(is_open)
-        self.assign_action.setEnabled(is_open)
+        self.assign_action.setEnabled(is_open and self.takes_plans(campaign))
         self.report_action.setEnabled(bool(campaign) and not is_open)
         self.next_order_action.setEnabled(bool(campaign) and not is_open)
         self.photos_action.setEnabled(is_open)

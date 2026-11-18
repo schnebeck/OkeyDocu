@@ -80,7 +80,8 @@ def test_removing_asks_and_takes_the_plan(page, app, monkeypatch):
     assert asked == [1]
     assert app.service.steps(page.campaign_id) == []
     assert app.service.measurements(page.campaign_id) == []
-    assert not page.plan_section.isVisible()
+    assert page.plan_section.isVisible() and page.plan_list.list.count() == 0
+    assert page.plan_list.assign_button.isVisible()
     assert page.middle.currentWidget() is page.work
 
 

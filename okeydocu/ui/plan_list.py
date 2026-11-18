@@ -9,12 +9,15 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QHBoxLayout,
+    QListView,
     QListWidget,
     QListWidgetItem,
     QMessageBox,
     QPushButton,
+    QStyle,
     QVBoxLayout,
     QWidget,
 )
@@ -42,6 +45,7 @@ class PlanList(QWidget):
         super().__init__()
         self.list = QListWidget()
         self.list.setWordWrap(True)
+        self.list.setResizeMode(QListView.ResizeMode.Adjust)  # wrapped rows follow the width
         self.list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.list.itemDoubleClicked.connect(lambda _: self._run())
         self.list.currentRowChanged.connect(lambda _: self._update())
@@ -70,8 +74,10 @@ class PlanList(QWidget):
         self.list.blockSignals(True)
         self.list.clear()
         for block in blocks:
-            mark = "▶  " if running is not None and running.step_ids == block.step_ids else ""
-            item = QListWidgetItem(f"{mark}{block.title}\n{progress_text(block)}")
+            item = QListWidgetItem(f"{block.title}\n{progress_text(block)}")
+            if running is not None and running.step_ids == block.step_ids:
+                item.setIcon(QIcon.fromTheme("media-playback-start", self.style().standardIcon(
+                    QStyle.StandardPixmap.SP_MediaPlay)))
             item.setData(BLOCK, block)
             self.list.addItem(item)
         self.list.blockSignals(False)
@@ -91,7 +97,9 @@ class PlanList(QWidget):
     def _update(self) -> None:
         block = self.chosen()
         self.run_button.setText(tr("Continue") if block and block.done else tr("Run"))
-        self.run_button.setEnabled(self.editable and block is not None and self.running is None)
+        running = self.running is not None and block is not None and \
+            self.running.step_ids == block.step_ids
+        self.run_button.setEnabled(self.editable and block is not None and not running)
         self.remove_button.setEnabled(self.editable and block is not None)
 
 

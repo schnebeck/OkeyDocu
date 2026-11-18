@@ -35,6 +35,11 @@ class CampaignPlans:
         """A repeat inspection is filled in any order; it is no plan to be led through."""
         return bool(campaign["plan_key"]) and not has_points(campaign["plan_key"])
 
+    def takes_plans(self, campaign) -> bool:
+        """Plans are added to and removed from any campaign but one with points, whose steps
+        are those points."""
+        return campaign is not None and not has_points(campaign["plan_key"])
+
     def running_block(self) -> PlanBlock | None:
         run = self.plan_runs.get(self.campaign_id) if self.campaign_id else None
         if run is None:
@@ -47,8 +52,9 @@ class CampaignPlans:
         if running is None:
             self.plan_runs.pop(campaign["id"], None)
         blocks = self.app.service.plan_blocks(campaign["id"]) if self._has_plans(campaign) else []
-        self.plan_list.show_blocks(blocks, campaign["status"] == "open", running)
-        self.plan_section.setVisible(self._has_plans(campaign))
+        is_open = campaign["status"] == "open"
+        self.plan_list.show_blocks(blocks, is_open, running)
+        self.plan_section.setVisible(self.takes_plans(campaign) and (is_open or bool(blocks)))
         if running is not None:
             self.plan_run.show_title(running.title)
         self.values.in_plan = running is not None
@@ -56,8 +62,12 @@ class CampaignPlans:
         self.middle.setCurrentWidget(self.plan_run if running is not None else self.work)
 
     def run_plan(self, block: PlanBlock) -> None:
+        """A plan running already is set aside as by pausing it: its answers stay, its open
+        points wait for it to be run again."""
         if self.campaign_id is None:
             return
+        if self.running_block() is not None:
+            self.app.service.pause_plans(self.campaign_id)
         self.plan_runs[self.campaign_id] = block.step_ids
         self.show_campaign(self.campaign_id)
         self.guided.select_step(self.app.service.first_open_step(block))

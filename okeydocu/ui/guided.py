@@ -99,7 +99,9 @@ class GuidedPage(GuidedSteps, GuidedActions, QWidget):
         scroll = QScrollArea()
         scroll.setWidget(inner)
         scroll.setWidgetResizable(True)
-        scroll.setMinimumWidth(320)
+        # The tick box cannot wrap, so its words set how narrow the column may get.
+        frame = scroll.verticalScrollBar().sizeHint().width() + 2 * scroll.frameWidth()
+        scroll.setMinimumWidth(max(320, inner.minimumSizeHint().width() + frame))
 
         upper = QSplitter(objectName="guided-step")
         for widget in (centre, scroll):
