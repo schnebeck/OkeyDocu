@@ -115,11 +115,13 @@ class CampaignService(
         driver_key: str = MANUAL, identity: DeviceIdentity | None = None,
         clock_offset_s: float = 0.0, offset_before_s: float | None = None,
         stored_since: datetime | None = None, user_id: int | None = None,
+        awaiting: bool = False,
     ) -> int:
         """Open a campaign. No instrument and no plan are needed.
 
         `tester` is the name as the record states it: it stays, whatever later
-        happens to the person's entry, which `user_id` points to.
+        happens to the person's entry, which `user_id` points to. `awaiting` opens it for an
+        instrument not read yet: no clock check is recorded until `take_start` brings one.
         """
         with self.db.connection:
             campaign_id = self.db.connection.execute(
@@ -134,7 +136,7 @@ class CampaignService(
                     _iso(datetime.now()), user_id,
                 ),
             ).lastrowid
-            if driver_key != MANUAL:
+            if driver_key != MANUAL and not awaiting:
                 self.db.connection.execute(
                     "INSERT INTO clock_checks (campaign_id, checked_at, kind, offset_s,"
                     " offset_before_s) VALUES (?, ?, ?, ?, ?)",
@@ -167,3 +169,27 @@ class CampaignService(
             offset_before_s=start.offset_before_s, stored_since=start.stored_since,
             user_id=user_id,
         )
+
+    def take_start(self, campaign_id: int, start: InstrumentStart) -> None:
+        """What the instrument tells on first contact, for a campaign opened before it answered."""
+        with self.db.connection:
+            self.db.connection.execute(
+                "UPDATE campaigns SET device_json=?, clock_offset_s=?, stored_since=? WHERE id=?",
+                (identity_to_json(start.identity), start.offset_s, _iso(start.stored_since),
+                 campaign_id),
+            )
+            self.db.connection.execute(
+                "INSERT INTO clock_checks (campaign_id, checked_at, kind, offset_s,"
+                " offset_before_s) VALUES (?, ?, ?, ?, ?)",
+                (
+                    campaign_id, _iso(datetime.now()),
+                    "measured" if start.offset_before_s is None else "set",
+                    start.offset_s, start.offset_before_s,
+                ),
+            )
+
+    def awaits_instrument(self, campaign_id: int) -> bool:
+        """Open with an instrument that has not been read yet."""
+        campaign = self.campaign(campaign_id)
+        return (campaign["status"] == "open" and campaign["driver"] not in NO_INSTRUMENT
+                and identity_from_json(campaign["device_json"]) is None)

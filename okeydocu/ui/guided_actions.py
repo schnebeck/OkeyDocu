@@ -11,12 +11,11 @@ from __future__ import annotations
 from PySide6.QtWidgets import QMessageBox
 
 from ..campaign.plan import Plan
-from ..campaign.service import NO_INSTRUMENT, read_instrument
-from ..devices import Cancelled, Capability, DeviceError
+from ..campaign.service import NO_INSTRUMENT
+from ..devices import Capability
 from ..l10n import tr
-from .common import run_busy, selected_id, show_error
+from .common import selected_id, show_error
 from .guided_pages import ReasonOverlay
-from .instrument_prepare import prepare_if_needed
 from .setting_warning import campaign_note
 
 
@@ -26,32 +25,19 @@ class GuidedActions:
     def start_campaign(
         self, asset_id: int, plan: Plan, title: str, tester: str, driver_key: str, port: str = "",
         user_id: int | None = None,
-    ) -> int | None:
-        driver = self.app.devices.new_driver(driver_key, port)
+    ) -> int:
+        """Opens the campaign at once; the instrument is read when it is entered."""
+        campaign = self.app.service.create(asset_id, title, tester, plan, driver_key,
+                                           user_id=user_id, awaiting=True)
+        self.app.devices.ports[campaign] = port
+        self.opened(campaign)
+        return campaign
 
-        def connect():
-            with driver:
-                return read_instrument(driver)
-
-        try:
-            text = tr("Connecting to the instrument and setting the clock …")
-            start = run_busy(self, text, connect, driver.abort)
-        except Cancelled:
-            return None
-        except DeviceError as err:
-            show_error(self, str(err))
-            return None
-        prepare_if_needed(self.app, driver_key, port, start.identity, driver.capabilities, self)
-        campaign = self.app.service.open_with(
-            asset_id, plan, title, tester, driver_key, start, user_id
-        )
-        self.app.devices.attach(campaign, driver, port)
-        self.instrument.unbroken.add(campaign)
+    def opened(self, campaign: int) -> None:
         self.campaign_id = campaign
         self.reload()
         self.started.emit(campaign)
         self.changed.emit()
-        return campaign
 
     # Actions -------------------------------------------------------------
 

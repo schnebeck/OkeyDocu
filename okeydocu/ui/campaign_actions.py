@@ -10,14 +10,13 @@ from __future__ import annotations
 
 from shiboken6 import isValid
 
-from ..campaign.service import read_instrument
+from ..campaign.service import MANUAL
 from ..campaign.setting_check import SettingCheck
-from ..devices import Cancelled, DeviceError
 from ..l10n import tr
 from .campaign_dialog import CampaignDialog
 from .campaign_tasks import CampaignTasks
 from .common import run_busy, show_error
-from .instrument_prepare import prepare_if_needed
+from .instrument_start import reach_instrument
 from .live_session import LiveSession
 from .measurement_detail import pick_images
 from .setting_warning import SettingsWarning
@@ -41,7 +40,6 @@ class CampaignActions(CampaignTasks):
             dialog.asset.setCurrentIndex(max(dialog.asset.findData(asset_id), 0))
         if title:
             dialog.title.setText(title)
-        newest = self.app.db.one("SELECT max(id) AS id FROM campaigns")["id"] or 0
         if not dialog.exec():
             return
         asset, plan = dialog.asset.currentData(), dialog.plan.currentData()
@@ -52,58 +50,40 @@ class CampaignActions(CampaignTasks):
         if names is None:
             return
         self._end_session()  # the instrument is about to be asked for by the new campaign
-        if plan is not None:
-            self.guided.start_campaign(
-                asset, plan, title, tester, instrument.key, instrument.port, user
-            )
-        elif instrument is None:
-            self.enter(self.app.service.create(asset, title, tester, user_id=user))
-        else:
-            self._start_free(asset, title, tester, user, instrument)
-        created = self.app.db.one("SELECT max(id) AS id FROM campaigns")["id"] or 0
-        if created > newest:
-            self.app.service.set_contact(created, *dialog.order.contact_values())
-            self.app.service.set_order(created, *dialog.order.order_values())
-        if follows and created > newest:
+        created = self.app.service.create(
+            asset, title, tester, plan, instrument.key if instrument else MANUAL, user_id=user,
+            awaiting=instrument is not None,
+        )
+        if instrument is not None:
+            self.app.devices.ports[created] = instrument.port
+        self.app.service.set_contact(created, *dialog.order.contact_values())
+        self.app.service.set_order(created, *dialog.order.order_values())
+        if follows:
             self.app.service.mark_follow_up(created, follows)
-        if dialog.repeat.isChecked() and dialog.previous is not None and created > newest:
+        if dialog.repeat.isChecked() and dialog.previous is not None:
             self.app.service.make_repeat(created, dialog.previous["id"])
-            self.show_campaign(created)
-        if template and created > newest:
+        if template:
             self.app.service.use_template(created, template, names)
-            self.show_campaign(created)
+        if plan is not None:
+            self.guided.opened(created)
+        else:
+            self.enter(created)
         self.list.refresh()
         self._update()
         self.changed.emit()
 
-    def _start_free(self, asset: int, title: str, tester: str, user, instrument) -> None:
-        driver = self.app.devices.new_driver(instrument.key, instrument.port)
-
-        def connect():
-            with driver:
-                return read_instrument(driver)
-
-        try:
-            text = tr("Connecting to the instrument and setting the clock …")
-            start = run_busy(self, text, connect, driver.abort)
-        except Cancelled:
-            return
-        except DeviceError as err:
-            show_error(self, str(err))
-            return
-        prepare_if_needed(self.app, instrument.key, instrument.port, start.identity,
-                          driver.capabilities, self)
-        campaign = self.app.service.open_with(
-            asset, None, title, tester, instrument.key, start, user
-        )
-        self.app.devices.attach(campaign, driver, instrument.port)
-        self.instrument.unbroken.add(campaign)
-        self.enter(campaign)
-
     # Measuring -----------------------------------------------------------
 
     def enter(self, campaign_id: int) -> None:
-        """Shows the campaign and gives it the instrument, if it uses one."""
+        """Shows the campaign and gives it the instrument, if it uses one. An instrument not
+        read yet is read first; if it does not answer, the campaign is only shown."""
+        if self.app.service.awaits_instrument(campaign_id):
+            self._end_session()
+            if not reach_instrument(self.app, self, campaign_id):
+                self.list.refresh()
+                self.show_campaign(campaign_id)
+                return
+            self.instrument.unbroken.add(campaign_id)
         driver = self._driver(self.app.service.campaign(campaign_id))
         if self.live_id != campaign_id:
             self._end_session()

@@ -342,7 +342,14 @@ The clock of the instrument has no time zone and no daylight saving time, and lo
 That is why `CampaignService.start()` sets it to the laptop time before every campaign, without asking.
 The aim is that there is no offset. For this the laptop time must be right, that is, run via NTP.
 
-Setting is verified: if a deviation of 3 s or more remains, the campaign does not start.
+Setting is verified: if a deviation of 3 s or more remains, the instrument counts as not read.
+
+A campaign is created before the instrument is asked anything (`create(..., awaiting=True)`), so it
+exists and stays open whatever the instrument does. The first contact (`ui/instrument_start.py`)
+reads identity and clock and stores them with `take_start()`, together with the first entry in
+`clock_checks`. While the instrument does not answer, a message offers “Try again” and “Connect later”;
+a cancel counts as later. A campaign that `awaits_instrument()` is read the next time it is entered,
+by resuming it from the header, the list or the overview.
 
 In the normal case there is therefore no offset, and the user interface shows nothing about the clock: the
 status display appears only for an unchecked or deviating clock, the report line “Instrument clock”

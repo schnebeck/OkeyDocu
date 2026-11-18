@@ -17,7 +17,6 @@ from okeydocu.__main__ import build_context
 from okeydocu.devices import DeviceError, FoundInstrument
 from okeydocu.devices.profitest_prime import pairing
 from okeydocu.devices.profitest_prime.info import DRIVER as PRIME_DRIVER
-from okeydocu.devices.simulator import SimulatedMeter
 from okeydocu.ui.campaign_dialog import CampaignDialog
 from okeydocu.ui.common import run_busy
 from okeydocu.ui.instrument_setup import InstrumentSetupOverlay
@@ -226,14 +225,3 @@ def test_error_during_the_work_reaches_the_caller_and_frees_the_window(qtbot, ap
         run_busy(window, "Warte …", fail)
     assert window.isEnabled()
 
-
-def test_failed_start_leaves_no_campaign_and_says_why(qtbot, app, plan, monkeypatch):
-    errors = []
-    monkeypatch.setattr("okeydocu.ui.guided_actions.show_error", lambda _, text: errors.append(text))
-    monkeypatch.setattr(SimulatedMeter, "identify", lambda self: (_ for _ in ()).throw(
-        DeviceError("Kein Messgerät gefunden")))
-    window = MainWindow(app)
-    qtbot.addWidget(window)
-    assert window.guided.start_campaign(1, plan, "T", "P", "simulator") is None
-    assert errors == ["Kein Messgerät gefunden"]
-    assert app.service.campaigns() == []
