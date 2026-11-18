@@ -549,7 +549,11 @@ driver; the user interface never imports a driver.
   moves on by itself.
 - **connect**: plug over its row of sockets, grey lead, probe on its terminal, laid one after the
   other. The test point is a drawing of its own per kind (`ui/test_object*.py`): an RCD, the
-  incoming terminals of a main switch, a CEE plug with the machine housing.
+  incoming terminals of a main switch, a CEE plug with the machine housing. Each is drawn in
+  the state the guide measures in (`Guide.live`): the handle of the main switch
+  (`ui/switch_handle.py`) lies across with “O OFF” in its window or stands upright with “I ON”,
+  the lever of the RCD is up or down. Where the installation stays live, the place station
+  shows the warning sign for electricity (`ui/warning_sign.py`, after ISO 7010 W012).
 - **prepare** and **configure**: what to do and which parts of the panel to use; configure can
   close in on parts, such as display and softkeys, and lists what the element states.
 - **measure**: the keys in order; the station waits for the result of its own function and shows

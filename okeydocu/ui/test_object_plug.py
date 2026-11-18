@@ -34,7 +34,7 @@ def _pins(poles: int) -> list[tuple[str, float]]:
 
 
 def cee_plug(painter: QPainter, box: QRectF, lines: list[str], poles: int = 4,
-             n_left: bool = False) -> dict[str, Anchor]:
+             n_left: bool = False, live: bool = True) -> dict[str, Anchor]:
     centre = QPointF(box.left() + box.width() * 0.40, box.top() + 44 + FACE + 10)
     painter.setPen(QPen(LINE, 1.5))
     painter.setBrush(RED if poles > 2 else BLUE)

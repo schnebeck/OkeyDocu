@@ -16,47 +16,36 @@ from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPen
 
 from ..l10n import tr
+from .switch_handle import switch_handle
 from .test_object_parts import BODY, CENTER, INK, LINE, Anchor, bold_font, pe_bar, screw, \
     side_label
 
 PITCH = 40
-PLATE, HANDLE = QColor("#f2c418"), QColor("#c0392b")
 
 
-def _handle(painter: QPainter, plate: QRectF) -> None:
-    painter.setPen(QPen(LINE, 1.5))
-    painter.setBrush(PLATE)
-    painter.drawRoundedRect(plate, 6, 6)
-    centre = plate.center()
-    painter.setBrush(HANDLE)
-    painter.drawEllipse(centre, 22, 22)
-    painter.save()
-    painter.translate(centre)
-    painter.rotate(-45)
-    painter.drawRoundedRect(QRectF(-9, -38, 18, 76), 6, 6)
-    painter.restore()
+def _handle(painter: QPainter, plate: QRectF, on: bool) -> None:
+    switch_handle(painter, plate, on)
     painter.setPen(INK)
-    painter.drawText(QRectF(plate.left(), plate.top() + 4, plate.width(), 14), CENTER, "0")
-    painter.drawText(QRectF(plate.right() - 20, plate.top() + 4, 16, 14), CENTER, "I")
-    painter.drawText(QRectF(plate.left() - 20, plate.bottom() + 4, plate.width() + 40, 16),
-                     CENTER, tr("Main switch"))
+    caption = tr("Main switch: on") if on else tr("Main switch: off")
+    painter.drawText(QRectF(plate.left() - 30, plate.bottom() + 4, plate.width() + 60, 16),
+                     CENTER, caption)
 
 
 def main_switch(painter: QPainter, box: QRectF, lines: list[str], poles: int = 4,
-                n_left: bool = False) -> dict[str, Anchor]:
+                n_left: bool = False, live: bool = True) -> dict[str, Anchor]:
     """`poles` above two draw three line conductors and N, otherwise L and N; `n_left` puts
-    N first."""
+    N first; `live` draws the handle switched on."""
     incoming = ["L1", "L2", "L3", "N"] if poles > 2 else ["L", "N"]
     outgoing = ["2", "4", "6", "N"] if poles > 2 else ["2", "N"]
     if n_left:
         incoming, outgoing = incoming[-1:] + incoming[:-1], outgoing[-1:] + outgoing[:-1]
     plate = QRectF(box.left() + box.width() * 0.08, box.top() + 56, 110, 110)
-    _handle(painter, plate)
+    _handle(painter, plate, live)
     module = QRectF(box.left() + box.width() * 0.33, box.top() + 70, 12 + PITCH * len(incoming),
                     160)
     painter.setPen(QPen(LINE, 1, Qt.PenStyle.DashLine))
     painter.drawLine(QPointF(plate.right() + 8, plate.center().y()),
-                     QPointF(module.left() - 100, plate.center().y()))
+                     QPointF(module.left() - 6, plate.center().y()))
     painter.setPen(QPen(QColor("#7d848b"), 1.5))
     painter.setBrush(BODY)
     painter.drawRoundedRect(module, 6, 6)

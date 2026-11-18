@@ -25,11 +25,11 @@ PITCH = 40  # between two poles
 
 
 def rcd(painter: QPainter, box: QRectF, lines: list[str], poles: int = 2,
-        n_left: bool = False) -> dict[str, Anchor]:
+        n_left: bool = False, live: bool = True) -> dict[str, Anchor]:
     """An RCD with two or four poles, lever, test button and its data, and a PE bar beside it;
     supply terminals on top, outgoing ones below. N stands after the line conductors, or
     before them with `n_left`: N L1 L2 L3. Terminal numbers stand inside the housing, beside
-    the screw they belong to."""
+    the screw they belong to. The lever is up while `live` and down otherwise."""
     terminals = TERMINALS[4 if poles > 2 else 2]
     if n_left:
         terminals = terminals[-1:] + terminals[:-1]
@@ -40,7 +40,14 @@ def rcd(painter: QPainter, box: QRectF, lines: list[str], poles: int = 2,
     painter.setBrush(BODY)
     painter.drawRoundedRect(module, 6, 6)
     painter.setBrush(QColor("#2c3037"))
-    painter.drawRoundedRect(QRectF(module.center().x() - 9, module.top() + 38, 18, 30), 3, 3)
+    slot = QRectF(module.center().x() - 10, module.top() + 32, 20, 38)
+    painter.save()
+    painter.setPen(QPen(QColor("#b3b9bf"), 1))
+    painter.setBrush(QColor("#e1e4e7"))
+    painter.drawRoundedRect(slot, 3, 3)
+    painter.restore()
+    lever = slot.top() + (1 if live else 17)
+    painter.drawRoundedRect(QRectF(slot.left() + 1, lever, 18, 20), 3, 3)
     button = QPointF(module.right() - 16, module.top() + 46)
     painter.setBrush(QColor("#f1c40f"))
     painter.drawEllipse(button, 7, 7)

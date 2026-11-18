@@ -118,7 +118,7 @@ class BenchView(QWidget):
         if self.guide is None:
             return
         draw = DRAWINGS[self.guide.test_object]
-        self.anchors = draw(painter, box, self.data, self.poles, self.n_left)
+        self.anchors = draw(painter, box, self.data, self.poles, self.n_left, self.guide.live)
         painter.setPen(QColor("#1f2933"))
         painter.drawText(box.adjusted(box.width() * 0.72, 16, -12, 0),
                          Qt.AlignmentFlag.AlignLeft | Qt.TextFlag.TextWordWrap,

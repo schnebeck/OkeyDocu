@@ -11,20 +11,20 @@ the state the installation stays in below, beside it what to do beforehand."""
 
 from __future__ import annotations
 
-from PySide6.QtCore import QPointF, QRectF, Qt
-from PySide6.QtGui import QColor, QFont, QPainter, QPainterPath, QPen
+from PySide6.QtCore import QRectF, Qt
+from PySide6.QtGui import QColor, QFont, QPainter, QPen
 from PySide6.QtWidgets import QWidget
 
 from ..campaign.measuring_place import MeasuringPlace
 from ..devices.guide import Guide
 from ..l10n import tr
 from .test_objects import DRAWINGS
+from .warning_sign import electricity_sign
 
 INK, MUTED, FRAME = QColor("#1f2933"), QColor("#5f666d"), QColor("#9aa5ae")
 LIVE, LIVE_BACK, LIVE_INK = QColor("#e67e22"), QColor("#fff4e5"), QColor("#b35c00")
 DEAD, DEAD_BACK, DEAD_INK = QColor("#2e8b57"), QColor("#e8f5ee"), QColor("#1e6b41")
 SCALE = 1.3  # the test point drawn a little larger than on the bench
-BOLT = ((18, 0), (3, 34), (21, 34), (-12, 88), (-5, 50), (-23, 50))
 
 
 def _font(size: int, bold: bool = False) -> QFont:
@@ -63,7 +63,7 @@ class PlaceScene(QWidget):
             lines = self.place.lines(self.guide.drawing_features)
             DRAWINGS[self.guide.test_object](
                 painter, QRectF(0, 0, (box.width() - 20) / SCALE, 230), lines,
-                self.place.poles, self.place.n_left)
+                self.place.poles, self.place.n_left, self.guide.live)
             painter.restore()
         state = QRectF(box.left() + 24, box.top() + 400, box.width() * 0.42, 220)
         self._paint_state(painter, state)
@@ -87,14 +87,7 @@ class PlaceScene(QWidget):
         painter.setBrush(back)
         painter.drawRoundedRect(state, 14, 14)
         if live:
-            x, y = state.left() + 44, state.top() + 52
-            bolt = QPainterPath(QPointF(x + BOLT[0][0], y + BOLT[0][1]))
-            for dx, dy in BOLT[1:]:
-                bolt.lineTo(QPointF(x + dx, y + dy))
-            bolt.closeSubpath()
-            painter.setPen(QPen(INK, 1.5))
-            painter.setBrush(QColor("#f1c40f"))
-            painter.drawPath(bolt)
+            electricity_sign(painter, QRectF(state.left() + 14, state.top() + 30, 78, 78))
         heading = tr("Live") if live else tr("De-energised")
         text = (tr("The circuit stays switched on.") if live else
                 tr("Switch off, secure against switching on again, verify that it is dead."))
