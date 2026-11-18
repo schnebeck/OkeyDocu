@@ -18,9 +18,8 @@ from PySide6.QtWidgets import QComboBox, QFormLayout, QLabel, QLineEdit, QVBoxLa
 
 from ..campaign.measuring_place import MeasuringPlace
 from ..devices.guide import Guide
-from ..l10n import N_, tr
+from ..l10n import N_, tr, value_text
 from .choice_box import feature_field, field_text
-from .choice_tips import choice_text
 from .pending_marks import PendingMarks
 
 MISSING_STYLE = "background:#fde2c4"
@@ -118,7 +117,7 @@ class PlaceForm(QWidget):
             above = place.inherited.get(key, "")
             if above and not place.features.get(key):
                 edit = field.lineEdit() if isinstance(field, QComboBox) else field
-                edit.setPlaceholderText(tr("{value}, as stated above", value=choice_text(above)))
+                edit.setPlaceholderText(tr("{value}, as stated above", value=value_text(above)))
             edits = field.editTextChanged if isinstance(field, QComboBox) else field.textEdited
             edits.connect(lambda text, field=field, above=above: self._typed(field, text, above))
             self.fields[key] = field

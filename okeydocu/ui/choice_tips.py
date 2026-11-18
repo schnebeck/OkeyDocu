@@ -18,9 +18,8 @@ from collections.abc import Callable, Mapping
 
 from PySide6.QtGui import QPixmap
 
-from ..l10n import in_language, tr
+from ..l10n import in_language, tr, value_text
 from ..l10n.catalog import source_of
-from ..l10n.formats import pattern
 from ..store.choice_lists import ChoiceList, ChoiceValue
 from ..vocabulary import function_label
 from .curve_picture import curve_picture, parse_curve
@@ -33,20 +32,11 @@ FINAL_LIMIT_A = 63
 REQUIRED_S = {("TN", True): 0.4, ("TN", False): 5.0, ("TT", True): 0.2, ("TT", False): 1.0}
 
 
-def choice_text(choice: str) -> str:
-    """A number with the decimal sign of the language, a word in the language."""
-    try:
-        float(choice)
-    except ValueError:
-        return tr(choice)
-    return choice.replace(".", pattern("decimal"))
-
-
 def held_value(chosen: ChoiceList, text: str) -> str | None:
     """The value of the list a text stands for, as stored or as shown in any language."""
     text = text.strip()
     for value in chosen.offered:
-        if text in (value, choice_text(value)):
+        if text in (value, value_text(value)):
             return value
     source = source_of(text)
     return source if source in chosen.offered else None
@@ -98,7 +88,7 @@ def text_tip(chosen: ChoiceList, text: str,
     entry = chosen.entry(value) if value is not None else None
     if entry is None:
         return None
-    return value_tip(chosen, entry, choice_text(value), context)
+    return value_tip(chosen, entry, value_text(value), context)
 
 
 def list_tip(chosen: ChoiceList) -> Tip | None:
@@ -115,7 +105,7 @@ def compare_tip(chosen: ChoiceList, held: str | None = None) -> Tip | None:
     if not names or not chosen.values:
         return list_tip(chosen)
     heads = (in_language(chosen.label), *(in_language(name) for name in names))
-    body = tuple((choice_text(entry.value),
+    body = tuple((value_text(entry.value),
                   *(in_language(entry.facts.get(name, "")) for name in names))
                  for entry in chosen.values)
     marked = chosen.offered.index(held) if held in chosen.offered else -1

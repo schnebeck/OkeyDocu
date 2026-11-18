@@ -22,9 +22,9 @@ from dataclasses import replace
 from PySide6.QtCore import QEvent, QObject, QPoint, Qt
 from PySide6.QtWidgets import QComboBox, QLineEdit
 
-from ..l10n import N_, tr
+from ..l10n import N_, tr, value_text
 from ..store.choice_lists import ChoiceList
-from .choice_tips import Context, choice_text, compare_tip, held_value, list_tip, text_tip
+from .choice_tips import Context, compare_tip, held_value, list_tip, text_tip
 from .rich_tip import Tip, install_tip, widget_tip
 
 EMPTY, OWN = "empty", "own"
@@ -48,7 +48,7 @@ class ChoiceBox(QComboBox):
         self.insertSeparator(len(LABELS))
         values = self.list.offered if isinstance(offered, ChoiceList) else offered
         for choice in values:
-            self.addItem(choice_text(choice))
+            self.addItem(value_text(choice))
             self.setItemData(self.count() - 1, choice, VALUE)
         self.lineEdit().setPlaceholderText(tr("choose or type"))
         self.setEditText(self.shown(value))
@@ -60,7 +60,7 @@ class ChoiceBox(QComboBox):
 
     def shown(self, value: str) -> str:
         """A value of the list in the language of the app; any other text as it is."""
-        return choice_text(value) if value in self.list.offered else value
+        return self.list.shown(value)
 
     def value(self) -> str:
         """The text as the list holds it, so a word is stored the same in every language."""

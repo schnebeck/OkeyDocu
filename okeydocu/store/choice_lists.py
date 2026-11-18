@@ -19,6 +19,8 @@ from importlib import resources
 
 import yaml
 
+from ..l10n import value_text
+
 
 @dataclass(frozen=True)
 class Method:
@@ -47,6 +49,10 @@ class ChoiceList:
     @property
     def offered(self) -> tuple[str, ...]:
         return tuple(entry.value for entry in self.values)
+
+    def shown(self, value: str) -> str:
+        """A value of the list in the current language; any other text as it is."""
+        return value_text(value) if value in self.offered else value
 
     def entry(self, value: str) -> ChoiceValue | None:
         return next((entry for entry in self.values if entry.value == value), None)

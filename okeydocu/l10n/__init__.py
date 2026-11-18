@@ -22,12 +22,12 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 
 from .catalog import SOURCE, Catalog, available, catalog, source_of
-from .formats import day, decimal, moment, qt_moment, stored_day
+from .formats import day, decimal, moment, pattern, qt_moment, stored_day
 from .quantities import signed_seconds
 
 __all__ = ["SOURCE", "N_", "available", "current", "day", "decimal", "in_language",
            "is_translation", "moment", "plural", "qt_moment", "set_language", "signed_seconds",
-           "speaking", "stored_day", "tr"]
+           "speaking", "stored_day", "tr", "value_text"]
 
 _chosen = SOURCE
 _speaking: ContextVar[str | None] = ContextVar("speaking", default=None)
@@ -64,6 +64,16 @@ def speaking(code: str):
 def tr(text: str, /, context: str = "", **values) -> str:
     translated = active().text(text, context) or text
     return translated.format(**values) if values else translated
+
+
+def value_text(value: str) -> str:
+    """A value of a choice list for showing: a number with the decimal sign of the language,
+    a word in the language. It is stored the same in every language."""
+    try:
+        float(value)
+    except ValueError:
+        return tr(value)
+    return value.replace(".", pattern("decimal"))
 
 
 def in_language(text: str) -> str:

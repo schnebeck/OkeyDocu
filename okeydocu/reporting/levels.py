@@ -24,7 +24,14 @@ if TYPE_CHECKING:
 def asset_features(db, asset) -> list[tuple[str, str]]:
     """The features noted on the element, in the order of its kind; empty ones stay out."""
     kind, values = db.kind(asset["kind"]), db.asset_features(asset["id"])
-    return [(feature.label, f"{values[feature.key]}{UNIT_SPACE}{feature.unit}".strip())
+    lists = db.choice_lists()
+
+    def said(feature) -> str:
+        chosen = lists.get(feature.choice_list or "")
+        value = values[feature.key]
+        return chosen.shown(value) if chosen is not None else value
+
+    return [(feature.label, f"{said(feature)}{UNIT_SPACE}{feature.unit}".strip())
             for feature in (kind.features if kind else ()) if values.get(feature.key)]
 
 

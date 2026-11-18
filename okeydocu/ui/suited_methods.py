@@ -17,10 +17,10 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 
-from ..l10n import in_language
+from ..l10n import in_language, value_text
 from ..store.choice_lists import ChoiceList
 from ..vocabulary import function_label
-from .choice_tips import EARTHING, choice_text, held_value
+from .choice_tips import EARTHING, held_value
 from .rich_tip import Tip
 
 INHERITED = (EARTHING,)
@@ -39,7 +39,7 @@ def suited(features: Iterable, lists: Mapping[str, ChoiceList],
         value = held_value(chosen, text) if chosen is not None and text else None
         entry = chosen.entry(value) if value is not None else None
         for method in entry.methods if entry else ():
-            reason = (f"{feature.label}: {choice_text(value)}",
+            reason = (f"{feature.label}: {value_text(value)}",
                       in_language(method.note))
             found.setdefault(method.function, []).append(reason)
     return found

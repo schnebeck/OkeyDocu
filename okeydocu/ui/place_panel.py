@@ -127,8 +127,9 @@ class PlacePanel(QWidget):
             text = values.get(feature.key, "")
             if not text:
                 continue
-            shown = self._add_line(feature.label, f"{text} {feature.unit}".strip())
             chosen = lists.get(feature.choice_list or "")
+            said = chosen.shown(text) if chosen is not None else text
+            shown = self._add_line(feature.label, f"{said} {feature.unit}".strip())
             if chosen is not None and text_tip(chosen, text) is not None:
                 install_tip(shown, lambda _, c=chosen, t=text: text_tip(c, t, context))
                 shown.setCursor(TIPPED)
