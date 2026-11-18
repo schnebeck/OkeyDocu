@@ -28,6 +28,7 @@ from .clock import (
     set_instrument_clock,
 )
 from .attachments import AttachmentMixin
+from .element_order import ElementOrderMixin
 from .closing import ClosingMixin
 from .editing import EditingMixin
 from .filing import FilingMixin
@@ -94,7 +95,7 @@ class CampaignService(
     ReadingMixin, ClockMixin, FilingMixin, EditingMixin, PhotoMixin, AttachmentMixin, PlanStepMixin,
     PlanBlockMixin, ClosingMixin, OverviewMixin, StructureMixin, DueMixin, RunMixin, RepeatMixin,
     RepeatCheckMixin, PhotoMarkMixin, ProxyMixin, CarryOverMixin, InstrumentHistoryMixin,
-    TemplateMixin, TemplateUseMixin, TemplateLearningMixin,
+    TemplateMixin, TemplateUseMixin, TemplateLearningMixin, ElementOrderMixin,
 ):
     def __init__(self, db: Database, archive_root: Path, key_store: KeyStore | None = None):
         self.db = db

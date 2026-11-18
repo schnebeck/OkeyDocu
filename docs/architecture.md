@@ -31,7 +31,14 @@ towards the overall result.
 ## Structure
 
 The structure of a customer is a tree of any depth (`assets`), freely nestable as in
-IZYTRONIQ. The kinds of the elements are in `asset_kinds`, their features in `kind_features`; both can be
+IZYTRONIQ. Every element is a measuring point: a reading goes to the element chosen, an RCD
+measurement straight onto the RCD; the kind “measuring point” is only the most general one.
+Elements side by side keep an order of their own (`assets.position`, the name breaks ties;
+`campaign/element_order.py`): a new one goes behind its last sibling, one moved below another
+element behind that one's children, a group takes the place of its first element. The tree, the
+report and every list of elements follow it. “Move up” and “Move down” (Ctrl+↑, Ctrl+↓) in the
+context menu shift the element chosen; dropped on the line between two elements it goes there,
+dropped onto an element it goes below it. The kinds of the elements are in `asset_kinds`, their features in `kind_features`; both can be
 changed under Settings → Structure kinds (`ui/kinds_page.py`). The kinds from `data/kinds.yaml` are
 supplied. Every kind names its IZYTRONIQ kind code for the import and a test interval. Feature values are
 collected at the element (`features_json`); empty ones are not stored and are shown nowhere. When a
@@ -720,15 +727,20 @@ takes them over through its function. The free measurement shows the same instru
 the rotary switch and the last measured value. For a function without instructions the app says so; it never shows anything unrelated.
 
 A campaign gets a plan at its start, or none; more are added through “Assign test plan”, in the
-side panel or the campaign menu, at any time while it is open. A campaign with points (a repeat
-inspection or a campaign template) takes no plans: its steps are those points. Every point
-is recorded as a copy in `steps`, so a corrected plan does not change any campaign.
-The steps of one assignment lie next to each other and carry its title; so every assignment stays
-a plan of its own (`campaign/plan_blocks.py`), even if the same plan is assigned twice.
+side panel or the campaign menu, at any time while it is open, also a campaign with the points of a repeat
+inspection or a campaign template; a plan added must be worked off before confirming, as must
+those points. Every point is recorded as a copy in `steps`, so a corrected plan does not change any
+campaign. A point of a repeat or a template carries its `origin` and belongs to no plan; the
+steps of one assignment share a block id (`PlanStep.block`), so every assignment stays a plan of
+its own (`campaign/plan_blocks.py`), even if the same plan is assigned twice or points lie between
+its steps. `plan_key` says where the points came from (repeat, template) and wins over a test
+plan's key; `plan_title` names them first, then each plan. The report shows each step by its own
+kind: points as in a repeat inspection, plan steps as steps.
 
 The campaign always shows structure and measurements. Its plans are in the side panel under
 “Test plans” with their progress (`ui/plan_list.py`). “Run” puts the plan in the place of
-structure and table (`ui/plan_run.py`); a campaign started with a plan begins with it straight away.
+structure and table (`ui/plan_run.py`), with only that plan's steps in the wizard's list; a
+campaign started with a plan begins with it straight away.
 Nothing fixes the order: any plan may be run at any time, and running one sets a running plan
 aside as “Pause plan” does; inside a plan every point can be chosen in the list.
 “Pause plan” leaves everything as it is; a step that is measuring then waits for its setup again;

@@ -84,6 +84,7 @@ class PlanStep:
     question: str = ""  # a check asks this; the title is its short name
     run: str = ""  # the run the step belonged to, by name
     run_kind: str = ""
+    block: str = ""  # the assignment of a plan to a campaign the step came with
 
     def accepts(self, function: str) -> bool:
         return function == self.function or function in self.also_accepts
@@ -125,6 +126,7 @@ class PlanStep:
             question=data.get("question", ""),
             run=data.get("run", ""),
             run_kind=data.get("run_kind", ""),
+            block=data.get("block", ""),
         )
 
 

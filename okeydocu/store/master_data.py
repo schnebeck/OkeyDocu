@@ -41,11 +41,14 @@ class MasterDataMixin:
         self, customer_id: int, kind: str, name: str, parent_id: int | None = None,
         identifier="", manufacturer="", type="", serial_no="", comment="", guid="",
     ) -> int:
+        """A new element goes behind its last sibling."""
         return self.execute(
             "INSERT INTO assets (customer_id, parent_id, kind, name, identifier, manufacturer,"
-            " type, serial_no, comment, guid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            " type, serial_no, comment, guid, position) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,"
+            " (SELECT coalesce(max(position), 0) + 1 FROM assets WHERE customer_id=?"
+            " AND parent_id IS ?))",
             customer_id, parent_id, kind, name, identifier, manufacturer, type, serial_no, comment,
-            guid,
+            guid, customer_id, parent_id,
         )
 
     def update_asset(
@@ -75,9 +78,10 @@ class MasterDataMixin:
 
     def assets(self, customer_id: int | None = None) -> list[sqlite3.Row]:
         if customer_id is None:
-            return self.query("SELECT * FROM assets ORDER BY name COLLATE NOCASE")
+            return self.query("SELECT * FROM assets ORDER BY position, name COLLATE NOCASE")
         return self.query(
-            "SELECT * FROM assets WHERE customer_id=? ORDER BY name COLLATE NOCASE", customer_id
+            "SELECT * FROM assets WHERE customer_id=? ORDER BY position, name COLLATE NOCASE",
+            customer_id,
         )
 
     def asset(self, asset_id: int) -> sqlite3.Row | None:

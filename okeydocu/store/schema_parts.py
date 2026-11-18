@@ -19,7 +19,8 @@ _ASSET_COLUMNS = """
     guid TEXT NOT NULL DEFAULT '',
     features_json TEXT NOT NULL DEFAULT '{}',
     interval_months INTEGER,  -- NULL: as its kind says
-    basis TEXT NOT NULL DEFAULT ''  -- what it is tested to; empty: as the element above
+    basis TEXT NOT NULL DEFAULT '',  -- what it is tested to; empty: as the element above
+    position INTEGER NOT NULL DEFAULT 0  -- among its siblings; the name breaks ties
 """
 
 # Kinds of structure elements and what can be noted about each, both editable. A choice list

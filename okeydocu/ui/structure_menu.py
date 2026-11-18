@@ -18,6 +18,8 @@ from .kind_catalog import KindCatalog
 from .structure_cleanup import CleanupOverlay
 from .structure_tree import UNPLACED, StructureTree
 
+UP, DOWN = "Ctrl+Up", "Ctrl+Down"
+
 
 def kind_menu(menu: QMenu, catalog: KindCatalog, slot) -> None:
     """The kinds used most first, the rest one level down."""
@@ -43,7 +45,9 @@ class StructureActions(QObject):
         tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         tree.customContextMenuRequested.connect(self._show_menu)
         for keys, slot in ((QKeySequence.StandardKey.Delete, self.delete),
-                           (QKeySequence("Ins"), self._new_at_cursor)):
+                           (QKeySequence("Ins"), self._new_at_cursor),
+                           (QKeySequence(UP), lambda: self.shift(-1)),
+                           (QKeySequence(DOWN), lambda: self.shift(1))):
             shortcut = QShortcut(keys, tree)
             shortcut.setContext(Qt.ShortcutContext.WidgetShortcut)
             shortcut.activated.connect(slot)
@@ -65,6 +69,11 @@ class StructureActions(QObject):
             kind_menu(menu.addMenu(tr("Change kind")), catalog, self.change_kind)
             menu.addAction(QIcon.fromTheme("document-properties"), tr("Properties …"),
                            lambda: self.properties_requested.emit(self._target()))
+        if single and self._movable() is not None:
+            menu.addAction(QIcon.fromTheme("go-up"), tr("Move up"),
+                           lambda: self.shift(-1)).setShortcut(QKeySequence(UP))
+            menu.addAction(QIcon.fromTheme("go-down"), tr("Move down"),
+                           lambda: self.shift(1)).setShortcut(QKeySequence(DOWN))
         if len(selected) > 1 or (selected and selected[0] != self.tree.root_id):
             kind_menu(menu.addMenu(tr("Group under a new element")), catalog, self.group)
         menu.addSeparator()
@@ -100,6 +109,18 @@ class StructureActions(QObject):
         else:
             created = self.app.service.add_element(parent, kind, label)
         self._rebuilt_with(created, edit=True)
+
+    def _movable(self) -> int | None:
+        """The element chosen, if it has a place among siblings here: never the installation
+        a campaign shows."""
+        current = self.tree.current_id()
+        return None if current in (None, UNPLACED, self.tree.root_id) else current
+
+    def shift(self, offset: int) -> None:
+        asset_id = self._movable()
+        if asset_id is not None:
+            self.app.service.shift_element(asset_id, offset)
+            self._rebuilt_with(asset_id)
 
     def group(self, kind: str) -> None:
         label = KindCatalog(self.app.db).label(kind)

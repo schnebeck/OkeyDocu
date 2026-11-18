@@ -133,22 +133,28 @@ def test_steps_without_measurement_are_listed_with_their_reason():
     assert nodes[-1].rows == [("Schutzleiter Motor", "kein Zugang")]
 
 
-def test_elements_side_by_side_follow_the_order_they_were_measured_in(app):
+def test_elements_side_by_side_follow_the_order_of_the_structure(app):
     db = app.db
     customer = db.add_customer("Muster AG")
     root = db.add_asset(customer, "machine", "Presse")
-    early, late = (db.add_asset(customer, "measuring_point", name, parent_id=root)
-                   for name in ("Zuleitung", "Antrieb"))
+    first, second = (db.add_asset(customer, "measuring_point", name, parent_id=root)
+                     for name in ("Zuleitung", "Antrieb"))
     campaign = app.service.create(root, "Prüfung", "Prüfer")
-    for asset, minute in ((late, 30), (early, 10), (late, 5)):
+    for asset, minute in ((second, 30), (first, 10), (second, 5)):
         result = ResultValue("rlo", "RLO", Quantity.parse("0.10Ω"), Verdict.PASSED, "", "<1.00Ω")
         app.service.add_measurement(campaign, "rlo", [result], T0 + timedelta(minutes=minute),
                                     Verdict.PASSED, asset_id=asset)
-    nodes = resolve({"blocks": [{"type": "structure"}]}, build_context(app.service, campaign))
-    places = [title for title in headings(nodes) if "Messpunkt" in title]
-    assert places == ["Antrieb (Messpunkt)", "Zuleitung (Messpunkt)"]
+
+    def places():
+        nodes = resolve({"blocks": [{"type": "structure"}]}, build_context(app.service, campaign))
+        return [title for title in headings(nodes) if "Messpunkt" in title], nodes
+
+    order, nodes = places()
+    assert order == ["Zuleitung (Messpunkt)", "Antrieb (Messpunkt)"]
     times = [row[1][:8] for node in nodes if hasattr(node, "body") for row in node.body.rows]
-    assert times == ["10:05:00", "10:30:00", "10:10:00"]
+    assert times == ["10:10:00", "10:05:00", "10:30:00"]
+    app.service.shift_element(second, -1)
+    assert places()[0] == ["Antrieb (Messpunkt)", "Zuleitung (Messpunkt)"]
 
 
 def test_an_element_says_what_it_is_and_how_it_was_measured(app):

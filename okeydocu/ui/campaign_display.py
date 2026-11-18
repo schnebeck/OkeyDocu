@@ -50,6 +50,7 @@ class CampaignDisplay:
         parts = (escape(customer["name"]), escape(asset["name"]), order, tester, escape(plan))
         self.header.details.setText(SEPARATOR.join(part for part in parts if part))
         self.values.show_campaign(campaign_id)
+        self.guided.only = self.plan_runs.get(campaign_id)
         self.guided.show_campaign(campaign_id if self._has_plans(campaign) else None)
         self.structure.show_root(campaign["asset_id"], campaign_id, campaign["status"] == "open")
         self.structure.select(self.place_targets.get(campaign_id) or campaign["asset_id"])
@@ -153,7 +154,7 @@ class CampaignDisplay:
         self.template_action.setEnabled(bool(campaign) and
                                         not self.app.service.is_empty(campaign["id"]))
         self.header.edit_button.setVisible(is_open)
-        self.assign_action.setEnabled(is_open and self.takes_plans(campaign))
+        self.assign_action.setEnabled(is_open)
         self.report_action.setEnabled(bool(campaign) and not is_open)
         self.next_order_action.setEnabled(bool(campaign) and not is_open)
         self.photos_action.setEnabled(is_open)

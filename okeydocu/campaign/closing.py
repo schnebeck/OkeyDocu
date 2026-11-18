@@ -43,13 +43,14 @@ class ClosingMixin:
         if not steps:
             return []
         plan_key = self.campaign(campaign_id)["plan_key"]
-        if has_points(plan_key):
-            return self.repeat_blockers(campaign_id, self.template_mode(plan_key) != OPEN)
         problems = [
             tr("Step open: {title}", title=self.plan_step(step).title)
-            for step in steps
+            for step in self.plan_step_rows(campaign_id)
             if step["status"] in ("pending", "active")
         ]
+        if has_points(plan_key):
+            strict = self.template_mode(plan_key) != OPEN
+            return self.repeat_blockers(campaign_id, strict) + problems
         unassigned = len(self.open_measurements(campaign_id))
         if unassigned:
             problems.append(plural(unassigned, "{count} measurement not assigned to a step",

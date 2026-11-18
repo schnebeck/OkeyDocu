@@ -26,6 +26,14 @@ class GuidedSteps:
 
     # What the chosen element states for the settings it decides, and its designation.
     element: tuple = ((), "")
+    only: tuple[int, ...] | None = None  # the steps of the plan being run
+
+    def _rows(self) -> list:
+        """The steps of the plan run, or of every test plan; points of a repeat never."""
+        if not self.campaign_id:
+            return []
+        rows = self.app.service.plan_step_rows(self.campaign_id)
+        return [row for row in rows if self.only is None or row["id"] in self.only]
 
     # Steps ---------------------------------------------------------------
 
@@ -36,7 +44,7 @@ class GuidedSteps:
         self.steps.blockSignals(True)
         self.steps.clear()
         service = self.app.service
-        rows = service.steps(self.campaign_id) if self.campaign_id else []
+        rows = self._rows()
         for row in rows:
             measured = service.measurements(self.campaign_id, row["id"])
             step = service.plan_step(row)
@@ -78,9 +86,7 @@ class GuidedSteps:
 
     def _show_position(self, rows: int) -> None:
         index = self.steps.currentRow()
-        service = self.app.service
-        steps = service.steps(self.campaign_id) if self.campaign_id else []
-        done = sum(1 for row in steps if row["status"] in ("done", "skipped"))
+        done = sum(1 for row in self._rows() if row["status"] in ("done", "skipped"))
         self.progress.setRange(0, max(rows, 1))
         self.progress.setValue(done)
         text = tr("Point {number} of {total}", number=index + 1, total=rows) if rows else ""

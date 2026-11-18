@@ -88,11 +88,13 @@ it, a defect in red.
 
 **Test plans, repeat inspections and campaign templates.** A test plan leads through questions
 and measurements in a wizard; a visual inspection to DIN VDE 0100-600 and an electrical machine
-inspection come as drafts. A repeat inspection turns the last confirmed campaign into a list of
-open points. A campaign template keeps the structure and the points of an inspection and can be
-used on the same installation or copied onto another of the same build. In open mode it is edited
-along the way and offers what a campaign did differently when it is confirmed; in series mode its
-points are fixed and deviations need a reason.
+inspection come as drafts. Any campaign takes any number of plans at any time, run in any order;
+each must be worked off before confirming. A repeat inspection turns the last confirmed campaign
+into a list of open points. A campaign template keeps the structure and the points of an
+inspection and can be used on the same installation or copied onto another of the same build. As
+an open pattern it is edited along the way and offers what a campaign did differently when it is
+confirmed; for series devices its points and measurements are fixed, their order is free, and
+deviations need a reason.
 
 **Reports.** Reports are made from templates in a graphical editor with live preview, letterhead
 and logo, in German or English, chosen for each report. A template block can show none,

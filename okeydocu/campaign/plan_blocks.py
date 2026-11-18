@@ -21,6 +21,7 @@ from datetime import datetime
 from ..l10n import tr
 from ..store import CampaignClosed
 from .plan_steps import TITLE_SEPARATOR
+from .point_plans import has_points
 
 OPEN = ("pending", "active")
 
@@ -42,15 +43,35 @@ class PlanBlock:
 
 class PlanBlockMixin:
     def plan_blocks(self, campaign_id: int) -> list[PlanBlock]:
-        blocks: list[PlanBlock] = []
+        """The test plans assigned, by their block id; steps without one go by title and
+        neighbourhood. Points of a repeat or a template belong to no plan."""
+        blocks: dict[str, PlanBlock] = {}
+        last = ""
         for row in self.steps(campaign_id):
+            step = self.plan_step(row)
+            if step.origin:
+                continue
+            group = step.block or (last if last.startswith("~") and
+                                   blocks[last].title == row["plan_title"] else f"~{row['id']}")
+            last = group
             done = int(row["status"] not in OPEN)
-            last = blocks[-1] if blocks else None
-            if last is not None and last.title == row["plan_title"]:
-                blocks[-1] = PlanBlock(last.title, (*last.step_ids, row["id"]), last.done + done)
-            else:
-                blocks.append(PlanBlock(row["plan_title"], (row["id"],), done))
-        return blocks
+            known = blocks.get(group)
+            blocks[group] = (PlanBlock(known.title, (*known.step_ids, row["id"]), known.done + done)
+                             if known else PlanBlock(row["plan_title"], (row["id"],), done))
+        return list(blocks.values())
+
+    def plan_step_rows(self, campaign_id: int) -> list:
+        """The steps of test plans, without the points of a repeat or a template."""
+        return [row for row in self.steps(campaign_id) if not self.plan_step(row).origin]
+
+    def _retitle(self, campaign_id: int) -> None:
+        """The campaign names where its points came from, then each plan."""
+        points = next((row["plan_title"] for row in self.steps(campaign_id)
+                       if self.plan_step(row).origin), "")
+        titles = [points] if points else []
+        titles += [block.title for block in self.plan_blocks(campaign_id)]
+        self.db.execute("UPDATE campaigns SET plan_title=? WHERE id=?",
+                        TITLE_SEPARATOR.join(titles), campaign_id)
 
     def first_open_step(self, block: PlanBlock) -> int:
         """Where working on a plan goes on; the first step once all are done."""
@@ -86,7 +107,6 @@ class PlanBlockMixin:
             self.delete_measurement(row["id"])
         with self.db.transaction() as connection:
             connection.execute(f"DELETE FROM steps WHERE id IN ({marks})", block.step_ids)
-        titles = [kept.title for kept in self.plan_blocks(campaign_id)]
-        self.db.execute("UPDATE campaigns SET plan_key=?, plan_title=? WHERE id=?",
-                        campaign["plan_key"] if titles else "",
-                        TITLE_SEPARATOR.join(titles), campaign_id)
+        if not has_points(campaign["plan_key"]) and not self.plan_blocks(campaign_id):
+            self.db.execute("UPDATE campaigns SET plan_key='' WHERE id=?", campaign_id)
+        self._retitle(campaign_id)

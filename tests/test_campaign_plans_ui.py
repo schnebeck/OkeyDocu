@@ -9,7 +9,6 @@
 import pytest
 
 from okeydocu.campaign.plan import parse_plan
-from okeydocu.campaign.point_plans import REPEAT
 from okeydocu.ui import campaign_plans
 
 SIGHT = parse_plan("""
@@ -68,13 +67,6 @@ def test_plans_are_added_one_after_the_other_and_removed_one_by_one(page, app, m
     page.plan_list.remove_button.click()
     assert titles(page) == [LOOP.label]
     assert app.service.campaign(page.campaign_id)["plan_title"] == LOOP.label
-
-
-def test_a_campaign_with_points_takes_no_plan(page, app):
-    app.db.execute("UPDATE campaigns SET plan_key=? WHERE id=?", REPEAT, page.campaign_id)
-    page.show_campaign(page.campaign_id)
-    assert not page.plan_section.isVisible()
-    assert not page.assign_action.isEnabled()
 
 
 def test_the_running_plan_keeps_its_progress_line_in_a_narrow_list(page, monkeypatch):

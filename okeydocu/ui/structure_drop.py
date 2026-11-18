@@ -9,9 +9,11 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QAbstractItemView
 
 from .common import ROW_ID, selected_ids
 
+Position = QAbstractItemView.DropIndicatorPosition
 UNPLACED = -1  # the item for measurements booked onto no element
 
 
@@ -43,10 +45,28 @@ class StructureDrop:
         target_id = None if to_top else target.data(0, ROW_ID)
         if event.source() is self:
             moving = [i for i in self.selected_ids() if i != self.root_id]
-            self._apply(lambda: [self.app.service.move_element(i, target_id) for i in moving])
+            beside = self._beside(target_id)
+            if beside is None:
+                self._apply(lambda: [self.app.service.move_element(i, target_id) for i in moving])
+            else:
+                self._apply(lambda: self._place(moving, target_id, beside))
         else:
             ids = selected_ids(self.measurement_source)
             self._apply(lambda: self.app.service.move_measurements(ids, target_id))
         # Copy, not move: the views rebuild from the database, nothing is to be removed.
         event.setDropAction(Qt.DropAction.CopyAction)
         event.accept()
+
+    def _beside(self, target_id) -> bool | None:
+        """Dropped on the line above or below an element: True after it, False before it;
+        None dropped onto it. The installation a campaign shows has nothing beside it."""
+        where = self.dropIndicatorPosition()
+        if target_id is None or target_id == self.root_id or \
+                where not in (Position.AboveItem, Position.BelowItem):
+            return None
+        return where == Position.BelowItem
+
+    def _place(self, moving: list[int], target_id: int, after: bool) -> None:
+        """The dragged elements keep their order among themselves."""
+        for asset_id in reversed(moving) if after else moving:
+            self.app.service.place_element(asset_id, target_id, after)

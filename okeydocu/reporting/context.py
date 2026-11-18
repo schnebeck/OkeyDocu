@@ -14,7 +14,6 @@ from pathlib import Path
 
 from ..campaign.line_conductors import ConductorBook
 from ..campaign.photo_view import PhotoView
-from ..campaign.point_plans import has_points
 from ..campaign.service import MANUAL, CampaignService
 from ..devices import is_simulated, setting_words
 from ..l10n import N_, in_language, tr
@@ -132,9 +131,9 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
     book = ConductorBook(service.db)
     steps = []
     loose: dict[str, list[ReportMeasurement]] = {}
-    repeat = has_points(campaign["plan_key"])
     for row in service.steps(campaign_id):
         plan_step = service.plan_step(row)
+        repeat = bool(plan_step.origin)  # a point of a repeat or a template
         measured = [load(m) for m in service.measurements(campaign_id, row["id"])
                     if not book.omitted(m)]
         if plan_step.kind == "note":

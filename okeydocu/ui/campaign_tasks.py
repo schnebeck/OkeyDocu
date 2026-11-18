@@ -62,7 +62,7 @@ class CampaignTasks:
 
     def assign_plan(self) -> None:
         campaign = self._campaign()
-        if campaign is None or campaign["status"] != "open" or not self.takes_plans(campaign):
+        if campaign is None or campaign["status"] != "open":
             return
         overlay = AssignPlanOverlay(self.app.service.plans(), self)
         if overlay.exec():

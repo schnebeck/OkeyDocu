@@ -100,20 +100,26 @@ class StructureMixin:
         self._relocate(asset_id)
 
     def move_element(self, asset_id: int, parent_id: int | None) -> None:
-        """Anywhere within the same customer, never below itself."""
+        """Anywhere within the same customer, never below itself; behind the new siblings."""
         asset = self.db.asset(asset_id)
         if parent_id is not None:
             if parent_id in self.subtree(asset_id):
                 raise StructureError(tr("An element cannot be moved below itself."))
             if self.db.asset(parent_id)["customer_id"] != asset["customer_id"]:
                 raise StructureError(tr("Elements stay with their customer."))
-        self.db.execute("UPDATE assets SET parent_id=? WHERE id=?", parent_id, asset_id)
+        if parent_id == asset["parent_id"]:
+            return
+        self.db.execute(
+            "UPDATE assets SET parent_id=?, position=(SELECT coalesce(max(position), 0) + 1"
+            " FROM assets WHERE customer_id=? AND parent_id IS ?) WHERE id=?",
+            parent_id, asset["customer_id"], parent_id, asset_id)
         self._relocate(asset_id)
 
     def group_elements(self, asset_ids: list[int], kind: str, name: str) -> int:
         """A new element in place of the first one, with all of them below it."""
         first = self.db.asset(asset_ids[0])
         group = self.db.add_asset(first["customer_id"], kind, name, parent_id=first["parent_id"])
+        self.place_element(group, asset_ids[0], after=False)
         for asset_id in asset_ids:
             self.move_element(asset_id, group)
         return group

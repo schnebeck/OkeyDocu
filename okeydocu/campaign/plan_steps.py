@@ -9,11 +9,14 @@
 from __future__ import annotations
 
 import json
+import uuid
+from dataclasses import replace
 
 from ..l10n import N_, tr
 from ..model import SIGHT_CHECK_FUNCTION, Quantity, ResultValue, Verdict
 from ..store import CampaignClosed
 from .plan import Plan, builtin_plan_texts, parse_plan
+from .point_plans import has_points
 
 TITLE_SEPARATOR = " + "
 
@@ -33,11 +36,16 @@ class PlanStepMixin:
                 self.db.save_plan(plan.key, plan.title, text)
 
     def _insert_steps(self, connection, campaign_id: int, plan: Plan) -> None:
+        """The steps of a test plan share one block id; points of a repeat or a template
+        carry their origin instead."""
         last = connection.execute(
             "SELECT max(position) FROM steps WHERE campaign_id=?", (campaign_id,)
         ).fetchone()[0]
         start = 0 if last is None else last + 1
+        block = "" if has_points(plan.key) else uuid.uuid4().hex
         for position, step in enumerate(plan.steps, start):
+            if block:
+                step = replace(step, block=block)
             connection.execute(
                 "INSERT INTO steps (campaign_id, position, plan_json, plan_title)"
                 " VALUES (?, ?, ?, ?)",
@@ -45,18 +53,16 @@ class PlanStepMixin:
             )
 
     def assign_plan(self, campaign_id: int, plan: Plan) -> None:
-        """Add a plan's steps behind those the campaign already has."""
+        """Add a plan's steps behind those the campaign already has. Points of a repeat or a
+        template give the campaign its key; a test plan keeps a key there is."""
         campaign = self.campaign(campaign_id)
         if campaign["status"] != "open":
             raise CampaignClosed(tr("The campaign is closed."))
-        titles = [campaign["plan_title"]] if campaign["plan_title"] else []
+        key = plan.key if has_points(plan.key) else (campaign["plan_key"] or plan.key)
         with self.db.transaction() as connection:
             self._insert_steps(connection, campaign_id, plan)
-            connection.execute(
-                "UPDATE campaigns SET plan_key=?, plan_title=? WHERE id=?",
-                (campaign["plan_key"] or plan.key, TITLE_SEPARATOR.join([*titles, plan.label]),
-                 campaign_id),
-            )
+            connection.execute("UPDATE campaigns SET plan_key=? WHERE id=?", (key, campaign_id))
+        self._retitle(campaign_id)
 
     def _forget_answer(self, step_id: int) -> None:
         for row in self.db.query("SELECT id FROM measurements WHERE step_id=?", step_id):

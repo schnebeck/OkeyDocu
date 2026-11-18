@@ -12,7 +12,6 @@ where it was."""
 from __future__ import annotations
 
 from ..campaign.plan_blocks import PlanBlock
-from ..campaign.point_plans import has_points
 from ..l10n import tr
 from .guided_pages import ReasonOverlay
 from .plan_list import PlanList, ask_remove
@@ -32,13 +31,8 @@ class CampaignPlans:
         self.plan_run.by_hand_requested.connect(lambda: self.values.manual_action.trigger())
 
     def _has_plans(self, campaign) -> bool:
-        """A repeat inspection is filled in any order; it is no plan to be led through."""
-        return bool(campaign["plan_key"]) and not has_points(campaign["plan_key"])
-
-    def takes_plans(self, campaign) -> bool:
-        """Plans are added to and removed from any campaign but one with points, whose steps
-        are those points."""
-        return campaign is not None and not has_points(campaign["plan_key"])
+        """Test plans to be led through; the points of a repeat or a template are none."""
+        return bool(self.app.service.plan_blocks(campaign["id"]))
 
     def running_block(self) -> PlanBlock | None:
         run = self.plan_runs.get(self.campaign_id) if self.campaign_id else None
@@ -54,7 +48,7 @@ class CampaignPlans:
         blocks = self.app.service.plan_blocks(campaign["id"]) if self._has_plans(campaign) else []
         is_open = campaign["status"] == "open"
         self.plan_list.show_blocks(blocks, is_open, running)
-        self.plan_section.setVisible(self.takes_plans(campaign) and (is_open or bool(blocks)))
+        self.plan_section.setVisible(is_open or bool(blocks))
         if running is not None:
             self.plan_run.show_title(running.title)
         self.values.in_plan = running is not None
