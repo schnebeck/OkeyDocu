@@ -21,13 +21,24 @@ LATER = "background:#d5dadf;color:#555"
 class StationBar(QWidget):
     def __init__(self, names: tuple[str, ...], parent=None):
         super().__init__(parent)
+        self.names: tuple[str, ...] = ()
+        self.chips: list[QLabel] = []
+        self.row = QHBoxLayout(self)
+        self.row.setContentsMargins(0, 0, 0, 0)
+        self.set_names(names)
+
+    def set_names(self, names: tuple[str, ...]) -> None:
+        """Another run of stations; the chips are made anew only where the names differ."""
+        if names == self.names:
+            return
+        for chip in self.chips:
+            self.row.removeWidget(chip)
+            chip.deleteLater()
         self.names = names
         self.chips = [QLabel() for _ in names]
-        row = QHBoxLayout(self)
-        row.setContentsMargins(0, 0, 0, 0)
         for chip in self.chips:
             chip.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            row.addWidget(chip)
+            self.row.addWidget(chip)
 
     def show_station(self, current: int, count: int) -> None:
         """Only the first `count` stations are part of this run."""

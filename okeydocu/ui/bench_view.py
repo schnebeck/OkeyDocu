@@ -26,6 +26,7 @@ LAY_MS = 900  # one lead
 PANEL_SHARE = 0.64  # of the height, at most
 LANE_GAP = 28  # between two lanes beside the socket field
 PLUG = (124, 40)  # plug size in panel units, over all three sockets of a row
+CROWDED = 64  # a marking in one line needs this much room to the next probe
 
 
 class _Leads(QWidget):
@@ -145,7 +146,13 @@ class BenchView(QWidget):
             path = route(QPointF(plug.left(), plug.center().y()), lane, anchor, depth)
             left = len(same) > 1 and lead is same[0]
             paint_lead(painter, plug, lead.plug, path, anchor, lead.probe, left,
-                       self.progress - index)
+                       self.progress - index, self._crowded(same))
+
+    def _crowded(self, same: list) -> bool:
+        """Whether a probe's marking would run into the probe right of it. The first probe
+        from the left carries its marking on its left, so only those after it count."""
+        places = [self.anchors[lead.terminal].point.x() for lead in same]
+        return any(right - left < CROWDED for left, right in zip(places[1:], places[2:]))
 
     def _side(self, side: int) -> list:
         """The leads reaching their terminal from `side`, left to right."""

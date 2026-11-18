@@ -77,7 +77,8 @@ def mode_text(guide: Guide, how, settings: list[tuple[str, str]], element: str,
     return html
 
 
-def measure_text(guide: Guide, reading=None) -> str:
+def measure_text(guide: Guide, reading=None, warnings=()) -> str:
+    """`warnings` stand below a result received, such as a voltage that does not fit."""
     steps = "".join(f"<li>{escape(tr(action.text))}</li>" for action in guide.steps)
     if reading is None:
         waiting = escape(tr("Waiting for the result …"))
@@ -86,5 +87,6 @@ def measure_text(guide: Guide, reading=None) -> str:
                                   for r in reading.measurement.results[:3])
     received = escape(tr("Received"))
     done = escape(tr("Further measurements of this kind go straight to the chosen element."))
+    warned = "".join(f"<p style='color:{CAUTION}'>⚠ {escape(text)}</p>" for text in warnings)
     return (f"<ol>{steps}</ol><p style='color:{RIGHT}'><b>✓ {received}:</b> {values}</p>"
-            f"<p>{done}</p>")
+            f"{warned}<p>{done}</p>")

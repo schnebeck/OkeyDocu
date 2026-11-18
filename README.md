@@ -67,7 +67,9 @@ the way are made there.
 **Line conductors.** Elements state how many line conductors and whether N reach them, inherited
 down the tree. The instrument's AUTO runs measure every pair of conductors; readings against a
 conductor that is not there are kept but marked as not applicable and left out of verdict and
-report.
+report. The guided voltage measurement follows the statement: with three line conductors it
+measures the 400 V between L1, L2 and L3 with the phase sequence first and the single voltages
+after, with one only those; a voltage that does not fit what is expected is pointed out.
 
 **Photos, placed by the time they were taken.** Photos from a phone or a camera are added to a
 campaign in one go, and each finds its measurement by the time it was taken, read from its EXIF

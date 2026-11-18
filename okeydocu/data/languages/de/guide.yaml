@@ -86,6 +86,17 @@ texts:
   "Press IΔN: the RCD trips and the tripping time is measured.": "IΔN drücken: Der FI löst aus, die Auslösezeit wird gemessen."
   "Measuring path: AUTO measures L-PE, N-PE and L-N one after the other; without N choose L-PE.": "Messstrecke: AUTO misst L-PE, N-PE und L-N nacheinander; ohne N L-PE wählen."
   "Hold the probes in place: the voltage is shown at once.": "Prüfspitzen halten: Die Spannung erscheint sofort."
+  "Hold the probes in place: the voltages and the phase sequence are shown at once.": "Prüfspitzen halten: Spannungen und Drehfeld erscheinen sofort."
+  "View: choose U3~ with its softkey. It shows the three voltages between the line conductors and the phase sequence.": "Ansicht: U3~ mit dem Softkey wählen. Sie zeigt die drei Spannungen zwischen den Außenleitern und das Drehfeld."
+  Place probe PE (L2) on the incoming line conductor L2.: Spitze PE (L2) an den zugeführten Außenleiter L2 setzen.
+  Place probe N (L3) on the incoming line conductor L3.: Spitze N (L3) an den zugeführten Außenleiter L3 setzen.
+  "Leads to L1, L2 and L3": "Leitungen an L1, L2, L3"
+  "Leads to L1, N and PE": "Leitungen an L1, N, PE"
+  View U3~: Ansicht U3~
+  Line voltages: Außenleiterspannungen
+  Measuring path: Messstrecke
+  Single voltages: Einzelspannungen
+  "{label} {value}: about {expected} V are expected here. Check the connection and what the element states.": "{label} {value}: Hier werden etwa {expected} V erwartet. Anschluss und Angaben am Element prüfen."
   Switch off and pull the plug: Ausschalten und Stecker ziehen
   The protective conductor is measured without voltage.: Der Schutzleiter wird spannungsfrei gemessen.
   Find a bare metal spot: Blanke Metallstelle suchen

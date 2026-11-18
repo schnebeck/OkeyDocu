@@ -83,13 +83,34 @@ class Guide:
     drawing_features: tuple[str, ...] = ()  # what the drawing of the test point prints
     every_path: bool = False  # AUTO measures every pair of conductors, there or not
     flow: tuple[Station, ...] = DEFAULT_FLOW
+    variants: tuple[Variant, ...] = ()  # guides that take over for what the element states
+    follow: Guide | None = None  # guided next in the same run, from where its flow begins
 
     def kinds(self) -> tuple[str, ...]:
         return tuple(station.kind for station in self.flow)
 
+    def suited(self, stated: Callable[[str], str]) -> Guide:
+        """The guide for an element: the first variant whose feature the element states with
+        its value, as `stated` tells by feature key, or this guide itself."""
+        return next((variant.guide for variant in self.variants
+                     if stated(variant.feature) == variant.value), self)
+
+    def chain(self) -> tuple[Guide, ...]:
+        """This guide and those that follow it in the same run."""
+        return (self, *(self.follow.chain() if self.follow is not None else ()))
+
     def ended_by(self, function: str) -> bool:
         """Whether a reading of `function` is the result this measurement waits for."""
         return function == self.function or function in self.results
+
+
+@dataclass(frozen=True)
+class Variant:
+    """Where the element states `feature` as `value`, `guide` is the one to follow."""
+
+    feature: str
+    value: str
+    guide: Guide
 
 
 @dataclass(frozen=True)

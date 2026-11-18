@@ -10,13 +10,18 @@
 plug 1 carries probe L (L1), plug 2 probe N (L3), plug 3 probe PE (L2); the conductor in
 brackets is the one the lead takes for a phase sequence test. The softkeys are numbered from
 the top of the column right of the display; storing a result sends it over Push/Print. The
-measurements guided here run on the battery; one needing the mains says so at its supply."""
+measurements guided here run on the battery; one needing the mains says so at its supply.
+
+The voltage follows the line conductors the element states: with three, the view U3~ measures
+between L1, L2 and L3 first, then the leads move to L1, N and PE for the single voltages."""
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 from ...l10n import N_
 from ..guide import CONFIGURE, CONNECT, MEASURE, PLACE, PREPARE, SELECT, Action, Guide, \
-    Lead, Station
+    Lead, Station, Variant
 
 L_LEAD = ("1", "socket-1", "L (L1)")
 N_LEAD = ("2", "socket-2", "N (L3)")
@@ -75,19 +80,42 @@ RCD_TIME = Guide(
         STORE),
     results=("rcd_touch",), flow=flow())
 
-VOLTAGE = Guide(
-    "u", N_("Voltage"), 12, "main_switch", N_("Main switch, incoming terminals"),
+LIVE_PARTS = N_("Live parts are exposed: touch only the grips of the probes.")
+SWITCH = ("main_switch", N_("Main switch, incoming terminals"))
+SINGLE = Guide(
+    "u", N_("Voltage"), 12, *SWITCH,
     (Lead(*PE_LEAD, "pe", N_("Place probe PE (L2) on the PE bar.")),
      Lead(*L_LEAD, "in_l1", N_("Place probe L (L1) on the incoming line conductor L1.")),
      Lead(*N_LEAD, "in_n", N_("Place probe N (L3) on the incoming N, where there is one."))),
-    N_("Live parts are exposed: touch only the grips of the probes."),
-    element_features=CONDUCTORS, live=True, preparation=(LIVE,), selector_label="U",
+    LIVE_PARTS, element_features=CONDUCTORS, live=True, preparation=(LIVE,), selector_label="U",
     selector_note=N_("Measures the voltage between the probes and its frequency."),
     settings=(Action(("soft-1",), N_("Measuring path: AUTO measures L-PE, N-PE and L-N one"
                                      " after the other; without N choose L-PE.")),),
     steps=(Action(("key-start",), N_("Hold the probes in place: the voltage is shown at"
                                      " once.")), STORE),
     drawing_features=("nominal_voltage", "rated_current"), every_path=True, flow=flow())
+AFTER_LINES = replace(SINGLE, flow=(
+    Station(CONNECT, N_("Leads to L1, N and PE")),
+    Station(CONFIGURE, N_("Measuring path"), (SOFTKEYS,), zoom=("lcd",)),
+    Station(MEASURE, N_("Single voltages"))))
+THREE_PHASE = Guide(
+    "u3", N_("Voltage and phase sequence"), 12, *SWITCH,
+    (Lead(*L_LEAD, "in_l1", N_("Place probe L (L1) on the incoming line conductor L1.")),
+     Lead(*PE_LEAD, "in_l2", N_("Place probe PE (L2) on the incoming line conductor L2.")),
+     Lead(*N_LEAD, "in_l3", N_("Place probe N (L3) on the incoming line conductor L3."))),
+    LIVE_PARTS, element_features=CONDUCTORS, live=True, preparation=(LIVE,), selector_label="U",
+    selector_note=N_("Measures the voltage between the probes and its frequency."),
+    settings=(Action((), N_("View: choose U3~ with its softkey. It shows the three voltages"
+                            " between the line conductors and the phase sequence.")),),
+    steps=(Action((), N_("Hold the probes in place: the voltages and the phase sequence are"
+                         " shown at once.")), STORE),
+    drawing_features=("nominal_voltage", "rated_current"),
+    flow=(Station(PLACE), Station(SELECT, N_("Rotary switch")),
+          Station(CONNECT, N_("Leads to L1, L2 and L3")), Station(PREPARE, N_("Supply"), BATTERY),
+          Station(CONFIGURE, N_("View U3~"), (SOFTKEYS,), zoom=("lcd",)),
+          Station(MEASURE, N_("Line voltages"))),
+    follow=AFTER_LINES)
+VOLTAGE = replace(SINGLE, variants=(Variant(CONDUCTORS[0], "3", THREE_PHASE),))
 
 PROTECTIVE_CONDUCTOR = Guide(
     "rlo", N_("Protective conductor resistance"), 13, "cee_plug",

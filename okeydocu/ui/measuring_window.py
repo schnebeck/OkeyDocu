@@ -22,17 +22,17 @@ from PySide6.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QPushButton,
     QStackedWidget, QVBoxLayout
 
 from ..devices import driver_info
-from ..devices.guide import CONFIGURE, CONNECT, MEASURE, PLACE, SELECT
+from ..devices.guide import CONFIGURE, CONNECT, PLACE, SELECT
 from ..l10n import tr
 from .bench_view import BenchView
 from .dial_station import DialStation
 from .footer_bar import FooterBar
+from .guide_run import GuideRun
 from .place_form import PlaceForm
 from .place_scene import PlaceScene
 from .place_station import PlaceStation
 from .station_bar import StationBar
 from .station_kinds import StationKinds
-from .station_texts import measure_text
 
 
 class Absent:
@@ -49,7 +49,7 @@ class Absent:
         return False
 
 
-class MeasuringWindow(PlaceStation, DialStation, StationKinds, QDialog):
+class MeasuringWindow(PlaceStation, DialStation, StationKinds, GuideRun, QDialog):
     place_made = Signal(int)  # an element made on the way
     place_kept = Signal(int)  # the element readings now go to, made on the way or chosen
     parent_chosen = Signal(int)  # where new elements hang, kept until changed
@@ -67,9 +67,10 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, QDialog):
         self.parent_id = next((place for place in (new_parent, asset_id)
                                if place is not None), self.root)
         self.flow = self.guide.flow
+        self.owners = (self.guide,) * len(self.flow)  # the guide each station belongs to
         self.index = 0
         self.position = None  # the dial position the instrument reported last
-        self.reading = None  # the result the last station waits for
+        self.readings: dict[str, object] = {}  # by the function of the guide a result ends
         self.setWindowTitle(tr(self.guide.title))
         self.resize(1440, 1020)
         self.head = QLabel()
@@ -138,7 +139,8 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, QDialog):
         return bool(self.bench) and self.guide.selector is not None
 
     def go_to(self, kind: str) -> None:
-        self.go(self.guide.kinds().index(kind))
+        """To the first station of a kind in this run."""
+        self.go([station.kind for station in self.flow].index(kind))
 
     def go(self, index: int) -> None:
         if index >= self.count:
@@ -151,6 +153,7 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, QDialog):
         if self.kind == CONNECT and index > self.index:
             self.bench.finish()
         self.index = max(index, 0)
+        self._take_guide()
         station = self.flow[self.index]
         self.bar.show_station(self.index, self.count)
         self.step_title.setText(f"<b style='font-size:13pt'>{self.index + 1} · "
@@ -165,12 +168,3 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, QDialog):
         last = self.index == self.count - 1
         self.next.setText(tr("Done ▶") if last else tr("Next ▶"))
         getattr(self, f"_enter_{station.kind}")(station)
-
-    def show_reading(self, reading) -> None:
-        """A result from the instrument; the one this measurement waits for ends it."""
-        if not self.guide.ended_by(reading.measurement.function):
-            return
-        self.reading = reading
-        if self.kind == MEASURE:
-            self.bench.panel.point_at()
-            self.step_text.setText(measure_text(self.guide, reading))

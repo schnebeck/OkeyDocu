@@ -65,7 +65,10 @@ def paint_plug(painter: QPainter, plug: QRectF, marking: str) -> None:
     painter.drawText(plug, Qt.AlignmentFlag.AlignCenter, marking)
 
 
-def paint_probe(painter: QPainter, anchor: Anchor, marking: str, left: bool) -> None:
+def paint_probe(painter: QPainter, anchor: Anchor, marking: str, left: bool,
+                narrow: bool = False) -> None:
+    """The marking stands beside the grip, left of it with `left`. `narrow` breaks it into
+    two lines, so it fits between probes on neighbouring terminals."""
     tip, side = anchor.point, anchor.side
     guard = QPointF(tip.x(), tip.y() + side * 18)
     grip_y = tip.y() + side * PROBE
@@ -79,17 +82,17 @@ def paint_probe(painter: QPainter, anchor: Anchor, marking: str, left: bool) -> 
     painter.setPen(QPen(TIP, 2))
     painter.drawLine(QPointF(tip.x(), tip.y() + side * 6), tip)
     painter.setPen(INK)
-    if left:
-        where, align = QRectF(handle.left() - 96, handle.center().y() - 10, 90, 20), \
-            Qt.AlignmentFlag.AlignRight
-    else:
-        where, align = QRectF(handle.right() + 6, handle.center().y() - 10, 90, 20), \
-            Qt.AlignmentFlag.AlignLeft
-    painter.drawText(where, align | Qt.AlignmentFlag.AlignVCenter, marking)
+    width, height, gap = (30, 32, 3) if narrow else (90, 20, 6)
+    x = handle.left() - gap - width if left else handle.right() + gap
+    align = Qt.AlignmentFlag.AlignRight if left else Qt.AlignmentFlag.AlignLeft
+    where = QRectF(x, handle.center().y() - height / 2, width, height)
+    text = marking.replace(" ", "\n") if narrow else marking
+    painter.drawText(where, align | Qt.AlignmentFlag.AlignVCenter, text)
 
 
 def paint_lead(painter: QPainter, plug: QRectF, marking: str, path: QPainterPath,
-               anchor: Anchor, probe: str, left: bool, progress: float) -> None:
+               anchor: Anchor, probe: str, left: bool, progress: float,
+               narrow: bool = False) -> None:
     if progress <= 0:
         return
     laid = partial(path, min(progress / 0.85, 1.0))
@@ -101,4 +104,4 @@ def paint_lead(painter: QPainter, plug: QRectF, marking: str, path: QPainterPath
         painter.drawPath(laid)
     paint_plug(painter, plug, marking)
     if progress >= 0.85:
-        paint_probe(painter, anchor, probe, left)
+        paint_probe(painter, anchor, probe, left, narrow)

@@ -15,7 +15,7 @@ from ..campaign.line_conductors import LINE_CONDUCTORS
 from ..devices.guide import Station
 from ..l10n import tr
 from ..vocabulary import setting_name
-from .station_texts import actions_text, conductors_text, leads_text, measure_text, mode_text
+from .station_texts import actions_text, conductors_text, leads_text, mode_text
 
 
 def parts_of(actions) -> list[str]:
@@ -61,7 +61,7 @@ class StationKinds:
 
     def _enter_measure(self, station: Station) -> None:
         self.bench.panel.point_at(*parts_of(self.guide.steps))
-        self.step_text.setText(measure_text(self.guide, self.reading))
+        self.step_text.setText(self.measure_text())
 
     def _settings(self) -> list[tuple[str, str]]:
         """What the element states that is set on the instrument for this measurement."""

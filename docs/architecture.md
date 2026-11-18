@@ -582,6 +582,22 @@ The guide follows the statement: one line conductor draws L and N at the main sw
 three-pole CEE plug, without N the N lead is left out, and the settings station advises
 choosing the measuring path by hand where AUTO would measure conductors that are not there.
 
+The voltage measurement follows it as well. A guide may name another guide for what the element
+states (`Guide.variants`) and guides that follow in the same run (`Guide.follow`); the driver
+decides, the window only lays their stations one behind the other (`ui/guide_run.py`), each
+station showing the leads, settings, steps and result of the guide it belongs to. The PROFITEST
+PRIME names one variant: with three line conductors the view U3~ measures between L1, L2 and L3
+first, the probes on the three incoming terminals, then the leads move to L1, N and PE for the
+single voltages. With one line conductor, or none stated, the run stays the single voltages.
+Changing the statement at the place station lays the run out anew at once. Probes on
+neighbouring terminals carry their markings in two lines.
+
+A voltage received is compared with what the element lets expect
+(`campaign/expected_voltage.py`): the system's voltage between two line conductors, that divided
+by √3 against N or PE; 400 V and 230 V unless the element states a nominal voltage. A reading
+more than a tenth off is named below the result in the measure station; N against PE is not
+judged.
+
 ## Campaign templates
 
 A campaign template (`campaign/templates.py`) keeps the element tree below the installation it

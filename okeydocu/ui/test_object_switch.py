@@ -21,6 +21,7 @@ from .test_object_parts import BODY, CENTER, INK, LINE, Anchor, bold_font, pe_ba
     side_label
 
 PITCH = 40
+INCOMING = {"L": "in_l1", "L1": "in_l1", "L2": "in_l2", "L3": "in_l3", "N": "in_n"}
 
 
 def _handle(painter: QPainter, plate: QRectF, on: bool) -> None:
@@ -62,9 +63,7 @@ def main_switch(painter: QPainter, box: QRectF, lines: list[str], poles: int = 4
         x = module.left() + 26 + index * PITCH
         screw(painter, QPointF(x, module.top() + 12), top, True)
         screw(painter, QPointF(x, module.bottom() - 12), low, False)
-        key = "in_n" if top == "N" else "in_l1" if top in ("L1", "L") else ""
-        if key:
-            anchors[key] = Anchor(QPointF(x, module.top() + 12), -1)
+        anchors[INCOMING[top]] = Anchor(QPointF(x, module.top() + 12), -1)
     side_label(painter, module, True, tr("Incoming"))
     side_label(painter, module, False, tr("Outgoing"))
     anchors["pe"] = pe_bar(painter, QRectF(module.right() + 48, box.top() + 70, 150, 16))
