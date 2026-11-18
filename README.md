@@ -36,7 +36,8 @@ them; the tree counts what has been measured this time against last time.
 ![A campaign following a template: structure, readings, open points and the chosen element](docs/images/campaign.png)
 
 **Live readings by Push/Print.** In Push/Print mode the PROFITEST PRIME keeps nothing in its
-own memory: the store key prints the result to the interface. The result therefore exists only in
+own memory: the softkey that otherwise stores a result shares it instead, printed to the
+interface. The result therefore exists only in
 OkeyDocu, which stores it before anything else happens and books it on the element chosen. The
 measurement itself is started and run on the instrument. The instrument clock is set at the start
 of a campaign. Readings the inspector stored in the instrument's memory while the link was down

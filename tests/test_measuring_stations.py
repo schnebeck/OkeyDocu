@@ -66,7 +66,7 @@ def test_the_settings_name_what_the_rcd_states_and_close_in_on_the_display(qtbot
     text = window.step_text.text()
     assert "=K1-F1 FI Steuerung gibt an" in text
     assert "<b>A</b>" in text and "<b>30 mA</b>" in text and "<b>25 A</b>" in text
-    assert window.bench.panel.pointed == ("soft-1", "soft-2", "soft-3")
+    assert window.bench.panel.pointed == ("soft-2", "soft-3")
     assert window.bench.leads_layer.isHidden()
     whole = window.bench.panel.front.viewBoxF()
     assert window.bench.panel._zoom.endValue().width() < whole.width() / 2
@@ -79,7 +79,7 @@ def test_the_last_station_waits_for_the_result_of_its_own_measurement(qtbot, app
     with speaking("de"):
         window.go_to(MEASURE)
         assert "Warte auf das Ergebnis" in window.step_text.text()
-        assert window.bench.panel.pointed == ("key-start", "key-idn", "key-mem")
+        assert window.bench.panel.pointed == ("key-start", "key-idn", "soft-5")
         window.show_reading(reading("rlo"))
         assert window.reading is None
         window.show_reading(reading("rcd_time"))
