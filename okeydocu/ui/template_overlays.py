@@ -16,8 +16,9 @@ from ..campaign.templates import OPEN, SERIES
 from ..l10n import N_, tr
 from .overlay import Overlay
 
-MODES = ((OPEN, N_("open: learns from every campaign")),
-         (SERIES, N_("series: points fixed, deviations need a reason")))
+MODES = ((OPEN, N_("open (pattern): points and measurements can change, learns from every"
+                   " campaign")),
+         (SERIES, N_("series (series devices): points and measurements fixed, order free")))
 INDENT = "    "
 
 

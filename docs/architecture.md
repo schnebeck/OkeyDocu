@@ -589,12 +589,13 @@ readings at their element in any order (`has_points` in `campaign/point_plans.py
 reading took a point, readings go on to the element of the next open point, so following the
 template's order needs no click on the laptop; the order is a suggestion and nothing is blocked.
 
-A template is open or series. Open, the campaign may move, remove and add points on the way (a
+A template is open (a pattern) or series (for series devices). Open, the campaign may move, remove and add points on the way (a
 reading that took no point is taken over as one), skipping needs no reason and differing limits or
 settings need none either. On confirming, a card lists what the campaign did differently: new
 points, points left out, the order as measured, new hints (`campaign/template_learning.py`); each
 line is taken into the template on its own, which then remembers the campaign. In series mode the
-points are fixed and the rules of the repeat inspection apply.
+points and the measurements due at them are fixed, their order is free as everywhere, and the
+rules of the repeat inspection apply: a differing limit or setting needs a reason.
 
 ## Windows, cards and their footer
 

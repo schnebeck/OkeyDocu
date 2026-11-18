@@ -21,8 +21,8 @@ texts:
   Mode: Modus
   Points: Punkte
   Save a confirmed campaign as a template first.: Zuerst eine bestätigte Kampagne als Vorlage speichern.
-  "open: learns from every campaign": "offen: lernt aus jeder Kampagne"
-  "series: points fixed, deviations need a reason": "Serie: Punkte fest, Abweichungen brauchen einen Grund"
+  "open (pattern): points and measurements can change, learns from every campaign": "offen (Muster): Punkte und Messungen änderbar, lernt aus jeder Kampagne"
+  "series (series devices): points and measurements fixed, order free": "Serie (Seriengeräte): Punkte und Messungen fest, Reihenfolge frei"
   Save as campaign template: Als Kampagnenvorlage speichern
   Keeps the structure of the installation and every point measured, in the order measured, without the values.: Behält die Struktur der Anlage und jeden gemessenen Punkt in der Reihenfolge der Messung, ohne die Messwerte.
   "Elements for {installation}": "Elemente für {installation}"
