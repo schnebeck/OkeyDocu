@@ -11,11 +11,15 @@ plug 1 carries probe L (L1), plug 2 probe N (L3), plug 3 probe PE (L2); the cond
 brackets is the one the lead takes for a phase sequence test. The softkeys are numbered from
 the top of the column right of the display. A measurement is started with ON/START, the
 fourth key left of the display, except the voltage, which the instrument measures as soon as
-the probes are on; once a result stands, the lowest softkey shares it over Push/Print. A softkey is named only where its place is known from the instrument. The
-measurements guided here run on the battery; one needing the mains says so at its supply.
+the probes are on; once a result stands, the lowest softkey shares it over Push/Print. A
+softkey is named only where its place is known from the instrument. The measurements guided
+here run on the battery; one needing the mains says so at its supply.
 
-The voltage follows the line conductors the element states: with three, the view U3~ measures
-between L1, L2 and L3 first, then the leads move to L1, N and PE for the single voltages."""
+The view U measures between the probes L and PE only. Its measuring path names the two
+conductors they are on and switches nothing; with AUTO the instrument names the pairs one after
+the other, moving on with each reading stored. The voltage follows the line conductors the
+element states: with three, the view U3~ measures between L1, L2 and L3 first, then the view U
+takes the single voltages."""
 
 from __future__ import annotations
 
@@ -24,6 +28,7 @@ from dataclasses import replace
 from ...l10n import N_
 from ..guide import CONFIGURE, CONNECT, MEASURE, PLACE, PREPARE, SELECT, Action, Guide, \
     Lead, Station, Variant
+from . import screens
 
 L_LEAD = ("1", "socket-1", "L (L1)")
 N_LEAD = ("2", "socket-2", "N (L3)")
@@ -39,7 +44,7 @@ BATTERY = (Action((), N_("The battery is enough for this measurement.")),
 MAINS = (Action(("mains-inlet", "mains-switch"), N_("This measurement needs the mains.")),
          Action((), N_("Plug the mains lead into the inlet at the top right and switch on:"
                        " 0 → I.")),
-         Action(("led-mains",), N_("The MAINS lamp lights up.")))
+         Action((), N_("The red glow lamp of the switch lights up.")))
 SOFTKEYS = Action((), N_("Press the softkey beside a setting, choose the value with the arrow"
                          " keys, confirm it and take it over with ✓."))
 
@@ -83,6 +88,7 @@ RCD_TIME = Guide(
         Action(("key-idn",), N_("Press IΔN: the RCD trips and the tripping time is"
                                 " measured.")),
         STORE),
+    screen=screens.RCD_TIME, result_screen=screens.shared(screens.RCD_TIME),
     results=("rcd_touch",), flow=flow())
 
 LIVE_PARTS = N_("Live parts are exposed: touch only the grips of the probes.")
@@ -90,20 +96,27 @@ SWITCH = ("main_switch", N_("Main switch, incoming terminals"))
 SINGLE = Guide(
     "u", N_("Voltage"), 12, *SWITCH,
     (Lead(*PE_LEAD, "pe", N_("Place probe PE (L2) on the PE bar.")),
-     Lead(*L_LEAD, "in_l1", N_("Place probe L (L1) on the incoming line conductor L1.")),
-     Lead(*N_LEAD, "in_n", N_("Place probe N (L3) on the incoming N, where there is one."))),
+     Lead(*L_LEAD, "in_l1", N_("Place probe L (L1) on the incoming line conductor L1."))),
     LIVE_PARTS, element_features=CONDUCTORS, live=True, preparation=(LIVE,), selector_label="U",
     selector_note=N_("Measures the voltage between the probes and its frequency."),
-    settings=(Action(("soft-4",), N_("Measuring path: AUTO measures L-PE, N-PE and L-N one"
-                                     " after the other; without N choose L-PE.")),),
+    settings=(Action(("soft-4",), N_(
+        "Measuring path: it only names the two conductors the probes are on; the instrument"
+        " switches nothing. With AUTO the display names the pair to measure, L1-PE first, and"
+        " moves on to the next with each reading stored.")),),
     steps=(Action((), N_("Hold the probes in place: the measurement starts by itself and the"
-                         " voltage is shown at once.")), STORE),
+                         " voltage is shown at once.")), STORE,
+           Action(("key-idn",), N_(
+               "For further voltages move the two probes to the pair the display names. IΔN"
+               " skips a pair the test point does not have."))),
+    screen=screens.U, result_screen=screens.shared(screens.U),
     drawing_features=("nominal_voltage", "rated_current"), every_path=True, flow=flow())
+N_ASIDE = Action((), N_("Take probe N (L3) off and put it aside: the view U measures between"
+                        " the probes L and PE only."))
 AFTER_LINES = replace(
     SINGLE,
     settings=(Action(("soft-1",), N_("View: switch back to U with the top softkey.")),
               *SINGLE.settings),
-    flow=(Station(CONNECT, N_("Leads to L1, N and PE")),
+    flow=(Station(CONNECT, N_("Leads to L1 and PE"), (N_ASIDE,)),
           Station(CONFIGURE, N_("Measuring path"), (SOFTKEYS,), zoom=("lcd",)),
           Station(MEASURE, N_("Single voltages"))))
 THREE_PHASE = Guide(
@@ -118,6 +131,7 @@ THREE_PHASE = Guide(
                                      " sequence.")),),
     steps=(Action((), N_("Hold the probes in place: the voltages and the phase sequence are"
                          " shown at once.")), STORE),
+    screen=screens.U3, result_screen=screens.shared(screens.U3),
     drawing_features=("nominal_voltage", "rated_current"),
     flow=(Station(PLACE), Station(SELECT, N_("Rotary switch")),
           Station(CONNECT, N_("Leads to L1, L2 and L3")), Station(PREPARE, N_("Supply"), BATTERY),
@@ -143,6 +157,7 @@ PROTECTIVE_CONDUCTOR = Guide(
               Action(("soft-4",), N_("With an extension lead: compensate it first (ROFFSET)."))),
     steps=(Action(("key-start",), N_("Press ON/START and hold the probes until the result"
                                      " stands.")), STORE),
+    screen=screens.RLO, result_screen=screens.shared(screens.RLO),
     drawing_features=("rated_current",), flow=flow())
 
 GUIDES = {guide.function: guide for guide in (RCD_TIME, VOLTAGE, PROTECTIVE_CONDUCTOR)}

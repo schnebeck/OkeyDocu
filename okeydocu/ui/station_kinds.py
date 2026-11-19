@@ -12,7 +12,7 @@ words of a station come from the driver; what stays here is how a kind of statio
 from __future__ import annotations
 
 from ..campaign.line_conductors import LINE_CONDUCTORS
-from ..devices.guide import Station
+from ..devices.guide import MEASURE, PLACE, Station
 from ..l10n import tr
 from ..vocabulary import setting_name
 from .station_texts import actions_text, conductors_text, leads_text, mode_text
@@ -24,6 +24,15 @@ def parts_of(actions) -> list[str]:
 
 class StationKinds:
     """Mixed into the measuring window, which holds guide, place, bench and the texts."""
+
+    def _on_display(self) -> None:
+        """The instrument's display at this station: dark while the element is chosen, the
+        view of the function from then on, with a reading on it while measuring."""
+        guide = self.guide
+        screen = None if self.kind == PLACE else guide.screen
+        if self.kind == MEASURE:
+            screen = guide.result_screen or screen
+        self.bench.panel.show_screen(screen, self.place.stated)
 
     def _enter_place(self, station: Station) -> None:
         self.next.setText(tr("Take it ▶") if self.repeat else tr("Prepared – next ▶"))

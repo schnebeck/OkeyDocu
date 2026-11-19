@@ -50,11 +50,12 @@ def leads_text(guide: Guide) -> str:
 
 
 def conductors_text(guide: Guide, lines: str, has_n: bool | None) -> str:
-    """Advice where AUTO would measure conductors the test point lacks."""
+    """Advice where AUTO would name conductors the test point lacks."""
     if not guide.every_path or (lines != "1" and has_n is not False):
         return ""
-    advice = tr("The test point lacks conductors AUTO would measure: choose the measuring path"
-                " by hand. Readings against missing conductors are marked as not applicable.")
+    advice = tr("The test point lacks conductors AUTO would name: skip those pairs or choose"
+                " the measuring path by hand. Readings against missing conductors are marked as"
+                " not applicable.")
     return f"<p style='color:{CAUTION}'>⚠ {escape(advice)}</p>"
 
 

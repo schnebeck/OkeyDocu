@@ -2,8 +2,9 @@
 
 What the instrument's display shows at each position of the rotary switch and which key
 operates what. It was read from photographs of the display taken at every position from U to
-the high-voltage step. The descriptions are in our own words; the instrument's own pictures
-and texts are not reproduced.
+the high-voltage step; what a setting or a lamp means comes from the maker's operating
+instructions (PROFITEST PRIME, document 3-349-933). The descriptions are in our own words; the
+instrument's own pictures and texts are not reproduced.
 
 ## Keys around the display
 
@@ -31,7 +32,8 @@ settings of the function.
 
 **Share.** Once a reading stands, `soft-5` shows the share symbol (an arrow into a box). It
 sends the result over Push/Print. Without a reading the row is empty. This was seen in the
-view U3~ with readings; the other views were photographed without readings.
+view U3~ with readings; the operating instructions say the same of every function: a result
+can be stored by softkey after a successful measurement.
 
 **Help pages.** HELP shows pages for the function: the connection diagram with the operating
 hint, then connections, display range, measuring range with operating uncertainty and nominal
@@ -39,7 +41,27 @@ values; some functions add error possibilities or a limit table. A counter at th
 names the page.
 
 **Prompt.** Switching ROFFSET on opens a prompt with two choices, ESC and CAL. They are taken
-by the keys that carry the same symbols: ON/START for ESC, IΔN for CAL.
+by the keys that carry the same symbols: ON/START for ESC, IΔN for CAL. ROFFSET is meant for
+extension leads only, the instrument's own leads need no compensation: with the extension
+short-circuited, IΔN measures its resistance, which is then subtracted from every result.
+
+## Lamps
+
+MAINS NETZ tells of the voltage at the probes, not of the instrument's own supply. At the
+positions that need the mains at the test point (RCD, ZLOOP, IMD, RCM, ΔU):
+
+| Lamp | Meaning |
+|------|---------|
+| green | connected correctly, mains voltage there, measurement released |
+| green, flashing | probe N not connected, measurement released |
+| yellow | 65 to 253 V against PE from two line conductors, a system without N, released |
+| yellow, flashing | probes L and N are both on line conductors |
+| red, flashing | no mains voltage, PE interrupted, or the RCD has tripped |
+
+At RLO, RISO, IL and ILAMP a steady red means a voltage at the test point: the measurement is
+blocked. At U the lamp has no meaning. The instrument's own mains supply shows in the red glow
+lamp of its mains switch; BATT is yellow on the battery, flashes green while charging and
+is green when full.
 
 ## Rotary switch positions
 
@@ -59,10 +81,10 @@ the number here plus 11, and the driver's table in `selector.py` uses it.
 | 06 | 17 | RCD, IF ramp | touch voltage, tripping current, earth resistance |
 | 07 | 18 | RCD, IΔN | touch voltage, tripping time, earth resistance |
 | 08 | 19 | RCD, IF ramp and IΔN | all of the above together |
-| 09 | 20 | ZLOOP AC | loop impedance, short-circuit current |
-| 10 | 21 | ZLOOP DC (DC + sine) | the same with a DC component; variants DC-L and DC-H |
-| 11 | 22 | ZLOOP, half-wave symbol | the same with an RCD in the circuit |
-| 12 | 23 | ZLOOP, pulse symbol | the same with an RCD in the circuit |
+| 09 | 20 | ZLOOP AC | loop impedance, short-circuit current; an RCD in front may trip |
+| 10 | 21 | ZLOOP DC (DC + sine) | made for circuits behind an RCD of type A or F, which it should not trip: half waves with a DC component, DC-L faster, DC-H safer |
+| 11 | 22 | ZLOOP, half-wave symbol | the same for type A, F or B: L-N with full current, N-PE with a reduced one |
+| 12 | 23 | ZLOOP, pulse symbol | the same for type A or F: a test current reduced after the RCD's data |
 | 13 | 24 | Ures | residual voltage after switching off, time window |
 | 14 | 25 | IMD | insulation monitoring device in IT systems |
 | 15 | 26 | RCM | residual current monitor: readings as at RCD, test current as a fraction of IΔN |
@@ -76,7 +98,8 @@ the number here plus 11, and the driver's table in `selector.py` uses it.
 | 23 | 34 | charging symbol | fast charge |
 
 Positions 21 to 23 were not looked at. The driver calls positions 11 and 12 `ZLOOP+RLO` and
-`ZLOOP+0.5x`; the display showed RCD data on `soft-2` at both.
+`ZLOOP+0.5x`; the display showed RCD data on `soft-2` at both. At position 11 the probes go
+another way round than elsewhere: L to L, N to PE and PE to N.
 
 ## Softkeys per position
 
@@ -86,7 +109,7 @@ A dash means the row is empty.
 |----------|--------|--------|--------|--------|--------|
 | 01 U view U | switch to U3~ | – | – | measuring path (AUTO) | – |
 | 01 U view U3~ | switch to U | – | – | – | share |
-| 02 RLO 200 mA | measuring time | polarity and target | limits | ROFFSET on/off | – |
+| 02 RLO 200 mA | measuring time | test signal | limits | ROFFSET on/off | – |
 | 03 RLO 25 A | – | IHIGH | limits | ROFFSET on/off | – |
 | 04 RISO | measuring time | test voltage | limits | measuring path | – |
 | 06 RCD IF ramp | RCD data | earthing system | limits | – | – |
@@ -101,6 +124,7 @@ A dash means the row is empty.
 | 15 RCM | – | test current | limits | – | – |
 | 16 IL | – | – | limits | – | – |
 | 17 ILAMP | clamp | clamp ratio | limits | – | – |
+| 18 T, %r.H. | – | unit °C or °F | – | – | – |
 | 19 Extra | mode | path, protective device | limits | OFFSET on/off | – |
 
 The share symbol on `soft-5` is shown only for U3~ because only there a reading was on the
@@ -109,9 +133,16 @@ key carries a table symbol and the label 60204-1 instead.
 
 ## What the settings offer
 
-- **Measuring time:** AUTO, 1 min, 15 min.
-- **Measuring path (U):** AUTO, which chooses the probes by itself, or one pair of line
-  conductors, N and PE.
+- **Measuring time:** AUTO ends the measurement once the value is taken, holding ON/START
+  goes on measuring; 1 min and 15 min run that long.
+- **Test signal (RLO):** the polarity, positive, negative or both in turn, each as a constant
+  current or as a ramp.
+- **Measuring path (U):** the view U measures between the probes L and PE only. The path names
+  the two conductors they are on, for the record; the instrument switches nothing. Set by
+  hand, every reading is stored for that pair. With AUTO the instrument names the pairs one
+  after the other and moves on with each reading stored, IΔN skips a pair: L1-PE, L2-PE,
+  L3-PE, N-PE, L1-N, L2-N, L3-N, L1-L2, L2-L3, L1-L3. RISO and ZLOOP run through their pairs
+  the same way.
 - **Measuring path (ZLOOP):** L1-PE, L2-PE, L3-PE, L1-N, L2-N, L3-N, L1-L2, L2-L3, L1-L3
   and AUTO. RISO has a list of the same kind; its view showed N-PE.
 - **RLO limits:** below 0.10, 0.20, 0.30, 0.50, 1.00 Ω or a value entered by hand; at 25 A
@@ -128,11 +159,15 @@ key carries a table symbol and the label 60204-1 instead.
   and number of cores; limits for the touch voltage (25, 50, 65 V) and the short-circuit
   current (2/3 Z, 3/4 Z, Ia).
 
+## In the application
+
+The views are kept in `okeydocu/devices/profitest_prime/screens.py`, one per position and
+view, and drawn on the panel's display in the guided measurement. A row that shows data of the
+test point on the instrument, such as the RCD's rated residual current or the protective
+device, carries the element's own value or a generic label there; limits are left out, because
+they are settings.
+
 ## Open points
 
-- The MAINS lamp was red in the photos at the RCD positions, at ZLOOP 11 and 12, at RCM and
-  at Extra, and grey at U, RLO, RISO, ZLOOP 09 and 10, Ures, IMD, IL and ILAMP (positions
-  looked at, not every photo). The meaning of the colours is not settled; the guides say the
-  lamp lights up.
-- The softkeys at positions 05 (rising voltage RISO) and 18 (T, %r.H.) are not known: only
-  their setting lists and help pages were photographed.
+- The softkeys at position 05 (rising voltage RISO) are not known: only its setting lists
+  and help pages were photographed.

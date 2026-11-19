@@ -86,14 +86,14 @@ def test_each_part_lays_its_own_leads_and_shows_its_own_result(qtbot, app, machi
     assert "401V" in window.step_text.text()
     window.go(6)
     assert window.kind == CONNECT and window.guide.function == "u"
-    assert [lead.terminal for lead in window.bench.guide.leads] == ["pe", "in_l1", "in_n"]
+    assert [lead.terminal for lead in window.bench.guide.leads] == ["pe", "in_l1"]
     window.go(8)
     assert window.reading.measurement.function == "u" and "231V" in window.step_text.text()
     window.go(5)
     assert window.bench.guide.function == "u3" and window.bench.progress == 3.0
 
 
-def test_without_n_only_the_lead_to_n_stays_away(qtbot, app, machine):
+def test_without_n_the_line_voltages_keep_three_leads_the_single_ones_two(qtbot, app, machine):
     window = opened(qtbot, app, machine, line_conductors="3", n_conductor="without N")
     lines, single = dict.fromkeys(window.owners)
     assert [lead.probe for lead in lines.leads] == ["L (L1)", "PE (L2)", "N (L3)"]

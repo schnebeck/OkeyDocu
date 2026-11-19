@@ -172,6 +172,7 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, GuideRun, QDialog
         self.ask.hide()
         self.bench.panel.zoom_dial(self.kind == SELECT and self.has_dial)
         self.bench.leads_layer.setVisible(self.kind != CONFIGURE)  # no room in a close view
+        self._on_display()
         last = self.index == self.count - 1
         self.next.setText(tr("Done ▶") if last else tr("Next ▶"))
         getattr(self, f"_enter_{station.kind}")(station)

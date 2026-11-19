@@ -36,4 +36,6 @@ def value_at(degrees: float) -> int:
     return VALUES[round((degrees % 360) / STEP_DEGREES) % len(VALUES)]
 
 
-DRAWING = PanelDrawing(FRONT, KNOB, DIAL, KNOB_RADIUS, DIAL_REACH, angle_of, value_at)
+SOFTKEYS = tuple(f"soft-{number}" for number in range(1, 6))
+DRAWING = PanelDrawing(FRONT, KNOB, DIAL, KNOB_RADIUS, DIAL_REACH, angle_of, value_at,
+                       display="lcd", softkeys=SOFTKEYS)

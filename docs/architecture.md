@@ -572,6 +572,19 @@ limits, measure. The simulator runs three: installation, function, measure; it h
 drawing, so the window shows the test point instead of the bench. The front panel is a drawing
 of the driver package (`devices/profitest_prime/panel/`).
 
+The display of the drawn panel shows what the instrument shows. A driver describes a view
+(`devices/screen.py`): the function's sign, a reading, the measuring path or a small line per
+row, and for each softkey what its row names, in the instrument's own short labels. A label can
+stand for what the element states, such as the rated residual current of the RCD measured. The
+application draws the view in its own strokes (`ui/screen_art.py`) into the part of the panel
+the drawing names as its display, each row at the height of the softkey beside it, so the key a
+guide points at stands next to its label. A guide names the view while the instrument is set
+and the one once a reading stands; the display is dark while the element is chosen. The
+PROFITEST PRIME's views (`devices/profitest_prime/screens.py`) are kept per rotary switch
+position, also for positions no guide leads through yet;
+[profitest-prime-display.md](profitest-prime-display.md) tells what was read from the
+instrument.
+
 ## Line conductors at a test point
 
 An electrical element states how many line conductors reach it (`line_conductors`, 1 or 3)
@@ -588,15 +601,18 @@ statement changes. Readings without a conductor path are never marked.
 
 The guide follows the statement: one line conductor draws L and N at the main switch and a
 three-pole CEE plug, without N the N lead is left out, and the settings station advises
-choosing the measuring path by hand where AUTO would measure conductors that are not there.
+skipping pairs or choosing the measuring path by hand where AUTO would name conductors that are
+not there.
 
 The voltage measurement follows it as well. A guide may name another guide for what the element
 states (`Guide.variants`) and guides that follow in the same run (`Guide.follow`); the driver
 decides, the window only lays their stations one behind the other (`ui/guide_run.py`), each
 station showing the leads, settings, steps and result of the guide it belongs to. The PROFITEST
 PRIME names one variant: with three line conductors the view U3~ measures between L1, L2 and L3
-first, the probes on the three incoming terminals, then the leads move to L1, N and PE for the
-single voltages. With one line conductor, or none stated, the run stays the single voltages.
+first, the probes on the three incoming terminals, then the view U takes the single voltages.
+That view measures between the probes L and PE only; its measuring path names the pair of
+conductors they are on and switches nothing, and with AUTO the instrument names the pairs one
+after the other. With one line conductor, or none stated, the run stays the single voltages.
 Changing the statement at the place station lays the run out anew at once. Probes on
 neighbouring terminals carry their markings in two lines.
 

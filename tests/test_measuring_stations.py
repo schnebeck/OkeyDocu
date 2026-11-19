@@ -55,8 +55,9 @@ def test_the_battery_is_enough_unless_the_guide_needs_the_mains(qtbot, app, plan
     window.flow = window.guide.flow
     with speaking("de"):
         window.go_to(PREPARE)
-    assert window.bench.panel.pointed == ("mains-inlet", "mains-switch", "led-mains")
+    assert window.bench.panel.pointed == ("mains-inlet", "mains-switch")
     assert "Netzversorgung" in window.step_text.text()
+    assert "Glimmlampe im Netzschalter" in window.step_text.text()
 
 
 def test_the_settings_name_what_the_rcd_states_and_close_in_on_the_display(qtbot, app, plant):
@@ -114,7 +115,7 @@ def test_voltage_and_protective_conductor_have_their_own_test_points(qtbot, app,
     assert window.place.asset_id == plant["machine"]
 
 
-def test_one_line_conductor_without_n_leaves_the_n_lead_and_advises_against_auto(
+def test_one_line_conductor_without_n_takes_two_leads_and_advises_against_auto(
         qtbot, app, plant):
     app.db.set_asset_features(plant["machine"], {"line_conductors": "1",
                                                  "n_conductor": "without N"})

@@ -77,3 +77,13 @@ def test_the_voltage_needs_no_start_key_the_other_measurements_do():
     three_phase = voltage.variants[0].guide
     assert not any(started(guide) for guide in (voltage, *three_phase.chain()))
     assert started(PRIME["rcd_time"]) and started(PRIME["rlo"])
+
+
+def test_the_view_u_measures_between_two_probes_and_names_the_next_pair_itself():
+    """Probe N has no part in it; IΔN skips a pair the instrument names."""
+    voltage = PRIME["u"]
+    after_lines = voltage.variants[0].guide.follow
+    for guide in (voltage, after_lines):
+        assert [lead.probe for lead in guide.leads] == ["PE (L2)", "L (L1)"]
+        assert guide.steps[-1].parts == ("key-idn",)
+    assert "probe N" in after_lines.flow[0].actions[0].text

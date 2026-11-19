@@ -10,7 +10,8 @@
 reports is a ring around its label, green where it serves the measurement and red elsewhere.
 Parts named in `point_at` pulse, so a guide can show the socket, key or detent that comes
 next. A click on a detent asks for that position. `zoom_dial` moves in on the dial and back
-out to the whole panel, `zoom_parts` in on other parts, such as display and softkeys."""
+out to the whole panel, `zoom_parts` in on other parts, such as display and softkeys.
+`show_screen` puts a view on the display, its rows at the height of the softkeys."""
 
 from __future__ import annotations
 
@@ -22,6 +23,8 @@ from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
 from ..devices.guide import PanelDrawing
+from ..devices.screen import Screen
+from .screen_art import paint_screen
 
 _POINT = QColor("#ff9f1c")
 _MATCH = QColor("#3ec46d")
@@ -44,6 +47,8 @@ class FrontPanel(QWidget):
         self.actual: int | None = None
         self.fits: bool | None = None
         self.pointed: tuple[str, ...] = ()
+        self.screen: Screen | None = None
+        self.stated = None  # what the element measured states, by feature key
         self.angle = 0.0
         self.pulse = 0.0
         self._turn = QVariantAnimation(self, duration=_TURN_MS)
@@ -114,6 +119,12 @@ class FrontPanel(QWidget):
         self.view = QRectF(value)
         self.update()
 
+    def show_screen(self, screen: Screen | None, stated=None) -> None:
+        """The view on the display, None for a dark one. `stated` fills in what a softkey row
+        shows of the element measured."""
+        self.screen, self.stated = screen, stated
+        self.update()
+
     def point_at(self, *ids: str) -> None:
         self.pointed = tuple(i for i in ids if self.front.elementExists(i))
         if self.pointed:
@@ -167,12 +178,20 @@ class FrontPanel(QWidget):
         box = self.front.viewBoxF()
         self.front.render(painter, QRectF(corner.x(), corner.y(), box.width() * scale,
                                           box.height() * scale))
+        self._paint_screen(painter)
         self._paint_actual(painter)
         self._paint_pointed(painter)
         centre, radius = self._dial_centre(), self.drawing.knob_radius * scale
         painter.translate(centre)
         painter.rotate(self.angle)
         self.knob.render(painter, QRectF(-radius, -radius, 2 * radius, 2 * radius))
+
+    def _paint_screen(self, painter: QPainter) -> None:
+        if self.screen is None or not self.front.elementExists(self.drawing.display):
+            return
+        centres = [self.part_rect(key).center().y() for key in self.drawing.softkeys]
+        paint_screen(painter, self.part_rect(self.drawing.display), centres, self.screen,
+                     self.stated)
 
     def _paint_actual(self, painter: QPainter) -> None:
         if self.actual is None or not self.front.elementExists(f"pos-{self.actual}"):

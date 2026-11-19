@@ -21,6 +21,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from ..l10n import N_
+from .screen import Screen
 
 PLACE, SELECT, CONNECT, PREPARE, CONFIGURE, MEASURE = (
     "place", "select", "connect", "prepare", "configure", "measure")
@@ -79,6 +80,8 @@ class Guide:
     selector_note: str = ""  # what the position measures, to be translated
     settings: tuple[Action, ...] = ()  # what to set before measuring
     steps: tuple[Action, ...] = ()  # how to measure and store, in order
+    screen: Screen | None = None  # the display while the instrument is set
+    result_screen: Screen | None = None  # the display once a reading stands
     results: tuple[str, ...] = ()  # functions of a reading that ends the measurement
     drawing_features: tuple[str, ...] = ()  # what the drawing of the test point prints
     every_path: bool = False  # AUTO measures every pair of conductors, there or not
@@ -124,3 +127,5 @@ class PanelDrawing:
     dial_reach: float  # a click this far from the centre still turns the dial
     angle_of: Callable[[int], float | None]  # reported position to degrees from the top
     value_at: Callable[[float], int]  # degrees from the top to the nearest position
+    display: str = ""  # the part a view of the display is drawn into
+    softkeys: tuple[str, ...] = ()  # the keys beside the display, top to bottom
