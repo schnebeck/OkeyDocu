@@ -76,7 +76,8 @@ def _knob(painter: QPainter, radius: float, on: bool) -> None:
     painter.setBrush(STEEL)
     screw = QPointF(radius * 0.34, 0)
     painter.drawEllipse(screw, radius * 0.075, radius * 0.075)
-    painter.drawLine(screw + QPointF(-radius * 0.05, 0), screw + QPointF(radius * 0.05, 0))
+    for arm in (QPointF(radius * 0.05, radius * 0.018), QPointF(-radius * 0.018, radius * 0.05)):
+        painter.drawLine(screw - arm, screw + arm)
 
 
 def _window(radius: float) -> QRectF:

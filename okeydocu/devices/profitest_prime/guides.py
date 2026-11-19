@@ -31,9 +31,11 @@ PE_LEAD = ("3", "socket-3", "PE (L2)")
 
 STORE = Action(("soft-5",), N_("Press the share softkey at the bottom right: the instrument"
                                 " prints the result to OkeyDocu and keeps nothing."))
-BATTERY = (Action(("lcd",), N_("The battery is enough for this measurement.")),
-           Action((), N_("Look at the BAT symbol at the top of the display. With a nearly empty"
-                         " battery plug in the mains lead and switch on.")))
+BATTERY = (Action((), N_("The battery is enough for this measurement.")),
+           Action(("mains-inlet", "mains-switch"),
+                  N_("With a nearly empty battery plug the mains lead into the inlet at the top"
+                     " right and switch on: 0 → I. The BAT symbol at the top of the display"
+                     " shows how full the battery is.")))
 MAINS = (Action(("mains-inlet", "mains-switch"), N_("This measurement needs the mains.")),
          Action((), N_("Plug the mains lead into the inlet at the top right and switch on:"
                        " 0 → I.")),
@@ -64,8 +66,9 @@ LIVE_RCD = (
 RCD_TIME = Guide(
     "rcd_time", N_("RCD tripping test IΔN"), 18, "rcd", N_("RCD, outgoing side"),
     (Lead(*PE_LEAD, "pe", N_("Place probe PE (L2) on the PE bar.")),
-     Lead(*L_LEAD, "out_l", N_("Place probe L (L1) on outgoing terminal 2 of the RCD.")),
-     Lead(*N_LEAD, "out_n", N_("Place probe N (L3) on outgoing terminal N of the RCD."))),
+     Lead(*L_LEAD, "out_l", N_("Place probe L (L1) on the outgoing line conductor terminal of"
+                               " the RCD, usually an upper one.")),
+     Lead(*N_LEAD, "out_n", N_("Place probe N (L3) on the outgoing N terminal of the RCD."))),
     N_("The test switches the circuit off. Secure the loads beforehand."),
     "rcd_type", RCD_FEATURES, True, LIVE_RCD, "IΔN",
     N_("Measures the touch voltage and the tripping time at the rated residual current."),

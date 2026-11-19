@@ -49,7 +49,7 @@ def test_the_battery_is_enough_unless_the_guide_needs_the_mains(qtbot, app, plan
     window = opened(qtbot, app, plant)
     with speaking("de"):
         window.go_to(PREPARE)
-    assert window.bench.panel.pointed == ("lcd",)
+    assert window.bench.panel.pointed == ("mains-inlet", "mains-switch")
     assert "reicht der Akku" in window.step_text.text()
     window.guide = replace(window.guide, flow=flow(MAINS))
     window.flow = window.guide.flow

@@ -10,7 +10,7 @@ import pytest
 from PySide6.QtCore import QRectF
 from PySide6.QtGui import QColor, QImage, QPainter
 
-from okeydocu.ui import test_object_switch
+from okeydocu.ui import test_object_parts
 from okeydocu.ui.switch_handle import switch_handle
 from okeydocu.ui.test_objects import DRAWINGS
 from okeydocu.ui.warning_sign import electricity_sign
@@ -71,11 +71,13 @@ def test_the_electricity_sign_is_a_yellow_triangle_with_a_black_flash(qtbot):
 
 
 @pytest.mark.parametrize("live", [True, False])
-def test_the_main_switch_stands_as_the_measurement_needs_it(qtbot, monkeypatch, live):
+@pytest.mark.parametrize("test_object", ["main_switch", "rcd"])
+def test_the_main_switch_stands_as_the_measurement_needs_it(qtbot, monkeypatch, live,
+                                                            test_object):
     seen = []
-    monkeypatch.setattr(test_object_switch, "switch_handle",
+    monkeypatch.setattr(test_object_parts, "switch_handle",
                         lambda painter, plate, on: seen.append(on))
-    painted(lambda painter: DRAWINGS["main_switch"](
+    painted(lambda painter: DRAWINGS[test_object](
         painter, QRectF(0, 0, SIZE, SIZE), [], 4, False, live))
     assert seen == [live]
 

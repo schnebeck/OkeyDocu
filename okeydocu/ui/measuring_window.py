@@ -35,6 +35,9 @@ from .station_bar import StationBar
 from .station_kinds import StationKinds
 
 
+RIGHT, GAP = 1, 3  # rows of the side column: what the station shows, and the room below
+
+
 class Absent:
     """Stands for the bench of an instrument without a panel drawing: whatever is asked of it
     does nothing."""
@@ -82,9 +85,11 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, GuideRun, QDialog
         if self.bench:
             self.left.addWidget(self.bench)
         self.form = PlaceForm(app)
-        self.form.element_chosen.connect(self.show_place)
+        self.form.show_root(self.root, campaign_id)
+        self.form.chosen.connect(self._choose)
+        self.form.changed.connect(
+            lambda: self._choose(self.form.panel.tree.current_id()))
         self.form.edited.connect(self._preview)
-        self.form.parent_chosen.connect(self._hang_below)
         self.step_text = QLabel()
         self.step_text.setWordWrap(True)
         self.step_text.setTextFormat(Qt.TextFormat.RichText)
@@ -108,7 +113,7 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, GuideRun, QDialog
         side = QFrame()
         side.setFrameShape(QFrame.Shape.StyledPanel)
         side.setMinimumWidth(360)
-        column = QVBoxLayout(side)
+        column = self.column = QVBoxLayout(side)
         column.addWidget(self.step_title)
         column.addWidget(self.right)
         column.addWidget(self.ask)
@@ -161,6 +166,8 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, GuideRun, QDialog
         here = self.kind == PLACE or not self.bench
         self.left.setCurrentWidget(self.scene if here else self.bench)
         self.right.setCurrentWidget(self.form if self.kind == PLACE else self.step_text)
+        self.column.setStretch(RIGHT, int(self.kind == PLACE))  # the tree takes what is left
+        self.column.setStretch(GAP, int(self.kind != PLACE))
         self.back.setEnabled(self.index > 0)
         self.ask.hide()
         self.bench.panel.zoom_dial(self.kind == SELECT and self.has_dial)

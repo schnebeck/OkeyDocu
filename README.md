@@ -58,8 +58,8 @@ RCD does not state is named instead of judged.
 each instrument brings its own flow. With the PROFITEST PRIME there are six: installation, rotary
 switch, test leads, supply, mode and limits, measure. The program reads the position of the rotary
 switch, lays the leads one by one from the sockets to the terminals of the test point (an RCD, a
-main switch, a CEE plug), names the softkeys to set and waits for the result. Elements missing on
-the way are made there.
+main switch, a CEE plug), names the softkeys to set and waits for the result. The first station
+shows the structure tree: elements of every kind are made, moved and deleted there while measuring.
 
 ![Station 2: the knob turns to IΔN, the instrument still reports IF](docs/images/guide-dial.png)
 

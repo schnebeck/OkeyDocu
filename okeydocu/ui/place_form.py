@@ -6,33 +6,36 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""A missing statement is marked, not demanded: going on without it keeps the measurement
-possible and the drawing in its usual layout. Where the element is still to be made, its name
-and identifier are asked for as well; the structure grows while measuring. What is entered is
-stored when the tester goes on, as if entered in the element's own form."""
+"""The element is chosen in the structure tree, which can be worked on as anywhere else: new
+elements of every kind, renamed, moved, grouped and deleted. Where the guide is taken at a
+kind of element of its own, such as an RCD, and none stands at or above the chosen one, a new
+one is entered that will hang below it. A missing statement is marked, not demanded: going on
+without it keeps the measurement possible and the drawing in its usual layout. What is entered
+is stored when the tester goes on, as if entered in the element's own form."""
 
 from __future__ import annotations
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import QEvent, Qt, Signal
 from PySide6.QtWidgets import QComboBox, QFormLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
 
 from ..campaign.measuring_place import MeasuringPlace
 from ..devices.guide import Guide
 from ..l10n import N_, tr, value_text
 from .choice_box import feature_field, field_text
+from .element_form import ElementOverlay
 from .pending_marks import PendingMarks
+from .structure_panel import StructurePanel
 
 MISSING_STYLE = "background:#fde2c4"
 HINT = "#b35c00"
-NEW = -1  # the choice that makes an element
-PARENT_TIP = N_("The element the new one is placed below in the structure, such as the"
-                " distribution board the RCD sits in. The choice stays for every further new"
-                " element of this campaign until it is changed.")
+TREE_HINT = N_("Choose the element that is measured. A right click or Ins makes new elements"
+               " of every kind below the chosen one; dragging moves them.")
+ENTER = (Qt.Key.Key_Return, Qt.Key.Key_Enter)
 
 
 class PlaceForm(QWidget):
-    element_chosen = Signal(int)  # an existing element, or NEW
-    parent_chosen = Signal(int)  # where a new element is to hang
+    chosen = Signal(object)  # an element picked in the tree; None: the installation itself
+    changed = Signal()  # the structure was worked on
     edited = Signal()
 
     def __init__(self, app, parent=None):
@@ -40,20 +43,21 @@ class PlaceForm(QWidget):
         self.app = app
         self.place = MeasuringPlace(None)
         self.fields: dict[str, QWidget] = {}
+        self.quiet = False  # the tree is being set, not worked on
+        self.panel = StructurePanel(app)
+        self.panel.set_hint(tr(TREE_HINT))
+        self.panel.setMinimumHeight(180)
+        self.panel.search.installEventFilter(self)
+        self.panel.tree.chosen.connect(self._picked)
+        self.panel.tree.changed.connect(self.changed)
+        self.panel.actions.properties_requested.connect(self._properties)
         self.name = QLineEdit()
         self.identifier = QLineEdit()
         for line in (self.name, self.identifier):
             line.textEdited.connect(lambda _: self.edited.emit())
-        self.parent_box = QComboBox()
-        self.parent_box.activated.connect(lambda index: self.parent_chosen.emit(
-            self.parent_box.itemData(index)))
-        self.choice = QComboBox()
-        self.choice.activated.connect(lambda index: self.element_chosen.emit(
-            self.choice.itemData(index)))
-        self.new_title = QLabel(f"<b>{tr('New element')}</b>")
+        self.new_title = QLabel()
+        self.new_title.setWordWrap(True)
         self.new_form = QFormLayout()
-        self.parent_box.setToolTip(tr(PARENT_TIP))
-        self.new_form.addRow(tr("Parent element"), self.parent_box)
         self.new_form.addRow(tr("Designation"), self.name)
         self.new_form.addRow(tr("Identifier"), self.identifier)
         self.form = QFormLayout()
@@ -64,7 +68,7 @@ class PlaceForm(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(QLabel(f"<b>{tr('Where do we measure?')}</b>"))
-        layout.addWidget(self.choice)
+        layout.addWidget(self.panel, 1)
         layout.addSpacing(8)
         layout.addWidget(self.new_title)
         layout.addLayout(self.new_form)
@@ -73,25 +77,36 @@ class PlaceForm(QWidget):
         layout.addLayout(self.form)
         layout.addWidget(self.hint)
 
+    def eventFilter(self, watched, event) -> bool:
+        """Enter in the search field stays there and does not press the window's button."""
+        return event.type() == QEvent.Type.KeyPress and event.key() in ENTER
+
+    def show_root(self, root_id: int, campaign_id: int) -> None:
+        self.quiet = True
+        self.panel.tree.show_root(root_id, campaign_id)
+        self.quiet = False
+
+    def select(self, asset_id: int) -> None:
+        """Rebuilt from the database first, so an element just made is there to be chosen."""
+        self.quiet = True
+        self.panel.tree.reload()
+        self.panel.tree.select(asset_id)
+        self.quiet = False
+
+    def _picked(self, asset_id) -> None:
+        if not self.quiet:
+            self.chosen.emit(asset_id)
+
+    def _properties(self, asset_id: int) -> None:
+        if ElementOverlay(self.app, asset_id, self.window()).exec():
+            self.panel.tree.reload()
+            self.changed.emit()
+
     def show_place(self, guide: Guide, place: MeasuringPlace,
-                   candidates: list[tuple[int, str]], parents: list[tuple[int, str]] = (),
-                   parent_id: int | None = None) -> None:
+                   typed: dict[str, str] | None = None) -> None:
+        """`typed` is what the fields hold beyond what the element states, not yet stored."""
         self.place = place
-        self.parent_box.clear()
-        for asset_id, path in parents:
-            self.parent_box.addItem(path, asset_id)
-        self.parent_box.setCurrentIndex(max(self.parent_box.findData(parent_id), 0))
-        self.new_title.setVisible(place.is_new)
-        for row in range(self.new_form.rowCount()):
-            self.new_form.setRowVisible(row, place.is_new)
-        self.choice.clear()
-        for asset_id, title in candidates:
-            self.choice.addItem(title, asset_id)
-        if place.kind and guide.owner_feature:
-            kind_label = tr(self.app.db.kind(place.kind).label)
-            self.choice.addItem(tr("＋ New {kind} …", kind=kind_label), NEW)
-        self.choice.setCurrentIndex(max(self.choice.findData(
-            NEW if place.is_new else place.asset_id), 0))
+        self.show_parent(place)
         while self.form.rowCount():
             self.form.removeRow(0)
         self.fields.clear()
@@ -102,7 +117,17 @@ class PlaceForm(QWidget):
             return
         if place.is_new:
             self.name.setPlaceholderText(tr(self.app.db.kind(place.kind).label))
-        self._feature_rows(guide, place)
+        self._feature_rows(guide, place.entered(typed or {}))
+
+    def show_parent(self, place: MeasuringPlace) -> None:
+        """What a new element is and below which one it will hang."""
+        self.new_title.setVisible(place.is_new)
+        for row in range(self.new_form.rowCount()):
+            self.new_form.setRowVisible(row, place.is_new)
+        if place.is_new:
+            text = tr("New {kind} below “{parent}”", kind=tr(self.app.db.kind(place.kind).label),
+                      parent=place.path[-1] if place.path else "")
+            self.new_title.setText(f"<b>{text}</b>")
 
     def _feature_rows(self, guide: Guide, place: MeasuringPlace) -> None:
         kind = self.app.db.kind(place.kind)

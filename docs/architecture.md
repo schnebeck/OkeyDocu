@@ -539,21 +539,29 @@ knows, in any number and order. The application shows each kind in one way
 from the driver. A kind new to the application is added there once and is then open to every
 driver; the user interface never imports a driver.
 
-- **place** (`ui/place_station.py`), always first: the element measured at, chosen or made on
-  the way. A guide that names an owner feature, such as the RCD type, is taken at the nearest
-  element of a kind with that feature; where none exists yet it is made below the element chosen
-  as parent, which is kept per campaign. The element kept becomes where the readings go.
+- **place** (`ui/place_station.py`), always first: the element measured at, chosen in the
+  structure tree. The tree is the one of the campaign (`ui/structure_panel.py`) and is worked on
+  in the same way: elements of every kind are made, renamed, moved, grouped and deleted while
+  measuring. A guide that names an owner feature, such as the RCD type, is taken at the nearest
+  element of a kind with that feature at or above the chosen one; where none stands there, one
+  is entered and made below the chosen element, which is kept per campaign as the place for
+  further new ones. What is typed at the element stays while the tree is worked on. The element
+  kept becomes where the readings go.
 - **select** (`ui/dial_station.py`): with a drawn dial and a position named, the knob turns there;
   otherwise the station says what to choose. The instrument is asked where it stands on entering
   the station and on request, never in a steady stream; a position that serves the measurement
   moves on by itself.
 - **connect**: plug over its row of sockets, grey lead, probe on its terminal, laid one after the
   other. The test point is a drawing of its own per kind (`ui/test_object*.py`): an RCD, the
-  incoming terminals of a main switch, a CEE plug with the machine housing. Each is drawn in
-  the state the guide measures in (`Guide.live`): the handle of the main switch
-  (`ui/switch_handle.py`) lies across with “O OFF” in its window or stands upright with “I ON”,
-  the lever of the RCD is up or down. Where the installation stays live, the place station
-  shows the warning sign for electricity (`ui/warning_sign.py`, after ISO 7010 W012).
+  incoming terminals of a main switch, a CEE plug with the machine housing. An RCD is drawn
+  with the supply at its lower terminals and the outgoing circuit at the upper ones, where the
+  probes go; screws show a cross recess. Each test point is drawn in the state the guide
+  measures in (`Guide.live`): the handle of the main switch (`ui/switch_handle.py`), drawn
+  beside the main switch's contact block and beside the RCD, lies across with “O OFF” in its
+  window or stands upright with “I ON”, the lever of the RCD is up or down. Where the
+  installation stays live, the place station shows the warning sign for electricity
+  (`ui/warning_sign.py`, after ISO 7010 W012). The bench keeps room below the panel for the
+  test point, its probes and the turns of the leads, so no lead leaves the picture.
 - **prepare** and **configure**: what to do and which parts of the panel to use; configure can
   close in on parts, such as display and softkeys, and lists what the element states.
 - **measure**: the keys in order; the station waits for the result of its own function and shows

@@ -23,7 +23,8 @@ from .lead_art import paint_lead, route
 from .test_objects import DRAWINGS
 
 LAY_MS = 900  # one lead
-PANEL_SHARE = 0.64  # of the height, at most
+OBJECT_ROOM = 310  # height kept for the test point, its probes and the turns of the leads
+PANEL_LEAST = 0.5  # of the height, which the panel gets even where that room is short
 LANE_GAP = 28  # between two lanes beside the socket field
 PLUG = (124, 40)  # plug size in panel units, over all three sockets of a row
 CROWDED = 64  # a marking in one line needs this much room to the next probe
@@ -100,7 +101,8 @@ class BenchView(QWidget):
     # Layout and painting --------------------------------------------------------
 
     def resizeEvent(self, _event) -> None:
-        height = min(int(self.width() * 725 / 1040), int(self.height() * PANEL_SHARE))
+        room = max(self.height() - OBJECT_ROOM, int(self.height() * PANEL_LEAST))
+        height = min(int(self.width() * 725 / 1040), room)
         self.panel.setGeometry(0, 0, self.width(), height)
         self.leads_layer.setGeometry(self.rect())
         self.leads_layer.raise_()

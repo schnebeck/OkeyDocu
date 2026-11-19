@@ -167,25 +167,6 @@ def make_place(service, place: MeasuringPlace, parent_id: int, name: str,
     return asset_id
 
 
-def candidates(service, guide: Guide, root_id: int) -> list[tuple[int, str]]:
-    """The elements of an installation a guide can be taken at, as (id, title)."""
-    db = service.db
-    kinds = _kinds_with(db, guide.owner_feature) if guide.owner_feature else None
-    found = []
-    for asset_id in service.subtree(root_id):
-        row = db.asset(asset_id)
-        if kinds is None or row["kind"] in kinds:
-            found.append((asset_id, " ".join(p for p in (row["identifier"], row["name"]) if p)))
-    return found
-
-
-def places(service, root_id: int) -> list[tuple[int, str]]:
-    """Every element of an installation with its path, for hanging a new one below it."""
-    db = service.db
-    return [(asset_id, " › ".join(_path(db, asset_id, root_id)))
-            for asset_id in service.subtree(root_id)]
-
-
 def measured_functions(db, campaign_id: int) -> set[str]:
     """The functions a campaign has readings of."""
     rows = db.query("SELECT DISTINCT function FROM measurements WHERE campaign_id=?",

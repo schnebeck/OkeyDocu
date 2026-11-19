@@ -6,17 +6,17 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""Leaving the station stores what was entered at the element, making it first where it is
-new, and the bench is drawn from it."""
+"""The tree names the element; the guide is taken at it or at the nearest one above that it
+suits. Leaving the station stores what was entered at the element, making it first where it
+is new, and the bench is drawn from it."""
 
 from __future__ import annotations
 
 from html import escape
 
-from ..campaign.measuring_place import candidates, make_place, measuring_place, new_place, \
-    places
+from ..campaign.measuring_place import make_place, measuring_place, new_place
 from ..l10n import tr
-from .place_form import NEW
+from .structure_tree import UNPLACED
 
 
 class PlaceStation:
@@ -24,24 +24,34 @@ class PlaceStation:
     `parent_id`. What the element states decides the run, so every preview plans it anew."""
 
     def show_place(self, asset_id: int | None) -> None:
+        """The element readings go to, or a new one below `parent_id` where the guide finds
+        none at `asset_id`; the tree shows which."""
         service = self.app.service
-        found = None if asset_id == NEW else measuring_place(service, self.base_guide, asset_id,
-                                                              self.root)
-        if found is None or found.asset_id is None:
+        found = measuring_place(service, self.base_guide, asset_id, self.root)
+        if found.asset_id is None:
             found = new_place(service, self.base_guide, self.parent_id, self.root)
-        self.place = found
-        self.form.show_place(self.base_guide, self.place,
-                             candidates(service, self.base_guide, self.root),
-                             places(service, self.root), self.parent_id)
+        self._take(found)
+        self.form.select(self.parent_id if found.asset_id is None else found.asset_id)
+
+    def _take(self, place, typed: dict[str, str] | None = None) -> None:
+        self.place = place
+        self.form.show_place(self.base_guide, place, typed)
         self._preview()
 
-    def _hang_below(self, parent_id: int) -> None:
-        """A new element hangs below another one; what was entered stays."""
-        self.parent_id = parent_id
-        moved = new_place(self.app.service, self.base_guide, parent_id, self.root)
-        self.place = moved.entered(self.place.features)
-        self._preview()
-        self.parent_chosen.emit(parent_id)
+    def _choose(self, asset_id) -> None:
+        """An element picked in the tree, or the tree worked on. Where the guide finds no
+        element to be taken at, a new one will hang below the one picked. The element already
+        shown keeps what was typed, and so does a new one that only hangs elsewhere."""
+        asset_id = self.root if asset_id in (None, UNPLACED) else asset_id
+        service = self.app.service
+        found = measuring_place(service, self.base_guide, asset_id, self.root)
+        if found.asset_id is None:
+            if asset_id != self.parent_id:
+                self.parent_id = asset_id
+                self.parent_chosen.emit(asset_id)
+            found = new_place(service, self.base_guide, asset_id, self.root)
+        same = (found.asset_id, found.kind) == (self.place.asset_id, self.place.kind)
+        self._take(found, self.form.entered() if same else None)
 
     def _shown(self):
         """The place as entered so far, a new one under a name of its own."""

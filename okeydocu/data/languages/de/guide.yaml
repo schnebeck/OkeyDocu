@@ -5,7 +5,7 @@ texts:
   Mode and limits: Modus und Grenzwerte
   Measure: Messen
   Outgoing: Abgang
-  Incoming: Zuleitung
+  Incoming: Einspeisung
   "for {element}": "für {element}"
   first measurement: erste Messung
   ◀ Back: ◀ Zurück
@@ -16,8 +16,8 @@ texts:
   RCD tripping test IΔN: RCD-Auslöseprüfung IΔN
   RCD, outgoing side: FI-Schutzschalter, Abgangsseite
   Place probe PE (L2) on the PE bar.: Spitze PE (L2) an die PE-Schiene setzen.
-  Place probe L (L1) on outgoing terminal 2 of the RCD.: Spitze L (L1) an Abgangsklemme 2 des FI setzen.
-  Place probe N (L3) on outgoing terminal N of the RCD.: Spitze N (L3) an Abgangsklemme N des FI setzen.
+  Place probe L (L1) on the outgoing line conductor terminal of the RCD, usually an upper one.: Spitze L (L1) an die Abgangsklemme des Außenleiters am FI setzen, üblicherweise oben.
+  Place probe N (L3) on the outgoing N terminal of the RCD.: Spitze N (L3) an die Abgangsklemme N des FI setzen.
   The test switches the circuit off. Secure the loads beforehand.: Die Messung schaltet den Stromkreis ab. Verbraucher vorher sichern.
   Inform the operator: Betreiber informieren
   The test switches the circuit off.: Die Messung schaltet den Stromkreis ab.
@@ -32,15 +32,13 @@ texts:
   No element chosen yet: Noch kein Element gewählt
   no element chosen: kein Element gewählt
   Where do we measure?: Wo messen wir?
+  "New {kind} below “{parent}”": "{kind} neu anlegen unter „{parent}“"
+  "Choose the element that is measured. A right click or Ins makes new elements of every kind below the chosen one; dragging moves them.": "Das Element wählen, an dem gemessen wird. Rechtsklick oder Einfg legt neue Elemente jeder Art unter dem gewählten an; Ziehen verschiebt sie."
   Choose the element this test is for.: Das Element wählen, für das diese Messung ist.
   Details from the rating plate: Angaben vom Typenschild
   Missing details are stored at the element. Without them the drawing shows the usual layout.: Fehlende Angaben werden am Element gespeichert. Ohne sie zeigt die Zeichnung die übliche Bauform.
   Prepared – next ▶: Vorbereitet – weiter ▶
-  "＋ New {kind} …": "＋ {kind} neu anlegen …"
   "{title} (new)": "{title} (neu)"
-  New element: Neues Element
-  Parent element: Übergeordnetes Element
-  "The element the new one is placed below in the structure, such as the distribution board the RCD sits in. The choice stays for every further new element of this campaign until it is changed.": "Das Element, unter dem das neue im Strukturbaum eingeordnet wird, etwa der Verteiler, in dem der FI sitzt. Die Wahl bleibt für alle weiteren neuen Elemente dieser Kampagne stehen, bis sie geändert wird."
   "Turn the rotary switch to {position}.": "Drehschalter auf {position} stellen."
   "Measures the touch voltage and the tripping time at the rated residual current.": "Misst die Berührspannung und die Auslösezeit beim Bemessungsdifferenzstrom."
   "No instrument connected: turn the switch, then go on.": "Kein Messgerät verbunden: Schalter drehen, dann weiter."
@@ -59,7 +57,7 @@ texts:
   "Plug the mains lead into the inlet at the top right and switch on: 0 → I.": "Netzkabel oben rechts einstecken und einschalten: 0 → I."
   The MAINS lamp lights up.: Die Lampe MAINS leuchtet.
   The battery is enough for this measurement.: Für diese Messung reicht der Akku.
-  Look at the BAT symbol at the top of the display. With a nearly empty battery plug in the mains lead and switch on.: Das Symbol BAT oben im Display ansehen. Ist der Akku fast leer, Netzkabel einstecken und einschalten.
+  "With a nearly empty battery plug the mains lead into the inlet at the top right and switch on: 0 → I. The BAT symbol at the top of the display shows how full the battery is.": "Ist der Akku fast leer, Netzkabel oben rechts einstecken und einschalten: 0 → I. Das Symbol BAT oben im Display zeigt, wie voll der Akku ist."
   "{element} states:": "{element} gibt an:"
   Waiting for the result …: Warte auf das Ergebnis …
   Machine housing: Maschinengehäuse
@@ -70,7 +68,7 @@ texts:
   "Limits: set them as the test basis requires.": "Grenzwerte: so einstellen, wie es die Prüfgrundlage verlangt."
   "Press the share softkey at the bottom right: the instrument prints the result to OkeyDocu and keeps nothing.": "Softkey „Teilen“ unten rechts drücken: Das Gerät druckt das Ergebnis an OkeyDocu und speichert nichts."
   The voltage is measured on the live supply.: Die Spannung wird an der eingeschalteten Versorgung gemessen.
-  Main switch, incoming terminals: Hauptschalter, Zuleitungsklemmen
+  Main switch, incoming terminals: Hauptschalter, Klemmen der Einspeisung
   "Live parts are exposed: touch only the grips of the probes.": "Spannungsführende Teile liegen frei: Prüfspitzen nur an den Griffen anfassen."
   CEE plug and housing of the machine: CEE-Stecker und Gehäuse der Maschine
   "Measure only dead: the plug is pulled.": "Nur spannungsfrei messen: Der Stecker ist gezogen."

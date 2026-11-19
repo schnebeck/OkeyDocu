@@ -16,20 +16,11 @@ from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPen
 
 from ..l10n import tr
-from .switch_handle import switch_handle
-from .test_object_parts import BODY, CENTER, INK, LINE, Anchor, bold_font, pe_bar, screw, \
-    side_label
+from .test_object_parts import BODY, CENTER, INK, LINE, Anchor, bold_font, handle, pe_bar, \
+    screw, side_label
 
 PITCH = 40
 INCOMING = {"L": "in_l1", "L1": "in_l1", "L2": "in_l2", "L3": "in_l3", "N": "in_n"}
-
-
-def _handle(painter: QPainter, plate: QRectF, on: bool) -> None:
-    switch_handle(painter, plate, on)
-    painter.setPen(INK)
-    caption = tr("Main switch: on") if on else tr("Main switch: off")
-    painter.drawText(QRectF(plate.left() - 30, plate.bottom() + 4, plate.width() + 60, 16),
-                     CENTER, caption)
 
 
 def main_switch(painter: QPainter, box: QRectF, lines: list[str], poles: int = 4,
@@ -41,7 +32,7 @@ def main_switch(painter: QPainter, box: QRectF, lines: list[str], poles: int = 4
     if n_left:
         incoming, outgoing = incoming[-1:] + incoming[:-1], outgoing[-1:] + outgoing[:-1]
     plate = QRectF(box.left() + box.width() * 0.08, box.top() + 56, 110, 110)
-    _handle(painter, plate, live)
+    handle(painter, plate, live)
     module = QRectF(box.left() + box.width() * 0.33, box.top() + 70, 12 + PITCH * len(incoming),
                     160)
     painter.setPen(QPen(LINE, 1, Qt.PenStyle.DashLine))

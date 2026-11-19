@@ -7,7 +7,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import pytest
-from PySide6.QtCore import QPointF, QRectF
+from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QImage, QPainter, QPainterPathStroker
 
 from okeydocu.devices.guide import CONNECT, SELECT
@@ -16,7 +16,6 @@ from okeydocu.devices.profitest_prime.info import DRIVER_KEY
 from okeydocu.l10n import speaking
 from okeydocu.ui.lead_art import route
 from okeydocu.ui.measuring_window import MeasuringWindow
-from okeydocu.ui.place_form import NEW
 from okeydocu.ui.test_objects import DRAWINGS
 
 
@@ -32,13 +31,13 @@ def plant(app):
                                        "rated_current": "25", "number_of_poles": "4"})
     circuit = app.db.add_asset(customer, "circuit", "Steckdosen", switch)
     campaign = app.service.create(machine, "Prüfung", "Tester")
-    return {"campaign": campaign, "machine": machine, "switch": switch, "other": other,
-            "circuit": circuit}
+    return {"campaign": campaign, "machine": machine, "cabinet": cabinet, "switch": switch,
+            "other": other, "circuit": circuit}
 
 
-def opened(qtbot, app, plant, asset_id):
+def opened(qtbot, app, plant, asset_id, function="rcd_time"):
     with speaking("de"):
-        shown = MeasuringWindow(app, plant["campaign"], DRIVER_KEY, "rcd_time", asset_id)
+        shown = MeasuringWindow(app, plant["campaign"], DRIVER_KEY, function, asset_id)
     qtbot.addWidget(shown)
     shown.resize(1440, 1020)
     shown.show()
@@ -76,10 +75,11 @@ def test_n_stands_after_the_line_conductors_or_first(n_left, order):
 
 
 @pytest.mark.parametrize("poles, n_left, crossing", [
-    (2, False, {"1", "2"}), (4, False, {"1", "2"}), (4, True, None)])
+    (2, False, None), (4, False, None), (4, True, {"1", "2"})])
 def test_leads_cross_only_where_plugs_and_terminals_force_it(window, poles, n_left, crossing):
-    """Plugs stacked L over N, terminals side by side L before N: one bridge is unavoidable.
-    With N first on the RCD the orders agree and nothing crosses; PE never crosses."""
+    """Plugs stacked L over N and probes coming from above: with the terminals side by side
+    L before N nothing crosses. With N first on the RCD one bridge is unavoidable; PE never
+    crosses."""
     window.go_to(CONNECT)
     window.bench.show_guide(guide_for("rcd_time"), ["30 mA"], poles, n_left)
     window.bench.finish()
@@ -88,15 +88,17 @@ def test_leads_cross_only_where_plugs_and_terminals_force_it(window, poles, n_le
     field = bench.panel.part_rect("socket-1").left()
     stroker = QPainterPathStroker()
     stroker.setWidth(2)
-    below = sorted((lead for lead in bench.guide.leads if bench.anchors[lead.terminal].side > 0),
-                   key=lambda lead: bench.anchors[lead.terminal].point.x())
+    sides = {side: sorted((lead for lead in bench.guide.leads
+                           if bench.anchors[lead.terminal].side == side),
+                          key=lambda lead: bench.anchors[lead.terminal].point.x())
+             for side in (1, -1)}
     rows = sorted({lead.row for lead in bench.guide.leads})
     outlines = {}
     for lead in bench.guide.leads:
         anchor = bench.anchors[lead.terminal]
         row = bench.panel.part_rect(lead.row)
         lane = field - 28 * (len(rows) - rows.index(lead.row))
-        depth = 18 + 16 * below.index(lead) if lead in below else 34
+        depth = 18 + 16 * sides[anchor.side].index(lead)
         outlines[lead.plug] = stroker.createStroke(
             route(QPointF(row.left(), row.center().y()), lane, anchor, depth))
     plugs = sorted(outlines)
@@ -147,9 +149,7 @@ def test_the_rcd_above_the_chosen_place_is_the_test_point(window, plant):
     assert window.place.asset_id == plant["switch"]
     assert window.place.path == ("Presse", "Schrank =K1")
     assert window.place.lines() == ["30 mA · A", "25 A"] and window.place.poles == 4
-    assert window.form.choice.currentData() == plant["switch"]
-    assert window.form.choice.count() == 3
-    assert window.form.choice.itemData(2) == NEW
+    assert window.form.panel.tree.current_id() == plant["switch"]
 
 
 def test_a_missing_detail_is_marked_and_does_not_stop_the_tester(window):
@@ -168,8 +168,7 @@ def test_what_is_entered_is_stored_at_the_element_as_the_list_holds_it(window, a
 
 
 def test_another_element_can_be_chosen(window, plant):
-    window.form.choice.setCurrentIndex(window.form.choice.findData(plant["other"]))
-    window.form.choice.activated.emit(window.form.choice.currentIndex())
+    window.form.panel.tree.select(plant["other"])
     assert window.place.asset_id == plant["other"]
     assert window.place.lines() == ["? mA", "? A"]
 
@@ -178,7 +177,8 @@ def test_without_an_rcd_the_station_makes_one_on_the_way(qtbot, app, plant):
     window = opened(qtbot, app, plant, plant["machine"])
     made = []
     window.place_made.connect(made.append)
-    assert window.place.is_new and window.form.choice.currentData() == NEW
+    assert window.place.is_new and window.form.panel.tree.current_id() == plant["machine"]
+    assert "RCD neu anlegen unter „Presse“" in window.form.new_title.text()
     window.form.identifier.setText("=K2-F1")
     window.form.fields["rcd_type"].setEditText("B")
     window.form.fields["rated_residual_current"].setEditText("300")
@@ -195,19 +195,56 @@ def test_a_new_element_hangs_where_it_was_put_and_that_place_is_kept(qtbot, app,
     kept = []
     window.parent_chosen.connect(kept.append)
     window.form.fields["rcd_type"].setEditText("A")
-    box = window.form.parent_box
-    box.setCurrentIndex(box.findData(plant["switch"]))
-    box.activated.emit(box.currentIndex())
-    assert kept == [plant["switch"]]
-    assert window.place.path[-1] == "FI Steuerung =K1-F1"
+    window.form.panel.tree.select(plant["cabinet"])
+    assert kept == [plant["cabinet"]]
+    assert window.place.is_new and window.place.path[-1] == "Schrank =K1"
     assert window.form.entered()["rcd_type"] == "A"
     again = opened(qtbot, app, plant, plant["machine"])
     assert again.parent_id == plant["machine"]
     with speaking("de"):
         chosen = MeasuringWindow(app, plant["campaign"], DRIVER_KEY, "rcd_time",
-                                 plant["machine"], new_parent=plant["switch"])
+                                 plant["machine"], new_parent=plant["cabinet"])
     qtbot.addWidget(chosen)
-    assert chosen.parent_id == plant["switch"]
+    assert chosen.parent_id == plant["cabinet"]
+    assert chosen.form.panel.tree.current_id() == plant["cabinet"]
+
+
+def test_elements_of_every_kind_are_made_in_the_tree_and_measured_at(qtbot, app, plant):
+    window = opened(qtbot, app, plant, plant["machine"], "u")
+    window.form.panel.actions.new_element("measuring_point")
+    made = window.form.panel.tree.current_id()
+    assert app.db.asset(made)["kind"] == "measuring_point"
+    assert app.db.asset(made)["parent_id"] == plant["machine"]
+    assert window.place.asset_id == made
+    kept = []
+    window.place_kept.connect(kept.append)
+    window.next.click()
+    assert kept == [made]
+
+
+def test_what_was_typed_stays_while_the_tree_is_worked_on(window, app, plant):
+    window.form.fields["n_terminal"].setEditText("links")
+    window.form.panel.actions.new_element("circuit")
+    assert window.place.asset_id == plant["switch"]
+    assert window.form.entered() == {"n_terminal": "left"}
+    app.service.rename_element(plant["cabinet"], "Schaltschrank")
+    window.form.panel.tree.reload()
+    assert window.place.path[-1] == "Schaltschrank =K1"
+    assert window.form.entered() == {"n_terminal": "left"}
+
+
+def test_deleting_the_chosen_element_leaves_a_new_one_to_be_made(window, monkeypatch, plant):
+    actions = window.form.panel.actions
+    monkeypatch.setattr(actions, "_confirm", lambda chosen: True)
+    window.form.panel.tree.select(plant["other"])
+    actions.delete()
+    assert window.place.is_new and window.parent_id == plant["cabinet"]
+    assert window.form.panel.tree.current_id() == plant["cabinet"]
+
+
+def test_enter_in_the_search_field_does_not_leave_the_station(qtbot, window):
+    qtbot.keyClick(window.form.panel.search, Qt.Key.Key_Return)
+    assert window.index == 0
 
 
 def test_a_detail_loses_its_mark_once_entered(qtbot, app, plant):
@@ -254,3 +291,27 @@ def test_without_an_instrument_the_dial_station_waits_for_the_tester(window):
     assert window.next.text() == "Gedreht – weiter ▶"
     window.next.click()
     assert window.kind == CONNECT
+
+
+def test_the_probes_reach_an_rcd_from_above_and_stay_inside_the_bench(window):
+    """The circuit leaves an RCD at its upper terminals; a lead coming from above needs no
+    room below the test point."""
+    window.go_to(CONNECT)
+    window.bench.finish()
+    window.bench.repaint()
+    anchors = window.bench.anchors
+    assert all(anchors[lead.terminal].side == -1 for lead in window.guide.leads)
+    assert all(anchors[lead.terminal].point.y() < window.bench.height() - 100
+               for lead in window.guide.leads)
+
+
+def test_the_bench_keeps_room_for_probes_that_come_from_below(window):
+    """A probe from below hangs under its terminal and its lead turns under the probe."""
+    window.go_to(CONNECT)
+    bench = window.bench
+    bench.resize(1000, 750)
+    bench.show_guide(guide_for("rlo"), [], 4, False)
+    bench.finish()
+    bench.repaint()
+    lowest = max(anchor.point.y() for anchor in bench.anchors.values() if anchor.side == 1)
+    assert lowest + 100 < bench.height()
