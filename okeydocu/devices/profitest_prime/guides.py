@@ -10,8 +10,8 @@
 plug 1 carries probe L (L1), plug 2 probe N (L3), plug 3 probe PE (L2); the conductor in
 brackets is the one the lead takes for a phase sequence test. The softkeys are numbered from
 the top of the column right of the display. A measurement is started with ON/START, the
-fourth key left of the display; once a result stands, the lowest softkey shares it over
-Push/Print. A softkey is named only where its place is known from the instrument. The
+fourth key left of the display, except the voltage, which the instrument measures as soon as
+the probes are on; once a result stands, the lowest softkey shares it over Push/Print. A softkey is named only where its place is known from the instrument. The
 measurements guided here run on the battery; one needing the mains says so at its supply.
 
 The voltage follows the line conductors the element states: with three, the view U3~ measures
@@ -73,9 +73,9 @@ RCD_TIME = Guide(
     "rcd_type", RCD_FEATURES, True, LIVE_RCD, "IΔN",
     N_("Measures the touch voltage and the tripping time at the rated residual current."),
     settings=(
-        Action(("soft-2",), N_("RCD: rated residual current IΔN, type and rated current IN,"
+        Action(("soft-1",), N_("RCD: rated residual current IΔN, type and rated current IN,"
                                " as the RCD states them.")),
-        Action((), N_("Test current: waveform, 1 × IΔN and the earthing system.")),
+        Action(("soft-2",), N_("Test current: waveform, 1 × IΔN and the earthing system.")),
         Action(("soft-3",), LIMITS)),
     steps=(
         Action(("key-start",), N_("Press ON/START: the touch voltage is measured, the RCD"
@@ -94,15 +94,18 @@ SINGLE = Guide(
      Lead(*N_LEAD, "in_n", N_("Place probe N (L3) on the incoming N, where there is one."))),
     LIVE_PARTS, element_features=CONDUCTORS, live=True, preparation=(LIVE,), selector_label="U",
     selector_note=N_("Measures the voltage between the probes and its frequency."),
-    settings=(Action((), N_("Measuring path: AUTO measures L-PE, N-PE and L-N one"
-                            " after the other; without N choose L-PE.")),),
-    steps=(Action(("key-start",), N_("Hold the probes in place: the voltage is shown at"
-                                     " once.")), STORE),
+    settings=(Action(("soft-4",), N_("Measuring path: AUTO measures L-PE, N-PE and L-N one"
+                                     " after the other; without N choose L-PE.")),),
+    steps=(Action((), N_("Hold the probes in place: the measurement starts by itself and the"
+                         " voltage is shown at once.")), STORE),
     drawing_features=("nominal_voltage", "rated_current"), every_path=True, flow=flow())
-AFTER_LINES = replace(SINGLE, flow=(
-    Station(CONNECT, N_("Leads to L1, N and PE")),
-    Station(CONFIGURE, N_("Measuring path"), (SOFTKEYS,), zoom=("lcd",)),
-    Station(MEASURE, N_("Single voltages"))))
+AFTER_LINES = replace(
+    SINGLE,
+    settings=(Action(("soft-1",), N_("View: switch back to U with the top softkey.")),
+              *SINGLE.settings),
+    flow=(Station(CONNECT, N_("Leads to L1, N and PE")),
+          Station(CONFIGURE, N_("Measuring path"), (SOFTKEYS,), zoom=("lcd",)),
+          Station(MEASURE, N_("Single voltages"))))
 THREE_PHASE = Guide(
     "u3", N_("Voltage and phase sequence"), 12, *SWITCH,
     (Lead(*L_LEAD, "in_l1", N_("Place probe L (L1) on the incoming line conductor L1.")),
@@ -110,8 +113,9 @@ THREE_PHASE = Guide(
      Lead(*N_LEAD, "in_l3", N_("Place probe N (L3) on the incoming line conductor L3."))),
     LIVE_PARTS, element_features=CONDUCTORS, live=True, preparation=(LIVE,), selector_label="U",
     selector_note=N_("Measures the voltage between the probes and its frequency."),
-    settings=(Action((), N_("View: choose U3~ with its softkey. It shows the three voltages"
-                            " between the line conductors and the phase sequence.")),),
+    settings=(Action(("soft-1",), N_("View: choose U3~ with its softkey. It shows the three"
+                                     " voltages between the line conductors and the phase"
+                                     " sequence.")),),
     steps=(Action((), N_("Hold the probes in place: the voltages and the phase sequence are"
                          " shown at once.")), STORE),
     drawing_features=("nominal_voltage", "rated_current"),
@@ -134,9 +138,9 @@ PROTECTIVE_CONDUCTOR = Guide(
                  (N_("Find a bare metal spot"), N_("Paint and rust falsify the result."))),
     selector_label="RLO",
     selector_note=N_("Measures the resistance of the protective conductor with 200 mA."),
-    settings=(Action((), N_("Polarity: both directions, the larger value counts.")),
-              Action((), LIMITS),
-              Action((), N_("With an extension lead: compensate it first (ROFFSET)."))),
+    settings=(Action(("soft-2",), N_("Polarity: both directions, the larger value counts.")),
+              Action(("soft-3",), LIMITS),
+              Action(("soft-4",), N_("With an extension lead: compensate it first (ROFFSET)."))),
     steps=(Action(("key-start",), N_("Press ON/START and hold the probes until the result"
                                      " stands.")), STORE),
     drawing_features=("rated_current",), flow=flow())

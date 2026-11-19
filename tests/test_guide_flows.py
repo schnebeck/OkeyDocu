@@ -66,3 +66,14 @@ def test_a_flow_runs_in_the_order_and_number_its_driver_gives(qtbot, app, campai
     assert [chip.text() for chip in window.bar.chips] == ["1  Anlage", "2  Ablesen"]
     window.next.click()
     assert window.kind == MEASURE and window.next.text() == "Fertig ▶"
+
+
+def test_the_voltage_needs_no_start_key_the_other_measurements_do():
+    """The instrument measures a voltage as soon as the probes are on."""
+    def started(guide) -> bool:
+        return any("key-start" in action.parts for action in guide.steps)
+
+    voltage = PRIME["u"]
+    three_phase = voltage.variants[0].guide
+    assert not any(started(guide) for guide in (voltage, *three_phase.chain()))
+    assert started(PRIME["rcd_time"]) and started(PRIME["rlo"])

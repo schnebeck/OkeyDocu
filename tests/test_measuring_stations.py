@@ -66,7 +66,7 @@ def test_the_settings_name_what_the_rcd_states_and_close_in_on_the_display(qtbot
     text = window.step_text.text()
     assert "=K1-F1 FI Steuerung gibt an" in text
     assert "<b>A</b>" in text and "<b>30 mA</b>" in text and "<b>25 A</b>" in text
-    assert window.bench.panel.pointed == ("soft-2", "soft-3")
+    assert window.bench.panel.pointed == ("soft-1", "soft-2", "soft-3")
     assert window.bench.leads_layer.isHidden()
     whole = window.bench.panel.front.viewBoxF()
     assert window.bench.panel._zoom.endValue().width() < whole.width() / 2
