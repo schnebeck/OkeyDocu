@@ -82,7 +82,7 @@ texts:
   "Press ON/START: the touch voltage is measured, the RCD does not trip yet.": "ON/START drücken: Die Berührungsspannung wird gemessen, der FI löst noch nicht aus."
   "Press IΔN: the RCD trips and the tripping time is measured.": "IΔN drücken: Der FI löst aus, die Auslösezeit wird gemessen."
   "Measuring path: it only names the two conductors the probes are on; the instrument switches nothing. With AUTO the display names the pair to measure, L1-PE first, and moves on to the next with each reading stored.": "Messstrecke: Sie benennt nur die beiden Leiter, an denen die Prüfspitzen liegen; das Gerät schaltet nichts um. Mit AUTO nennt die Anzeige das zu messende Paar, zuerst L1-PE, und springt mit jedem gespeicherten Messwert zum nächsten."
-  "For further voltages move the two probes to the pair the display names. IΔN skips a pair the test point does not have.": "Für weitere Spannungen die beiden Prüfspitzen an das Paar setzen, das die Anzeige nennt. IΔN überspringt ein Paar, das es an der Prüfstelle nicht gibt."
+  "For further pairs of conductors move the two probes to the pair the display names. IΔN skips a pair the test point does not have.": "Für weitere Leiterpaare die beiden Prüfspitzen an das Paar setzen, das die Anzeige nennt. IΔN überspringt ein Paar, das es an der Prüfstelle nicht gibt."
   "Take probe N (L3) off and put it aside: the view U measures between the probes L and PE only.": "Spitze N (L3) abnehmen und beiseitelegen: Die Ansicht U misst nur zwischen den Spitzen L und PE."
   "Hold the probes in place: the measurement starts by itself and the voltage is shown at once.": "Prüfspitzen halten: Die Messung startet von selbst, die Spannung erscheint sofort."
   "Hold the probes in place: the voltages and the phase sequence are shown at once.": "Prüfspitzen halten: Spannungen und Drehfeld erscheinen sofort."
@@ -116,3 +116,63 @@ texts:
   Preparation: Vorbereitung
   "Choose the measurement in the campaign window, beside “Simulate measurement”.": "Die Messung im Kampagnenfenster neben „Messung simulieren“ wählen."
   "Click “Simulate measurement”: the simulator sends a random result.": "„Messung simulieren“ klicken: Der Simulator sendet ein Zufallsergebnis."
+  "With the probes in place press ON/START and hold them until the result stands.": "Mit aufgesetzten Prüfspitzen ON/START drücken und die Spitzen halten, bis das Ergebnis steht."
+  Protective conductor resistance with 25 A: Schutzleiterwiderstand mit 25 A
+  "Measures the protective conductor with 25 A from the mains: for large cross-sections and short leads.": "Misst den Schutzleiter mit 25 A aus dem Netz: für große Querschnitte und kurze Leitungen."
+  "Limits: by hand, or with the key 60204-1 from the cross-section of the line conductors and the protective device in front.": "Grenzwerte: von Hand oder mit der Taste 60204-1 aus dem Querschnitt der Außenleiter und der vorgeschalteten Schutzeinrichtung."
+  Insulation resistance: Isolationswiderstand
+  "CEE plug of the machine, pulled": "CEE-Stecker der Maschine, gezogen"
+  Place probe PE (L2) on the PE contact of the CEE plug.: Spitze PE (L2) an den PE-Kontakt des CEE-Steckers setzen.
+  Place probe L (L1) on the contact of line conductor L1.: Spitze L (L1) an den Kontakt des Außenleiters L1 setzen.
+  "The probes carry the test voltage: do not touch them, and leave them on until the voltage shown has fallen below 10 V.": "An den Prüfspitzen liegt die Prüfspannung: nicht berühren und erst abnehmen, wenn die angezeigte Spannung unter 10 V gefallen ist."
+  Leave the probes on until the voltage shown has fallen below 10 V.: Prüfspitzen aufgesetzt lassen, bis die angezeigte Spannung unter 10 V gefallen ist.
+  The insulation is measured without voltage.: Die Isolation wird spannungsfrei gemessen.
+  Switch the machine's main switch on: Hauptschalter der Maschine einschalten
+  So the circuits behind it are measured too.: So werden die Stromkreise dahinter mitgemessen.
+  Mind sensitive parts: Empfindliche Teile beachten
+  "Disconnect what the test voltage would damage, or lower it.": "Abklemmen, was die Prüfspannung beschädigen würde, oder die Prüfspannung senken."
+  Measures the insulation resistance with a constant test voltage.: Misst den Isolationswiderstand mit konstanter Prüfspannung.
+  "Test voltage: 500 V is usual; lower where parts would not stand it.": "Prüfspannung: üblich sind 500 V; niedriger, wo Teile sie nicht aushalten."
+  Insulation with rising voltage: Isolation mit ansteigender Spannung
+  "Raises the test voltage until a surge protective device or a weak spot of the insulation responds, and shows that voltage.": "Erhöht die Prüfspannung, bis ein Überspannungsschutz oder eine Schwachstelle der Isolation anspricht, und zeigt diese Spannung."
+  "Current limit ILIM: the measurement stops when this current flows.": "Stromgrenze ILIM: Fließt dieser Strom, bricht die Messung ab."
+  "Test voltage: the highest voltage the ramp reaches.": "Prüfspannung: die höchste Spannung, die die Rampe erreicht."
+  "Limits: the range the voltage of the response has to lie in.": "Grenzwerte: der Bereich, in dem die Ansprechspannung liegen muss."
+  "With the probes in place press ON/START briefly: the voltage rises until something responds, the test voltage is reached or the current limit flows.": "Mit aufgesetzten Prüfspitzen ON/START kurz drücken: Die Spannung steigt, bis etwas anspricht, die Prüfspannung erreicht ist oder der Grenzstrom fließt."
+  RCD tripping current IF: RCD-Auslösestrom IF
+  "Measures the touch voltage and the current at which the RCD trips, with a rising test current.": "Misst die Berührungsspannung und den Strom, bei dem der FI auslöst, mit ansteigendem Prüfstrom."
+  Waveform of the test current and the earthing system.: Kurvenform des Prüfstroms und Netzform.
+  "Press IΔN: the test current rises until the RCD trips; the tripping current is measured.": "IΔN drücken: Der Prüfstrom steigt, bis der FI auslöst; der Auslösestrom wird gemessen."
+  RCD tripping current and time: RCD-Auslösestrom und Auslösezeit
+  "Measures touch voltage, tripping current and tripping time in one run, with a rising test current.": "Misst Berührungsspannung, Auslösestrom und Auslösezeit in einem Durchgang, mit ansteigendem Prüfstrom."
+  "Press IΔN: the test current rises until the RCD trips; tripping current and tripping time are measured.": "IΔN drücken: Der Prüfstrom steigt, bis der FI auslöst; Auslösestrom und Auslösezeit werden gemessen."
+  Loop impedance: Schleifenimpedanz
+  The loop is measured on the live supply.: Die Schleife wird an der eingeschalteten Versorgung gemessen.
+  An RCD in front may trip and switch the circuit off.: Ein vorgeschalteter FI kann auslösen und den Stromkreis abschalten.
+  "Measures the loop impedance and the short-circuit current with the full test current, which trips an RCD in front. Behind an RCD take one of the three positions that follow; each has a guide of its own.": "Misst die Schleifenimpedanz und den Kurzschlussstrom mit vollem Prüfstrom; ein vorgeschalteter FI löst dabei aus. Hinter einem FI eine der drei folgenden Stellungen nehmen; jede hat ihre eigene Anleitung."
+  "Protective device: rated current and characteristic of the fuse or breaker in front; cross-section, cable and cores are for the record.": "Schutzeinrichtung: Nennstrom und Charakteristik der vorgeschalteten Sicherung oder des Schalters; Querschnitt, Kabeltyp und Adern dienen nur dem Protokoll."
+  "DC variant: DC-L measures faster, DC-H is safer against tripping the RCD.": "DC-Variante: DC-L misst schneller, DC-H ist sicherer gegen ein Auslösen des FI."
+  "RCD: its rated residual current and type, or it trips while measuring.": "RCD: Bemessungsdifferenzstrom und Typ einstellen, sonst löst er beim Messen aus."
+  "Limits: the touch voltage and how the short-circuit current is judged.": "Grenzwerte: die Berührungsspannung und wie der Kurzschlussstrom bewertet wird."
+  Residual voltage: Restspannung
+  "Main switch, outgoing terminals": "Hauptschalter, Klemmen des Abgangs"
+  Place probe L (L1) on the outgoing terminal of line conductor L1.: Spitze L (L1) an die Abgangsklemme des Außenleiters L1 setzen.
+  The measurement starts from the running machine.: Die Messung beginnt an der laufenden Maschine.
+  Measures the voltage left after switching off and the time it takes to fall.: Misst die Spannung, die nach dem Ausschalten bleibt, und die Zeit, in der sie fällt.
+  "Limits: 60 V after 5 s for a machine; 1 s where pulling a plug bares its contacts.": "Grenzwerte: 60 V nach 5 s an einer Maschine; 1 s, wo beim Ziehen eines Steckers Kontakte frei liegen."
+  "Hold the probes in place: the voltage is shown, nothing needs to be pressed.": "Prüfspitzen halten: Die Spannung wird angezeigt, es muss nichts gedrückt werden."
+  "Switch the main switch off: the instrument notices the voltage falling, stops the time and shows the residual voltage.": "Hauptschalter ausschalten: Das Gerät bemerkt den Spannungsabfall, stoppt die Zeit und zeigt die Restspannung."
+  ESC clears the values for another run.: ESC löscht die Werte für einen weiteren Durchgang.
+  "The RCD is not meant to trip, but it can: the circuit is then switched off.": "Der FI soll nicht auslösen, kann es aber: Dann wird der Stromkreis abgeschaltet."
+  Where to measure: Messort
+  "The loop is greatest at the far end of the circuit: measure there where possible.": "Am Ende des Stromkreises ist die Schleife am größten: möglichst dort messen."
+  For further line conductors move probe L to the one the display names. IΔN skips a pair the test point does not have.: Für weitere Außenleiter die Spitze L an den setzen, den die Anzeige nennt. IΔN überspringt ein Paar, das es an der Prüfstelle nicht gibt.
+  "Place probe N (L3) on the PE bar: here N and PE change places.": "Spitze N (L3) an die PE-Schiene setzen: Hier tauschen N und PE die Plätze."
+  Place probe PE (L2) on the outgoing N terminal of the RCD.: Spitze PE (L2) an die Abgangsklemme N des FI setzen.
+  "Loop impedance behind an RCD: DC+": "Schleifenimpedanz hinter RCD: DC+"
+  "For a circuit behind an RCD of type A or F: a direct current saturates the RCD before half waves measure the loop, so it does not trip. Needs all three probes and N at the test point. It is the second of the four ZLOOP positions, marked DC+.": "Für einen Stromkreis hinter einem FI vom Typ A oder F: Ein Gleichstrom sättigt den FI, bevor Halbwellen die Schleife messen, sodass er nicht auslöst. Braucht alle drei Prüfspitzen und N an der Prüfstelle. Es ist die zweite der vier ZLOOP-Stellungen, mit DC+ bezeichnet."
+  "Loop impedance behind an RCD: L-N and N-PE": "Schleifenimpedanz hinter RCD: L-N und N-PE"
+  "For a circuit behind an RCD of type A, F or B: L-N is measured with the full test current, N-PE with a small one, and both together make the loop. Needs all three probes and N at the test point, with the probes N and PE changed over. It is the third of the four ZLOOP positions.": "Für einen Stromkreis hinter einem FI vom Typ A, F oder B: L-N wird mit vollem Prüfstrom gemessen, N-PE mit einem kleinen, beides zusammen ergibt die Schleife. Braucht alle drei Prüfspitzen und N an der Prüfstelle, die Spitzen N und PE vertauscht. Es ist die dritte der vier ZLOOP-Stellungen."
+  "Probes N and PE change places for this measurement. Live parts are exposed: touch only the grips of the probes.": "Bei dieser Messung tauschen die Spitzen N und PE die Plätze. Spannungsführende Teile liegen frei: Prüfspitzen nur an den Griffen anfassen."
+  "Loop impedance behind an RCD: reduced test current": "Schleifenimpedanz hinter RCD: reduzierter Prüfstrom"
+  "For a circuit behind an RCD of type A or F: the test current stays small enough for the RCD set. Two probes are enough, but the reading is coarse: the instrument states its accuracy from 10 Ω up. It is the last of the four ZLOOP positions, marked with square pulses.": "Für einen Stromkreis hinter einem FI vom Typ A oder F: Der Prüfstrom bleibt klein genug für den eingestellten FI. Zwei Prüfspitzen genügen, der Messwert ist aber grob: Das Gerät nennt seine Genauigkeit erst ab 10 Ω. Es ist die letzte der vier ZLOOP-Stellungen, mit Rechteckimpulsen bezeichnet."

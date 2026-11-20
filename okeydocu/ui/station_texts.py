@@ -18,15 +18,13 @@ RIGHT = "#2e8b57"
 
 
 def fits(guide: Guide, position) -> bool:
-    """Whether the reported dial position serves the guide's measurement: the target itself,
-    or one that also produces its function."""
-    return position is not None and (position.value == guide.selector
-                                     or guide.function in position.functions)
+    """Whether the reported dial position serves the guide's measurement."""
+    return position is not None and guide.served_at(position.value)
 
 
 def dial_text(guide: Guide, position) -> str:
     turn = tr("Turn the rotary switch to {position}.", position="§")
-    turn = escape(turn).replace("§", f"<b>{escape(guide.selector_label)}</b>")
+    turn = escape(turn).replace("§", f"<b>{escape(tr(guide.selector_label))}</b>")
     note = f"<p>{escape(tr(guide.selector_note))}</p>" if guide.selector_note else ""
     if position is None:
         alone = tr("No instrument connected: turn the switch, then go on.")
@@ -64,11 +62,12 @@ def actions_text(actions) -> str:
     return "".join(f"<p>{escape(tr(action.text))}</p>" for action in actions)
 
 
-def mode_text(guide: Guide, how, settings: list[tuple[str, str]], element: str,
+def mode_text(to_set, how, settings: list[tuple[str, str]], element: str,
               advice: str = "") -> str:
-    """`how` are the station's own actions, such as how its keys set a value; `settings` what
-    the element states for the measurement, as (name, value); `advice` stands below."""
-    items = "".join(f"<li>{escape(tr(action.text))}</li>" for action in guide.settings)
+    """`to_set` are the settings of the measurement, `how` the station's own actions, such as
+    how its keys set a value; `settings` what the element states for the measurement, as (name,
+    value); `advice` stands below."""
+    items = "".join(f"<li>{escape(tr(action.text))}</li>" for action in to_set)
     stated = "".join(f"<li>{escape(name)}: <b>{escape(value)}</b></li>"
                      for name, value in settings)
     html = (f"<ol>{items}</ol>" if items else "") + actions_text(how) + advice

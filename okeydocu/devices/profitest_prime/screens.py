@@ -8,25 +8,32 @@
 
 """Each view names the readings and what the five softkeys right of the display do, top to
 bottom, as the instrument shows it at that position; `docs/profitest-prime-display.md` tells
-the same in words. The labels are the instrument's own short ones. Where a key shows data of
-the test point, a generic label or the element's own value stands for it. Once a reading
-stands, the lowest softkey shares it."""
+the same in words. A row a guide names as a setting has a name of its own here. The labels
+are the instrument's own short ones. Where a key shows data of the test point, a generic label
+or the element's own value stands for it. Once a reading stands, the lowest softkey shares
+it."""
 
 from __future__ import annotations
 
 from ..screen import Key, Line, Path, Reading, Screen
 
-SHARE_KEY = 4  # the softkey that shares a result, counted from 0
 SHARE = Key(symbol="share")
+RESULT = (4, SHARE)  # the softkey that shares a result, counted from 0, and its row
 LIMITS = Key(("Limits",))
 TIME = Key(("ton:", "AUTO"))
+SIGNAL = Key(("POL", "→PE"))  # the test signal: polarity, constant or ramp
 OFFSET = Key(("ROFFSET", "ON|OFF"), "OFF")
 RCD = Key(("{rated_residual_current}", "RCD", "{rcd_type}"))
+TEST_CURRENT = Key(("1×IΔN", "TN/TT"))
+EARTHING = Key(("TN/TT",))
+TEST_VOLTAGE = Key(("500V", "UISO"))
+CURRENT_LIMIT = Key(("ILIM", "1000µA"))
+DC_VARIANT = Key(("DC-L",))
 DEVICE = Key(("IN", "gL/gG", "mm²"))  # the protective device and the cable behind it
 Z_LIMITS = Key(("LIMITS", "UL", "IK"), "LIMITS")
 SUPPLY = Line("U ---V   f ---Hz")
 FREQUENCY = Line("f ---")
-VIEWS = ("U", "U3~")
+VIEW_U, VIEW_U3 = Key(("U", "U3~"), "U"), Key(("U", "U3~"), "U3~")
 
 
 def path_key(count: str) -> Key:
@@ -34,39 +41,40 @@ def path_key(count: str) -> Key:
     return Key((count, "AUTO"), count)
 
 
-def shared(screen: Screen) -> Screen:
-    """The view once a reading stands."""
-    return screen.with_key(SHARE_KEY, SHARE)
+U_PATH, RISO_PATH = path_key("01/10"), path_key("01/11")
+Z_PATH, Z_PATH_RCD = path_key("01/09"), path_key("01/03")
 
 
-def _zloop(second: Key | None, paths: str = "01/09") -> Screen:
+def _zloop(second: Key | None, path: Key = Z_PATH) -> Screen:
     return Screen("ZLOOP", (Reading("Z", "Ω"), Reading("IK", "A"), Path("L1-PE"), SUPPLY),
-                  (DEVICE, second, Z_LIMITS, path_key(paths), None))
+                  (DEVICE, second, Z_LIMITS, path, None))
 
 
 U = Screen("U", (None, Reading("U", "V"), Path("L1-PE"), FREQUENCY),
-           (Key(VIEWS, "U"), None, None, path_key("01/10"), None))
+           (VIEW_U, None, None, U_PATH, None))
 U3 = Screen("U3~", (Reading("UL3-L1", "V"), Reading("UL1-L2", "V"), Reading("UL2-L3", "V"),
                     FREQUENCY),
-            (Key(VIEWS, "U3~"), None, None, None, None))
+            (VIEW_U3, None, None, None, None))
 RLO = Screen("RLO", (Reading("RLO", "Ω"), None, None, Line("ROFFSET 0,00Ω")),
-             (TIME, Key(("POL", "→PE")), LIMITS, OFFSET, None))
+             (TIME, SIGNAL, LIMITS, OFFSET, None))
 RLO_25A = Screen("RLO 25A", (Reading("RLO", "Ω"), Reading("I", "A"), None, None),
                  (None, Key(("IHIGH",)), LIMITS, OFFSET, None))
 RISO = Screen("RISO", (Reading("RISO", "Ω"), Reading("U", "V"), Path("N-PE"),
                        Reading("UISO", "V")),
-              (TIME, Key(("500V", "UISO")), LIMITS, path_key("01/11"), None))
+              (TIME, TEST_VOLTAGE, LIMITS, RISO_PATH, None))
+RISO_RAMP = Screen("RISO◢", (Line("UN"), Reading("U", "V"), Path("L1-PE"), Reading("UISO", "V")),
+                   (CURRENT_LIMIT, TEST_VOLTAGE, LIMITS, RISO_PATH, None))
 RCD_RAMP = Screen("RCD", (Reading("UIΔN", "V"), Reading("IΔ", "mA"), Reading("RE", "Ω"), SUPPLY),
-                  (RCD, Key(("TN/TT",)), LIMITS, None, None))
+                  (RCD, EARTHING, LIMITS, None, None))
 RCD_TIME = Screen("RCD", (Reading("UIΔN", "V"), Reading("tA", "s"), Reading("RE", "Ω"), SUPPLY),
-                  (RCD, Key(("1×IΔN", "TN/TT")), LIMITS, None, None))
+                  (RCD, TEST_CURRENT, LIMITS, None, None))
 RCD_BOTH = Screen("RCD", (Reading("UIΔN", "V"), Reading("tA", "s"), Reading("IΔ", "mA"),
                           Line("RE ---Ω")),
                   (None, RCD, LIMITS, None, None))
 ZLOOP = _zloop(None)
-ZLOOP_DC = _zloop(Key(("DC-L",)))
-ZLOOP_HALF = _zloop(RCD, "01/03")
-ZLOOP_PULSE = _zloop(RCD)
+ZLOOP_DC = _zloop(DC_VARIANT)
+ZLOOP_COMBINED = _zloop(RCD, Z_PATH_RCD)
+ZLOOP_REDUCED = _zloop(RCD)
 URES = Screen("Ures", (Reading("U", "V"), Reading("Ures", "V"), Reading("tU", "s"), FREQUENCY),
               (None, None, LIMITS, None, None))
 IMD = Screen("IMD", (Reading("RL-PE", "MΩ"), Reading("tA", "s"), Line("Rmin   Rmax"), SUPPLY),
@@ -87,7 +95,8 @@ DELTA_U = Screen("ΔU", (Reading("ΔU", "%"), Reading("ZL-N", "Ω"), None, SUPPL
 
 # By the value the instrument reports for the position; the view it opens with comes first.
 AT_POSITION = {
-    12: (U, U3), 13: (RLO,), 14: (RLO_25A,), 15: (RISO,), 17: (RCD_RAMP,), 18: (RCD_TIME,),
-    19: (RCD_BOTH,), 20: (ZLOOP,), 21: (ZLOOP_DC,), 22: (ZLOOP_HALF,), 23: (ZLOOP_PULSE,),
-    24: (URES,), 25: (IMD,), 26: (RCM,), 27: (IL,), 28: (I_CLAMP,), 29: (T_RH,), 30: (DELTA_U,),
+    12: (U, U3), 13: (RLO,), 14: (RLO_25A,), 15: (RISO,), 16: (RISO_RAMP,), 17: (RCD_RAMP,),
+    18: (RCD_TIME,), 19: (RCD_BOTH,), 20: (ZLOOP,), 21: (ZLOOP_DC,), 22: (ZLOOP_COMBINED,),
+    23: (ZLOOP_REDUCED,), 24: (URES,), 25: (IMD,), 26: (RCM,), 27: (IL,), 28: (I_CLAMP,),
+    29: (T_RH,), 30: (DELTA_U,),
 }

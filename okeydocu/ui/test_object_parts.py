@@ -27,6 +27,7 @@ TILT = 0.36  # how far a cross recess is turned out of the upright, as a share o
 class Anchor:
     point: QPointF
     side: int  # +1: the probe comes from below, -1: from above
+    mark_left: bool = False  # the probe's marking stands left of it: the right is taken
 
 
 def cross(painter: QPainter, centre: QPointF, reach: float) -> None:

@@ -21,7 +21,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from ..l10n import N_
-from .screen import Screen
+from .screen import Key, Screen
 
 PLACE, SELECT, CONNECT, PREPARE, CONFIGURE, MEASURE = (
     "place", "select", "connect", "prepare", "configure", "measure")
@@ -40,8 +40,12 @@ class Lead:
 
 @dataclass(frozen=True)
 class Action:
+    """`key` names a setting by the softkey row that shows it. The softkey to press is the one
+    beside that row in the view on the display; a view without the row has no such setting."""
+
     parts: tuple[str, ...]  # what the tester works with, as named in the panel drawing
     text: str  # what to do with it, to be translated
+    key: Key | None = None
 
 
 @dataclass(frozen=True)
@@ -80,8 +84,9 @@ class Guide:
     selector_note: str = ""  # what the position measures, to be translated
     settings: tuple[Action, ...] = ()  # what to set before measuring
     steps: tuple[Action, ...] = ()  # how to measure and store, in order
-    screen: Screen | None = None  # the display while the instrument is set
-    result_screen: Screen | None = None  # the display once a reading stands
+    screen: Screen | None = None  # the display at the guide's own dial position
+    screens: tuple[tuple[int, Screen], ...] = ()  # at other positions that serve it, by value
+    result_key: tuple[int, Key] | None = None  # softkey and its row once a reading stands
     results: tuple[str, ...] = ()  # functions of a reading that ends the measurement
     drawing_features: tuple[str, ...] = ()  # what the drawing of the test point prints
     every_path: bool = False  # AUTO measures every pair of conductors, there or not
@@ -97,6 +102,19 @@ class Guide:
         its value, as `stated` tells by feature key, or this guide itself."""
         return next((variant.guide for variant in self.variants
                      if stated(variant.feature) == variant.value), self)
+
+    def served_at(self, value: int | None) -> bool:
+        """Whether the dial position `value` serves the measurement: the guide's own, or one
+        it has a view for."""
+        return value == self.selector or value in dict(self.screens)
+
+    def screen_at(self, value: int | None, measured: bool = False) -> Screen | None:
+        """The view at the dial position `value`, the guide's own where that position has none;
+        `measured` with a reading on it."""
+        screen = dict(self.screens).get(value, self.screen)
+        if screen is None or not measured or self.result_key is None:
+            return screen
+        return screen.with_key(*self.result_key)
 
     def chain(self) -> tuple[Guide, ...]:
         """This guide and those that follow it in the same run."""

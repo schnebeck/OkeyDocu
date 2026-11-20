@@ -51,6 +51,10 @@ class Screen:
     rows: tuple[Reading | Path | Line | None, ...]  # from the second row on
     keys: tuple[Key | None, ...]
 
+    def softkey(self, key: Key) -> int | None:
+        """Which softkey, counted from 0, has `key` in its row; None where the view lacks it."""
+        return self.keys.index(key) if key in self.keys else None
+
     def with_key(self, index: int, key: Key | None) -> Screen:
         """The same view with another meaning for the softkey `index`, counted from 0."""
         keys = list(self.keys)

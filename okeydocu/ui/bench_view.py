@@ -146,7 +146,7 @@ class BenchView(QWidget):
             same = below if lead in below else above
             depth = 18 + 16 * same.index(lead)
             path = route(QPointF(plug.left(), plug.center().y()), lane, anchor, depth)
-            left = len(same) > 1 and lead is same[0]
+            left = anchor.mark_left or (len(same) > 1 and lead is same[0])
             paint_lead(painter, plug, lead.plug, path, anchor, lead.probe, left,
                        self.progress - index, self._crowded(same))
 

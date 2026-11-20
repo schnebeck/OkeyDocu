@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import math
 
-from PySide6.QtCore import QPointF, QRectF
+from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPen
 
 from ..l10n import tr
@@ -58,10 +58,14 @@ def cee_plug(painter: QPainter, box: QRectF, lines: list[str], poles: int = 4,
         painter.drawText(QRectF(label, label + QPointF(24, 16)), CENTER, name)
         if name == "PE":
             anchors["pe_pin"] = Anchor(QPointF(point.x(), point.y() + size - 2), 1)
+        elif name in ("L", "L1"):  # its probe comes from above, marked on the plug's outer side
+            anchors["l_pin"] = Anchor(QPointF(point.x(), point.y() - size + 2), -1,
+                                      point.x() < centre.x())
     painter.setPen(INK)
     painter.setFont(bold_font(painter))
     caption = " · ".join([tr("CEE plug, contact side"), *lines[:1]])
-    painter.drawText(QRectF(centre.x() - 140, box.top() + 12, 280, 16), CENTER, caption)
+    beside = QRectF(box.left() + box.width() * 0.72, box.top() + 58, box.width() * 0.26, 36)
+    painter.drawText(beside, Qt.AlignmentFlag.AlignLeft | Qt.TextFlag.TextWordWrap, caption)
     painter.setFont(QFont())
     housing = QRectF(box.left() + box.width() * 0.56, box.top() + 40, box.width() * 0.14, 150)
     painter.setPen(QPen(LINE, 1.5))

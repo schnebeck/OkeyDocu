@@ -97,9 +97,25 @@ the number here plus 11, and the driver's table in `selector.py` uses it.
 | 22 | 33 | Setup | |
 | 23 | 34 | charging symbol | fast charge |
 
-Positions 21 to 23 were not looked at. The driver calls positions 11 and 12 `ZLOOP+RLO` and
-`ZLOOP+0.5x`; the display showed RCD data on `soft-2` at both. At position 11 the probes go
-another way round than elsewhere: L to L, N to PE and PE to N.
+Positions 21 to 23 were not looked at.
+
+### Loop impedance: four positions, four ways
+
+The dial marks them with signs under one arc. The instrument's help names the probes and the
+range it states an accuracy for; the firmware names the positions as the driver does.
+
+| No. | Value | Driver's name | Sign on the dial | Probes | Range |
+|---|---|---|---|---|---|
+| 09 | 20 | `ZLOOP` | sine | 1(L), 3(PE) | 50 mΩ to 5 Ω |
+| 10 | 21 | `ZLOOP+DC` | DC+ and a sine | 1(L), 2(N), 3(PE) | 250 mΩ to 5 Ω |
+| 11 | 22 | `ZLOOP+RLO` | sine with a bar | 1(L) on L, 2(N) on PE, 3(PE) on N | 0,5 to 99,9 Ω |
+| 12 | 23 | `ZLOOP+0.5x` | square pulses | 1(L), 3(PE) | 10 to 999 Ω |
+
+Position 09 trips an RCD in front. Position 10 saturates it with a direct current first and
+needs N at the test point. Position 11 measures L-N with the full current and N-PE with a small
+one; its help carries a warning sign because the probes N and PE change places. Position 12
+keeps the test current small enough for the RCD set and reads coarsely. The display showed RCD
+data on `soft-2` at positions 11 and 12, the DC variant at position 10.
 
 ## Softkeys per position
 
@@ -112,6 +128,7 @@ A dash means the row is empty.
 | 02 RLO 200 mA | measuring time | test signal | limits | ROFFSET on/off | – |
 | 03 RLO 25 A | – | IHIGH | limits | ROFFSET on/off | – |
 | 04 RISO | measuring time | test voltage | limits | measuring path | – |
+| 05 RISO, rising voltage | current limit | test voltage | limits | measuring path | – |
 | 06 RCD IF ramp | RCD data | earthing system | limits | – | – |
 | 07 RCD IΔN | RCD data | test current, earthing system | limits | – | – |
 | 08 RCD IF and IΔN | – | RCD data | limits | – | – |
@@ -167,7 +184,5 @@ test point on the instrument, such as the RCD's rated residual current or the pr
 device, carries the element's own value or a generic label there; limits are left out, because
 they are settings.
 
-## Open points
-
-- The softkeys at position 05 (rising voltage RISO) are not known: only its setting lists
-  and help pages were photographed.
+The row of position 05 is taken from the picture of that view in the operating instructions;
+it was not photographed.

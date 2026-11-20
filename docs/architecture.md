@@ -553,7 +553,8 @@ driver; the user interface never imports a driver.
   moves on by itself.
 - **connect**: plug over its row of sockets, grey lead, probe on its terminal, laid one after the
   other. The test point is a drawing of its own per kind (`ui/test_object*.py`): an RCD, the
-  incoming terminals of a main switch, a CEE plug with the machine housing. An RCD is drawn
+  terminals of a main switch, incoming or outgoing, a CEE plug with the machine housing. A
+  drawing names every place a probe can go; the guide picks its own. An RCD is drawn
   with the supply at its lower terminals and the outgoing circuit at the upper ones, where the
   probes go; screws show a cross recess. Each test point is drawn in the state the guide
   measures in (`Guide.live`): the handle of the main switch (`ui/switch_handle.py`), drawn
@@ -578,12 +579,28 @@ row, and for each softkey what its row names, in the instrument's own short labe
 stand for what the element states, such as the rated residual current of the RCD measured. The
 application draws the view in its own strokes (`ui/screen_art.py`) into the part of the panel
 the drawing names as its display, each row at the height of the softkey beside it, so the key a
-guide points at stands next to its label. A guide names the view while the instrument is set
-and the one once a reading stands; the display is dark while the element is chosen. The
-PROFITEST PRIME's views (`devices/profitest_prime/screens.py`) are kept per rotary switch
-position, also for positions no guide leads through yet;
-[profitest-prime-display.md](profitest-prime-display.md) tells what was read from the
-instrument.
+guide points at stands next to its label. The display is dark while the element is chosen and
+carries the share symbol once a reading stands.
+
+A guide names a setting by the softkey row that shows it, not by a key. Where several dial
+positions serve one measurement, the guide names the view of each (`Guide.screens`); the view
+shown is the one of the position the instrument reported, the softkey pointed at is the one
+beside the row in that view, and a setting the view does not have is left out. So the RCD
+tripping test points at the first softkey for the RCD data at IΔN and at the second at
+IF+IΔN. A guide is served by its own position and by those it names a view for
+(`Guide.served_at`), whatever else a position can produce: the four loop impedance positions
+each have a guide of their own, with other probes and settings, and none passes for another.
+
+The PROFITEST PRIME's views (`devices/profitest_prime/screens.py`) are kept per rotary switch
+position; [profitest-prime-display.md](profitest-prime-display.md) tells what was read from the
+instrument. Its guides stand with their kind (`guides_voltage.py`, `guides_rcd.py`,
+`guides_resistance.py` for what is measured dead at the pulled plug, `guides_loop.py`,
+`guides_residual.py`) on common parts (`guide_parts.py`): voltage, protective conductor with
+200 mA and with 25 A from the mains, insulation with constant and with rising voltage, RCD
+tripping time, tripping current and both in one run, loop impedance, residual voltage. The loop
+impedance with the full test current is taken at the incoming terminals of the main switch; the
+three ways made for a circuit behind an RCD are taken at the outgoing side of that RCD, as its
+tests are.
 
 ## Line conductors at a test point
 

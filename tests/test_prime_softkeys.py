@@ -10,15 +10,20 @@ import re
 from pathlib import Path
 
 import okeydocu.devices.profitest_prime as prime_package
+from okeydocu.devices.profitest_prime import screens
 from okeydocu.devices.profitest_prime.guides import GUIDES as PRIME
+from okeydocu.devices.profitest_prime.panel import DRAWING
 from okeydocu.ui.station_kinds import parts_of
 
 VOLTAGE = PRIME["u"]
 THREE_PHASE = VOLTAGE.variants[0].guide
 
 
-def softkeys(guide) -> tuple[str, ...]:
-    return tuple(part for part in parts_of(guide.settings) if part.startswith("soft-"))
+def softkeys(guide, position=None) -> tuple[str, ...]:
+    """The softkeys beside the rows the guide's settings name, in the view at `position`."""
+    view = guide.screen_at(position)
+    rows = [view.softkey(action.key) for action in guide.settings if action.key is not None]
+    return tuple(DRAWING.softkeys[row] for row in rows if row is not None)
 
 
 def test_each_setting_points_at_the_softkey_in_its_row_of_the_display():
@@ -32,9 +37,17 @@ def test_after_the_line_voltages_the_view_is_switched_back_before_the_path_is_ch
     assert softkeys(THREE_PHASE.follow) == ("soft-1", "soft-4")
 
 
+def test_at_another_position_that_serves_the_measurement_the_softkeys_are_those_of_its_view():
+    assert softkeys(PRIME["rcd_time"], 19) == ("soft-2", "soft-3")
+    assert softkeys(PRIME["rcd_time"], 18) == ("soft-1", "soft-2", "soft-3")
+    assert softkeys(PRIME["rlo"], 99) == softkeys(PRIME["rlo"])
+
+
 def test_the_result_is_shared_with_the_lowest_softkey():
     for guide in (PRIME["rcd_time"], PRIME["rlo"], VOLTAGE, THREE_PHASE):
         assert "soft-5" in parts_of(guide.steps)
+        assert guide.screen.keys[-1] is None
+        assert guide.screen_at(None, measured=True).keys[-1] == screens.SHARE
 
 
 def test_every_part_a_guide_points_at_is_on_the_panel():

@@ -80,6 +80,7 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, GuideRun, QDialog
         self.bar = StationBar(tuple(station.heading() for station in self.flow))
         self.scene = PlaceScene()
         self.bench = BenchView(info.panel) if info.panel is not None else Absent()
+        self.softkeys = info.panel.softkeys if info.panel is not None else ()
         self.left = QStackedWidget()
         self.left.addWidget(self.scene)
         if self.bench:

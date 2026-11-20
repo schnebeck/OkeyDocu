@@ -91,3 +91,17 @@ def test_the_switch_chooses_the_guide_and_reaches_the_open_window(page):
     assert page.guide_window.position == position
     page.pause()
     assert page.guide_window is None
+
+
+def test_a_position_serving_several_guides_chooses_the_one_that_leads_to_it(page):
+    """IF+IΔN also produces the readings of the tripping time and of the tripping current."""
+    from okeydocu.devices.profitest_prime.selector import selector_position
+
+    starter = page.free.starter
+    for value, function in ((19, "i_ramp"), (18, "rcd_time"), (17, "rcd_current"),
+                            (20, "zloop"), (21, "zloop_dc"), (22, "zloop_rlo"),
+                            (23, "zloop_half"), (16, "riso_ramp"), (24, "ures")):
+        page.guide_selector(selector_position(value))
+        assert starter.choice.currentData() == function
+    page.guide_selector(selector_position(33))
+    assert starter.choice.currentData() == "ures"

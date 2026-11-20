@@ -33,19 +33,24 @@ def test_every_view_has_a_row_for_each_softkey_and_a_position_the_instrument_rep
     assert all(selector_position(value).label for value in screens.AT_POSITION)
 
 
-def test_every_softkey_a_guide_points_at_has_a_label_on_the_view_it_shows():
+def test_every_setting_named_by_a_softkey_row_is_on_a_view_the_guide_shows():
     for guide in GUIDED:
-        for part in parts_of(guide.settings):
-            assert guide.screen.keys[DRAWING.softkeys.index(part)] is not None, guide.function
+        views = (guide.screen, *(view for _, view in guide.screens))
+        named = [action.key for action in guide.settings if action.key is not None]
+        assert named and all(any(view.softkey(key) is not None for view in views)
+                             for key in named), guide.function
+        assert all(any(view.softkey(key) is not None for key in named) for view in views)
         shares = [part for part in parts_of(guide.steps) if part in DRAWING.softkeys]
-        assert [guide.result_screen.keys[DRAWING.softkeys.index(part)] for part in shares] \
-            == [screens.SHARE]
-        assert guide.screen.keys[screens.SHARE_KEY] is None
+        measured = guide.screen_at(None, measured=True)
+        assert [measured.keys[DRAWING.softkeys.index(part)] for part in shares] == [screens.SHARE]
 
 
-def test_the_view_a_guide_shows_is_one_of_its_switch_position():
+def test_the_views_a_guide_shows_are_those_of_the_positions_that_serve_it():
     for guide in GUIDED:
         assert guide.screen in screens.AT_POSITION[guide.selector]
+        for value, view in guide.screens:
+            assert view in screens.AT_POSITION[value]
+            assert guide.function in selector_position(value).functions
 
 
 def ink(panel: FrontPanel, area: QRectF) -> int:
@@ -104,6 +109,31 @@ def test_the_display_follows_the_stations(qtbot, app):
     shown = window.bench.panel
     assert window.kind == PLACE and shown.screen is None
     for kind, view in ((PREPARE, screens.RLO), (CONFIGURE, screens.RLO),
-                       (MEASURE, screens.shared(screens.RLO)), (CONFIGURE, screens.RLO)):
+                       (MEASURE, screens.RLO.with_key(*screens.RESULT)),
+                       (CONFIGURE, screens.RLO)):
         window.go_to(kind)
         assert shown.screen == view, kind
+
+
+def test_display_and_softkeys_follow_the_position_the_instrument_stands_at(qtbot, app):
+    """IΔN and IF+IΔN both serve the tripping test, with the RCD data in different rows."""
+    customer = app.db.add_customer("Muster AG")
+    machine = app.db.add_asset(customer, "machine", "Presse")
+    rcd = app.db.add_asset(customer, "rcd", "FI Steuerung", machine)
+    campaign = app.service.create(machine, "Prüfung", "Tester")
+    with speaking("de"):
+        window = MeasuringWindow(app, campaign, DRIVER_KEY, "rcd_time", rcd)
+        qtbot.addWidget(window)
+        window.show()
+        window.go_to(CONFIGURE)
+        assert window.bench.panel.screen == screens.RCD_TIME
+        assert window.bench.panel.pointed == ("soft-1", "soft-2", "soft-3")
+        assert "Prüfstrom" in window.step_text.text()
+        window.show_selector(selector_position(19))
+        window.go_to(CONFIGURE)
+        assert window.bench.panel.screen == screens.RCD_BOTH
+        assert window.bench.panel.pointed == ("soft-2", "soft-3")
+        assert "Prüfstrom" not in window.step_text.text()
+        window.show_selector(selector_position(13))
+        window.go_to(CONFIGURE)
+    assert window.bench.panel.screen == screens.RCD_TIME

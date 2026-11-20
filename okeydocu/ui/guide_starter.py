@@ -54,11 +54,14 @@ class GuideStarter(QWidget):
         self._label()
 
     def follow(self, position) -> None:
-        """The switch stands on a position one of the guides serves."""
-        for index in range(self.choice.count()):
-            if self.choice.itemData(index) in position.functions:
-                self.choice.setCurrentIndex(index)
-                return
+        """The switch stands on a position one of the guides serves: the guide that leads to
+        this very position is chosen, else the first whose function it produces."""
+        functions = [self.choice.itemData(index) for index in range(self.choice.count())]
+        own = [function for function in functions
+               if self.info.guide(function).selector == position.value]
+        served = own or [function for function in functions if function in position.functions]
+        if served:
+            self.choice.setCurrentIndex(functions.index(served[0]))
 
     def is_first(self, function: str) -> bool:
         guide = self.info.guide(function) if self.info is not None else None

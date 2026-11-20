@@ -20,7 +20,9 @@ from .test_object_parts import BODY, CENTER, INK, LINE, Anchor, bold_font, handl
     screw, side_label
 
 PITCH = 40
+HEIGHT = 136  # of the contact block; a probe on a lower terminal needs the room below it
 INCOMING = {"L": "in_l1", "L1": "in_l1", "L2": "in_l2", "L3": "in_l3", "N": "in_n"}
+OUTGOING = {"2": "out_l1", "4": "out_l2", "6": "out_l3", "N": "out_n"}
 
 
 def main_switch(painter: QPainter, box: QRectF, lines: list[str], poles: int = 4,
@@ -33,8 +35,8 @@ def main_switch(painter: QPainter, box: QRectF, lines: list[str], poles: int = 4
         incoming, outgoing = incoming[-1:] + incoming[:-1], outgoing[-1:] + outgoing[:-1]
     plate = QRectF(box.left() + box.width() * 0.08, box.top() + 56, 110, 110)
     handle(painter, plate, live)
-    module = QRectF(box.left() + box.width() * 0.33, box.top() + 70, 12 + PITCH * len(incoming),
-                    160)
+    module = QRectF(box.left() + box.width() * 0.33, box.top() + 62, 12 + PITCH * len(incoming),
+                    HEIGHT)
     painter.setPen(QPen(LINE, 1, Qt.PenStyle.DashLine))
     painter.drawLine(QPointF(plate.right() + 8, plate.center().y()),
                      QPointF(module.left() - 6, plate.center().y()))
@@ -42,11 +44,11 @@ def main_switch(painter: QPainter, box: QRectF, lines: list[str], poles: int = 4
     painter.setBrush(BODY)
     painter.drawRoundedRect(module, 6, 6)
     painter.setBrush(QColor("#2c3037"))
-    painter.drawEllipse(QPointF(module.center().x(), module.top() + 52), 12, 12)
+    painter.drawEllipse(QPointF(module.center().x(), module.top() + 44), 11, 11)
     painter.setPen(INK)
     painter.setFont(bold_font(painter))
     for index, text in enumerate(lines[:2]):
-        painter.drawText(QRectF(module.left(), module.top() + 74 + 16 * index,
+        painter.drawText(QRectF(module.left(), module.top() + 60 + 16 * index,
                                 module.width(), 16), CENTER, text)
     painter.setFont(QFont())
     anchors = {}
@@ -55,6 +57,7 @@ def main_switch(painter: QPainter, box: QRectF, lines: list[str], poles: int = 4
         screw(painter, QPointF(x, module.top() + 12), top, True)
         screw(painter, QPointF(x, module.bottom() - 12), low, False)
         anchors[INCOMING[top]] = Anchor(QPointF(x, module.top() + 12), -1)
+        anchors[OUTGOING[low]] = Anchor(QPointF(x, module.bottom() - 12), 1)
     side_label(painter, module, True, tr("Incoming"))
     side_label(painter, module, False, tr("Outgoing"))
     anchors["pe"] = pe_bar(painter, QRectF(module.right() + 48, box.top() + 70, 150, 16))

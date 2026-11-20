@@ -58,8 +58,12 @@ RCD does not state is named instead of judged.
 each instrument brings its own flow. With the PROFITEST PRIME there are six: installation, rotary
 switch, test leads, supply, mode and limits, measure. The program reads the position of the rotary
 switch, lays the leads one by one from the sockets to the terminals of the test point (an RCD, a
-main switch, a CEE plug), names the softkeys to set and waits for the result. The first station
-shows the structure tree: elements of every kind are made, moved and deleted there while measuring.
+main switch, a CEE plug), shows the instrument's display with the softkeys to set beside their
+labels and waits for the result. Guided are voltage, protective conductor with 200 mA and 25 A,
+insulation with constant and rising voltage, the three RCD tests, the loop impedance in its
+four ways (with the full test current, and three made for a circuit behind an RCD) and residual
+voltage. The first station shows the structure tree: elements of every kind are made, moved and
+deleted there while measuring.
 
 ![Station 2: the knob turns to IΔN, the instrument still reports IF](docs/images/guide-dial.png)
 
