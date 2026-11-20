@@ -553,8 +553,11 @@ driver; the user interface never imports a driver.
   moves on by itself.
 - **connect**: plug over its row of sockets, grey lead, probe on its terminal, laid one after the
   other. The test point is a drawing of its own per kind (`ui/test_object*.py`): an RCD, the
-  terminals of a main switch, incoming or outgoing, a CEE plug with the machine housing. A
-  drawing names every place a probe can go; the guide picks its own. An RCD is drawn
+  terminals of a main switch, incoming or outgoing, a CEE plug with the machine housing, a
+  monitoring device with its alarm lamp beside the terminals it watches, a touchable part,
+  the cores of the supply cable. A drawing names every place a probe can go; the guide picks
+  its own. A current clamp is a lead as well (`Lead.tool`): a round plug over its own socket
+  and the clamp closed around a conductor in place of a probe. An RCD is drawn
   with the supply at its lower terminals and the outgoing circuit at the upper ones, where the
   probes go; screws show a cross recess. Each test point is drawn in the state the guide
   measures in (`Guide.live`): the handle of the main switch (`ui/switch_handle.py`), drawn
@@ -595,9 +598,13 @@ The PROFITEST PRIME's views (`devices/profitest_prime/screens.py`) are kept per 
 position; [profitest-prime-display.md](profitest-prime-display.md) tells what was read from the
 instrument. Its guides stand with their kind (`guides_voltage.py`, `guides_rcd.py`,
 `guides_resistance.py` for what is measured dead at the pulled plug, `guides_loop.py`,
-`guides_residual.py`) on common parts (`guide_parts.py`): voltage, protective conductor with
-200 mA and with 25 A from the mains, insulation with constant and with rising voltage, RCD
-tripping time, tripping current and both in one run, loop impedance, residual voltage. The loop
+`guides_residual.py`, `guides_monitor.py`, `guides_current.py`, `guides_drop.py`) on common
+parts (`guide_parts.py`): voltage, protective conductor with 200 mA and with 25 A from the
+mains, insulation with constant and with rising voltage, RCD tripping time, tripping current
+and both in one run, loop impedance, residual voltage, the response of an insulation monitor
+and of a residual current monitor, the leakage current at a touchable part, the current with a
+clamp, the voltage drop. A monitor only raises an alarm: its guides have the tester stop the
+instrument's clock by hand and rate the response before the result can be shared. The loop
 impedance with the full test current is taken at the incoming terminals of the main switch; the
 three ways made for a circuit behind an RCD are taken at the outgoing side of that RCD, as its
 tests are.

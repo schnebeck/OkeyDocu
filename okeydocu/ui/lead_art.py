@@ -11,27 +11,31 @@ and reaches the probe from the side the terminal is approached from. Lanes are o
 the rows, the first row outermost, so that no two leads cross. `progress` from 0 to 1 draws
 the lead as it is laid: the plug first, the lead growing towards the probe, the probe last.
 Where the order of plugs and terminals forces two leads to cross, the later one bridges the
-earlier one, with a light rim like a crossing in a cable plan."""
+earlier one, with a light rim like a crossing in a cable plan. A current clamp is laid the same
+way: a round plug over its socket, and the clamp closed around its conductor in place of a
+probe."""
 
 from __future__ import annotations
 
 from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPainterPath, QPen
 
+from ..devices.guide import CLAMP, PROBE
 from .test_objects import Anchor
 
 LEAD, EDGE, PLUG = QColor("#8d949b"), QColor("#5f666d"), QColor("#b4bac0")
 HALO = QColor(238, 241, 244, 230)  # a lead laid later runs visibly over one laid before
 SHAFT, TIP, INK = QColor("#3a3f45"), QColor("#e9ebed"), QColor("#1f2933")
 BEND = 14
-PROBE = 64  # from tip to the end of the handle
+REACH = 64  # from the tip of a probe, or the conductor in a clamp, to the end of the handle
+JAWS = 15  # radius of a clamp's jaws
 SAMPLES = 80
 
 
 def route(start: QPointF, lane: float, anchor: Anchor, depth: float) -> QPainterPath:
     """From the plug to the end of the probe's handle; `depth` keeps leads that approach
     from the same side apart where they turn."""
-    grip = QPointF(anchor.point.x(), anchor.point.y() + anchor.side * PROBE)
+    grip = QPointF(anchor.point.x(), anchor.point.y() + anchor.side * REACH)
     turn = grip.y() + anchor.side * depth
     path = QPainterPath(start)
     path.lineTo(lane + BEND, start.y())
@@ -54,10 +58,14 @@ def partial(path: QPainterPath, fraction: float) -> QPainterPath:
     return cut
 
 
-def paint_plug(painter: QPainter, plug: QRectF, marking: str) -> None:
+def paint_plug(painter: QPainter, plug: QRectF, marking: str, round_one: bool = False) -> None:
+    """Over a row of sockets, or with `round_one` over a single round socket."""
     painter.setPen(QPen(EDGE, 1.5))
     painter.setBrush(PLUG)
-    painter.drawRoundedRect(plug, 7, 7)
+    if round_one:
+        painter.drawEllipse(plug)
+    else:
+        painter.drawRoundedRect(plug, 7, 7)
     bold = QFont(painter.font())
     bold.setBold(True)
     painter.setFont(bold)
@@ -71,7 +79,7 @@ def paint_probe(painter: QPainter, anchor: Anchor, marking: str, left: bool,
     two lines, so it fits between probes on neighbouring terminals."""
     tip, side = anchor.point, anchor.side
     guard = QPointF(tip.x(), tip.y() + side * 18)
-    grip_y = tip.y() + side * PROBE
+    grip_y = tip.y() + side * REACH
     handle = QRectF(tip.x() - 7, min(guard.y(), grip_y), 14, abs(grip_y - guard.y()))
     painter.setPen(QPen(EDGE, 1.2))
     painter.setBrush(PLUG)
@@ -90,9 +98,22 @@ def paint_probe(painter: QPainter, anchor: Anchor, marking: str, left: bool,
     painter.drawText(where, align | Qt.AlignmentFlag.AlignVCenter, text)
 
 
+def paint_clamp(painter: QPainter, anchor: Anchor) -> None:
+    """A current clamp closed around the conductor at the anchor, its handle towards the lead."""
+    centre, side = anchor.point, anchor.side
+    end = centre.y() + side * REACH
+    handle = QRectF(centre.x() - 10, min(centre.y() + side * JAWS, end), 20, REACH - JAWS)
+    painter.setPen(QPen(EDGE, 1.2))
+    painter.setBrush(PLUG)
+    painter.drawRoundedRect(handle, 6, 6)
+    painter.setPen(QPen(SHAFT, 5))
+    painter.setBrush(Qt.BrushStyle.NoBrush)
+    painter.drawEllipse(centre, JAWS, JAWS)
+
+
 def paint_lead(painter: QPainter, plug: QRectF, marking: str, path: QPainterPath,
                anchor: Anchor, probe: str, left: bool, progress: float,
-               narrow: bool = False) -> None:
+               narrow: bool = False, tool: str = PROBE) -> None:
     if progress <= 0:
         return
     laid = partial(path, min(progress / 0.85, 1.0))
@@ -102,6 +123,8 @@ def paint_lead(painter: QPainter, plug: QRectF, marking: str, path: QPainterPath
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         painter.setPen(pen)
         painter.drawPath(laid)
-    paint_plug(painter, plug, marking)
-    if progress >= 0.85:
+    paint_plug(painter, plug, marking, tool == CLAMP)
+    if progress >= 0.85 and tool == CLAMP:
+        paint_clamp(painter, anchor)
+    elif progress >= 0.85:
         paint_probe(painter, anchor, probe, left, narrow)

@@ -16,7 +16,7 @@ from PySide6.QtCore import QEasingCurve, QPointF, QRectF, Qt, QVariantAnimation
 from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import QWidget
 
-from ..devices.guide import Guide
+from ..devices.guide import CLAMP, Guide, Lead
 from ..l10n import tr
 from .front_panel import FrontPanel
 from .lead_art import paint_lead, route
@@ -139,16 +139,23 @@ class BenchView(QWidget):
         above = self._side(-1)
         for index, lead in enumerate(self.guide.leads):
             anchor = self.anchors[lead.terminal]
-            row = self.panel.part_rect(lead.row)
-            plug = QRectF(row.left() - 4 * scale, row.top() - 3 * scale,
-                          PLUG[0] * scale, PLUG[1] * scale)
+            plug = self._plug(lead, scale)
             lane = field - LANE_GAP * (len(rows) - rows.index(lead.row))
             same = below if lead in below else above
             depth = 18 + 16 * same.index(lead)
             path = route(QPointF(plug.left(), plug.center().y()), lane, anchor, depth)
             left = anchor.mark_left or (len(same) > 1 and lead is same[0])
             paint_lead(painter, plug, lead.plug, path, anchor, lead.probe, left,
-                       self.progress - index, self._crowded(same))
+                       self.progress - index, self._crowded(same), lead.tool)
+
+    def _plug(self, lead: Lead, scale: float) -> QRectF:
+        """The plug of a lead: over all three sockets of its row, or over the single socket a
+        clamp has."""
+        row = self.panel.part_rect(lead.row)
+        if lead.tool == CLAMP:
+            return row.adjusted(-2 * scale, -2 * scale, 2 * scale, 2 * scale)
+        return QRectF(row.left() - 4 * scale, row.top() - 3 * scale,
+                      PLUG[0] * scale, PLUG[1] * scale)
 
     def _crowded(self, same: list) -> bool:
         """Whether a probe's marking would run into the probe right of it. The first probe

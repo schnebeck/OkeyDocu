@@ -31,6 +31,14 @@ CURRENT_LIMIT = Key(("ILIM", "1000µA"))
 DC_VARIANT = Key(("DC-L",))
 DEVICE = Key(("IN", "gL/gG", "mm²"))  # the protective device and the cable behind it
 Z_LIMITS = Key(("LIMITS", "UL", "IK"), "LIMITS")
+IMD_SEQUENCE = Key(("MAN±", "AUTO"), "MAN±")
+IMD_START = Key(("RSTART", "50,0kΩ"))
+IMD_PATH = Key(("L1-PE", "±10,0%"), "L1-PE")  # the conductor and the range the IMD may show
+RCM_TEST = Key(("{rated_residual_current}", "½×IΔN"))
+CLAMP_RATIO = Key(("SETTING", "V/A"), "SETTING")
+EXTRA_MODE = Key(("ΔU",))  # the function chosen at the position Extra
+DU_CIRCUIT = Key(("L1-N", "IN", "gL/gG"))
+DU_OFFSET = Key(("OFFSET", "ON|OFF"), "OFF")
 SUPPLY = Line("U ---V   f ---Hz")
 FREQUENCY = Line("f ---")
 VIEW_U, VIEW_U3 = Key(("U", "U3~"), "U"), Key(("U", "U3~"), "U3~")
@@ -78,20 +86,18 @@ ZLOOP_REDUCED = _zloop(RCD)
 URES = Screen("Ures", (Reading("U", "V"), Reading("Ures", "V"), Reading("tU", "s"), FREQUENCY),
               (None, None, LIMITS, None, None))
 IMD = Screen("IMD", (Reading("RL-PE", "MΩ"), Reading("tA", "s"), Line("Rmin   Rmax"), SUPPLY),
-             (None, Key(("MAN±", "AUTO"), "MAN±"), Key(("RSTART", "50,0kΩ")),
-              Key(("L1-PE", "±10,0%"), "L1-PE"), None))
+             (None, IMD_SEQUENCE, IMD_START, IMD_PATH, None))
 RCM = Screen("RCM", (Reading("UIΔN", "V"), Reading("tA", "s"), Reading("IΔ", "mA"),
                      Line("RE ---Ω")),
-             (None, Key(("IΔN", "½×IΔN")), LIMITS, None, None))
+             (None, RCM_TEST, LIMITS, None, None))
 IL = Screen("IL", (Reading("IL", "A"), None, None, FREQUENCY),
             (None, None, LIMITS, None, None))
 I_CLAMP = Screen("ILAMP", (Reading("IL/AMP", "A"), None, Path("100mV/mA"), None),
-                 (Key(("I",)), Key(("SETTING", "V/A"), "SETTING"), LIMITS, None, None))
+                 (Key(("I",)), CLAMP_RATIO, LIMITS, None, None))
 T_RH = Screen("T, r.H.", (Reading("T", "°C"), Reading("r.H.", "%"), None, None),
               (None, Key(("°C", "°F"), "°C"), None, None, None))
 DELTA_U = Screen("ΔU", (Reading("ΔU", "%"), Reading("ZL-N", "Ω"), None, SUPPLY),
-                 (Key(("ΔU",)), Key(("L1-N", "IN", "gL/gG")), LIMITS,
-                  Key(("OFFSET", "ON|OFF"), "OFF"), None))
+                 (EXTRA_MODE, DU_CIRCUIT, LIMITS, DU_OFFSET, None))
 
 # By the value the instrument reports for the position; the view it opens with comes first.
 AT_POSITION = {

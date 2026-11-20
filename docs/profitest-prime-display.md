@@ -176,6 +176,32 @@ key carries a table symbol and the label 60204-1 instead.
   and number of cores; limits for the touch voltage (25, 50, 65 V) and the short-circuit
   current (2/3 Z, 3/4 Z, Ia).
 
+- **IMD:** the sequence is MAN or AUTO, the start resistance RSTART lies between 15 kΩ and
+  2,5 MΩ, the path is L1-PE or L2-PE with a range in percent the monitor's own reading has to
+  lie in. Probes 1(L) on L1, 2(N) on L2, 3(PE) on PE. ON/START switches the resistance in and
+  starts a stop watch; with MAN two softkeys with a rising and a falling ramp change the
+  resistance, with AUTO it changes every 2 s; IΔN changes the conductor; ON/START again stops
+  when the monitor raises its alarm. The response is then rated with a check mark or a cross,
+  and only a rated result can be stored.
+- **RCM:** rated residual current 10 to 1000 mA, waveform, the factor ½ × IΔN or 1 × IΔN,
+  type, rated current, earthing system; limit for the touch voltage. Probes 1(L) and 3(PE)
+  on the load side of the transformer, 2(N) as well for direct current. ON/START measures
+  the touch voltage; IΔN sends the test current: at half the rated residual current no alarm
+  may come within 10 s, at the full one IΔN is pressed again when the alarm comes, which
+  stops the time. The response is rated as at the IMD.
+- **IL:** limits from 50 µA to 5 mA or entered by hand. Probe 3(PE) on the protective
+  conductor, probe 1(L) on the conductive part; the current is measured through 2 kΩ, on and
+  on. The part has to be free of voltage: above 60 V the instrument switches off.
+- **ILAMP:** the clamp has a round socket of its own, 1 V at most. The ratio has to be set as
+  the clamp's switch stands (10 V/A to 1 mV/A, 100 mV/mA for the leakage current clamp).
+  Around the protective conductor alone it measures the leakage current, around the line
+  conductors and N together the residual current.
+- **Extra, ΔU:** `soft-1` chooses the function; the circuit is a pair L-N or two line
+  conductors with the rated current and characteristic of the fuse in front; the limit is a
+  percentage. Probes 1(L) and 3(PE) on that pair. With OFFSET the line impedance at the
+  handover point is measured once (IΔN, a prompt, IΔN again) and left out of the readings
+  that follow.
+
 ## In the application
 
 The views are kept in `okeydocu/devices/profitest_prime/screens.py`, one per position and

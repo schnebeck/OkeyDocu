@@ -19,10 +19,10 @@ from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPen
 
 from ..l10n import tr
-from .test_object_parts import CENTER, INK, LINE, Anchor, bold_font
+from .test_object_parts import CENTER, INK, LINE, Anchor, bold_font, metal_part
 
 RED, BLUE = QColor("#d64534"), QColor("#2f6fbf")
-PIN, HOUSING, BARE = QColor("#d9b84a"), QColor("#b9c0c7"), QColor("#e8eaec")
+PIN = QColor("#d9b84a")
 FACE = 64  # radius of the plug face
 
 
@@ -68,16 +68,5 @@ def cee_plug(painter: QPainter, box: QRectF, lines: list[str], poles: int = 4,
     painter.drawText(beside, Qt.AlignmentFlag.AlignLeft | Qt.TextFlag.TextWordWrap, caption)
     painter.setFont(QFont())
     housing = QRectF(box.left() + box.width() * 0.56, box.top() + 40, box.width() * 0.14, 150)
-    painter.setPen(QPen(LINE, 1.5))
-    painter.setBrush(HOUSING)
-    painter.drawRoundedRect(housing, 8, 8)
-    spot = QPointF(housing.center().x(), housing.bottom() - 30)
-    painter.setBrush(BARE)
-    painter.drawEllipse(spot, 14, 10)
-    painter.setPen(INK)
-    painter.drawText(QRectF(housing.left(), housing.top() + 10, housing.width(), 18), CENTER,
-                     tr("Machine housing"))
-    painter.drawText(QRectF(housing.left(), spot.y() - 36, housing.width(), 18), CENTER,
-                     tr("bare metal"))
-    anchors["body"] = Anchor(QPointF(spot.x(), spot.y() + 8), 1)
+    anchors["body"] = metal_part(painter, housing, tr("Machine housing"), tr("bare metal"))
     return anchors

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from html import escape
 
-from ..devices.guide import Guide
+from ..devices.guide import PROBE, Guide
 from ..l10n import tr
 
 CAUTION = "#b03a2e"
@@ -40,11 +40,12 @@ def dial_text(guide: Guide, position) -> str:
 
 def leads_text(guide: Guide) -> str:
     steps = "".join(f"<li>{escape(tr(lead.text))}</li>" for lead in guide.leads)
-    plugs = ", ".join(lead.plug for lead in sorted(guide.leads, key=lambda lead: lead.plug))
+    plugs = ", ".join(sorted(lead.plug for lead in guide.leads if lead.tool == PROBE))
     caution = (f"<p style='color:{CAUTION}'>⚠ {escape(tr(guide.caution))}</p>"
                if guide.caution else "")
     plugged = tr("Leads {plugs} are plugged into their rows of sockets.", plugs=plugs)
-    return f"<p>{escape(plugged)}</p><ol>{steps}</ol>{caution}"
+    rows = f"<p>{escape(plugged)}</p>" if plugs else ""
+    return f"{rows}<ol>{steps}</ol>{caution}"
 
 
 def conductors_text(guide: Guide, lines: str, has_n: bool | None) -> str:

@@ -8,7 +8,8 @@
 
 """A driver describes its instrument's side of a measurement: the stations its flow runs
 through, which test lead goes into which row of sockets, how its probe is marked and where on
-the test point it goes. The test point is named by a kind of drawing, so the app can draw what
+the test point it goes. A current clamp is a lead too, with a socket of its own and a conductor
+it closes around. The test point is named by a kind of drawing, so the app can draw what
 the tester has in front of them.
 
 A flow is a list of stations of the kinds the application knows, in any number and order; the
@@ -29,13 +30,17 @@ KIND_TITLES = {PLACE: N_("Installation"), SELECT: N_("Function"), CONNECT: N_("T
                PREPARE: N_("Preparation"), CONFIGURE: N_("Settings"), MEASURE: N_("Measure")}
 
 
+PROBE, CLAMP = "probe", "clamp"
+
+
 @dataclass(frozen=True)
 class Lead:
     plug: str  # marking on the plug, as on the cable
-    row: str  # the socket row in the panel drawing the plug covers
+    row: str  # the socket row in the panel drawing the plug covers, or its single socket
     probe: str  # marking on the probe
     terminal: str  # where on the test point the probe goes
     text: str  # what the tester does, to be translated
+    tool: str = PROBE  # what the lead ends in: a probe on a terminal, a clamp round a conductor
 
 
 @dataclass(frozen=True)

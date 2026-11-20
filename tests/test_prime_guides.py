@@ -8,7 +8,7 @@
 
 import pytest
 
-from okeydocu.devices.guide import CONFIGURE, CONNECT, MEASURE, PREPARE, SELECT
+from okeydocu.devices.guide import CLAMP, CONFIGURE, CONNECT, MEASURE, PREPARE, SELECT
 from okeydocu.devices.profitest_prime import screens
 from okeydocu.devices.profitest_prime.guides import GUIDES as PRIME
 from okeydocu.devices.profitest_prime.info import DRIVER_KEY
@@ -20,7 +20,7 @@ from okeydocu.ui.measuring_window import MeasuringWindow
 
 LOOPS = ("zloop", "zloop_dc", "zloop_rlo", "zloop_half")
 FUNCTIONS = ("u", "rlo", "rlo_25a", "riso", "riso_ramp", "rcd_time", "rcd_current", "i_ramp",
-             *LOOPS, "ures")
+             *LOOPS, "ures", "imd", "rcm_touch", "il", "i_clamp", "zln_du")
 
 
 def opened(qtbot, app, function):
@@ -129,3 +129,43 @@ def test_the_insulation_keeps_the_probes_on_until_the_test_point_is_discharged(q
         assert text.index("ON/START") < text.index("unter 10 V") < text.index("Teilen")
         assert not window.guide.live
     assert softkeys(PRIME["riso_ramp"]) == ("soft-1", "soft-2", "soft-3", "soft-4")
+
+
+def test_a_monitor_is_stopped_by_hand_and_rated_before_its_result_is_shared(qtbot, app):
+    assert softkeys(PRIME["imd"]) == ("soft-2", "soft-3", "soft-4")
+    assert softkeys(PRIME["rcm_touch"]) == ("soft-2", "soft-3")
+    for function, feature in (("imd", "imd_type"), ("rcm_touch", "rcm_type")):
+        assert PRIME[function].owner_feature == feature
+        with speaking("de"):
+            window = opened(qtbot, app, function)
+            window.go_to(MEASURE)
+        text = window.step_text.text()
+        assert text.index("ON/START") < text.index("Alarm gibt") < text.index("bewerten")
+        assert text.index("bewerten") < text.index("Teilen")
+
+
+def test_the_clamp_takes_a_socket_of_its_own_and_no_test_lead(qtbot, app):
+    lead, = PRIME["i_clamp"].leads
+    assert lead.tool == CLAMP and lead.row == "socket-clamp"
+    with speaking("de"):
+        window = opened(qtbot, app, "i_clamp")
+        window.go_to(CONNECT)
+    window.bench.finish()
+    window.bench.grab()
+    assert window.bench.panel.pointed == ("socket-clamp",)
+    assert "Zange" in window.step_text.text() and "Buchsenreihen" not in window.step_text.text()
+
+
+def test_the_touch_current_goes_from_a_part_to_the_pe_bar_on_the_running_machine():
+    touch = PRIME["il"]
+    assert {lead.probe: lead.terminal for lead in touch.leads} == {
+        "L (L1)": "part", "PE (L2)": "pe"}
+    assert touch.live and softkeys(touch) == ("soft-3",)
+
+
+def test_the_voltage_drop_is_one_function_of_a_position_that_names_none():
+    drop = PRIME["zln_du"]
+    assert softkeys(drop) == ("soft-1", "soft-2", "soft-3", "soft-4")
+    assert {lead.probe: lead.terminal for lead in drop.leads} == {
+        "L (L1)": "in_l1", "PE (L2)": "in_n"}
+    assert drop.served_at(30) and not selector_position(30).functions

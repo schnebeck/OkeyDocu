@@ -15,8 +15,19 @@ from PySide6.QtCore import QPointF, QRectF
 from PySide6.QtGui import QColor, QFont, QPainter, QPen
 
 from ..l10n import tr
-from .test_object_parts import BODY, CENTER, INK, Anchor, bold_font, handle, pe_bar, screw, \
-    side_label
+from .test_object_current import supply_cores, touchable_part
+from .test_object_monitor import imd, rcm
+from .test_object_parts import (
+    BODY,
+    CENTER,
+    INK,
+    Anchor,
+    bold_font,
+    handle,
+    pe_bar,
+    screw,
+    side_label,
+)
 from .test_object_plug import cee_plug
 from .test_object_switch import main_switch
 
@@ -81,4 +92,5 @@ def _lever(painter: QPainter, module: QRectF, on: bool) -> None:
     painter.restore()
 
 
-DRAWINGS = {"rcd": rcd, "main_switch": main_switch, "cee_plug": cee_plug}
+DRAWINGS = {"rcd": rcd, "main_switch": main_switch, "cee_plug": cee_plug, "imd": imd,
+            "rcm": rcm, "touchable_part": touchable_part, "supply_cores": supply_cores}

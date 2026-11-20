@@ -19,6 +19,7 @@ from .switch_handle import switch_handle
 INK, LINE = QColor("#1f2933"), QColor("#55595e")
 BODY, SCREW = QColor("#f4f5f6"), QColor("#c9cdd1")
 PE_BAR, PE_SCREW, PE_RECESS = QColor("#c8a43a"), QColor("#3aa845"), QColor("#1d6b27")
+HOUSING, BARE = QColor("#b9c0c7"), QColor("#e8eaec")
 CENTER = Qt.AlignmentFlag.AlignCenter
 TILT = 0.36  # how far a cross recess is turned out of the upright, as a share of its reach
 
@@ -65,6 +66,21 @@ def pe_bar(painter: QPainter, bar: QRectF) -> Anchor:
     painter.drawText(QRectF(bar.left(), bar.bottom() + 4, bar.width(), 16), CENTER,
                      tr("PE bar"))
     return Anchor(QPointF(bar.left() + 40, bar.top() + 4), -1)
+
+
+def metal_part(painter: QPainter, part: QRectF, title: str, note: str) -> Anchor:
+    """A piece of metal with a bare spot near its lower edge, which a probe reaches from below;
+    `title` stands at its top, `note` above the spot."""
+    painter.setPen(QPen(LINE, 1.5))
+    painter.setBrush(HOUSING)
+    painter.drawRoundedRect(part, 8, 8)
+    spot = QPointF(part.center().x(), part.bottom() - 30)
+    painter.setBrush(BARE)
+    painter.drawEllipse(spot, 14, 10)
+    painter.setPen(INK)
+    painter.drawText(QRectF(part.left(), part.top() + 10, part.width(), 18), CENTER, title)
+    painter.drawText(QRectF(part.left(), spot.y() - 36, part.width(), 18), CENTER, note)
+    return Anchor(QPointF(spot.x(), spot.y() + 8), 1)
 
 
 def side_label(painter: QPainter, module: QRectF, top: bool, text: str) -> None:
