@@ -284,6 +284,7 @@ lists:
         methods:
           - {function: rcd_current, note: "Sinusoidal: trips between 0.5 and 1 × IΔn; pulsating DC: between 0.35 and 1.4 × IΔn above 10 mA"}
           - {function: zloop_dc, note: The DC pre-magnetisation keeps it from tripping}
+          - {function: zloop_rlo, note: "L-N with the full test current, N-PE with a small one: does not trip it"}
       F:
         facts: {Detects: "as A, and residual currents of mixed frequencies", Frequencies: up to 1 kHz}
         help: >-
@@ -291,6 +292,7 @@ lists:
           currents of mixed frequencies up to 1 kHz and bears 10 mA of smooth DC.
         methods:
           - {function: rcd_current, note: "Sinusoidal: trips between 0.5 and 1 × IΔn"}
+          - {function: zloop_rlo, note: "L-N with the full test current, N-PE with a small one: does not trip it"}
           - {function: zloop_half, note: "Measures with half the rated residual current, 15 mA at 30 mA"}
       B:
         facts: {Detects: "as F, and smooth DC residual currents", Frequencies: up to 1 kHz}
@@ -300,7 +302,7 @@ lists:
           own cause them. A DC pre-magnetisation for the loop impedance would trip it.
         methods:
           - {function: rcd_current, note: "Also with smooth DC: trips between 0.5 and 2 × IΔn"}
-          - {function: zloop_half, note: "Measures with half the rated residual current, 15 mA at 30 mA"}
+          - {function: zloop_rlo, note: "L-N with the full test current, N-PE with a small one: does not trip it"}
       B+:
         facts: {Detects: "as F, and smooth DC residual currents", Frequencies: up to 20 kHz}
         help: >-
@@ -308,7 +310,7 @@ lists:
           whole range: for preventive fire protection.
         methods:
           - {function: rcd_current, note: "Also with smooth DC: trips between 0.5 and 2 × IΔn"}
-          - {function: zloop_half, note: "Measures with half the rated residual current, 15 mA at 30 mA"}
+          - {function: zloop_rlo, note: "L-N with the full test current, N-PE with a small one: does not trip it"}
 
   earthing_system:
     label: Earthing system type
@@ -434,6 +436,12 @@ lists:
       Whether the N conductor reaches the test point. Without it, readings against N are
       marked as not applicable.
     values: [with N, without N]
+  supply_connection:
+    label: Supply connection
+    help: >-
+      How the element is connected to its supply. It decides where the guided measurement takes
+      the protective conductor and the insulation: at the plug, pulled, or at the terminals.
+    values: [fixed, CEE plug, Schuko plug]
   n_terminal:
     label: N terminal
     help: Where the RCD has its N terminals, seen from the front.

@@ -594,6 +594,14 @@ IF+IΔN. A guide is served by its own position and by those it names a view for
 (`Guide.served_at`), whatever else a position can produce: the four loop impedance positions
 each have a guide of their own, with other probes and settings, and none passes for another.
 
+What a measurement rests on belongs to its function, not to an instrument: `data/basis.yaml`
+names per function the standards with their clauses, why the inspector takes the measurement and
+where to measure next (`vocabulary/basis.py`). The dial station shows standards and purpose below
+the position to turn to; once a reading has arrived, the measure station says where further
+readings are taken, each booked to the element it was taken at. Every driver's guide for a
+function shows the same. Standards are codes and read the same in every language; the texts are
+translated by the catalogues.
+
 The PROFITEST PRIME's views (`devices/profitest_prime/screens.py`) are kept per rotary switch
 position; [profitest-prime-display.md](profitest-prime-display.md) tells what was read from the
 instrument. Its guides stand with their kind (`guides_voltage.py`, `guides_rcd.py`,

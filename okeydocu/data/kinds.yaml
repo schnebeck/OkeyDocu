@@ -21,13 +21,13 @@ kinds:
                 Earthing system type, "Supply voltage|V", "Supply frequency|Hz", "Rated current|A",
                 Cable type, "Cross-section|mm²", "Cable length|m"]}
   - {key: machine, label: Machine, icon: machine, izytron: 231, interval: 12,
-     features: [Line conductors, N conductor,
+     features: [Line conductors, N conductor, Supply connection,
                 CE marking, IP rating, Protection class, "Nominal voltage|V", Earthing system type,
                 Supply cable, "Rated current|A", "Rated power|kW", Number of cores, Power factor,
                 Characteristic, "Cross-section|mm²", Ex number, Ex zone,
                 Type of ignition protection, "Cable length|m"]}
   - {key: device, label: Device, icon: device, interval: 12,
-     features: [Line conductors, N conductor,
+     features: [Line conductors, N conductor, Supply connection,
                 Protection class, "Nominal voltage|V", "Rated current|A", "Rated power|kW"]}
   - {key: distribution_board, label: Distribution board, icon: distribution_board,
      izytron: 232, interval: 48,
@@ -68,7 +68,7 @@ kinds:
                 "Cross-section|mm²", "Cable length|m"]}
   - {key: equipment, label: Equipment, icon: equipment, izytron: 237,
      interval: 12,
-     features: [Line conductors, N conductor,
+     features: [Line conductors, N conductor, Supply connection,
                 Equipment type, Cable type, Degree of protection, Number of cores,
                 Protection class, "Cross-section|mm²", "Cable length|m"]}
   - {key: electric_engine, label: Electric motor, icon: electric_engine,
@@ -145,6 +145,7 @@ lists:
   Number of cores: cores
   Line conductors: line_conductors
   N conductor: n_conductor
+  Supply connection: supply_connection
   Earthing system type: earthing_system
   IP rating: ip_rating
   Degree of protection: ip_rating

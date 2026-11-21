@@ -18,6 +18,7 @@ import yaml
 from okeydocu import l10n
 from okeydocu.l10n.catalog import STORED, catalog, folder
 from okeydocu.store.choice_lists import shipped_choice_texts
+from okeydocu.vocabulary.basis import basis_texts
 from okeydocu.vocabulary.terms import GROUPS, vocabulary
 
 PACKAGE = Path(l10n.__file__).parents[1]
@@ -122,10 +123,16 @@ def test_every_text_of_the_shipped_choice_lists_has_a_german_entry():
     assert not missing, "\n".join(missing)
 
 
+def test_every_text_of_the_measuring_bases_has_a_german_entry():
+    missing = sorted(text for text in basis_texts() if catalog("de").text(text) is None)
+    assert not missing, "\n".join(missing)
+
+
 def test_every_german_entry_is_used():
     names, symbols = vocabulary_texts()
     used = {(text, context) for _, text, context in marked_texts()}
-    used |= {(text, "") for text in names | symbols | shipped_plan_words() | shipped_choice_texts()}
+    used |= {(text, "") for text in names | symbols | shipped_plan_words() | shipped_choice_texts()
+                                        | basis_texts()}
     german = catalog("de")
     stored = _stored_words("de")
     unused = [text for text in german.texts if (text, "") not in used and text not in stored]

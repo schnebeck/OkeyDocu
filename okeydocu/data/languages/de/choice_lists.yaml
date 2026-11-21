@@ -1,6 +1,11 @@
 # OkeyDocu - German texts of the shipped choice lists: names, facts, help and notes.
 texts:
   RCD characteristic: RCD-Charakteristik
+  Supply connection: Anschluss
+  "How the element is connected to its supply. It decides where the guided measurement takes the protective conductor and the insulation: at the plug, pulled, or at the terminals.": "Wie das Element an seine Versorgung angeschlossen ist. Danach richtet sich, wo das geführte Messen Schutzleiter und Isolation misst: am gezogenen Stecker oder an den Klemmen."
+  fixed: fest angeschlossen
+  CEE plug: CEE-Stecker
+  Schuko plug: Schukostecker
   N terminal: N-Klemme
   Where the RCD has its N terminals, seen from the front.: Wo der FI seine N-Klemmen hat, von vorn gesehen.
   right: rechts
@@ -96,6 +101,7 @@ texts:
   "Sinusoidal: trips between 0.5 and 1 × IΔn; pulsating DC: between 0.35 and 1.4 × IΔn above 10 mA": "Sinusförmig: löst zwischen 0,5 und 1 × IΔn aus; pulsierender Gleichstrom: zwischen 0,35 und 1,4 × IΔn über 10 mA"
   "For single-phase frequency converters, as in washing machines: also detects residual currents of mixed frequencies up to 1 kHz and bears 10 mA of smooth DC.": "Für einphasige Frequenzumrichter, etwa in Waschmaschinen: erfasst auch Fehlerströme mit Mischfrequenzen bis 1 kHz und verträgt 10 mA glatten Gleichstrom."
   "Sinusoidal: trips between 0.5 and 1 × IΔn": "Sinusförmig: löst zwischen 0,5 und 1 × IΔn aus"
+  "L-N with the full test current, N-PE with a small one: does not trip it": "L-N mit vollem Prüfstrom, N-PE mit kleinem: löst ihn nicht aus"
   "Measures with half the rated residual current, 15 mA at 30 mA": "Misst mit dem halben Bemessungsdifferenzstrom, 15 mA bei 30 mA"
   "Sensitive to all currents: also detects smooth DC residual currents, as three-phase frequency converters, PV inverters or charging points without a DC detection of their own cause them. A DC pre-magnetisation for the loop impedance would trip it.": "Allstromsensitiv: erfasst auch glatte Gleichfehlerströme, wie sie dreiphasige Frequenzumrichter, PV-Wechselrichter oder Ladepunkte ohne eigene DC-Erkennung verursachen. Eine Gleichstrom-Vormagnetisierung für die Schleifenimpedanz würde ihn auslösen."
   "Also with smooth DC: trips between 0.5 and 2 × IΔn": "Auch mit glattem Gleichstrom: löst zwischen 0,5 und 2 × IΔn aus"

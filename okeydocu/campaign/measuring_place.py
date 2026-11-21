@@ -22,6 +22,8 @@ from ..l10n.catalog import source_of
 from .line_conductors import ABSENT, LINE_CONDUCTORS, N_CONDUCTOR, PRESENT, ConductorBook, \
     neutral_of
 
+SUPPLY_CONNECTION = "supply_connection"  # fixed, or the plug the element is supplied through
+
 
 @dataclass(frozen=True)
 class MeasuringPlace:
@@ -99,14 +101,31 @@ def _measured_at(db, guide: Guide, asset_id: int | None) -> int | None:
 
 
 def _from_above(db, parent_id: int | None) -> dict[str, str]:
-    """The conductors elements above state, in the words their lists hold."""
+    """The conductors and the supply connection elements above state, in the words their
+    lists hold."""
     known = ConductorBook(db).at(parent_id)
     found = {}
     if known.lines is not None:
         found[LINE_CONDUCTORS] = str(known.lines)
     if known.neutral is not None:
         found[N_CONDUCTOR] = PRESENT if known.neutral else ABSENT
+    connection = _nearest_above(db, parent_id, SUPPLY_CONNECTION)
+    if connection:
+        found[SUPPLY_CONNECTION] = connection
     return found
+
+
+def _nearest_above(db, asset_id: int | None, key: str) -> str:
+    """What the nearest element at or above `asset_id` states for `key`."""
+    seen = set()
+    while asset_id is not None and asset_id not in seen:
+        seen.add(asset_id)
+        value = str(db.asset_features(asset_id).get(key) or "").strip()
+        if value:
+            return value
+        row = db.asset(asset_id)
+        asset_id = row["parent_id"] if row is not None else None
+    return ""
 
 
 def _title(row) -> str:

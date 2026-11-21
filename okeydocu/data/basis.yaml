@@ -1,0 +1,201 @@
+# OkeyDocu - okeydocu/data/basis.yaml
+# What a measuring function rests on, independent of the instrument that takes it.
+#
+# functions: by the function of the vocabulary
+#   standards: where the measurement is asked for, by standard and clause; codes only, they
+#              read the same in every language
+#   why:       why the inspector takes this measurement, in a few sentences
+#   further:   where to measure next once the instrument is set up; every further reading is
+#              booked to the element it was taken at
+#
+# The texts are written in our own words; clause numbers follow EN 60204-1:2018 (unchanged
+# in chapter 18 by A1:2025), DIN VDE 0100-600:2017 and the IEC 61557 series.
+#
+# Producer: thorsten.schnebeck@gmx.net
+# Generator: Claude Opus 5.5
+# SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+functions:
+  u:
+    standards: ["DIN VDE 0100-600: 6.4.3.1", "EN 60204-1 (VDE 0113-1): 4.3"]
+    why: >-
+      The supply has to match what the machine is built for. A voltage between N and PE that
+      stands out points to load on N or a fault in the PEN.
+    further: >-
+      Measure each further supply the same way. For a machine with a plug, measure at the
+      socket outlet that feeds it.
+  u3:
+    standards: ["DIN VDE 0100-600: 6.4.3.1", "IEC 61557-7"]
+    why: >-
+      A wrong phase sequence turns motors the wrong way. The instrument only shows a valid
+      sequence when all three line conductors are there and none lies on N or PE.
+    further: >-
+      Check every three-phase supply and socket outlet the machine is fed from.
+  rlo:
+    standards: ["EN 60204-1 (VDE 0113-1): 18.2.2, 8.2.1", "DIN VDE 0100-600: 6.4.3.2",
+                "IEC 61557-4", "DIN EN 50678 (VDE 0701), DIN EN 50699 (VDE 0702)"]
+    why: >-
+      Test 1 of EN 60204-1 and the first of all measurements: a fault current can only
+      disconnect through an intact protective conductor, and every later measurement under
+      voltage relies on it. The standard sets no fixed limit; the reading has to fit the
+      length, cross-section and material of the conductors.
+    further: >-
+      Measure from the same reference to every exposed conductive part: housings, motors,
+      doors and covers that carry equipment, frame parts. Book each reading to the element it
+      was taken at.
+  rlo_25a:
+    standards: ["EN 60204-1 (VDE 0113-1): 18.2.2", "EN 61439-1"]
+    why: >-
+      EN 60204-1 asks for 0.2 A up to about 10 A; 25 A is the instrument maker's choice. It
+      finds poor joints in large cross-sections and switchgear assemblies, while thin
+      conductors of an installation may warm up. Test 1 is met with 0.2 A already.
+    further: >-
+      Use it where large cross-sections or busbars are to be judged; measure the other parts
+      with 0.2 A.
+  riso:
+    standards: ["EN 60204-1 (VDE 0113-1): 18.3", "DIN VDE 0100-600: 6.4.3.3", "IEC 61557-2"]
+    why: >-
+      Damaged insulation lets a fault current flow before anybody touches the machine. EN
+      60204-1 measures the conductors of the power circuits against the protective conductor
+      with 500 V DC and asks for at least 1 MΩ; joined active conductors against PE is the
+      measurement it means, single pairs Lx-PE and N-PE are equivalent and narrow a fault
+      down.
+    further: >-
+      Measure the sections behind open contactors separately. L-N and L-L only with all
+      loads disconnected. Where surge protection stays connected, a lower test voltage must
+      not fall below the peak of the supply voltage, about 360 V for a machine at 230 V.
+  riso_ramp:
+    standards: ["IEC 61557-2", "EN 60204-1 (VDE 0113-1): 18.3"]
+    why: >-
+      No standard asks for a rising test voltage. It finds the voltage at which surge
+      protection or a spark gap begins to conduct, and so shows how far the test voltage of
+      the insulation measurement may be lowered while that protection stays connected.
+    further: >-
+      Repeat it at every surge protective device that cannot be disconnected.
+  rcd_time:
+    standards: ["EN 60204-1 (VDE 0113-1): 18.2.1", "DIN VDE 0100-600: 6.4.3.7", "IEC 61557-6"]
+    why: >-
+      Proves that the RCD disconnects in time: under 300 ms at IΔN for a general type, 130 to
+      500 ms for a selective one. Before tripping, the instrument measures the touch voltage
+      at a small current and stops where it would exceed the limit.
+    further: >-
+      The touch voltage tells most at the far end of the protected circuit, with PE taken
+      there: measure it again at the socket outlet or the load. Readings of another RCD go to
+      its own element.
+  rcd_current:
+    standards: ["DIN VDE 0100-600: 6.4.3.7", "IEC 61557-6"]
+    why: >-
+      A rising current finds where the RCD trips; for sinusoidal current it has to lie
+      between half and the full rated residual current. A leakage current of the running
+      machine adds to the test current and makes the RCD seem more sensitive than it is.
+    further: >-
+      Switch the loads off or measure their leakage current with the clamp beforehand and
+      note it. Readings of another RCD go to its own element.
+  i_ramp:
+    standards: ["DIN VDE 0100-600: 6.4.3.7", "IEC 61557-6"]
+    why: >-
+      Tripping current and time in one run: the current rises until the RCD trips, and the
+      time at that current is taken with it.
+    further: >-
+      Switch the loads off beforehand, their leakage current adds to the test current.
+      Readings of another RCD go to its own element.
+  zloop:
+    standards: ["EN 60204-1 (VDE 0113-1): 18.2.3, A.1", "DIN VDE 0100-600: 6.4.3.7",
+                "IEC 61557-3"]
+    why: >-
+      Test 2 of EN 60204-1: a fault between a line conductor and PE must make the protective
+      device disconnect in time. The loop impedance measured cold may be at most 2/3 of U₀/Iₐ,
+      the third left for the warm conductors. Take Test 1 first: a broken protective
+      conductor would put the voltage on the housing while measuring.
+    further: >-
+      At the incoming terminals the reading gives the impedance of the supply. Then measure
+      at the far end of every circuit with a protective device of its own, at the motor
+      terminals, the socket outlet or the input of the drive, with probe PE on the PE there:
+      on the PE bar the protective conductor of the circuit would be missing from the loop
+      and the impedance would seem too small. Each line conductor against PE.
+  zloop_dc:
+    standards: ["EN 60204-1 (VDE 0113-1): 18.2.3, A.1", "IEC 61557-3"]
+    why: >-
+      The protective device behind an RCD has to be judged too. A direct current blinds an
+      RCD of type A or F before the measurement, so it does not trip. It does not work behind
+      a type B, and some type A trip nonetheless: there L-N and N-PE is the safer way.
+    further: >-
+      Measure at the far end of each circuit behind the RCD, with probe PE on the PE there.
+  zloop_rlo:
+    standards: ["EN 60204-1 (VDE 0113-1): 18.2.3, A.1", "IEC 61557-3"]
+    why: >-
+      Behind an RCD of type A, F or B: the loop is put together from L-N with the full test
+      current and N-PE with a current the RCD does not trip at. It needs N at the test point
+      and measures from 0.5 Ω up.
+    further: >-
+      Measure at the far end of each circuit behind the RCD, with the probes on N and PE there,
+      changed over as before. Where the limit of the protective device lies below 0.5 Ω, measure in front of
+      the RCD with the full current and add the protective conductor resistance behind it.
+  zloop_half:
+    standards: ["IEC 61557-3", "DIN VDE 0100-600: 6.4.3.7"]
+    why: >-
+      A test current of half the rated residual current does not trip the RCD, but it is
+      read only from 10 Ω up: too coarse to judge a circuit breaker. It shows that the RCD
+      itself disconnects, which holds where the loop stays below U_L / IΔN, 1666 Ω at 30 mA.
+    further: >-
+      To judge the circuit breaker take L-N and N-PE instead, or measure in front of the RCD
+      with the full current.
+  ures:
+    standards: ["EN 60204-1 (VDE 0113-1): 6.2.4, 18.5"]
+    why: >-
+      Capacitors in drives and power supplies keep their charge after switching off. Live
+      parts must fall to 60 V within 5 s; exposed pins of a pulled plug within 1 s, or they
+      need a cover or a warning.
+    further: >-
+      Measure between the line conductors too, L1-L2, L2-L3, L3-L1, and at accessible DC link
+      terminals. The moment of switching off is random: measure at least three times and keep
+      the highest reading.
+  imd:
+    standards: ["EN 60204-1 (VDE 0113-1): 18.2.1, 18.6", "DIN VDE 0100-600: 6.4.3.7",
+                "IEC 61557-8"]
+    why: >-
+      In an IT system the first fault does not disconnect: the insulation monitor has to
+      report it. A test resistance of half the set response value, switched between a line
+      conductor and PE, must raise the alarm.
+    further: >-
+      Test each line conductor of the IT system. Then the test button of the monitor, the
+      monitoring of its own connections, and whether the alarm reaches the place where
+      someone sees it. Disconnect the monitor before measuring the insulation.
+  rcm_touch:
+    standards: ["IEC 61557-11", "IEC 62020-1", "EN 60204-1 (VDE 0113-1): 6.3.3"]
+    why: >-
+      A residual current monitor reports a rising leakage before it becomes a fault. At half
+      the rated residual current it must stay silent for at least 10 s, at the full one it
+      must report within 10 s.
+    further: >-
+      Measure the leakage current of the running machine with the clamp first: the alarm
+      needs room above it. A monitor that switches a contactor off is tested like an RCD.
+  il:
+    standards: ["DIN EN 50678 (VDE 0701), DIN EN 50699 (VDE 0702)", "IEC 60990"]
+    why: >-
+      Parts not connected to PE must not carry a dangerous current when touched. The guide
+      value for the touch current is 0.5 mA, measured with the machine running.
+    further: >-
+      Measure every touchable part in every mode of operation. A machine with a Schuko plug in
+      both directions of the plug, keeping the higher reading.
+  i_clamp:
+    standards: ["EN 60204-1 (VDE 0113-1): 8.2.6", "IEC 61557-13",
+                "DIN EN 50678 (VDE 0701), DIN EN 50699 (VDE 0702)"]
+    why: >-
+      Above 10 mA in the protective conductor EN 60204-1 asks for a further measure, such as
+      10 mm² Cu, a second protective conductor or a CEE plug with 2.5 mm² PE; a Schuko plug
+      is not one of them. Around PE alone the clamp shows the protective conductor current,
+      around all active conductors without PE the residual current.
+    further: >-
+      Measure in every mode of operation, with the drives enabled. The small clamp ends at
+      9.99 mA: above about 8 mA or on overflow take a clamp with a larger range.
+  zln_du:
+    standards: ["DIN VDE 0100-520: 525", "DIN 18015-1", "EN 60204-1 (VDE 0113-1): 12.5"]
+    why: >-
+      Too much voltage drop makes motors draw more current and contactors drop out. The
+      installation up to the machine is judged against 4 % from the handover point; inside
+      the machine EN 60204-1 allows 5 %, a design value proven by the documents.
+    further: >-
+      With a symmetric three-phase load Z L-N overstates the drop; where the lines are short
+      and thick the difference lies within the measuring error, and calculating is better.

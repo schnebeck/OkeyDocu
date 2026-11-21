@@ -10,14 +10,16 @@
 """The protective conductor is measured from the PE contact of the pulled plug to the housing,
 with 200 mA from the battery or with 25 A from the mains. The insulation is measured from a
 line conductor contact to the PE contact, with a constant test voltage or with one that rises
-until something responds; its probes stay on until the test point is discharged."""
+until something responds; its probes stay on until the test point is discharged. Each guide is
+drawn at a CEE plug; where the element states a Schuko plug as its supply connection, a variant
+takes over with the same settings at the Schuko plug, its earthing clip as PE contact."""
 
 from __future__ import annotations
 
 from dataclasses import replace
 
 from ...l10n import N_
-from ..guide import Action, Guide, Lead
+from ..guide import Action, Guide, Lead, Variant
 from . import screens
 from .guide_parts import (
     CONDUCTORS,
@@ -34,6 +36,23 @@ from .guide_parts import (
 )
 
 OFFSET = Action((), N_("With an extension lead: compensate it first (ROFFSET)."), screens.OFFSET)
+CONNECTION, SCHUKO = "supply_connection", "Schuko plug"
+SCHUKO_PE = N_("Place probe PE (L2) on an earthing clip of the Schuko plug.")
+CONDUCTOR_AT_SCHUKO = (
+    Lead(*L_LEAD, "pe_pin", N_("Place probe L (L1) on an earthing clip of the Schuko plug.")),
+    Lead(*PE_LEAD, "body", N_("Place probe PE (L2) on a bare metal spot of the housing.")))
+INSULATION_AT_SCHUKO = (
+    Lead(*PE_LEAD, "pe_pin", SCHUKO_PE),
+    Lead(*L_LEAD, "l_pin", N_("Place probe L (L1) on pin 1 of the Schuko plug, then on pin 2:"
+                              " either may be L.")))
+
+
+def with_schuko(guide: Guide, leads: tuple[Lead, ...], test_point: str) -> Guide:
+    """The guide with a variant for an element supplied through a Schuko plug."""
+    schuko = replace(guide, test_object="schuko_plug", test_point=test_point, leads=leads)
+    return replace(guide, variants=(Variant(CONNECTION, SCHUKO, schuko),))
+
+
 PROTECTIVE_CONDUCTOR = Guide(
     "rlo", N_("Protective conductor resistance"), 13, "cee_plug",
     N_("CEE plug and housing of the machine"),
@@ -100,3 +119,10 @@ RISING = replace(
         " responds, the test voltage is reached or the current limit flows.")),
         DISCHARGE, STORE, NEXT_PAIR),
     screen=screens.RISO_RAMP)
+
+AT_SCHUKO = N_("Schuko plug and housing of the machine")
+PULLED_SCHUKO = N_("Schuko plug of the machine, pulled")
+PROTECTIVE_CONDUCTOR = with_schuko(PROTECTIVE_CONDUCTOR, CONDUCTOR_AT_SCHUKO, AT_SCHUKO)
+HIGH_CURRENT = with_schuko(HIGH_CURRENT, CONDUCTOR_AT_SCHUKO, AT_SCHUKO)
+INSULATION = with_schuko(INSULATION, INSULATION_AT_SCHUKO, PULLED_SCHUKO)
+RISING = with_schuko(RISING, INSULATION_AT_SCHUKO, PULLED_SCHUKO)

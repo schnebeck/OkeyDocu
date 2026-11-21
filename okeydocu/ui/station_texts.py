@@ -12,9 +12,11 @@ from html import escape
 
 from ..devices.guide import PROBE, Guide
 from ..l10n import tr
+from ..vocabulary.basis import basis_of
 
 CAUTION = "#b03a2e"
 RIGHT = "#2e8b57"
+MUTED = "#5f666d"
 
 
 def fits(guide: Guide, position) -> bool:
@@ -35,7 +37,27 @@ def dial_text(guide: Guide, position) -> str:
         where = position.label or tr("a position without a measurement")
         state = (f"<p style='color:{CAUTION}'><b>"
                  f"{escape(tr('The instrument is set to {position}.', position=where))}</b></p>")
-    return f"<p>{turn}</p>{note}{state}"
+    return f"<p>{turn}</p>{note}{state}{basis_text(guide.function)}"
+
+
+def basis_text(function: str) -> str:
+    """The standards a measurement rests on and why it is taken."""
+    basis = basis_of(function)
+    if basis is None:
+        return ""
+    head = escape(tr("Basis"))
+    standards = " · ".join(escape(standard) for standard in basis.standards)
+    why = f"<p>{escape(tr(basis.why))}</p>" if basis.why else ""
+    return f"<hr><p style='color:{MUTED}'><b>{head}:</b> {standards}</p>{why}"
+
+
+def further_text(function: str) -> str:
+    """Where to measure next, once the instrument is set up."""
+    basis = basis_of(function)
+    if basis is None or not basis.further:
+        return ""
+    head = escape(tr("Where to measure next"))
+    return f"<p><b>{head}:</b> {escape(tr(basis.further))}</p>"
 
 
 def leads_text(guide: Guide) -> str:
@@ -90,4 +112,4 @@ def measure_text(guide: Guide, reading=None, warnings=()) -> str:
     done = escape(tr("Further measurements of this kind go straight to the chosen element."))
     warned = "".join(f"<p style='color:{CAUTION}'>⚠ {escape(text)}</p>" for text in warnings)
     return (f"<ol>{steps}</ol><p style='color:{RIGHT}'><b>✓ {received}:</b> {values}</p>"
-            f"{warned}<p>{done}</p>")
+            f"{warned}{further_text(guide.function)}<p>{done}</p>")
