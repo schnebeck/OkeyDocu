@@ -70,6 +70,10 @@ def main() -> int:
     application.setApplicationName(APP_NAME)
     application.setDesktopFileName("okeydocu")
     application.setWindowIcon(program_icon())
+    # An orderly exit lets instrument drivers leave Push/Print. A signal that comes while the
+    # program is still starting quits it as soon as the event loop runs.
+    for number in (signal.SIGINT, signal.SIGTERM):
+        signal.signal(number, lambda *_: QTimer.singleShot(0, application.quit))
     choose_language(application)
     try:
         context = build_context()
@@ -78,10 +82,7 @@ def main() -> int:
         return 1
     window = MainWindow(context)
     window.show()
-    # An orderly exit lets instrument drivers leave Push/Print. Python only sees a
-    # signal while it runs, hence the timer.
-    for number in (signal.SIGINT, signal.SIGTERM):
-        signal.signal(number, lambda *_: application.quit())
+    # Python only sees a signal while it runs, hence the timer.
     heartbeat = QTimer(interval=250)
     heartbeat.timeout.connect(lambda: None)
     heartbeat.start()

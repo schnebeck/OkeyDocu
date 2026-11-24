@@ -13,13 +13,15 @@ from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMenu, QMessageBox
 
 from ..l10n import tr
-from .common import selected_id
+from .common import selected_id, selected_ids
 from .measurement_details import MeasurementDetails
 from .table_columns import GROUP
 
 
 class RowMenu:
-    """A right click on a row offers what may be done to it; first, to see how it was taken."""
+    """A right click on a row offers what may be done to it; first, to see how it was taken.
+    With several rows selected it offers only what applies to all of them at once, as the
+    structure tree does."""
 
     def _set_up_row_menu(self) -> None:
         self.details_action = QAction(tr("How it was measured …"), self)
@@ -38,16 +40,25 @@ class RowMenu:
         return (self.details_action, None, *taken, self.edit_action, self.photo_action, None,
                 self.delete_action)
 
+    def _many_actions(self) -> tuple:
+        """Actions for several rows at once."""
+        return (self.delete_action,)
+
     def _row_menu(self, point) -> None:
         row = self.table.indexAt(point).row()
         if row < 0:
             return
         self.note_run(row)
+        count = len(selected_ids(self.table))
+        single = self.delete_action.text()
+        if count > 1:
+            self.delete_action.setText(tr("Delete {count} measurements …", count=count))
         menu = QMenu(self)
-        for action in self._menu_actions():
+        for action in self._many_actions() if count > 1 else self._menu_actions():
             menu.addSeparator() if action is None else menu.addAction(action)
         menu.exec(self.table.viewport().mapToGlobal(point))
         menu.deleteLater()
+        self.delete_action.setText(single)
 
     def note_run(self, row: int) -> None:
         """The run a row belongs to, which the menu may take over as a plan."""

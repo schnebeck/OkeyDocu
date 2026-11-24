@@ -20,9 +20,9 @@ from .status_badges import BAD, GOOD, WAITING
 log = logging.getLogger(__name__)
 
 RETRY_S = 5.0
-CONNECTED_TEXT = N_("Instrument connected")
-CONNECTING_TEXT = N_("Connecting to the instrument …")
-LOST_TEXT = N_("Instrument not connected")
+CONNECTED_TEXT = N_("Instrument {name} is connected")
+CONNECTING_TEXT = N_("Connecting to the instrument {name} …")
+LOST_TEXT = N_("Instrument {name} was disconnected")
 
 
 class LiveSession(QObject):
@@ -36,9 +36,10 @@ class LiveSession(QObject):
     link = Signal(str, str)
     selector = Signal(object)
 
-    def __init__(self, driver: MeterDriver, campaign_id: int = 0, parent=None):
+    def __init__(self, driver: MeterDriver, campaign_id: int = 0, parent=None, name: str = ""):
         super().__init__(parent)
         self.driver = driver
+        self.name = name
         self.campaign_id = campaign_id
         self._stop = threading.Event()
         # Without a link the operator can only store on the instrument, so readings may lie
@@ -49,12 +50,15 @@ class LiveSession(QObject):
 
     def start(self) -> None:
         self._stop.clear()
-        self.link.emit(WAITING, tr(CONNECTING_TEXT))
+        self.link.emit(WAITING, self._say(CONNECTING_TEXT))
         if Capability.SIMULATED_TRIGGER in self.driver.capabilities:
             self._connect()
         else:
             self._thread = threading.Thread(target=self._keep_trying, daemon=True)
             self._thread.start()
+
+    def _say(self, text: str) -> str:
+        return " ".join(tr(text, name=self.name).split())
 
     def stop(self) -> None:
         """Leaves Push/Print. Can take seconds with a real instrument."""
@@ -68,10 +72,13 @@ class LiveSession(QObject):
         self.driver.close()
 
     def read_selector(self) -> None:
-        """Answers through `selector`, and not at all if the instrument cannot tell."""
+        """Answers through `selector`, and not at all if the instrument cannot tell. A
+        question still on its way takes the place of a new one."""
         capabilities = self.driver.capabilities
         if Capability.SIMULATED_TRIGGER in capabilities:
             self._read_selector()
+        elif self._reader is not None and self._reader.is_alive():
+            return
         elif Capability.SELECTOR in capabilities:
             self._reader = threading.Thread(target=self._read_selector, daemon=True)
             self._reader.start()
@@ -91,13 +98,13 @@ class LiveSession(QObject):
                 log.info("Instrument not reachable: %s", err)
                 self.driver.close()
                 self.gap = True
-                self.link.emit(BAD, tr(LOST_TEXT))
+                self.link.emit(BAD, self._say(LOST_TEXT))
             self._stop.wait(RETRY_S)
 
     def _connect(self) -> None:
         self.driver.open()
         self.driver.subscribe_live(self._on_reading, self._on_state)
-        self.link.emit(GOOD, tr(CONNECTED_TEXT))
+        self.link.emit(GOOD, self._say(CONNECTED_TEXT))
 
     def _on_reading(self, reading) -> None:
         self.reading.emit(self.campaign_id, reading)
@@ -106,8 +113,8 @@ class LiveSession(QObject):
         if state is not LinkState.CONNECTED and not self._stop.is_set():
             self.gap = True  # a stop asked for here is no loss
         if state is LinkState.CONNECTED:
-            self.link.emit(GOOD, tr(CONNECTED_TEXT))
+            self.link.emit(GOOD, self._say(CONNECTED_TEXT))
         elif state is LinkState.LOST:
-            self.link.emit(BAD, tr(LOST_TEXT))
+            self.link.emit(BAD, self._say(LOST_TEXT))
         else:
             self.link.emit(BAD, text)

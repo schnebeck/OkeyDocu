@@ -6,9 +6,9 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""The knob shows where the dial has to go and turns there; the position the instrument
-reports is a ring around its label, green where it serves the measurement and red elsewhere.
-Parts named in `point_at` pulse, so a guide can show the socket, key or detent that comes
+"""The knob stands where the instrument reports its dial, and where the guide wants it as long
+as nothing is reported. The position wanted pulses orange around its label until the dial
+serves the measurement; then the position it stands on is ringed solid green. Parts named in `point_at` pulse, so a guide can show the socket, key or detent that comes
 next. A click on a detent asks for that position. `zoom_dial` moves in on the dial and back
 out to the whole panel, `zoom_parts` in on other parts, such as display and softkeys.
 `show_screen` puts a view on the display, its rows at the height of the softkeys."""
@@ -28,7 +28,6 @@ from .screen_art import paint_screen
 
 _POINT = QColor("#ff9f1c")
 _MATCH = QColor("#3ec46d")
-_ELSEWHERE = QColor("#e74c3c")
 _TURN_MS = 700
 _ZOOM_MS = 500
 _ZOOM_MARGIN = 1.25  # of the dial's reach, around the dial when zoomed in
@@ -50,6 +49,8 @@ class FrontPanel(QWidget):
         self.screen: Screen | None = None
         self.stated = None  # what the element measured states, by feature key
         self.angle = 0.0
+        self._goal: float | None = None  # the detent angle the knob turns to, so a repeated
+        # report does not start the turn again
         self.pulse = 0.0
         self._turn = QVariantAnimation(self, duration=_TURN_MS)
         self._turn.setEasingCurve(QEasingCurve.Type.OutBack)
@@ -67,24 +68,41 @@ class FrontPanel(QWidget):
     # What to show -------------------------------------------------------------
 
     def turn_to(self, value: int | None) -> None:
-        """The knob turns the short way round to the detent the guide asks for."""
-        self.target = value
-        goal = self.drawing.angle_of(value) if value is not None else None
-        if goal is None:
-            self.update()
-            return
-        delta = (goal - self.angle + 180) % 360 - 180
-        self._turn.stop()
-        self._turn.setStartValue(self.angle)
-        self._turn.setEndValue(self.angle + delta)
-        self._turn.start()
+        """The detent the guide asks for. Whether a report serves it is known again only with
+        the next report."""
+        self.target, self.fits = value, None
+        self._follow()
 
     def show_actual(self, value: int | None, fits: bool | None = None) -> None:
-        """`fits` says whether the reported position serves the measurement; by default only
-        the target itself does."""
+        """The detent the instrument reports. `fits` says whether it serves the measurement;
+        by default only the target itself does."""
         self.actual = value
         self.fits = fits
+        self._follow()
+
+    @property
+    def right(self) -> bool:
+        """Whether the dial as reported serves the measurement."""
+        if self.actual is None:
+            return False
+        return self.actual == self.target if self.fits is None else self.fits
+
+    def _follow(self) -> None:
+        """The knob turns the short way round to where the dial is, or is to be."""
+        shown = self.actual if self._known(self.actual) else self.target
+        goal = self.drawing.angle_of(shown) if shown is not None else None
+        if goal is not None and goal != self._goal:
+            self._goal = goal
+            delta = (goal - self.angle + 180) % 360 - 180
+            self._turn.stop()
+            self._turn.setStartValue(self.angle)
+            self._turn.setEndValue(self.angle + delta)
+            self._turn.start()
+        self._pulse_if_wanted()
         self.update()
+
+    def _known(self, value: int | None) -> bool:
+        return value is not None and self.drawing.angle_of(value) is not None
 
     def zoom_dial(self, close: bool) -> None:
         """Close in on the dial, or show the whole panel again."""
@@ -127,11 +145,26 @@ class FrontPanel(QWidget):
 
     def point_at(self, *ids: str) -> None:
         self.pointed = tuple(i for i in ids if self.front.elementExists(i))
-        if self.pointed:
-            self._pulse.start()
-        else:
-            self._pulse.stop()
+        self._pulse_if_wanted()
         self.update()
+
+    def _pulse_if_wanted(self) -> None:
+        """Only a panel in view pulses: a hidden one would repaint for nobody."""
+        wanted = self.isVisible() and (
+            bool(self.pointed) or (self._known(self.target) and not self.right))
+        running = self._pulse.state() == self._pulse.State.Running
+        if wanted and not running:
+            self._pulse.start()
+        elif not wanted and running:
+            self._pulse.stop()
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        self._pulse_if_wanted()
+
+    def hideEvent(self, event) -> None:
+        super().hideEvent(event)
+        self._pulse_if_wanted()
 
     # Geometry -----------------------------------------------------------------
 
@@ -179,7 +212,7 @@ class FrontPanel(QWidget):
         self.front.render(painter, QRectF(corner.x(), corner.y(), box.width() * scale,
                                           box.height() * scale))
         self._paint_screen(painter)
-        self._paint_actual(painter)
+        self._paint_detent(painter)
         self._paint_pointed(painter)
         centre, radius = self._dial_centre(), self.drawing.knob_radius * scale
         painter.translate(centre)
@@ -193,25 +226,26 @@ class FrontPanel(QWidget):
         paint_screen(painter, self.part_rect(self.drawing.display), centres, self.screen,
                      self.stated)
 
-    def _paint_actual(self, painter: QPainter) -> None:
-        if self.actual is None or not self.front.elementExists(f"pos-{self.actual}"):
-            return
-        rect = self.part_rect(f"pos-{self.actual}").adjusted(-6, -5, 6, 5)
-        fits = self.actual == self.target if self.fits is None else self.fits
-        color = _MATCH if fits else _ELSEWHERE
-        painter.setPen(QPen(color, 2.5))
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawRoundedRect(rect, 6, 6)
+    def _paint_detent(self, painter: QPainter) -> None:
+        if self.right and self.front.elementExists(f"pos-{self.actual}"):
+            painter.setPen(QPen(_MATCH, 3))
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            painter.drawRoundedRect(self.part_rect(f"pos-{self.actual}").adjusted(-6, -5, 6, 5),
+                                    6, 6)
+        elif self.target is not None and self.front.elementExists(f"pos-{self.target}"):
+            self._glow(painter, f"pos-{self.target}")
 
     def _paint_pointed(self, painter: QPainter) -> None:
+        for element in self.pointed:
+            self._glow(painter, element)
+
+    def _glow(self, painter: QPainter, element: str) -> None:
         glow = QColor(_POINT)
         glow.setAlphaF(0.35 + 0.65 * (1 - abs(2 * self.pulse - 1)))
         painter.setPen(QPen(glow, 3 + 3 * self.pulse))
         painter.setBrush(Qt.BrushStyle.NoBrush)
-        for element in self.pointed:
-            rect = self.part_rect(element)
-            grow = 4 + 6 * self.pulse
-            painter.drawRoundedRect(rect.adjusted(-grow, -grow, grow, grow), 8, 8)
+        grow = 4 + 6 * self.pulse
+        painter.drawRoundedRect(self.part_rect(element).adjusted(-grow, -grow, grow, grow), 8, 8)
 
     # Choosing a position ------------------------------------------------------
 

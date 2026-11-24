@@ -173,6 +173,9 @@ class CampaignValues(CampaignPoints, MeasurementView):
         return (self.details_action, None, *taken, *self.point_actions(), self.edit_action,
                 self.photo_action, self.move_action, None, self.delete_action)
 
+    def _many_actions(self) -> tuple:
+        return (self.move_action, None, self.delete_action)
+
     def _move_to(self) -> None:
         ids = selected_ids(self.table)
         root = self.app.service.campaign(self.campaign_id)["asset_id"]

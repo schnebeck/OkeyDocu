@@ -108,6 +108,7 @@ class PrimeTransport:
         self._thread: threading.Thread | None = None
         self.events: queue.Queue[tuple[datetime, bytes]] = queue.Queue()
         self.failure: Exception | None = None
+        self.last_heard = time.monotonic()  # when the instrument last sent anything
 
     def __enter__(self) -> "PrimeTransport":
         return self
@@ -145,6 +146,7 @@ class PrimeTransport:
             if not data:
                 time.sleep(_IDLE_S)
                 continue
+            self.last_heard = time.monotonic()
             for kind, frame in splitter.feed(data):
                 if kind == EVENT:
                     self.events.put((datetime.now(), frame))

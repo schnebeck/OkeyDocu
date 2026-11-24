@@ -273,7 +273,7 @@ def test_the_dial_station_zooms_in_and_goes_on_once_the_switch_is_right(window, 
 
     window.go_to(SELECT)
     qtbot.waitUntil(lambda: window.bench.panel.view.width() < 400, timeout=3000)
-    assert window.bench.panel.pointed == ("pos-18",)
+    assert window.bench.panel.target == 18 and not window.bench.panel.right
     window.show_selector(selector_position(17))
     assert "Das Messgerät steht auf" in window.step_text.text()
     assert window.bench.panel.actual == 17 and window.bench.panel.fits is False
@@ -283,6 +283,32 @@ def test_the_dial_station_zooms_in_and_goes_on_once_the_switch_is_right(window, 
     assert "steht richtig" in window.step_text.text()
     qtbot.waitUntil(lambda: window.kind == CONNECT, timeout=3000)
     qtbot.waitUntil(lambda: window.bench.panel.view.width() > 1000, timeout=3000)
+
+
+def test_the_instrument_is_asked_for_its_dial_until_a_result_is_due(window, qtbot):
+    from okeydocu.devices.guide import MEASURE
+
+    window.show()
+    asked = []
+    window.selector_wanted.connect(lambda: asked.append(window.kind))
+    window.go_to(CONNECT)
+    qtbot.waitUntil(lambda: len(asked) >= 2, timeout=3000)
+    window.go_to(MEASURE)
+    asked.clear()
+    qtbot.wait(1200)
+    assert asked == []
+    window.hide()
+    assert not window.poll.isActive()
+
+
+def test_a_report_on_any_station_turns_the_drawn_knob(window):
+    from okeydocu.devices.profitest_prime.selector import selector_position
+
+    window.go_to(CONNECT)
+    window.show_selector(selector_position(17))
+    assert window.bench.panel.actual == 17 and not window.bench.panel.right
+    window.show_selector(selector_position(18))
+    assert window.bench.panel.right
 
 
 def test_without_an_instrument_the_dial_station_waits_for_the_tester(window):

@@ -126,3 +126,31 @@ def test_answers_come_before_their_questions(window, app):
     page.show_campaign(campaign)
     assert page.values.table.item(0, 6).text() == "ja – Schutz vorhanden?"
     assert not page.values.table.item(0, 0).icon().isNull()
+
+
+def test_several_rows_offer_only_moving_and_deleting(shown, monkeypatch):
+    from PySide6.QtWidgets import QMenu, QMessageBox
+
+    from okeydocu.ui import measurement_menu
+
+    values = shown["page"].values
+    shown["page"].structure.select(shown["press"])
+    offered = []
+
+    class Shown(QMenu):
+        def exec(self, *_args):
+            offered.extend(action.text() for action in self.actions() if not action.isSeparator())
+
+    monkeypatch.setattr(measurement_menu, "QMenu", Shown)
+    values.table.selectRow(0)
+    values._row_menu(values.table.visualItemRect(values.table.item(0, 1)).center())
+    assert "Messung bearbeiten" in offered
+    offered.clear()
+    values.table.selectAll()
+    values._row_menu(values.table.visualItemRect(values.table.item(0, 1)).center())
+    assert offered == ["Verschieben nach …", "3 Messungen löschen …"]
+    assert values.delete_action.text() == "Messung löschen …"
+    monkeypatch.setattr(QMessageBox, "question",
+                        lambda *args: QMessageBox.StandardButton.Yes)
+    values.delete_action.trigger()
+    assert values.table.rowCount() == 0

@@ -11,9 +11,8 @@ import pytest
 from okeydocu.devices import Capability, DeviceError, SelectorPosition
 from okeydocu.devices.profitest_prime.driver import ProfitestPrimeDriver
 from okeydocu.devices.profitest_prime.framing import EVENT, REPLY, TEXT, FrameSplitter
-from okeydocu.devices.profitest_prime.push_print import PUSH_LEFT_ON
+from okeydocu.devices.base import LinkState
 from okeydocu.devices.profitest_prime.selector import selector_position
-from okeydocu.l10n import tr
 from okeydocu.devices.profitest_prime.transport import (
     ALLOWED_COMMANDS,
     TEXT_COMMANDS,
@@ -186,30 +185,27 @@ def test_a_refused_push_says_what_is_wrong(driver, instrument, code, text):
         driver.subscribe_live(lambda reading: None)
 
 
-def test_a_clean_end_leaves_no_warning(driver):
-    driver.subscribe_live(lambda reading: None)
-    driver.unsubscribe_live()
-    assert driver.stop_warning == ""
-
-
-def test_an_end_without_signing_off_warns(driver, instrument):
+def test_an_end_without_signing_off_passes_quietly(driver, instrument):
     driver.subscribe_live(lambda reading: None)
     instrument.broken = True
     driver.unsubscribe_live()
-    assert driver.stop_warning == tr(PUSH_LEFT_ON)
+    assert not driver._pushing.is_set()
 
 
-def test_coming_back_on_another_connection_warns(instrument):
-    class OtherLink(FakeInstrument):
-        pass
+def test_a_silent_instrument_counts_as_lost_and_is_found_again(instrument):
+    import time
 
-    links = [instrument, OtherLink()]
-    meter = ProfitestPrimeDriver(channel_factory=lambda: links.pop(0), reconnect_delay_s=0.01)
+    links = [instrument, FakeInstrument()]
+    meter = ProfitestPrimeDriver(channel_factory=lambda: links.pop(0), reconnect_delay_s=0.01,
+                                 heartbeat_s=0.05)
     meter.open()
     states = []
     meter.subscribe_live(lambda reading: None, lambda state, text: states.append(state))
-    instrument.broken = True
-    while len(states) < 2:
-        pass
-    assert meter.stop_warning == tr(PUSH_LEFT_ON)
+    instrument.silent = True
+    deadline = time.monotonic() + 15
+    while LinkState.CONNECTED not in states and time.monotonic() < deadline:
+        time.sleep(0.05)
+    assert states[:2] == [LinkState.LOST, LinkState.CONNECTED]
+    assert instrument.sent.count("IDNXML:GET:SERIALNO") >= 2
+    meter.unsubscribe_live()
     meter.close()

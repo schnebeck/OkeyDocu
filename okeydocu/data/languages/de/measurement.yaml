@@ -21,6 +21,8 @@ texts:
   Time unknown: Zeitpunkt unbekannt
   Delete measurement: Messung löschen
   "Delete measurement {function} of {moment}?": "Messung {function} vom {moment} löschen?"
+  "Delete these {count} measurements?": "Diese {count} Messungen löschen?"
+  "Delete {count} measurements …": "{count} Messungen löschen …"
   Inspector: Prüfer
   Limit: Grenzwert
   The campaign has been completed in the meantime. The change to the measurement is not saved.: Die Kampagne wurde inzwischen abgeschlossen. Die Änderung an der Messung ist nicht gespeichert.

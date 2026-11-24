@@ -15,7 +15,8 @@ from ..campaign.setting_check import SettingCheck
 from ..l10n import tr
 from .campaign_dialog import CampaignDialog
 from .campaign_tasks import CampaignTasks
-from .common import run_busy, show_error
+from ..devices import driver_info
+from .common import run_busy
 from .instrument_start import reach_instrument
 from .live_session import LiveSession
 from .measurement_detail import pick_images
@@ -89,7 +90,8 @@ class CampaignActions(CampaignTasks):
             self._end_session()
         starting = driver is not None and self.session is None
         if starting:
-            self.session = LiveSession(driver, campaign_id, self)
+            name = tr(driver_info(self.app.service.campaign(campaign_id)["driver"]).label)
+            self.session = LiveSession(driver, campaign_id, self, name)
             self.session.reading.connect(self._received)
             self.session.link.connect(self._link_changed)
             self.session.selector.connect(self._selector_read)
@@ -182,9 +184,6 @@ class CampaignActions(CampaignTasks):
         if session is not None:
             run_busy(self, tr("Disconnecting from the instrument …"), session.stop)
             session.deleteLater()
-            warning, session.driver.stop_warning = session.driver.stop_warning, ""
-            if warning:
-                show_error(self, warning)
 
     def import_photos(self) -> None:
         files = pick_images(self)

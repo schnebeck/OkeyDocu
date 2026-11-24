@@ -29,17 +29,15 @@ log = logging.getLogger(__name__)
 ACK_TIMEOUT_S = 5.0
 PUSH_TIMEOUT_S = 10.0
 RECONNECT_DELAY_S = 3.0
+HEARTBEAT_S = 4.0  # a silent instrument is asked after this long
+PROBE_TIMEOUT_S = 3.0
+PROBE_MISSES = 2  # unanswered probes in a row that count as a lost link
 
 PUSH_REFUSALS = {
     403: N_("The instrument is busy elsewhere and accepts no connection."),
     500: N_("Three connections are already signed on at the instrument."
             " Please switch it off and on again."),
 }
-# Only the connection that signed on can sign off, and a save goes to whoever is signed on.
-PUSH_LEFT_ON = N_(
-    "The instrument could not be disconnected cleanly. Please switch it off and on again"
-    " before measuring without the laptop. Otherwise it may not save measurements."
-)
 
 
 class PushPrintMixin:
@@ -47,8 +45,8 @@ class PushPrintMixin:
 
     _transport: PrimeTransport | None
     _serial_no: str
-    _channel_kind: type | None
-    stop_warning: str
+    _heartbeat_s: float
+    _misses: int
     _channel_factory: Callable[[], Channel]
     _reconnect_delay_s: float
     _on_reading: Callable[[LiveReading], None] | None
@@ -86,8 +84,7 @@ class PushPrintMixin:
             try:
                 transport.query("PPXML:LEAVE", PUSH_TIMEOUT_S)
             except DeviceError as err:
-                log.warning("PPXML:LEAVE failed: %s", err)
-                self.stop_warning = tr(PUSH_LEFT_ON)
+                log.info("PPXML:LEAVE failed: %s", err)
         if self._dispatcher is not None:
             self._dispatcher.join(timeout=ACK_TIMEOUT_S + 2)
         self._dispatcher = None
@@ -104,6 +101,7 @@ class PushPrintMixin:
                     return
                 if transport.failure is not None and not self._reconnect(transport):
                     return
+                self._probe(transport)
                 continue
             self._deliver(received_at, frame)
             if self._pushing.is_set():
@@ -125,6 +123,21 @@ class PushPrintMixin:
             transport.query("IDNXML:GET:ORDERNO", ACK_TIMEOUT_S)
         except DeviceError as err:
             log.warning("Acknowledgement failed: %s", err)
+
+    def _probe(self, transport: PrimeTransport) -> None:
+        """A silent instrument is asked who it is now and then. One that stays silent counts
+        as lost: switched off, the radio reports it only much later."""
+        silent_s = time.monotonic() - transport.last_heard
+        if transport.failure is not None or silent_s < self._heartbeat_s:
+            return
+        try:
+            transport.query("IDNXML:GET:SERIALNO", PROBE_TIMEOUT_S)
+            self._misses = 0
+        except DeviceError as err:
+            self._misses += 1
+            log.info("No answer to probe %d: %s", self._misses, err)
+            if self._misses >= PROBE_MISSES:
+                transport.abort()
 
     def _report(self, state: LinkState, message: str = "") -> None:
         if self._on_state is None:
@@ -158,9 +171,7 @@ class PushPrintMixin:
                 if transport is not None:
                     transport.close()
                 continue
-            if type(channel) is not self._channel_kind:
-                self.stop_warning = tr(PUSH_LEFT_ON)
-            self._transport = transport
+            self._transport, self._misses = transport, 0
             self._report(LinkState.CONNECTED)
             return True
         return False

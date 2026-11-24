@@ -185,16 +185,3 @@ def test_the_switch_is_left_alone_while_measuring(page, window, monkeypatch):
 
     monkeypatch.setattr(driver, "read_selector", must_not_run)
     page._read_selector()
-
-
-def test_a_connection_that_ended_badly_is_reported_once(page, window, monkeypatch):
-    errors = []
-    monkeypatch.setattr(
-        "okeydocu.ui.campaign_actions.show_error", lambda _, text: errors.append(text)
-    )
-    driver = live_session(page, window)
-    driver.stop_warning = "Bitte einschalten"
-    window.campaign.pause()
-    window.campaign.resume()
-    window.campaign.pause()
-    assert errors == ["Bitte einschalten"]

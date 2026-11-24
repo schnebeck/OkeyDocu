@@ -235,9 +235,9 @@ texts:
   All connections made.: Alle Verbindungen hergestellt.
   "Make connection {number} of {total} and click it in the drawing.": "Verbindung {number} von {total} herstellen und in der Grafik anklicken."
   Measure step again: Schritt erneut messen
-  Instrument connected: Messgerät verbunden
-  Connecting to the instrument …: Verbinde mit dem Messgerät …
-  Instrument not connected: Messgerät nicht verbunden
+  "Instrument {name} is connected": "Messgerät {name} ist verbunden"
+  "Connecting to the instrument {name} …": "Verbinde mit dem Messgerät {name} …"
+  "Instrument {name} was disconnected": "Messgerät {name} wurde getrennt"
   "Rotary switch: {selector}": "Drehschalter: {selector}"
   Set on the instrument: Am Gerät einstellen
   "Set on the instrument for {element}": "Am Gerät einstellen für {element}"

@@ -21,7 +21,7 @@ from ..base import SelectorPosition
 from .channels import Channel, SerialChannel, SerialPort, open_channel
 from .discovery import open_any
 from .parser import parse_database, parse_date
-from .push_print import PUSH_TIMEOUT_S, RECONNECT_DELAY_S, PushPrintMixin
+from .push_print import HEARTBEAT_S, PUSH_TIMEOUT_S, RECONNECT_DELAY_S, PushPrintMixin
 from .selector import SELECTOR_COMMAND, selector_position
 from .texts import TEXTS_COMMAND, TEXTS_TIMEOUT_S, parse_texts
 from .transport import PrimeTransport
@@ -49,7 +49,7 @@ class ProfitestPrimeDriver(PushPrintMixin, MeterDriver):
     def __init__(
         self, port: str = "", serial_port: SerialPort | None = None,
         channel_factory: Callable[[], Channel] | None = None,
-        reconnect_delay_s: float = RECONNECT_DELAY_S,
+        reconnect_delay_s: float = RECONNECT_DELAY_S, heartbeat_s: float = HEARTBEAT_S,
     ):
         if channel_factory is None:
             if serial_port is not None:
@@ -58,8 +58,9 @@ class ProfitestPrimeDriver(PushPrintMixin, MeterDriver):
                 channel_factory = (lambda: open_channel(port)) if port else open_any
         self._channel_factory = channel_factory
         self._reconnect_delay_s = reconnect_delay_s
+        self._heartbeat_s = heartbeat_s
+        self._misses = 0
         self._transport: PrimeTransport | None = None
-        self._channel_kind: type | None = None
         self._serial_no = ""
         self._on_reading: Callable[[LiveReading], None] | None = None
         self._on_state: Callable[[LinkState, str], None] | None = None
@@ -68,7 +69,6 @@ class ProfitestPrimeDriver(PushPrintMixin, MeterDriver):
 
     def open(self) -> None:
         channel = self._channel_factory()
-        self._channel_kind = type(channel)
         self._transport = PrimeTransport(channel)
         try:
             self._leave_stale_push(self._transport)
@@ -132,10 +132,10 @@ class ProfitestPrimeDriver(PushPrintMixin, MeterDriver):
         self._transport.set_clock(datetime.now())
 
     def read_selector(self) -> SelectorPosition:
-        """Read on request only.
+        """Read on request only, never while a result is due.
 
         The instrument writes an event in pieces and nothing keeps a reply out of it, so
-        a steady stream of questions could land inside a measurement being pushed.
+        a question could land inside a measurement being pushed.
         """
         transport = self._transport
         if transport is None:

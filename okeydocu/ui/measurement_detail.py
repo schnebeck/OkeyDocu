@@ -18,7 +18,7 @@ from PySide6.QtWidgets import QFileDialog, QListWidgetItem, QMessageBox
 from ..campaign.photo_marks import ROLES
 from ..campaign.service import MANUAL
 from ..l10n import moment, tr
-from .common import AppContext, function_short, selected_id
+from .common import AppContext, function_short, selected_id, selected_ids
 from .photo_gallery import PHOTO_ID, PHOTO_PATH
 from .photo_preview import PhotoPreview
 from .photo_shared import shared_thumbs
@@ -134,16 +134,21 @@ class MeasurementDetail:
             self._edit_measurement(FIELD_OF_COLUMN.get(column, "comment"))
 
     def _delete_measurement(self) -> None:
-        row = self._selected_row()
-        when = datetime.fromisoformat(row["local_time"])
-        answer = QMessageBox.question(
-            self, tr("Delete measurement"),
-            tr("Delete measurement {function} of {moment}?",
-               function=function_short(row["function"]), moment=moment(when, seconds=True)),
-        )
+        ids = selected_ids(self.table)
+        if len(ids) > 1:
+            question = tr("Delete these {count} measurements?", count=len(ids))
+        else:
+            row = self._selected_row()
+            ids = [row["id"]]
+            when = datetime.fromisoformat(row["local_time"])
+            question = tr("Delete measurement {function} of {moment}?",
+                          function=function_short(row["function"]),
+                          moment=moment(when, seconds=True))
+        answer = QMessageBox.question(self, tr("Delete measurement"), question)
         if answer == QMessageBox.StandardButton.Yes:
             self.editor.show_row(None, False)
-            self.app.service.delete_measurement(row["id"])
+            for measurement_id in ids:
+                self.app.service.delete_measurement(measurement_id)
             self._after_change()
 
     def _add_photo(self) -> None:

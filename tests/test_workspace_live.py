@@ -102,14 +102,14 @@ class Unreachable(SimulatedMeter):
 
 
 def test_unreachable_instrument_gives_a_short_message_without_technical_detail(qtbot):
-    session = LiveSession(Unreachable(), 1)
+    session = LiveSession(Unreachable(), 1, name="PROFITEST PRIME")
     messages = []
     session.link.connect(lambda kind, text: messages.append((kind, text)))
     session.start()
     qtbot.waitUntil(lambda: any(kind == BAD for kind, _ in messages), timeout=3000)
     session.stop()
     text = dict(messages)[BAD]
-    assert text == "Messgerät nicht verbunden"
+    assert text == "Messgerät PROFITEST PRIME wurde getrennt"
 
 
 def test_long_message_cannot_widen_the_window(window, app, monkeypatch):

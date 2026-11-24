@@ -73,7 +73,6 @@ texts:
   Instrument found, pairing …: Messgerät gefunden, kopple …
   The instrument is busy elsewhere and accepts no connection.: Das Messgerät ist gerade anderweitig belegt und nimmt keine Verbindung an.
   Three connections are already signed on at the instrument. Please switch it off and on again.: Am Messgerät sind schon drei Verbindungen angemeldet. Bitte es einmal aus- und wieder einschalten.
-  The instrument could not be disconnected cleanly. Please switch it off and on again before measuring without the laptop. Otherwise it may not save measurements.: Das Messgerät konnte nicht sauber getrennt werden. Bitte es einmal aus- und wieder einschalten, bevor ohne Laptop gemessen wird. Sonst speichert es Messungen womöglich nicht.
   Push/Print is already running.: Push/Print läuft bereits.
   "The measurement could not be taken over: {error}": "Messung konnte nicht übernommen werden: {error}"
   A different instrument answered.: Es hat sich ein anderes Messgerät gemeldet.

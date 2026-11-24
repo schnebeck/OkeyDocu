@@ -64,3 +64,39 @@ def test_only_parts_of_the_drawing_are_pointed_at(qtbot):
     assert widget.pointed == ("key-idn",)
     widget.point_at()
     assert widget._pulse.state() == widget._pulse.State.Stopped
+
+
+def settled(qtbot, widget):
+    qtbot.waitUntil(lambda: widget._turn.state() == widget._turn.State.Stopped, timeout=3000)
+
+
+def test_the_knob_stands_where_the_instrument_reports_it(qtbot):
+    widget = FrontPanel(panel.DRAWING)
+    qtbot.addWidget(widget)
+    widget.turn_to(13)
+    settled(qtbot, widget)
+    assert widget.angle == pytest.approx(panel.angle_of(13))
+    widget.show_actual(12)
+    settled(qtbot, widget)
+    assert widget.angle == pytest.approx(panel.angle_of(12))
+    widget.show_actual(None)
+    settled(qtbot, widget)
+    assert widget.angle == pytest.approx(panel.angle_of(13))
+
+
+def test_the_wanted_detent_pulses_until_the_dial_serves_and_again_when_turned_away(qtbot):
+    widget = FrontPanel(panel.DRAWING)
+    qtbot.addWidget(widget)
+    widget.show()
+    running = widget._pulse.State.Running
+    widget.turn_to(18)
+    assert widget._pulse.state() == running and not widget.right
+    widget.show_actual(18)
+    assert widget.right and widget._pulse.state() != running
+    widget.show_actual(17)
+    assert widget._pulse.state() == running
+    widget.show_actual(19, True)
+    assert widget.right and widget._pulse.state() != running
+    widget.show_actual(17)
+    widget.hide()
+    assert widget._pulse.state() != running

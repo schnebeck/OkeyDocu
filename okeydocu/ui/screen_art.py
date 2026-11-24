@@ -145,17 +145,16 @@ def _stated(stated, feature: str) -> str:
 
 
 def _share(painter: QPainter, box: QRectF, dot: float) -> None:
-    """An arrow into a tray: the result goes out."""
-    middle = box.center().y()
-    painter.setPen(QPen(INK, 1.8 * dot, Qt.PenStyle.SolidLine, Qt.PenCapStyle.FlatCap))
-    painter.drawLine(QPointF(box.left() + 3 * dot, middle), QPointF(box.left() + 11 * dot, middle))
+    """The share sign: one dot on the left joined to two on the right, above and below."""
+    centre = box.center()
+    reach = min(box.width(), box.height()) * 0.28
+    left = QPointF(centre.x() - reach * 0.8, centre.y())
+    upper = QPointF(centre.x() + reach * 0.8, centre.y() - reach)
+    lower = QPointF(centre.x() + reach * 0.8, centre.y() + reach)
+    painter.setPen(QPen(INK, 1.2 * dot))
+    painter.drawLine(left, upper)
+    painter.drawLine(left, lower)
     painter.setPen(Qt.PenStyle.NoPen)
     painter.setBrush(INK)
-    painter.drawPolygon(QPolygonF([QPointF(box.left() + 15 * dot, middle),
-                                   QPointF(box.left() + 10 * dot, middle - 4 * dot),
-                                   QPointF(box.left() + 10 * dot, middle + 4 * dot)]))
-    tray = QRectF(box.right() - 13 * dot, middle - 6 * dot, 10 * dot, 12 * dot)
-    painter.setPen(QPen(INK, 1.2 * dot))
-    painter.setBrush(Qt.BrushStyle.NoBrush)
-    painter.drawRect(tray)
-    painter.fillRect(QRectF(tray.left(), tray.bottom() - 4 * dot, tray.width(), 4 * dot), INK)
+    for spot in (left, upper, lower):
+        painter.drawEllipse(spot, 2.6 * dot, 2.6 * dot)

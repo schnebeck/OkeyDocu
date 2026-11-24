@@ -62,6 +62,7 @@ class FakeInstrument:
         self.serial_no = serial_no
         self.incoming = queue.Queue()
         self.broken = False
+        self.silent = False  # switched off: the radio does not tell yet
         self.closed = False
         self.lock = threading.Lock()
         self.wheel = b"0;15\n"
@@ -80,6 +81,8 @@ class FakeInstrument:
             raise OSError("verbindung weg")
         command = data.decode().strip()
         self.sent.append(command)
+        if self.silent:
+            return
         if command == "PPXML:IS:ON":
             self.incoming.put(boolean_reply(command, self.push_on))
         elif command == "SYS:GET:ROTATIONWHEEL":

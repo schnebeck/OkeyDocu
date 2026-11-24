@@ -98,7 +98,6 @@ class MeterDriver(ABC):
     """
 
     capabilities: Capability = Capability.NONE
-    stop_warning = ""  # what the operator has to do after a connection that ended badly
 
     @abstractmethod
     def open(self) -> None: ...

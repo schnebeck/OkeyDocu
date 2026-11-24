@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from html import escape
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QPushButton, \
     QStackedWidget, QVBoxLayout
 
@@ -25,7 +25,7 @@ from ..devices import driver_info
 from ..devices.guide import CONFIGURE, CONNECT, PLACE, SELECT
 from ..l10n import tr
 from .bench_view import BenchView
-from .dial_station import DialStation
+from .dial_station import POLL_MS, DialStation
 from .footer_bar import FooterBar
 from .guide_run import GuideRun
 from .place_form import PlaceForm
@@ -99,8 +99,8 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, GuideRun, QDialog
         self.right.addWidget(self.form)
         self.right.addWidget(self.step_text)
         self.step_title = QLabel()
-        self.ask = QPushButton(tr("Ask the instrument again"))
-        self.ask.clicked.connect(self.selector_wanted)
+        self.poll = QTimer(self, interval=POLL_MS)
+        self.poll.timeout.connect(self._poll_selector)
         self.back = QPushButton(tr("◀ Back"))
         self.next = QPushButton()
         self.next.setDefault(True)
@@ -117,7 +117,6 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, GuideRun, QDialog
         column = self.column = QVBoxLayout(side)
         column.addWidget(self.step_title)
         column.addWidget(self.right)
-        column.addWidget(self.ask)
         column.addStretch(1)
         self.footer = FooterBar()
         self.footer.add_leading(self.back)
@@ -130,6 +129,14 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, GuideRun, QDialog
         layout.addWidget(self.head)
         layout.addWidget(self.bar)
         layout.addLayout(body, 1)
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        self.poll.start()
+
+    def hideEvent(self, event) -> None:
+        self.poll.stop()
+        super().hideEvent(event)
 
     @property
     def count(self) -> int:
@@ -170,7 +177,6 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, GuideRun, QDialog
         self.column.setStretch(RIGHT, int(self.kind == PLACE))  # the tree takes what is left
         self.column.setStretch(GAP, int(self.kind != PLACE))
         self.back.setEnabled(self.index > 0)
-        self.ask.hide()
         self.bench.panel.zoom_dial(self.kind == SELECT and self.has_dial)
         self.bench.leads_layer.setVisible(self.kind != CONFIGURE)  # no room in a close view
         self._on_display()

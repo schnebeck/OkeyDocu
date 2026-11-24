@@ -30,8 +30,10 @@ passes to the choices and back, `soft-4` (✓) takes the choice over. On the sec
 RCD form list `soft-3` shows ↵ instead of →. The left column keeps the current values of all
 settings of the function.
 
-**Share.** Once a reading stands, `soft-5` shows the share symbol (an arrow into a box). It
-sends the result over Push/Print. Without a reading the row is empty. This was seen in the
+**Share.** Once a reading stands, `soft-5` shows the share symbol (three dots joined like a
+"<") in a frame. It sends the result over Push/Print. Without a connection to the laptop the
+same key shows the save symbol and stores the result in the instrument's memory. Without a
+reading the row is empty. This was seen in the
 view U3~ with readings; the operating instructions say the same of every function: a result
 can be stored by softkey after a successful measurement.
 
@@ -144,7 +146,7 @@ A dash means the row is empty.
 | 18 T, %r.H. | – | unit °C or °F | – | – | – |
 | 19 Extra | mode | path, protective device | limits | OFFSET on/off | – |
 
-The share symbol on `soft-5` is shown only for U3~ because only there a reading was on the
+The share symbol on `soft-5` is seen in the views U3~ and U, each with a reading on the
 display; it is expected in every view once a reading stands. In the RLO 25 A limit list the
 key carries a table symbol and the label 60204-1 instead.
 
