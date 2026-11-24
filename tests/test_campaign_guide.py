@@ -107,3 +107,19 @@ def test_a_position_serving_several_guides_chooses_the_one_that_leads_to_it(page
         assert starter.choice.currentData() == function
     page.guide_selector(selector_position(33))
     assert starter.choice.currentData() == "ures"
+
+
+def test_each_measurement_shows_its_dial_marking(qtbot):
+    from okeydocu.ui.dial_icons import BADGE, dial_icon
+    from okeydocu.ui.guide_starter import GuideStarter
+
+    starter = GuideStarter()
+    qtbot.addWidget(starter)
+    starter.show_campaign("profitest-prime", set())
+    for index in range(starter.choice.count()):
+        icon = starter.choice.itemIcon(index)
+        assert not icon.isNull(), starter.choice.itemData(index)
+        assert icon.availableSizes()[0] == BADGE * 2
+    assert dial_icon(None, 12).isNull()
+    assert dial_icon(panel.DRAWING, None).isNull()
+    assert dial_icon(panel.DRAWING, 99).isNull()

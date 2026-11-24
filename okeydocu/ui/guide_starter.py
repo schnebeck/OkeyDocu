@@ -17,6 +17,7 @@ from PySide6.QtWidgets import QComboBox, QHBoxLayout, QPushButton, QWidget
 
 from ..devices import driver_info
 from ..l10n import tr
+from .dial_icons import BADGE, dial_icon
 
 
 class GuideStarter(QWidget):
@@ -27,6 +28,7 @@ class GuideStarter(QWidget):
         self.info = None
         self.measured: set[str] = set()
         self.choice = QComboBox()
+        self.choice.setIconSize(BADGE)
         self.choice.currentIndexChanged.connect(lambda _: self._label())
         self.button = QPushButton()
         self.button.clicked.connect(self._request)
@@ -46,8 +48,10 @@ class GuideStarter(QWidget):
             kept = self.choice.currentData()
             self.choice.blockSignals(True)
             self.choice.clear()
+            panel = info.panel if info is not None else None
             for function in (info.guided if info is not None else ()):
-                self.choice.addItem(tr(info.guide(function).title), function)
+                guide = info.guide(function)
+                self.choice.addItem(dial_icon(panel, guide.selector), tr(guide.title), function)
             self.choice.setCurrentIndex(max(self.choice.findData(kept), 0))
             self.choice.blockSignals(False)
         self.setVisible(self.choice.count() > 0)
