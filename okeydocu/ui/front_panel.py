@@ -36,6 +36,7 @@ _PULSE_MS = 1100
 
 class FrontPanel(QWidget):
     position_chosen = Signal(int)
+    viewed = Signal()  # the part of the panel in view changed
 
     def __init__(self, drawing: PanelDrawing, parent=None):
         super().__init__(parent)
@@ -136,6 +137,7 @@ class FrontPanel(QWidget):
     def _zoomed(self, value) -> None:
         self.view = QRectF(value)
         self.update()
+        self.viewed.emit()
 
     def show_screen(self, screen: Screen | None, stated=None) -> None:
         """The view on the display, None for a dark one. `stated` fills in what a softkey row

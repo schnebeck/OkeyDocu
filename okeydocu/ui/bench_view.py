@@ -8,7 +8,9 @@
 
 """The leads are laid one after the other in the order the guide places the probes, each
 plug's row pulsing while its lead is laid. The leads are painted by a transparent layer above
-panel and test point, so they can run across both."""
+panel and test point, so they can run across both. Where the panel moves in or out, the whole
+layer is painted again: a repaint of the panel alone would leave the leads over the test point
+where they ran before."""
 
 from __future__ import annotations
 
@@ -47,6 +49,7 @@ class BenchView(QWidget):
         super().__init__(parent)
         self.panel = FrontPanel(drawing, self)
         self.leads_layer = _Leads(self)
+        self.panel.viewed.connect(lambda: self.leads_layer.update())
         self.guide: Guide | None = None
         self.data: list[str] = []
         self.poles = 2
