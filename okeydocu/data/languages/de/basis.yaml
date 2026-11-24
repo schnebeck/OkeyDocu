@@ -146,3 +146,9 @@ texts:
   "With a symmetric three-phase load Z L-N overstates the drop; where the lines are short and thick the difference lies within the measuring error, and calculating is better.": >-
     Bei symmetrischer Drehstromlast überschätzt Z L-N den Spannungsfall; bei kurzen, dicken
     Leitungen liegt der Unterschied in der Messabweichung, dann ist Rechnen besser.
+  "A type B detects the direct current and trips: take the position ZLOOP+RLO, L-N and N-PE.": >-
+    Ein Typ B erkennt den Gleichstrom und löst aus: die Stellung ZLOOP+RLO nehmen, L-N und
+    N-PE.
+  "The instrument offers the reduced test current for types A and F only: behind a type B take the position ZLOOP+RLO, L-N and N-PE.": >-
+    Das Gerät bietet den reduzierten Prüfstrom nur für die Typen A und F an: Hinter einem
+    Typ B die Stellung ZLOOP+RLO nehmen, L-N und N-PE.

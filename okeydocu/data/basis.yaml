@@ -7,6 +7,7 @@
 #   why:       why the inspector takes this measurement, in a few sentences
 #   further:   where to measure next once the instrument is set up; every further reading is
 #              booked to the element it was taken at
+#   unsuited:  where the method does not work: a feature, its values, and what to take instead
 #
 # The texts are written in our own words; clause numbers follow EN 60204-1:2018 (unchanged
 # in chapter 18 by A1:2025), DIN VDE 0100-600:2017 and the IEC 61557 series.
@@ -122,6 +123,11 @@ functions:
       a type B, and some type A trip nonetheless: there L-N and N-PE is the safer way.
     further: >-
       Measure at the far end of each circuit behind the RCD, with probe PE on the PE there.
+    unsuited:
+      feature: rcd_type
+      values: [B, B+]
+      advice: >-
+        A type B detects the direct current and trips: take the position ZLOOP+RLO, L-N and N-PE.
   zloop_rlo:
     standards: ["EN 60204-1 (VDE 0113-1): 18.2.3, A.1", "IEC 61557-3"]
     why: >-
@@ -141,6 +147,12 @@ functions:
     further: >-
       To judge the circuit breaker take L-N and N-PE instead, or measure in front of the RCD
       with the full current.
+    unsuited:
+      feature: rcd_type
+      values: [B, B+]
+      advice: >-
+        The instrument offers the reduced test current for types A and F only: behind a type B
+        take the position ZLOOP+RLO, L-N and N-PE.
   ures:
     standards: ["EN 60204-1 (VDE 0113-1): 6.2.4, 18.5"]
     why: >-

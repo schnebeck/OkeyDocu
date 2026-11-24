@@ -101,16 +101,22 @@ class PlaceScene(QWidget):
                          Qt.TextFlag.TextWordWrap, text)
 
     def _paint_preparation(self, painter: QPainter, area: QRectF) -> None:
-        for index, (heading, text) in enumerate(self.guide.preparation):
-            tile = QRectF(area.left(), area.top() + index * 76, area.width(), 66)
+        """One tile per step, each as high as its text needs."""
+        top = area.top()
+        for heading, text in self.guide.preparation:
+            painter.setFont(_font(10))
+            width = area.width() - 24
+            wrapped = painter.fontMetrics().boundingRect(
+                0, 0, int(width), 1000, Qt.TextFlag.TextWordWrap, tr(text)).height()
+            tile = QRectF(area.left(), top, area.width(), 40 + wrapped)
             painter.setPen(QPen(FRAME, 1.2))
             painter.setBrush(QColor("#f7f8f9"))
             painter.drawRoundedRect(tile, 10, 10)
             painter.setFont(_font(11, True))
             painter.setPen(INK)
-            painter.drawText(QRectF(tile.left() + 16, tile.top() + 10, tile.width() - 24, 20),
-                             tr(heading))
+            painter.drawText(QRectF(tile.left() + 16, tile.top() + 10, width, 20), tr(heading))
             painter.setFont(_font(10))
             painter.setPen(MUTED)
-            painter.drawText(QRectF(tile.left() + 16, tile.top() + 32, tile.width() - 24, 30),
+            painter.drawText(QRectF(tile.left() + 16, tile.top() + 32, width, wrapped + 4),
                              Qt.TextFlag.TextWordWrap, tr(text))
+            top = tile.bottom() + 10

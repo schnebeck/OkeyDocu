@@ -1,5 +1,14 @@
 # OkeyDocu - German texts of the guided first measurement.
 texts:
+  Place probe L (L1) on the PE bar the supply comes in on.: Spitze L (L1) an die PE-Schiene setzen, auf der die Zuleitung ankommt.
+  Place probe L (L1) on the incoming terminal of line conductor L1.: Spitze L (L1) an die Einspeiseklemme des Außenleiters L1 setzen.
+  Switch off in front: Davor freischalten
+  Switch the supply off ahead of the machine and secure it.: Die Versorgung vor der Maschine abschalten und sichern.
+  "Measure only dead: the supply is switched off in front.": "Nur spannungsfrei messen: Die Versorgung davor ist abgeschaltet."
+  Open the N-PE bridge: N-PE-Brücke öffnen
+  Where N and PE are bridged at the supply, open the bridge.: Wo N und PE an der Einspeisung gebrückt sind, die Brücke öffnen.
+  PE bar of the supply and housing of the machine: PE-Schiene der Einspeisung und Gehäuse der Maschine
+  Main switch, incoming terminals, supply switched off: Hauptschalter, Einspeiseklemmen, Versorgung abgeschaltet
   Schuko plug, contact side: Schukostecker, Steckseite
   "It fits either way round: pins 1 and 2 have no fixed L and N.": "Er passt in beide Richtungen: Stift 1 und 2 haben kein festes L und N."
   Place probe PE (L2) on an earthing clip of the Schuko plug.: Spitze PE (L2) an einen Schutzkontakt des Schukosteckers setzen.

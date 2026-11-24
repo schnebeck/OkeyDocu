@@ -16,8 +16,8 @@ from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPen
 
 from ..l10n import tr
-from .test_object_parts import BODY, CENTER, INK, LINE, Anchor, bold_font, handle, pe_bar, \
-    screw, side_label
+from .test_object_parts import BODY, CENTER, INK, LINE, Anchor, bold_font, handle, metal_part, \
+    pe_bar, screw, side_label
 
 PITCH = 40
 HEIGHT = 136  # of the contact block; a probe on a lower terminal needs the room below it
@@ -61,4 +61,21 @@ def main_switch(painter: QPainter, box: QRectF, lines: list[str], poles: int = 4
     side_label(painter, module, True, tr("Incoming"))
     side_label(painter, module, False, tr("Outgoing"))
     anchors["pe"] = pe_bar(painter, QRectF(module.right() + 48, box.top() + 70, 150, 16))
+    return anchors
+
+
+def main_switch_on(painter: QPainter, box: QRectF, lines: list[str], poles: int = 4,
+                   n_left: bool = False, live: bool = True) -> dict[str, Anchor]:
+    """The main switch switched on although the supply in front is off, as for the insulation
+    measurement of everything behind it."""
+    return main_switch(painter, box, lines, poles, n_left, True)
+
+
+def supply_pe(painter: QPainter, box: QRectF, lines: list[str], poles: int = 4,
+              n_left: bool = False, live: bool = True) -> dict[str, Anchor]:
+    """The main switch with the PE bar the supply comes in on, and beside it the housing of the
+    machine with a bare spot: the two ends of the protective conductor measured."""
+    anchors = main_switch(painter, box, lines, poles, n_left, live)
+    housing = QRectF(box.left() + box.width() * 0.86, box.top() + 40, box.width() * 0.13, 150)
+    anchors["body"] = metal_part(painter, housing, tr("Machine housing"), tr("bare metal"))
     return anchors

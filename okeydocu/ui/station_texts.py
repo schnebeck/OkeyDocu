@@ -51,6 +51,13 @@ def basis_text(function: str) -> str:
     return f"<hr><p style='color:{MUTED}'><b>{head}:</b> {standards}</p>{why}"
 
 
+def unsuited_text(function: str, stated) -> str:
+    """A warning where the element, as `stated` tells by feature key, rules the method out."""
+    basis = basis_of(function)
+    advice = basis.unsuited_for(stated) if basis is not None else ""
+    return f"<p style='color:{CAUTION}'>⚠ {escape(tr(advice))}</p>" if advice else ""
+
+
 def further_text(function: str) -> str:
     """Where to measure next, once the instrument is set up."""
     basis = basis_of(function)

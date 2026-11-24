@@ -15,7 +15,8 @@ from ..campaign.line_conductors import LINE_CONDUCTORS
 from ..devices.guide import MEASURE, PLACE, Station
 from ..l10n import tr
 from ..vocabulary import setting_name
-from .station_texts import actions_text, conductors_text, fits, leads_text, mode_text
+from .station_texts import actions_text, conductors_text, fits, leads_text, mode_text, \
+    unsuited_text
 
 
 def parts_of(actions) -> list[str]:
@@ -83,6 +84,7 @@ class StationKinds:
         self.next.setText(tr("Set – next ▶"))
         advice = conductors_text(self.guide, self.place.stated(LINE_CONDUCTORS),
                                  self.place.has_n)
+        advice += unsuited_text(self.guide.function, self.place.stated)
         self.step_text.setText(mode_text([action for action, _ in to_set], station.actions,
                                          self._settings(), self.place.title, advice))
 

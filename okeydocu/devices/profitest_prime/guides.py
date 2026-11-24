@@ -21,7 +21,7 @@ from .guides_loop import LOOP, LOOP_COMBINED, LOOP_DC, LOOP_REDUCED
 from .guides_monitor import IMD, RCM
 from .guides_rcd import RCD_BOTH, RCD_CURRENT, RCD_TIME
 from .guides_residual import RESIDUAL
-from .guides_resistance import HIGH_CURRENT, INSULATION, PROTECTIVE_CONDUCTOR, RISING
+from .guides_connection import HIGH_CURRENT, INSULATION, PROTECTIVE_CONDUCTOR, RISING
 from .guides_voltage import VOLTAGE
 
 __all__ = ["GUIDES", "MAINS", "flow", "guide_for"]

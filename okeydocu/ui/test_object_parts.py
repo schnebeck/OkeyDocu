@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from PySide6.QtCore import QPointF, QRectF, Qt
-from PySide6.QtGui import QColor, QFont, QPainter, QPen
+from PySide6.QtGui import QColor, QFont, QFontMetricsF, QPainter, QPen
 
 from ..l10n import tr
 from .switch_handle import switch_handle
@@ -78,9 +78,23 @@ def metal_part(painter: QPainter, part: QRectF, title: str, note: str) -> Anchor
     painter.setBrush(BARE)
     painter.drawEllipse(spot, 14, 10)
     painter.setPen(INK)
+    painter.save()
+    _fit_font(painter, title, part.width() - 8)
     painter.drawText(QRectF(part.left(), part.top() + 10, part.width(), 18), CENTER, title)
+    painter.restore()
     painter.drawText(QRectF(part.left(), spot.y() - 36, part.width(), 18), CENTER, note)
     return Anchor(QPointF(spot.x(), spot.y() + 8), 1)
+
+
+def _fit_font(painter: QPainter, text: str, width: float) -> None:
+    """Makes the painter's font smaller, down to two thirds, until `text` fits `width`."""
+    font = QFont(painter.font())
+    size = font.pointSizeF()
+    for _ in range(12):
+        if QFontMetricsF(font).horizontalAdvance(text) <= width or font.pointSizeF() < size * 0.67:
+            break
+        font.setPointSizeF(font.pointSizeF() * 0.95)
+    painter.setFont(font)
 
 
 def side_label(painter: QPainter, module: QRectF, top: bool, text: str) -> None:

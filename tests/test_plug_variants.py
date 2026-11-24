@@ -10,6 +10,7 @@ import pytest
 
 from okeydocu.devices.guide import MEASURE
 from okeydocu.devices.profitest_prime.guides import GUIDES
+from okeydocu.l10n import speaking
 from okeydocu.ui.measuring_window import MeasuringWindow
 
 AT_THE_PLUG = ("rlo", "rlo_25a", "riso", "riso_ramp")
@@ -56,3 +57,25 @@ def test_the_probes_find_their_places_on_the_schuko_plug(qtbot, app, function):
 def test_an_element_below_the_machine_takes_the_plug_stated_above(qtbot, app):
     window = opened(qtbot, app, "rlo", child_kind="electric_engine", **SCHUKO)
     assert window.guide.test_object == "schuko_plug"
+
+
+@pytest.mark.parametrize("function, drawing", [("rlo", "supply_pe"), ("riso", "main_switch_on")])
+def test_a_fixed_connection_is_measured_at_the_terminals(qtbot, app, function, drawing):
+    window = opened(qtbot, app, function, supply_connection="fixed")
+    assert window.guide.test_object == drawing
+    for index in range(1, window.count):
+        window.go(index)
+    window.bench.grab()
+    assert {lead.terminal for lead in window.guide.leads} <= set(window.bench.anchors)
+
+
+def test_stating_the_connection_at_the_first_station_changes_the_drawing(qtbot, app):
+    with speaking("de"):
+        window = opened(qtbot, app, "riso")
+        assert window.guide.test_object == "cee_plug"
+        window.form.fields["supply_connection"].setEditText("Schukostecker")
+        window.form.edited.emit()
+        assert window.guide.test_object == "schuko_plug"
+        window.form.fields["supply_connection"].setEditText("fest angeschlossen")
+        window.form.edited.emit()
+        assert window.guide.test_object == "main_switch_on"

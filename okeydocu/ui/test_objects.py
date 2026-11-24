@@ -30,7 +30,7 @@ from .test_object_parts import (
 )
 from .test_object_plug import cee_plug
 from .test_object_schuko import schuko_plug
-from .test_object_switch import main_switch
+from .test_object_switch import main_switch, main_switch_on, supply_pe
 
 TERMINALS = {2: (("1", "2"), ("N", "N")),
              4: (("1", "2"), ("3", "4"), ("5", "6"), ("N", "N"))}
@@ -95,4 +95,4 @@ def _lever(painter: QPainter, module: QRectF, on: bool) -> None:
 
 DRAWINGS = {"rcd": rcd, "main_switch": main_switch, "cee_plug": cee_plug, "imd": imd,
             "rcm": rcm, "touchable_part": touchable_part, "supply_cores": supply_cores,
-            "schuko_plug": schuko_plug}
+            "schuko_plug": schuko_plug, "main_switch_on": main_switch_on, "supply_pe": supply_pe}
