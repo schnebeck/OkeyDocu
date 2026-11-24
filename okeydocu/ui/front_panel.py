@@ -11,6 +11,8 @@ as nothing is reported. The position wanted pulses orange around its label until
 serves the measurement; then the position it stands on is ringed solid green. Parts named in `point_at` pulse, so a guide can show the socket, key or detent that comes
 next. A click on a detent asks for that position. `zoom_dial` moves in on the dial and back
 out to the whole panel, `zoom_parts` in on other parts, such as display and softkeys.
+`crop_to` shows one part alone, such as the key block with display and softkeys, framed by
+its own edge and with room around it, so it does not fill the bench.
 `show_screen` puts a view on the display, its rows at the height of the softkeys."""
 
 from __future__ import annotations
@@ -18,7 +20,7 @@ from __future__ import annotations
 import math
 
 from PySide6.QtCore import QEasingCurve, QPointF, QRectF, Qt, QVariantAnimation, Signal
-from PySide6.QtGui import QColor, QPainter, QPen
+from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
@@ -32,6 +34,8 @@ _TURN_MS = 700
 _ZOOM_MS = 500
 _ZOOM_MARGIN = 1.25  # of the dial's reach, around the dial when zoomed in
 _PULSE_MS = 1100
+_CROP_EDGE = 3.0  # drawing units kept around a part shown alone
+_CROP_ROOM = 1.5  # the view around a part shown alone, against the part's size
 
 
 class FrontPanel(QWidget):
@@ -60,6 +64,7 @@ class FrontPanel(QWidget):
         self._pulse.setLoopCount(-1)
         self._pulse.valueChanged.connect(self._pulsed)
         self.view = self.front.viewBoxF()
+        self.crop: QRectF | None = None  # the part shown alone, in drawing units
         self._zoom = QVariantAnimation(self, duration=_ZOOM_MS)
         self._zoom.setEasingCurve(QEasingCurve.Type.InOutCubic)
         self._zoom.valueChanged.connect(self._zoomed)
@@ -107,6 +112,7 @@ class FrontPanel(QWidget):
 
     def zoom_dial(self, close: bool) -> None:
         """Close in on the dial, or show the whole panel again."""
+        self.crop = None
         whole = self.front.viewBoxF()
         if close:
             reach = self.drawing.dial_reach * _ZOOM_MARGIN
@@ -118,6 +124,7 @@ class FrontPanel(QWidget):
 
     def zoom_parts(self, *ids: str) -> None:
         """Close in on the parts named, with some of the panel around them."""
+        self.crop = None
         found = [self._bounds(i) for i in ids if self.front.elementExists(i)]
         if not found:
             self.zoom_dial(False)
@@ -127,6 +134,21 @@ class FrontPanel(QWidget):
             goal = goal.united(bounds)
         margin = max(goal.width(), goal.height()) * (_ZOOM_MARGIN - 1)
         self._zoom_to(goal.adjusted(-margin, -margin, margin, margin))
+
+    def crop_to(self, *ids: str) -> None:
+        """Show only the parts named, with the panel's background around them."""
+        found = [self._bounds(i) for i in ids if self.front.elementExists(i)]
+        if not found:
+            self.zoom_dial(False)
+            return
+        frame = found[0]
+        for bounds in found[1:]:
+            frame = frame.united(bounds)
+        frame = frame.adjusted(-_CROP_EDGE, -_CROP_EDGE, _CROP_EDGE, _CROP_EDGE)
+        grow_x = frame.width() * (_CROP_ROOM - 1) / 2
+        grow_y = frame.height() * (_CROP_ROOM - 1) / 2
+        self.crop = frame
+        self._zoom_to(frame.adjusted(-grow_x, -grow_y, grow_x, grow_y))
 
     def _zoom_to(self, goal: QRectF) -> None:
         self._zoom.stop()
@@ -210,6 +232,10 @@ class FrontPanel(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         scale, corner = self._frame()
+        if self.crop is not None:
+            shown = QPainterPath()
+            shown.addRoundedRect(self._to_widget(self.crop), 8, 8)
+            painter.setClipPath(shown)
         box = self.front.viewBoxF()
         self.front.render(painter, QRectF(corner.x(), corner.y(), box.width() * scale,
                                           box.height() * scale))

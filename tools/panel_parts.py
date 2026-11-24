@@ -31,7 +31,7 @@ def line(x1, y1, x2, y2, width=1.5):
 
 
 def display() -> list[str]:
-    parts = [f'<rect x="457" y="439" width="313" height="195" rx="5" fill="none"'
+    parts = [f'<rect id="keypad" x="457" y="439" width="313" height="195" rx="5" fill="none"'
              f' stroke="{METAL}" stroke-width="1.5"/>', line(770, 439, 1020, 439),
              line(462, 456, 512, 456, 1), line(712, 456, 764, 456, 1)]
     leds = [("led-mains", "MAINS NETZ", 522, "start"), ("led-batt", "BATT", 585, "start"),

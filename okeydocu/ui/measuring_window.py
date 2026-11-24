@@ -37,7 +37,7 @@ from .station_bar import StationBar
 from .station_kinds import StationKinds
 
 
-RIGHT, GAP = 1, 3  # rows of the side column: what the station shows, and the room below
+RIGHT, GAP = 1, 2  # rows of the side column: what the station shows, and the room below
 NEXT_TEXTS = (N_("Prepared – next ▶"), N_("Turned – next ▶"), N_("Connected – next ▶"),
               N_("Set – next ▶"), N_("Next ▶"), N_("Done ▶"))
 

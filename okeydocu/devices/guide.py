@@ -57,7 +57,7 @@ class Action:
 class Station:
     """One station of a flow. `select` turns a drawn dial where the guide names a position and
     the panel has one, and otherwise lists its actions; `prepare` and `configure` list their
-    actions and point at the parts they name; `zoom` closes the panel in on parts."""
+    actions and point at the parts they name; `zoom` shows only those parts of the panel."""
 
     kind: str
     title: str = ""  # to be translated; empty: the kind's own name

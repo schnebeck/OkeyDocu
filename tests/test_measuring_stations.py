@@ -128,9 +128,21 @@ def test_the_button_that_goes_on_keeps_its_width_and_place(qtbot, app, plant):
         for index in range(window.count):
             window.go(index)
             qtbot.wait(10)
-            places.add((window.next.width(), window.next.mapTo(window, window.next.rect()
-                                                                .topLeft()).x()))
+            corner = window.next.mapTo(window, window.next.rect().topLeft())
+            places.add((window.next.width(), corner.x(), corner.y()))
     assert len(places) == 1
+
+
+def test_mode_and_limits_show_the_key_block_alone(qtbot, app, plant):
+    window = opened(qtbot, app, plant)
+    panel = window.bench.panel
+    with speaking("de"):
+        window.go_to(CONFIGURE)
+    keypad = panel._bounds("keypad")
+    assert panel.crop is not None and panel.crop.contains(keypad)
+    assert panel._zoom.endValue().contains(panel.crop)
+    window.go_to(MEASURE)
+    assert panel.crop is None
 
 
 @pytest.mark.parametrize("function, kind, terminals", [

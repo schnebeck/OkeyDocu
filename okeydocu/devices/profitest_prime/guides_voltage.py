@@ -66,7 +66,7 @@ AFTER_LINES = replace(
     settings=(Action((), N_("View: switch back to U with the top softkey."), screens.VIEW_U),
               *SINGLE.settings),
     flow=(Station(CONNECT, N_("Leads to L1 and PE"), (N_ASIDE,)),
-          Station(CONFIGURE, N_("Measuring path"), (SOFTKEYS,), zoom=("lcd",)),
+          Station(CONFIGURE, N_("Measuring path"), (SOFTKEYS,), zoom=("keypad",)),
           Station(MEASURE, N_("Single voltages"))))
 THREE_PHASE = Guide(
     "u3", N_("Voltage and phase sequence"), 12, *SWITCH,
@@ -83,7 +83,7 @@ THREE_PHASE = Guide(
     screen=screens.U3, result_key=screens.RESULT, drawing_features=PRINTED,
     flow=(Station(PLACE), Station(SELECT, N_("Rotary switch")),
           Station(CONNECT, N_("Leads to L1, L2 and L3")), Station(PREPARE, N_("Supply"), BATTERY),
-          Station(CONFIGURE, N_("View U3~"), (SOFTKEYS,), zoom=("lcd",)),
+          Station(CONFIGURE, N_("View U3~"), (SOFTKEYS,), zoom=("keypad",)),
           Station(MEASURE, N_("Line voltages"))),
     follow=AFTER_LINES)
 VOLTAGE = replace(SINGLE, variants=(Variant(CONDUCTORS[0], "3", THREE_PHASE),))

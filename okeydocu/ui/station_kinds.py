@@ -78,8 +78,10 @@ class StationKinds:
     def _enter_configure(self, station: Station) -> None:
         to_set = self._to_set()
         parts = [part for _, pressed in to_set for part in pressed] + parts_of(station.actions)
-        if station.zoom or parts:
-            self.bench.panel.zoom_parts(*station.zoom, *parts)
+        if station.zoom:
+            self.bench.panel.crop_to(*station.zoom)
+        elif parts:
+            self.bench.panel.zoom_parts(*parts)
         self.bench.panel.point_at(*parts)
         self.next.setText(tr("Set – next ▶"))
         advice = conductors_text(self.guide, self.place.stated(LINE_CONDUCTORS),

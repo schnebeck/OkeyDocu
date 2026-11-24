@@ -56,7 +56,7 @@ def flow(supply=BATTERY) -> tuple[Station, ...]:
     """The PROFITEST PRIME's six stations; `supply` says what the instrument runs on."""
     return (Station(PLACE), Station(SELECT, N_("Rotary switch")), Station(CONNECT),
             Station(PREPARE, N_("Supply"), supply),
-            Station(CONFIGURE, N_("Mode and limits"), (SOFTKEYS,), zoom=("lcd",)),
+            Station(CONFIGURE, N_("Mode and limits"), (SOFTKEYS,), zoom=("keypad",)),
             Station(MEASURE))
 
 
