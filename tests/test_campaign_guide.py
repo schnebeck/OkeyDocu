@@ -62,7 +62,7 @@ def test_the_first_measurement_of_a_kind_is_guided_and_lands_where_it_was_made(p
     assert not starter.is_first("rcd_time")
     with speaking("de"):
         starter._label()
-    assert starter.button.text() == "Nächstes Element …"
+    assert starter.button.text() == "Einrichten …"
 
 
 def test_a_repeat_only_asks_for_the_element_and_where_new_ones_hang_is_kept(page, app):

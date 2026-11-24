@@ -70,7 +70,7 @@ class GuideStarter(QWidget):
     def _label(self) -> None:
         function = self.choice.currentData()
         first = function is not None and self.is_first(function)
-        self.button.setText(tr("Guided measurement …") if first else tr("Next element …"))
+        self.button.setText(tr("Guided measurement …") if first else tr("Set up …"))
         self.button.setToolTip(tr("Leads through the first measurement of this kind step by"
                                   " step.") if first else
                                tr("Chooses or makes the element the next readings go to."))
