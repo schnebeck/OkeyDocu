@@ -7,8 +7,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 """Offered are the measurements the instrument's driver has a guide for. The first of a kind
-in a campaign is guided through all stations; once one is there, the button only asks for the
-element the next readings go to."""
+in a campaign is guided through all stations; once one is there, a repeat passes by what stays
+as it was."""
 
 from __future__ import annotations
 
@@ -70,10 +70,11 @@ class GuideStarter(QWidget):
     def _label(self) -> None:
         function = self.choice.currentData()
         first = function is not None and self.is_first(function)
-        self.button.setText(tr("Guided measurement …") if first else tr("Set up …"))
+        self.button.setText(tr("Guided measurement …") if first else tr("Guided repeat …"))
         self.button.setToolTip(tr("Leads through the first measurement of this kind step by"
                                   " step.") if first else
-                               tr("Chooses or makes the element the next readings go to."))
+                               tr("Leads through the next measurement of this kind, passing"
+                                  " by what stays as it was."))
 
     def _request(self) -> None:
         if self.choice.currentData() is not None:

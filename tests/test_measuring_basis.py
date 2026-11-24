@@ -8,7 +8,7 @@
 
 import re
 
-from okeydocu.devices.guide import CONFIGURE, SELECT
+from okeydocu.devices.guide import CONFIGURE
 from okeydocu.devices.profitest_prime.guides import GUIDES
 from okeydocu.l10n import speaking
 from okeydocu.ui.measuring_window import MeasuringWindow
@@ -52,9 +52,9 @@ def test_the_texts_follow_the_language():
     assert basis_text("no_such_function") == further_text("no_such_function") == ""
 
 
-def test_the_dial_station_shows_what_the_measurement_rests_on(qtbot, app):
+def test_mode_and_limits_show_what_the_measurement_rests_on(qtbot, app):
     window = opened(qtbot, app, "riso")
-    index = next(i for i, station in enumerate(window.guide.flow) if station.kind == SELECT)
+    index = next(i for i, station in enumerate(window.guide.flow) if station.kind == CONFIGURE)
     with speaking("de"):
         window.go(index)
         text = window.step_text.text()

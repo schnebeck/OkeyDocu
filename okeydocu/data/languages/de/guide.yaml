@@ -64,7 +64,6 @@ texts:
   a position without a measurement: eine Stellung ohne Messung
   "The instrument is set to {position}.": "Das Messgerät steht auf {position}."
   Turned – next ▶: Gedreht – weiter ▶
-  Take it ▶: Übernehmen ▶
   Set – next ▶: Eingestellt – weiter ▶
   repeat measurement: Wiederholmessung
   "Press the softkey beside a setting, choose the value with the arrow keys, confirm it and take it over with ✓.": "Softkey neben der Einstellung drücken, den Wert mit den Pfeiltasten wählen, bestätigen und mit ✓ übernehmen."
@@ -123,7 +122,8 @@ texts:
   Press ON/START and hold the probes until the result stands.: ON/START drücken und die Prüfspitzen halten, bis das Ergebnis steht.
   Guided measurement …: Geführt messen …
   Leads through the first measurement of this kind step by step.: Führt Schritt für Schritt durch die erste Messung dieser Art.
-  Chooses or makes the element the next readings go to.: Wählt oder legt das Element an, an das die nächsten Messwerte gehen.
+  Guided repeat …: Geführt wiederholen …
+  Leads through the next measurement of this kind, passing by what stays as it was.: Führt durch die nächste Messung dieser Art und überspringt, was gleich bleibt.
   not applicable: entfällt
   Measured between conductors the test point does not have, as the element states. Left out of the verdict and the report.: Zwischen Leitern gemessen, die es an der Prüfstelle laut Element nicht gibt. Zählt nicht zur Bewertung und steht nicht im Protokoll.
   "{value}, as stated above": "{value}, wie übergeordnet angegeben"

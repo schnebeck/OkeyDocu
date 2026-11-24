@@ -15,8 +15,8 @@ from ..campaign.line_conductors import LINE_CONDUCTORS
 from ..devices.guide import MEASURE, PLACE, Station
 from ..l10n import tr
 from ..vocabulary import setting_name
-from .station_texts import actions_text, conductors_text, fits, leads_text, mode_text, \
-    unsuited_text
+from .station_texts import actions_text, basis_text, conductors_text, fits, leads_text, \
+    mode_text, unsuited_text
 
 
 def parts_of(actions) -> list[str]:
@@ -53,7 +53,7 @@ class StationKinds:
         return found
 
     def _enter_place(self, station: Station) -> None:
-        self.next.setText(tr("Take it ▶") if self.repeat else tr("Prepared – next ▶"))
+        self.next.setText(tr("Prepared – next ▶"))
 
     def _enter_select(self, station: Station) -> None:
         """A dial is turned where the guide names a position and the panel has one; otherwise
@@ -86,7 +86,8 @@ class StationKinds:
                                  self.place.has_n)
         advice += unsuited_text(self.guide.function, self.place.stated)
         self.step_text.setText(mode_text([action for action, _ in to_set], station.actions,
-                                         self._settings(), self.place.title, advice))
+                                         self._settings(), self.place.title, advice)
+                               + basis_text(self.guide.function))
 
     def _enter_measure(self, station: Station) -> None:
         self.bench.panel.point_at(*parts_of(self.guide.steps))

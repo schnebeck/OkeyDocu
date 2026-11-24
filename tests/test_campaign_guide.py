@@ -62,10 +62,10 @@ def test_the_first_measurement_of_a_kind_is_guided_and_lands_where_it_was_made(p
     assert not starter.is_first("rcd_time")
     with speaking("de"):
         starter._label()
-    assert starter.button.text() == "Einrichten …"
+    assert starter.button.text() == "Geführt wiederholen …"
 
 
-def test_a_repeat_only_asks_for_the_element_and_where_new_ones_hang_is_kept(page, app):
+def test_a_repeat_runs_the_stations_again_and_where_new_ones_hang_is_kept(page, app):
     starter = page.free.starter
     starter.choice.setCurrentIndex(starter.choice.findData("rcd_time"))
     starter.button.click()
@@ -78,7 +78,7 @@ def test_a_repeat_only_asks_for_the_element_and_where_new_ones_hang_is_kept(page
     first.next.click()
     starter.button.click()
     repeat = page.guide_window
-    assert repeat.repeat and repeat.count == 1
+    assert repeat.repeat and repeat.count == len(repeat.flow) > 1
     assert page.new_parents[page.campaign_id] == root
 
 

@@ -12,7 +12,8 @@ from datetime import datetime
 import pytest
 
 from okeydocu.devices.base import LiveReading
-from okeydocu.devices.guide import CONFIGURE, MEASURE, PLACE, PREPARE
+from okeydocu.devices.guide import CONFIGURE, CONNECT, MEASURE, PLACE, PREPARE, SELECT
+from okeydocu.devices.profitest_prime.selector import selector_position
 from okeydocu.devices.profitest_prime.guides import MAINS, flow
 from okeydocu.devices.profitest_prime.info import DRIVER_KEY
 from okeydocu.devices.simulator import SimulatedMeter
@@ -89,18 +90,47 @@ def test_the_last_station_waits_for_the_result_of_its_own_measurement(qtbot, app
     assert window.next.text() == "Fertig ▶"
 
 
-def test_a_repeat_only_asks_for_the_element(qtbot, app, plant):
+def kinds_reached(window) -> list[str]:
+    reached = [window.kind]
+    while window.index < window.count - 1:
+        window.next.click()
+        reached.append(window.kind)
+    return reached
+
+
+def test_a_repeat_passes_by_the_switch_set_right_and_the_leads_in_place(qtbot, app, plant):
+    app.service.add_measurement(plant["campaign"], "rcd_time", [], asset_id=plant["switch"])
     window = opened(qtbot, app, plant, repeat=True)
-    chips = window.bar.chips
-    assert not chips[0].isHidden() and all(chip.isHidden() for chip in chips[1:])
+    assert all(not chip.isHidden() for chip in window.bar.chips[:window.count])
     assert "Wiederholmessung" in window.head.text()
-    with speaking("de"):
-        window.go_to(PLACE)
-    assert window.next.text() == "Übernehmen ▶"
+    window.show_selector(selector_position(window.guide.selector))
     window.form.fields["n_terminal"].setEditText("links")
-    window.next.click()
-    assert window.result() == window.DialogCode.Accepted
+    with speaking("de"):
+        reached = kinds_reached(window)
+    assert reached == [PLACE, PREPARE, CONFIGURE, MEASURE]
+    assert window.bench.progress == len(window.guide.leads)
     assert app.db.asset_features(plant["switch"])["n_terminal"] == "left"
+
+
+def test_a_repeat_shows_the_switch_set_wrong_and_leads_without_an_earlier_run(qtbot, app,
+                                                                             plant):
+    window = opened(qtbot, app, plant, repeat=True)
+    window.show_selector(selector_position(12))
+    with speaking("de"):
+        reached = kinds_reached(window)
+    assert reached == [PLACE, SELECT, CONNECT, PREPARE, CONFIGURE, MEASURE]
+
+
+def test_the_button_that_goes_on_keeps_its_width_and_place(qtbot, app, plant):
+    window = opened(qtbot, app, plant)
+    places = set()
+    with speaking("de"):
+        for index in range(window.count):
+            window.go(index)
+            qtbot.wait(10)
+            places.add((window.next.width(), window.next.mapTo(window, window.next.rect()
+                                                                .topLeft()).x()))
+    assert len(places) == 1
 
 
 @pytest.mark.parametrize("function, kind, terminals", [
@@ -139,3 +169,16 @@ def test_what_is_stated_above_stands_in_the_empty_field(qtbot, app, plant):
     assert field.lineEdit().placeholderText() == "3, wie übergeordnet angegeben"
     assert "fde2c4" not in field.styleSheet()
     assert hall is None and window.place.poles == 4
+
+
+def test_the_leads_are_painted_anew_while_the_panel_moves_out(qtbot, app, plant, monkeypatch):
+    window = opened(qtbot, app, plant)
+    zoom = window.bench.panel._zoom
+    with speaking("de"):
+        window.go_to(CONFIGURE)
+    qtbot.waitUntil(lambda: zoom.state() == zoom.State.Stopped, timeout=3000)
+    painted = []
+    monkeypatch.setattr(window.bench.leads_layer, "update", lambda *a: painted.append(a))
+    window.go_to(MEASURE)
+    qtbot.waitUntil(lambda: zoom.state() == zoom.State.Stopped, timeout=3000)
+    assert len(painted) > 2 and all(call == () for call in painted)

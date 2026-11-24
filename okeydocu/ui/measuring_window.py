@@ -9,9 +9,10 @@
 """The stations are the driver's flow for the measurement, in its order. No station can be
 skipped, but each can be left at once: "Next" does not wait for the instrument, the tester
 confirms by going on. The leads stay laid once they are. The measure station waits for the
-result; once it is there, "Done" ends the guide. A repeat measurement only has the first
-station: the element the readings go to, chosen or made on the way. An instrument without a
-drawing of its panel shows the test point instead of the bench."""
+result; once it is there, "Done" ends the guide. A repeat measurement passes by what stays as
+it was (see repeat_run). The button that goes on keeps one width whatever it says, so it stays
+where the hand expects it. An instrument without a drawing of its panel shows the test point
+instead of the bench."""
 
 from __future__ import annotations
 
@@ -23,7 +24,7 @@ from PySide6.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QPushButton,
 
 from ..devices import driver_info
 from ..devices.guide import CONFIGURE, CONNECT, PLACE, SELECT
-from ..l10n import tr
+from ..l10n import N_, tr
 from .bench_view import BenchView
 from .dial_station import POLL_MS, DialStation
 from .footer_bar import FooterBar
@@ -31,11 +32,23 @@ from .guide_run import GuideRun
 from .place_form import PlaceForm
 from .place_scene import PlaceScene
 from .place_station import PlaceStation
+from .repeat_run import RepeatRun
 from .station_bar import StationBar
 from .station_kinds import StationKinds
 
 
 RIGHT, GAP = 1, 3  # rows of the side column: what the station shows, and the room below
+NEXT_TEXTS = (N_("Prepared – next ▶"), N_("Turned – next ▶"), N_("Connected – next ▶"),
+              N_("Set – next ▶"), N_("Next ▶"), N_("Done ▶"))
+
+
+def widest(button: QPushButton, texts) -> int:
+    """The width `button` needs for the longest of `texts`."""
+    widths = []
+    for text in texts:
+        button.setText(text)
+        widths.append(button.sizeHint().width())
+    return max(widths)
 
 
 class Absent:
@@ -52,7 +65,7 @@ class Absent:
         return False
 
 
-class MeasuringWindow(PlaceStation, DialStation, StationKinds, GuideRun, QDialog):
+class MeasuringWindow(PlaceStation, DialStation, StationKinds, RepeatRun, GuideRun, QDialog):
     place_made = Signal(int)  # an element made on the way
     place_kept = Signal(int)  # the element readings now go to, made on the way or chosen
     parent_chosen = Signal(int)  # where new elements hang, kept until changed
@@ -74,6 +87,7 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, GuideRun, QDialog
         self.index = 0
         self.position = None  # the dial position the instrument reported last
         self.readings: dict[str, object] = {}  # by the function of the guide a result ends
+        self._recall_leads(campaign_id)
         self.setWindowTitle(tr(self.guide.title))
         self.resize(1440, 1020)
         self.head = QLabel()
@@ -104,6 +118,7 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, GuideRun, QDialog
         self.back = QPushButton(tr("◀ Back"))
         self.next = QPushButton()
         self.next.setDefault(True)
+        self.next.setFixedWidth(widest(self.next, [tr(text) for text in NEXT_TEXTS]))
         self.back.clicked.connect(lambda: self.go(self.index - 1))
         self.next.clicked.connect(lambda: self.go(self.index + 1))
         self._lay_out()
@@ -141,7 +156,7 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, GuideRun, QDialog
     @property
     def count(self) -> int:
         """How many stations this run has."""
-        return 1 if self.repeat else len(self.flow)
+        return len(self.flow)
 
     @property
     def kind(self) -> str:
@@ -161,12 +176,15 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, GuideRun, QDialog
                 self._keep_place()
             self.accept()
             return
-        if self.kind == PLACE and index > self.index:
+        forward = index > self.index
+        if self.kind == PLACE and forward:
             self._keep_place()
-        if self.kind == CONNECT and index > self.index:
+        if self.kind == CONNECT and forward:
             self.bench.finish()
-        self.index = max(index, 0)
+        self.index = self._past_passed(max(index, 0), 1 if forward else -1)
         self._take_guide()
+        if self._leads_passed():
+            self.bench.finish()
         station = self.flow[self.index]
         self.bar.show_station(self.index, self.count)
         self.step_title.setText(f"<b style='font-size:13pt'>{self.index + 1} · "

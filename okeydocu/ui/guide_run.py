@@ -37,10 +37,14 @@ class GuideRun:
     """Mixed into the measuring window, which holds `base_guide`, `bar`, `bench`, `index` and
     the place as entered in `shown`."""
 
+    def _chain(self, place) -> list[Guide]:
+        """The guides of a run at `place`, each with the leads its test point has."""
+        return [_without_n(guide, place.has_n)
+                for guide in self.base_guide.suited(place.stated).chain()]
+
     def _plan(self) -> None:
         """Lays the run out anew for the element as entered so far."""
-        chain = [_without_n(guide, self.shown.has_n)
-                 for guide in self.base_guide.suited(self.shown.stated).chain()]
+        chain = self._chain(self.shown)
         self.owners = tuple(guide for guide in chain for _ in guide.flow)
         self.flow = tuple(station for guide in chain for station in guide.flow)
         self.bar.set_names(tuple(station.heading() for station in self.flow))

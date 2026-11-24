@@ -37,7 +37,7 @@ def dial_text(guide: Guide, position) -> str:
         where = position.label or tr("a position without a measurement")
         state = (f"<p style='color:{CAUTION}'><b>"
                  f"{escape(tr('The instrument is set to {position}.', position=where))}</b></p>")
-    return f"<p>{turn}</p>{note}{state}{basis_text(guide.function)}"
+    return f"<p>{turn}</p>{note}{state}"
 
 
 def basis_text(function: str) -> str:
