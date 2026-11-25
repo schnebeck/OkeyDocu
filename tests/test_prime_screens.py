@@ -6,8 +6,12 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from datetime import datetime
+
 import pytest
 from PySide6.QtCore import QRectF
+
+from okeydocu.devices import LiveReading
 
 from okeydocu.devices.guide import CONFIGURE, MEASURE, PLACE, PREPARE
 from okeydocu.devices.profitest_prime import screens
@@ -16,6 +20,7 @@ from okeydocu.devices.profitest_prime.info import DRIVER_KEY
 from okeydocu.devices.profitest_prime.panel import DRAWING
 from okeydocu.devices.profitest_prime.selector import selector_position
 from okeydocu.l10n import speaking
+from okeydocu.model import MeterMeasurement, Parameter, Quantity, ResultValue, Verdict
 from okeydocu.ui.front_panel import FrontPanel
 from okeydocu.ui.measuring_window import MeasuringWindow
 from okeydocu.ui.screen_art import INK
@@ -96,6 +101,47 @@ def test_a_softkey_row_shows_what_the_element_states(panel):
     first = panel.grab().toImage()
     panel.show_screen(screens.RCD_TIME, {"rated_residual_current": "300 mA"}.get)
     assert panel.grab().toImage() != first
+
+
+def test_a_reading_shows_its_value_in_place_of_the_dashes(panel):
+    display = panel.part_rect("lcd")
+    left = QRectF(display.left(), display.top(), display.width() * 0.55, display.height())
+    panel.show_screen(screens.RCD_TIME)
+    waiting = panel.grab().toImage()
+    panel.show_screen(screens.RCD_TIME, None, {"ta": "24\u202fms", "u_ln": "230\u202fV"})
+    assert panel.grab().toImage() != waiting
+    # A value the view has no row for changes nothing.
+    panel.show_screen(screens.RCD_TIME, None, {"riso": "5\u202fM\u03a9"})
+    assert panel.grab().toImage() == waiting
+    assert ink(panel, left) > 0
+
+
+def test_every_view_can_be_drawn_with_the_values_of_a_result(panel):
+    for view in VIEWS:
+        named = [key for row in view.rows for key in getattr(row, "values", ())]
+        panel.show_screen(view, None, {key: "1,23\u202fV" for key in named})
+        assert not panel.grab().toImage().isNull()
+
+
+def test_the_values_of_a_result_come_onto_the_display_while_measuring(qtbot, app):
+    customer = app.db.add_customer("Muster AG")
+    machine = app.db.add_asset(customer, "machine", "Presse")
+    campaign = app.service.create(machine, "Prüfung", "Tester")
+    with speaking("de"):
+        window = MeasuringWindow(app, campaign, DRIVER_KEY, "rlo", machine)
+        qtbot.addWidget(window)
+        window.show()
+        window.go_to(MEASURE)
+        shown = window.bench.panel
+        assert shown.values == {}
+        value = ResultValue("rlo", "RLO", Quantity.parse("0.07Ω"), Verdict.PASSED)
+        taken = MeterMeasurement(uid="u1", function="rlo", taken_at=datetime(2026, 3, 1, 10),
+                                 verdict=Verdict.PASSED, results=(value,),
+                                 parameters=(Parameter("conductor", "L2-PE"),))
+        window.show_reading(LiveReading(taken, datetime(2026, 3, 1, 10)))
+        assert shown.values == {"rlo": "70\u202fm\u03a9", "conductor": "L2-PE"}
+        window.go_to(CONFIGURE)  # the settings are shown without a result
+        assert shown.values == {}
 
 
 def test_the_display_follows_the_stations(qtbot, app):

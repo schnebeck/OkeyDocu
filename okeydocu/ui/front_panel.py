@@ -53,6 +53,7 @@ class FrontPanel(QWidget):
         self.pointed: tuple[str, ...] = ()
         self.screen: Screen | None = None
         self.stated = None  # what the element measured states, by feature key
+        self.values: dict[str, str] = {}  # of a result that stands, by their keys
         self.angle = 0.0
         self._goal: float | None = None  # the detent angle the knob turns to, so a repeated
         # report does not start the turn again
@@ -161,10 +162,11 @@ class FrontPanel(QWidget):
         self.update()
         self.viewed.emit()
 
-    def show_screen(self, screen: Screen | None, stated=None) -> None:
+    def show_screen(self, screen: Screen | None, stated=None,
+                    values: dict[str, str] | None = None) -> None:
         """The view on the display, None for a dark one. `stated` fills in what a softkey row
-        shows of the element measured."""
-        self.screen, self.stated = screen, stated
+        shows of the element measured, `values` what a result brought, as number and unit."""
+        self.screen, self.stated, self.values = screen, stated, values or {}
         self.update()
 
     def point_at(self, *ids: str) -> None:
@@ -252,7 +254,7 @@ class FrontPanel(QWidget):
             return
         centres = [self.part_rect(key).center().y() for key in self.drawing.softkeys]
         paint_screen(painter, self.part_rect(self.drawing.display), centres, self.screen,
-                     self.stated)
+                     self.stated, self.values)
 
     def _paint_detent(self, painter: QPainter) -> None:
         if self.right and self.front.elementExists(f"pos-{self.actual}"):

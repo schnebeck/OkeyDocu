@@ -101,11 +101,13 @@ def actions_text(actions) -> str:
 
 
 def mode_text(to_set, how, settings: list[tuple[str, str]], element: str,
-              advice: str = "") -> str:
+              advice: str = "", links=()) -> str:
     """`to_set` are the settings of the measurement, `how` the station's own actions, such as
     how its keys set a value; `settings` what the element states for the measurement, as (name,
-    value); `advice` stands below."""
-    items = "".join(f"<li>{escape(tr(action.text))}</li>" for action in to_set)
+    value); `advice` stands below; `links` follow the settings one by one, as markup."""
+    links = [*links, *[""] * len(to_set)]
+    items = "".join(f"<li>{escape(tr(action.text))}{link}</li>"
+                    for action, link in zip(to_set, links))
     stated = "".join(f"<li>{escape(name)}: <b>{escape(value)}</b></li>"
                      for name, value in settings)
     html = (f"<ol>{items}</ol>" if items else "") + actions_text(how) + advice

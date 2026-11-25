@@ -14,6 +14,8 @@ from __future__ import annotations
 from ..campaign.line_conductors import LINE_CONDUCTORS
 from ..devices.guide import MEASURE, PLACE, Station
 from ..l10n import tr
+from ..model import CONDUCTOR, conductor_of
+from ..reporting.language import value_text
 from ..vocabulary import setting_name
 from .limit_text import limit_text
 from .station_texts import actions_text, basis_text, conductors_text, fits, leads_text, \
@@ -35,9 +37,16 @@ class StationKinds:
 
     def _on_display(self) -> None:
         """The instrument's display at this station: dark while the element is chosen, the
-        view of the function from then on, with a reading on it while measuring."""
+        view of the function from then on; while measuring with the softkey that shares a
+        result, and with the values of the result once it has arrived."""
         screen = None if self.kind == PLACE else self._view(self.kind == MEASURE)
-        self.bench.panel.show_screen(screen, self.place.stated)
+        result = self.reading if self.kind == MEASURE else None
+        values = {found.key: value_text(found.quantity.raw)
+                  for found in (result.measurement.results if result else ())
+                  if found.quantity is not None}
+        if result is not None:
+            values[CONDUCTOR] = conductor_of(result.measurement.parameters)
+        self.bench.panel.show_screen(screen, self.place.stated, values)
 
     def _to_set(self) -> list[tuple[object, tuple[str, ...]]]:
         """The settings the view on the display has, each with the parts to press. One named
@@ -78,20 +87,30 @@ class StationKinds:
         self.step_text.setText(actions_text(station.actions))
 
     def _enter_configure(self, station: Station) -> None:
-        to_set = self._to_set()
-        parts = [part for _, pressed in to_set for part in pressed] + parts_of(station.actions)
+        parts = [part for _, pressed in self._to_set() for part in pressed]
+        parts += parts_of(station.actions)
         if station.zoom:
             self.bench.panel.crop_to(*station.zoom)
         elif parts:
             self.bench.panel.zoom_parts(*parts)
-        self.bench.panel.point_at(*parts)
         self.next.setText(tr("Set – next ▶"))
+        self._show_configure()
+
+    def _show_configure(self) -> None:
+        """What the station says and points at: the settings with the softkeys beside them,
+        or the keys of the setting list being looked at."""
+        station, to_set = self.flow[self.index], self._to_set()
+        if not self._list_on_display():
+            self._on_display()
+            self.bench.panel.point_at(*[part for _, pressed in to_set for part in pressed],
+                                      *parts_of(station.actions))
         advice = conductors_text(self.guide, self.place.stated(LINE_CONDUCTORS),
                                  self.place.has_n)
         advice += unsuited_text(self.guide.function, self.place.stated)
         advice += limit_text(self.guide.function, self.place.stated, self.place.title)
         self.step_text.setText(mode_text([action for action, _ in to_set], station.actions,
-                                         self._settings(), self.place.title, advice)
+                                         self._settings(), self.place.title, advice,
+                                         self._list_links())
                                + basis_text(self.guide.function))
 
     def _enter_measure(self, station: Station) -> None:

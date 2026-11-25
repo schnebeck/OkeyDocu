@@ -214,3 +214,14 @@ they are settings.
 
 The row of position 05 is taken from the picture of that view in the operating instructions;
 it was not photographed.
+
+Once a result has arrived at the measure station, the readings of the view carry its values.
+
+The setting lists are kept in `okeydocu/devices/profitest_prime/setting_lists.py`, by view and
+softkey row, each read off the display: for the measuring path of U and ZLOOP, the measuring
+time, the test voltage and the limits of RLO and RISO, the current and the voltage thresholds
+of the rising voltage, the RCD data with its four settings and the limits of the three RCD
+views, the limits and the DC variant of ZLOOP, and the limits of Ures. A list or a page that
+was not seen is left out: the test signal of RLO, the protective device of ZLOOP, the second
+page of the rated current of an RCD, and the lists of IMD, RCM, IL, the clamp and ΔU. At the
+station "Mode and limits" a link beside a setting shows its list on the drawn display.

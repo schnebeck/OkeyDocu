@@ -43,5 +43,6 @@ class DriverInfo:
     panel: object | None = None  # its front panel as drawn, for guided measurements
     guide: Callable[[str], object] | None = None  # function key to its guide, or None
     guided: tuple[str, ...] = ()  # the functions it has a guide for
+    setting_list: Callable[[object, object], object] | None = None  # view, softkey row: its list
     preparing: str = PREPARING  # shown while the program gets the instrument ready
     simulated: bool = False  # random readings: shown as such, never signed

@@ -63,6 +63,9 @@ texts:
   Place probe PE (L2) on the incoming N terminal.: Spitze PE (L2) an die zugeführte N-Klemme setzen.
   Missing details are stored at the element. Without them the drawing shows the usual layout.: Fehlende Angaben werden am Element gespeichert. Ohne sie zeigt die Zeichnung die übliche Bauform.
   Prepared – next ▶: Vorbereitet – weiter ▶
+  Show its list: Liste zeigen
+  Next in its list: Weiter in der Liste
+  Back to the view: Zurück zur Messansicht
   "{title} (new)": "{title} (neu)"
   "Turn the rotary switch to {position}.": "Drehschalter auf {position} stellen."
   "Measures the touch voltage and the tripping time at the rated residual current.": "Misst die Berührspannung und die Auslösezeit beim Bemessungsdifferenzstrom."

@@ -17,6 +17,7 @@ from . import mapping, pairing, panel
 from .discovery import DRIVER_KEY, LABEL, find_instruments
 from .driver import ProfitestPrimeDriver
 from .guides import GUIDES, guide_for
+from .setting_lists import setting_list
 
 PAIRING_BUTTON = N_("Set up {instrument} via Bluetooth …")
 PAIRING_STEPS = N_(
@@ -48,5 +49,6 @@ DRIVER = DriverInfo(
     panel=panel.DRAWING,
     guide=guide_for,
     guided=tuple(GUIDES),
+    setting_list=setting_list,
     preparing=PREPARING,
 )

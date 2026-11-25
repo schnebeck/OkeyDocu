@@ -30,6 +30,7 @@ from .button_width import widest
 from .dial_station import POLL_MS, DialStation
 from .footer_bar import FooterBar
 from .guide_run import GuideRun
+from .list_station import ListStation
 from .place_form import PlaceForm
 from .place_scene import PlaceScene
 from .place_station import PlaceStation
@@ -57,7 +58,8 @@ class Absent:
         return False
 
 
-class MeasuringWindow(PlaceStation, DialStation, StationKinds, RepeatRun, GuideRun, QDialog):
+class MeasuringWindow(PlaceStation, DialStation, StationKinds, ListStation, RepeatRun, GuideRun,
+                      QDialog):
     place_made = Signal(int)  # an element made on the way
     place_kept = Signal(int)  # the element readings now go to, made on the way or chosen
     parent_chosen = Signal(int)  # where new elements hang, kept until changed
@@ -87,6 +89,8 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, RepeatRun, GuideR
         self.scene = PlaceScene()
         self.bench = BenchView(info.panel) if info.panel is not None else Absent()
         self.softkeys = info.panel.softkeys if info.panel is not None else ()
+        self.setting_list = info.setting_list
+        self.listed: tuple[int, int] | None = None
         self.left = QStackedWidget()
         self.left.addWidget(self.scene)
         if self.bench:
@@ -102,6 +106,7 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, RepeatRun, GuideR
         self.step_text.setWordWrap(True)
         self.step_text.setTextFormat(Qt.TextFormat.RichText)
         self.step_text.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.step_text.linkActivated.connect(self._follow_list)
         self.right = QStackedWidget()
         self.right.addWidget(self.form)
         self.right.addWidget(self.step_text)
@@ -179,6 +184,7 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, RepeatRun, GuideR
         if self.kind == CONNECT and forward:
             self.bench.finish()
         self.index = self._past_passed(max(index, 0), 1 if forward else -1)
+        self.listed = None  # a setting list is looked at in one station only
         self._take_guide()
         if self._leads_passed():
             self.bench.finish()

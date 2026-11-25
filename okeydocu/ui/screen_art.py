@@ -8,8 +8,9 @@
 
 """The display is laid out in rows, each at the height of the softkey beside it: the header
 with the function's sign first, then readings, measuring path or small lines. A column at the
-right edge holds what each softkey does, a bracket where it does nothing. All sizes are in
-dots, 128 across the display, so the view keeps its proportions at any zoom."""
+right edge holds what each softkey does, a bracket where it does nothing. A reading shows
+three dashes until a result stands, then its value with the unit the result came with. All
+sizes are in dots, 128 across the display, so the view keeps its proportions at any zoom."""
 
 from __future__ import annotations
 
@@ -18,22 +19,30 @@ import re
 from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QColor, QFont, QFontMetricsF, QPainter, QPen, QPolygonF
 
-from ..devices.screen import Key, Line, Path, Reading, Screen
+from ..devices.screen import Key, Line, Path, Reading, Screen, SettingList
+from ..l10n.quantities import NARROW
+from ..model import CONDUCTOR
 
 INK, PAPER = QColor("#27304a"), QColor("#c9cfb8")
 GRID = 128.0  # dots across the display
 COLUMN = 31.0  # width of the softkey column
 ROW = 0.9  # of the distance between two softkeys, the height a row takes
 PLACEHOLDER = re.compile(r"\{(\w+)\}")
+DASHES = re.compile(r"---\S*")  # a value still open in a small line, with its unit
 CENTER, LEFT, RIGHT = (Qt.AlignmentFlag.AlignCenter,
                        Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
                        Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
 
 
 def paint_screen(painter: QPainter, box: QRectF, centres: list[float], screen: Screen,
-                 stated=None) -> None:
+                 stated=None, values: dict[str, str] | None = None) -> None:
     """`box` is the display on the widget, `centres` the heights of the softkeys beside it
-    from the top; `stated` tells what the element measured states, by feature key."""
+    from the top; `stated` tells what the element measured states, by feature key; `values`
+    are those of a result that stands, as number and unit by their keys."""
+    if isinstance(screen, SettingList):  # the second kind of view has its own layout
+        from .list_art import paint_list
+        return paint_list(painter, box, centres, screen, stated)
+    values = values or {}
     dot = box.width() / GRID
     pitch = (centres[-1] - centres[0]) / max(len(centres) - 1, 1) or box.height()
     height = pitch * ROW
@@ -46,7 +55,7 @@ def paint_screen(painter: QPainter, box: QRectF, centres: list[float], screen: S
         if index == 0:
             _header(painter, area, screen.sign, dot)
         elif index <= len(screen.rows):
-            _row(painter, area, screen.rows[index - 1], dot)
+            _row(painter, area, screen.rows[index - 1], dot, values)
         _key(painter, slot, screen.keys[index] if index < len(screen.keys) else None, dot,
              stated)
     painter.restore()
@@ -86,15 +95,25 @@ def _header(painter: QPainter, area: QRectF, sign: str, dot: float) -> None:
     painter.drawLine(area.bottomLeft(), area.bottomRight())
 
 
-def _row(painter: QPainter, area: QRectF, row, dot: float) -> None:
+def _found(values: dict[str, str], keys: tuple[str, ...]) -> str:
+    """The first of `keys` the result has a value for, as number and unit."""
+    return next((values[key] for key in keys if values.get(key)), "")
+
+
+def _row(painter: QPainter, area: QRectF, row, dot: float, values: dict[str, str]) -> None:
     if isinstance(row, Reading):
         _text(painter, QRectF(area.left(), area.top(), area.width() * 0.6, 9 * dot), row.label,
               8 * dot, bold=True, align=LEFT)
+        number, _, measured = _found(values, row.values).rpartition(NARROW)
         unit = QRectF(area.right() - 24 * dot, area.bottom() - 15 * dot, 24 * dot, 14 * dot)
-        _text(painter, unit, row.unit, 12 * dot, bold=True, align=RIGHT)
+        _text(painter, unit, measured if number else row.unit, 12 * dot, bold=True, align=RIGHT)
+        if number:
+            figures = QRectF(area.left(), unit.top(), unit.left() - area.left() - 3 * dot,
+                             unit.height())
+            _text(painter, figures, number, 13 * dot, bold=True, align=RIGHT)
         painter.setPen(QPen(INK, 1.6 * dot, Qt.PenStyle.SolidLine, Qt.PenCapStyle.FlatCap))
         level = area.bottom() - 8 * dot
-        for dash in range(3):
+        for dash in range(0 if number else 3):
             start = unit.left() - (10 + dash * 9) * dot
             painter.drawLine(QPointF(start, level), QPointF(start + 6 * dot, level))
         painter.setPen(QPen(INK, max(0.6 * dot, 1.0), Qt.PenStyle.DotLine))
@@ -102,9 +121,13 @@ def _row(painter: QPainter, area: QRectF, row, dot: float) -> None:
     elif isinstance(row, Path):
         box = area.adjusted(0, 3 * dot, -2 * dot, -3 * dot)
         _frame(painter, box, dot)
-        _text(painter, box.adjusted(3 * dot, 0, -3 * dot, 0), row.text, 11 * dot, bold=True)
+        # A result names the pair of conductors it was taken between.
+        _text(painter, box.adjusted(3 * dot, 0, -3 * dot, 0), values.get(CONDUCTOR) or row.text,
+              11 * dot, bold=True)
     elif isinstance(row, Line):
-        _text(painter, area.adjusted(0, area.height() * 0.3, 0, 0), row.text, 7.5 * dot,
+        known = iter(row.values)
+        text = DASHES.sub(lambda open_: values.get(next(known, ""), "") or open_[0], row.text)
+        _text(painter, area.adjusted(0, area.height() * 0.3, 0, 0), text, 7.5 * dot,
               align=RIGHT)
 
 

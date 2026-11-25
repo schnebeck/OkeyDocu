@@ -82,6 +82,7 @@ class GuideRun:
         if self.kind == MEASURE and self.guide.ended_by(function):
             self.bench.panel.point_at()
             self.step_text.setText(self.measure_text())
+            self._on_display()
 
     def measure_text(self) -> str:
         return measure_text(self.guide, self.reading, self._voltage_warnings())

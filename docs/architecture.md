@@ -658,7 +658,20 @@ stand for what the element states, such as the rated residual current of the RCD
 application draws the view in its own strokes (`ui/screen_art.py`) into the part of the panel
 the drawing names as its display, each row at the height of the softkey beside it, so the key a
 guide points at stands next to its label. The display is dark while the element is chosen and
-carries the share symbol once a reading stands.
+carries the share symbol at the measure station. A reading and a small line name the values
+of a result they show, by the keys of the vocabulary: once the result has arrived, they carry
+its values with the unit it came with in place of their dashes, and the measuring path names
+the pair of conductors measured.
+
+A softkey of a setting opens its setting list on the instrument, the second kind of view
+(`SettingList`): the settings of that softkey in a column on the left, the choices of the
+selected one on the right, page by page. The driver hands out the list of a view's softkey row
+(`DriverInfo.setting_list`, for the PROFITEST PRIME `setting_lists.py`). At the station that
+sets the instrument up, each setting with a known list carries a link (`ui/list_station.py`):
+it puts the list on the drawn display (`ui/list_art.py`), steps through the settings of the
+softkey and returns to the view. The choice the element states, such as the rated residual
+current of the RCD, is framed, on the page it stands on, and the softkeys that work a list are
+pointed at.
 
 A guide names a setting by the softkey row that shows it, not by a key. Where several dial
 positions serve one measurement, the guide names the view of each (`Guide.screens`); the view

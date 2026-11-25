@@ -39,8 +39,19 @@ CLAMP_RATIO = Key(("SETTING", "V/A"), "SETTING")
 EXTRA_MODE = Key(("ΔU",))  # the function chosen at the position Extra
 DU_CIRCUIT = Key(("L1-N", "IN", "gL/gG"))
 DU_OFFSET = Key(("OFFSET", "ON|OFF"), "OFF")
-SUPPLY = Line("U ---V   f ---Hz")
-FREQUENCY = Line("f ---")
+SUPPLY = Line("U ---V   f ---Hz", ("u_ln", "f"))
+FREQUENCY = Line("f ---", ("f",))
+EARTH = Line("RE ---Ω", ("re",))
+# Readings several views share, each with the values of a result it shows.
+VOLTS = Reading("U", "V", ("u", "u_lpe", "u_ln"))
+LINE_VOLTS = (Reading("UL3-L1", "V", ("u_l3l1",)), Reading("UL1-L2", "V", ("u_l1l2",)),
+              Reading("UL2-L3", "V", ("u_l2l3",)))
+R_LOW = Reading("RLO", "Ω", ("rlo",))
+TEST_VOLTS = Reading("UISO", "V", ("u_iso",))
+TOUCH = Reading("UIΔN", "V", ("u_idn",))
+TRIP_TIME = Reading("tA", "s", ("ta",))
+TRIP_CURRENT = Reading("IΔ", "mA", ("i_f",))
+EARTH_R = Reading("RE", "Ω", ("re",))
 VIEW_U, VIEW_U3 = Key(("U", "U3~"), "U"), Key(("U", "U3~"), "U3~")
 
 
@@ -54,49 +65,46 @@ Z_PATH, Z_PATH_RCD = path_key("01/09"), path_key("01/03")
 
 
 def _zloop(second: Key | None, path: Key = Z_PATH) -> Screen:
-    return Screen("ZLOOP", (Reading("Z", "Ω"), Reading("IK", "A"), Path("L1-PE"), SUPPLY),
+    loop = Reading("Z", "Ω", ("zloop", "z_dc", "z_rlo", "z_half", "zlpe", "zln", "z"))
+    return Screen("ZLOOP", (loop, Reading("IK", "A", ("ik",)), Path("L1-PE"), SUPPLY),
                   (DEVICE, second, Z_LIMITS, path, None))
 
 
-U = Screen("U", (None, Reading("U", "V"), Path("L1-PE"), FREQUENCY),
+U = Screen("U", (None, VOLTS, Path("L1-PE"), FREQUENCY),
            (VIEW_U, None, None, U_PATH, None))
-U3 = Screen("U3~", (Reading("UL3-L1", "V"), Reading("UL1-L2", "V"), Reading("UL2-L3", "V"),
-                    FREQUENCY),
-            (VIEW_U3, None, None, None, None))
-RLO = Screen("RLO", (Reading("RLO", "Ω"), None, None, Line("ROFFSET 0,00Ω")),
+U3 = Screen("U3~", (*LINE_VOLTS, FREQUENCY), (VIEW_U3, None, None, None, None))
+RLO = Screen("RLO", (R_LOW, None, None, Line("ROFFSET 0,00Ω")),
              (TIME, SIGNAL, LIMITS, OFFSET, None))
-RLO_25A = Screen("RLO 25A", (Reading("RLO", "Ω"), Reading("I", "A"), None, None),
+RLO_25A = Screen("RLO 25A", (R_LOW, Reading("I", "A", ("i",)), None, None),
                  (None, Key(("IHIGH",)), LIMITS, OFFSET, None))
-RISO = Screen("RISO", (Reading("RISO", "Ω"), Reading("U", "V"), Path("N-PE"),
-                       Reading("UISO", "V")),
+RISO = Screen("RISO", (Reading("RISO", "Ω", ("riso",)), VOLTS, Path("N-PE"), TEST_VOLTS),
               (TIME, TEST_VOLTAGE, LIMITS, RISO_PATH, None))
-RISO_RAMP = Screen("RISO◢", (Line("UN"), Reading("U", "V"), Path("L1-PE"), Reading("UISO", "V")),
+RISO_RAMP = Screen("RISO◢", (Line("UN"), VOLTS, Path("L1-PE"), TEST_VOLTS),
                    (CURRENT_LIMIT, TEST_VOLTAGE, LIMITS, RISO_PATH, None))
-RCD_RAMP = Screen("RCD", (Reading("UIΔN", "V"), Reading("IΔ", "mA"), Reading("RE", "Ω"), SUPPLY),
+RCD_RAMP = Screen("RCD", (TOUCH, TRIP_CURRENT, EARTH_R, SUPPLY),
                   (RCD, EARTHING, LIMITS, None, None))
-RCD_TIME = Screen("RCD", (Reading("UIΔN", "V"), Reading("tA", "s"), Reading("RE", "Ω"), SUPPLY),
+RCD_TIME = Screen("RCD", (TOUCH, TRIP_TIME, EARTH_R, SUPPLY),
                   (RCD, TEST_CURRENT, LIMITS, None, None))
-RCD_BOTH = Screen("RCD", (Reading("UIΔN", "V"), Reading("tA", "s"), Reading("IΔ", "mA"),
-                          Line("RE ---Ω")),
+RCD_BOTH = Screen("RCD", (TOUCH, TRIP_TIME, TRIP_CURRENT, EARTH),
                   (None, RCD, LIMITS, None, None))
 ZLOOP = _zloop(None)
 ZLOOP_DC = _zloop(DC_VARIANT)
 ZLOOP_COMBINED = _zloop(RCD, Z_PATH_RCD)
 ZLOOP_REDUCED = _zloop(RCD)
-URES = Screen("Ures", (Reading("U", "V"), Reading("Ures", "V"), Reading("tU", "s"), FREQUENCY),
+URES = Screen("Ures", (VOLTS, Reading("Ures", "V"), Reading("tU", "s"), FREQUENCY),
               (None, None, LIMITS, None, None))
-IMD = Screen("IMD", (Reading("RL-PE", "MΩ"), Reading("tA", "s"), Line("Rmin   Rmax"), SUPPLY),
+IMD = Screen("IMD", (Reading("RL-PE", "MΩ"), TRIP_TIME, Line("Rmin   Rmax"), SUPPLY),
              (None, IMD_SEQUENCE, IMD_START, IMD_PATH, None))
-RCM = Screen("RCM", (Reading("UIΔN", "V"), Reading("tA", "s"), Reading("IΔ", "mA"),
-                     Line("RE ---Ω")),
+RCM = Screen("RCM", (TOUCH, TRIP_TIME, TRIP_CURRENT, EARTH),
              (None, RCM_TEST, LIMITS, None, None))
-IL = Screen("IL", (Reading("IL", "A"), None, None, FREQUENCY),
+IL = Screen("IL", (Reading("IL", "A", ("il",)), None, None, FREQUENCY),
             (None, None, LIMITS, None, None))
-I_CLAMP = Screen("ILAMP", (Reading("IL/AMP", "A"), None, Path("100mV/mA"), None),
+I_CLAMP = Screen("ILAMP", (Reading("IL/AMP", "A", ("i_clamp",)), None, Path("100mV/mA"), None),
                  (Key(("I",)), CLAMP_RATIO, LIMITS, None, None))
 T_RH = Screen("T, r.H.", (Reading("T", "°C"), Reading("r.H.", "%"), None, None),
               (None, Key(("°C", "°F"), "°C"), None, None, None))
-DELTA_U = Screen("ΔU", (Reading("ΔU", "%"), Reading("ZL-N", "Ω"), None, SUPPLY),
+DELTA_U = Screen("ΔU", (Reading("ΔU", "%", ("u_delta",)), Reading("ZL-N", "Ω", ("zln",)), None,
+                        SUPPLY),
                  (EXTRA_MODE, DU_CIRCUIT, LIMITS, DU_OFFSET, None))
 
 # By the value the instrument reports for the position; the view it opens with comes first.
