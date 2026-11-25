@@ -108,6 +108,7 @@ class SidePanel(QScrollArea):
     def __init__(self):
         super().__init__()
         self.sections: list[Section] = []
+        self.widest = 0  # the most its content has asked for
         inner = QWidget()
         self.column = QVBoxLayout(inner)
         self.column.setContentsMargins(0, 0, 0, 0)
@@ -118,10 +119,19 @@ class SidePanel(QScrollArea):
         self.setFrameShape(QFrame.Shape.NoFrame)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
+    def eventFilter(self, watched, event) -> bool:
+        # A scroll area keeps a change of what its content needs to itself. Whoever lays
+        # the panel out has to hear of it, or content grown wider is cut at the edge.
+        if watched is self.widget() and event.type() == QEvent.Type.LayoutRequest:
+            self.updateGeometry()
+        return super().eventFilter(watched, event)
+
     def minimumSizeHint(self) -> QSize:
-        """As narrow as the sections allow, but free in height: that is what scrolls."""
-        width = self.widget().minimumSizeHint().width() + self.verticalScrollBar().sizeHint().width()
-        return QSize(width, 0)
+        """As narrow as the sections allow, but free in height: that is what scrolls. The
+        width never falls back: a panel that followed every name it shows would twitch."""
+        needed = self.widget().minimumSizeHint().width()
+        self.widest = max(self.widest, needed + self.verticalScrollBar().sizeHint().width())
+        return QSize(self.widest, 0)
 
     def add(self, title: str, content: QWidget, grows: bool = True) -> Section:
         section = Section(title, content, grows)

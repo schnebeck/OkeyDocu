@@ -8,8 +8,6 @@
 
 from __future__ import annotations
 
-from html import escape
-
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
@@ -25,6 +23,7 @@ from PySide6.QtWidgets import (
 from ..campaign.service import LOCATION_SEPARATOR
 from ..l10n import tr
 from .common import AppContext
+from .elided_label import ElidedLink
 from .kind_catalog import KindCatalog
 
 WAY = "  ›  "
@@ -68,10 +67,8 @@ class PlaceLine(QWidget):
         self.asset_id: int | None = None
         self.icon = QLabel()
         self.way = _WayLabel()
-        self.name = QLabel()
-        self.name.setTextFormat(Qt.TextFormat.RichText)
-        self.name.setToolTip(tr("Show in the structure tree"))
-        self.name.linkActivated.connect(lambda _: self.chosen.emit(self.asset_id))
+        self.name = ElidedLink()  # gives way to a narrow panel instead of widening it
+        self.name.clicked.connect(lambda: self.chosen.emit(self.asset_id))
         self.button = QToolButton()
         fallback = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogDetailedView)
         self.button.setIcon(QIcon.fromTheme("document-edit", fallback))
@@ -98,6 +95,6 @@ class PlaceLine(QWidget):
         parts = self.app.service.place_path(asset_id).split(LOCATION_SEPARATOR)
         self.way.show_way(WAY.join(parts[:-1]))
         self.way.setVisible(len(parts) > 1)
-        self.name.setText(f'<a href="element" style="text-decoration:none">'
-                          f'{escape(parts[-1])}</a>')
+        self.name.setText(parts[-1])
+        self.name.setToolTip(tr("{name}: show in the structure tree", name=parts[-1]))
         self.button.setVisible(movable)

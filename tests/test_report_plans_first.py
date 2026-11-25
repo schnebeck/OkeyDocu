@@ -1,11 +1,11 @@
 # OkeyDocu - tests/test_report_plans_first.py
+# l10n: de
 # A report ordered by measured quantity states the test plans first, then the readings.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Fable 5.2
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
-# l10n: de
 
 from datetime import datetime
 

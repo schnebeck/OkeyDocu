@@ -13,8 +13,8 @@ tool tip of its own."""
 
 from __future__ import annotations
 
-from PySide6.QtCore import QEvent, QSize, Qt
-from PySide6.QtGui import QPainter
+from PySide6.QtCore import QEvent, QSize, Qt, Signal
+from PySide6.QtGui import QPainter, QPalette
 from PySide6.QtWidgets import QLabel, QToolTip
 
 LEAST = 8  # characters that stay readable before the ellipsis
@@ -43,4 +43,27 @@ class ElidedLabel(QLabel):
         room = self.contentsRect()
         shown = self.fontMetrics().elidedText(self.text(), Qt.TextElideMode.ElideRight,
                                               room.width())
-        QPainter(self).drawText(room, self.alignment(), shown)
+        painter = QPainter(self)
+        self.colour(painter)
+        painter.drawText(room, self.alignment(), shown)
+
+    def colour(self, painter: QPainter) -> None:
+        """The pen the text is drawn with; the painter comes with that of plain text."""
+
+
+class ElidedLink(ElidedLabel):
+    """A name that leads somewhere: in the colour of a link, and a click on it is reported."""
+
+    clicked = Signal()
+
+    def __init__(self, text: str = "", parent=None):
+        super().__init__(text, parent)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+    def colour(self, painter: QPainter) -> None:
+        painter.setPen(self.palette().color(QPalette.ColorRole.Link))
+
+    def mouseReleaseEvent(self, event) -> None:
+        if event.button() == Qt.MouseButton.LeftButton and self.rect().contains(event.position().toPoint()):
+            self.clicked.emit()
+        super().mouseReleaseEvent(event)

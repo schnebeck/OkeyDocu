@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QHBoxLayout, QPushButton, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QPushButton, QToolButton, QWidget
 
 from ..campaign.templates import OPEN
 from ..l10n import tr
@@ -31,8 +31,13 @@ class PointEdit(QWidget):
         super().__init__(parent)
         self.app = app
         self.step_id: int | None = None
-        self.up = QPushButton(tr("▲ Earlier"))
-        self.down = QPushButton(tr("▼ Later"))
+        # Two arrows and one worded button: a row the narrow side panel has room for.
+        self.up, self.down = QToolButton(), QToolButton()
+        for button, arrow, tip in ((self.up, "▲", tr("Earlier in the order of the points")),
+                                   (self.down, "▼", tr("Later in the order of the points"))):
+            button.setText(arrow)
+            button.setToolTip(tip)
+            button.setAccessibleName(tip)
         self.remove = QPushButton(tr("Remove point"))
         self.remove.setToolTip(tr("The point leaves this campaign; when the campaign is ended, the"
                                   " template can leave it out as well."))

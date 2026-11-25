@@ -89,7 +89,7 @@ texts:
   Take over: Übernehmen
   "Fetch the chosen entry of the last inspection into this campaign. The ended campaign stays unchanged.": "Den gewählten Eintrag der letzten Prüfung in diese Kampagne holen. Die beendete Kampagne bleibt unverändert."
   "From the inspection of {day}. “Take over” fetches it into this campaign, a double-click shows it.": "Aus der Prüfung vom {day}. „Übernehmen“ holt ihn in diese Kampagne, ein Doppelklick zeigt ihn."
-  Show in the structure tree: Im Strukturbaum zeigen
+  "{name}: show in the structure tree": "{name}: im Strukturbaum zeigen"
   Assign to another element …: Anderem Element zuordnen …
   Change measuring location: Messort ändern
   "Preparing photos for the report: {done} of {total}": "Bereite Fotos für das Protokoll vor: {done} von {total}"

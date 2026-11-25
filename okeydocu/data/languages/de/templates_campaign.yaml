@@ -13,6 +13,8 @@ texts:
   Campaign templates …: Kampagnenvorlagen …
   ▲ Earlier: ▲ Früher
   ▼ Later: ▼ Später
+  Earlier in the order of the points: Früher in der Reihenfolge der Messpunkte
+  Later in the order of the points: Später in der Reihenfolge der Messpunkte
   Remove point: Punkt entfernen
   "The point leaves this campaign; when the campaign is ended, the template can leave it out as well.": "Der Punkt fällt aus dieser Kampagne; beim Beenden der Kampagne kann ihn auch die Vorlage weglassen."
   "Delete the campaign template “{title}”?": "Kampagnenvorlage „{title}“ löschen?"

@@ -36,6 +36,10 @@ change of state changes what a block says, not where things stand.
   the whole text waits under the mouse. A row never grows because the window got narrower.
 - The texts of a column begin on one line, cut or not, in tables and in lists
   (`ui/steady_text.py`); a column sized to its texts shows them whole.
+- The side panel is as wide as what it shows needs and never falls back in width
+  (`ui/side_panel.py`), so nothing in it is cut and it does not twitch with the choice. What
+  it shows gives way instead of widening it: a name that leads somewhere is a cut link
+  (`ElidedLink`), and a row of buttons that would not fit is two rows or arrows.
 - A button that changes its text is as wide as its longest text (`ui/button_width.py`).
 - Details of the same kind stand on a line each, their names dimmed in one column.
 

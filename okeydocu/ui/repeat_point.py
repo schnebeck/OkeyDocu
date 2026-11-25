@@ -120,9 +120,13 @@ class RepeatPoint(QWidget):
         self.skip_button.clicked.connect(self._skip)
         self.reopen_button = QPushButton(tr("Reopen"))
         self.reopen_button.clicked.connect(self._reopen)
+        # Answering and leaving out are two rows: side by side they are wider than the panel.
+        answers = QHBoxLayout()
+        answers.addWidget(self.yes_button)
+        answers.addWidget(self.no_button)
+        answers.addStretch(1)
         buttons = QHBoxLayout()
-        for button in (self.yes_button, self.no_button, self.hand_button):
-            buttons.addWidget(button)
+        buttons.addWidget(self.hand_button)
         buttons.addStretch(1)
         buttons.addWidget(self.skip_button)
         buttons.addWidget(self.reopen_button)
@@ -133,6 +137,7 @@ class RepeatPoint(QWidget):
         for widget in (self.title, self.state, self.place, self.question, self.settings,
                        self.hint_box, self.remark, self.photos, self.answer_note):
             layout.addWidget(widget)
+        layout.addLayout(answers)
         layout.addLayout(buttons)
         layout.addWidget(self.edit)
 
