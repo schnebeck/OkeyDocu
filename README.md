@@ -200,5 +200,5 @@ OkeyDocu is written by Thorsten Schnebeck, who holds all rights to it. The code 
 with Claude by Anthropic, used as a coding agent under his direction.
 
 GPL-3.0-or-later, see [LICENSES](LICENSES/GPL-3.0-or-later.txt). The screenshots show invented
-data. PROFITEST PRIME and GOSSEN METRAWATT are names of their owner; IZYTRONIQ belongs to
-IZYTRON. OkeyDocu is not affiliated with either.
+data. PROFITEST PRIME, IZYTRONIQ and GOSSEN METRAWATT are names of their owner. OkeyDocu is
+not affiliated with it.
