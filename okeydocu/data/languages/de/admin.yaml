@@ -22,7 +22,7 @@ texts:
   Click to view the campaign: Klicken, um die Kampagne anzusehen
   "Test plan: {plan}": "Messplan: {plan}"
   No test plan: Ohne Messplan
-  "{done} of {total} steps": "{done} von {total} Schritten"
+  "{done} of {total} steps": "{done} von {total} Messschritten"
   "Inspector: {tester}": "Prüfer: {tester}"
   No inspector: Prüfer fehlt
   ● Measuring now: ● Misst gerade

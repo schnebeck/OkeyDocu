@@ -3,8 +3,8 @@ texts:
   End test plan: Messplan beenden
   "{done} of {total} done": "{done} von {total} erledigt"
   done: erledigt
-  "Its {count} step goes with it.": "Sein {count} Schritt geht mit."
-  "Its {count} steps go with it.": "Seine {count} Schritte gehen mit."
+  "Its {count} step goes with it.": "Sein {count} Messschritt geht mit."
+  "Its {count} steps go with it.": "Seine {count} Messschritte gehen mit."
   Remove test plan: Messplan entfernen
   "Remove “{title}” from the campaign?": "„{title}“ aus der Kampagne entfernen?"
   Run: Ausführen
@@ -13,10 +13,10 @@ texts:
   This cannot be undone.: Das lässt sich nicht rückgängig machen.
   Continue: Fortsetzen
   "Pause test plan": "Messplan unterbrechen"
-  "Closes the test plan; everything stays, and it goes on at the first open step": "Schließt den Messplan; alles bleibt erhalten, weiter geht es am ersten offenen Schritt"
+  "Closes the test plan; everything stays, and it goes on at the first open step": "Schließt den Messplan; alles bleibt erhalten, weiter geht es am ersten offenen Messschritt"
   "End test plan …": "Messplan beenden …"
-  "The steps still open count as skipped, with a reason that appears in the report": "Die noch offenen Schritte gelten als ausgelassen, mit einem Grund, der im Protokoll erscheint"
-  Enters a reading by hand into the step shown: Trägt einen Messwert von Hand in den gezeigten Schritt ein
+  "The steps still open count as skipped, with a reason that appears in the report": "Die noch offenen Messschritte gelten als ausgelassen, mit einem Grund, der im Protokoll erscheint"
+  Enters a reading by hand into the step shown: Trägt einen Messwert von Hand in den gezeigten Messschritt ein
   "Test plan: {title}": "Messplan: {title}"
   Connecting to the instrument and setting the clock …: Verbinde mit dem Messgerät und stelle die Uhr …
   "{state}, measuring for “{title}”": "{state}, misst für „{title}“"
@@ -78,7 +78,7 @@ texts:
   Test plan: Messplan
   Title: Titel
   Instrument: Messgerät
-  "Repeat like the inspection of {day} ({count} points)": "Wie die Prüfung vom {day} wiederholen ({count} Punkte)"
+  "Repeat like the inspection of {day} ({count} points)": "Wie die Prüfung vom {day} wiederholen ({count} Messpunkte)"
   Simulator (random values): Simulator (Zufallswerte)
   Manual entry: Manuelle Eingabe
   an installation: eine Anlage
@@ -138,7 +138,7 @@ texts:
   "Double-click: continue measuring with the instrument": "Doppelklick: mit dem Messgerät weitermessen"
   Seal without key: Siegel ohne Schlüssel
   Only once the photos are prepared for the report (see status bar).: Erst wenn die Fotos für das Protokoll vorbereitet sind (siehe Statuszeile).
-  "“{run}” has several steps. A click on the time unfolds them, then each can be edited on its own.": "„{run}“ hat mehrere Schritte. Ein Klick auf die Zeit klappt sie auf, dann lässt sich jeder einzeln bearbeiten."
+  "“{run}” has several steps. A click on the time unfolds them, then each can be edited on its own.": "„{run}“ hat mehrere Messschritte. Ein Klick auf die Zeit klappt sie auf, dann lässt sich jeder einzeln bearbeiten."
   Choose a row of the table.: Eine Zeile der Tabelle wählen.
   No photos for this measurement. Drag photos onto the row or attach them with a right-click.: Keine Fotos zu dieser Messung. Fotos auf die Zeile ziehen oder per Rechtsklick anhängen.
   Shows the photos of the chosen measurement.: Zeigt die Fotos der gewählten Messung.
@@ -163,8 +163,8 @@ texts:
   An inspector is still missing.: Es fehlt noch ein Prüfer.
   Assign test plan: Messplan zuweisen
   Assign: Zuweisen
-  "{plan} ({count} points)": "{plan} ({count} Punkte)"
-  "{plan} (draft, {count} points)": "{plan} (Entwurf, {count} Punkte)"
+  "{plan} ({count} points)": "{plan} ({count} Messschritte)"
+  "{plan} (draft, {count} points)": "{plan} (Entwurf, {count} Messschritte)"
   There is no test plan yet.: Es gibt noch keinen Messplan.
   Simulate measurement: Messung simulieren
   Measurement instructions: Anleitung zur Messung
@@ -209,14 +209,14 @@ texts:
   Rotary switch and settings are set as given: Drehschalter und Einstellungen stehen wie angegeben
   Confirm setup: Aufbau bestätigen
   Fetch from the instrument: Vom Gerät nachholen
-  Skip step …: Schritt auslassen …
+  Skip step …: Messschritt auslassen …
   "← Back": "← Zurück"
   Next →: Weiter →
   Time: Zeitpunkt
   Designation: Bezeichnung
   Readings: Messwerte
   Reason: Grund
-  Assign to the chosen step: Dem gewählten Schritt zuordnen
+  Assign to the chosen step: Dem gewählten Messschritt zuordnen
   "Received: {values}": "Empfangen: {values}"
   The test plan is a draft and not yet approved technically.: Messplan ist ein Entwurf und fachlich noch nicht freigegeben.
   "<b>Simulation:</b> The readings are random values.": "<b>Simulation:</b> Die Messwerte sind Zufallswerte."
@@ -226,16 +226,16 @@ texts:
   "{added} new, {assigned} assigned, {open} open.": "{added} neu, {assigned} zugeordnet, {open} offen."
   No measurement: Keine Messung
   "This step has no measurement. Count it as done anyway? The report then shows it as not measured.": "Dieser Messschritt hat keine Messung. Trotzdem als erledigt werten? Das Protokoll weist ihn dann als nicht gemessen aus."
-  Please choose a measurement and, on the left, the step.: Bitte eine Messung und links den Schritt wählen.
+  Please choose a measurement and, on the left, the step.: Bitte eine Messung und links den Messschritt wählen.
   "&Yes": "&Ja"
   "&No": "&Nein"
   "&Skip": "Über&springen"
   "The question is left out, for example because it does not arise on this installation. The reason appears in the report; the result stays as it is.": "Die Frage wird ausgelassen, zum Beispiel weil sie sich an dieser Anlage nicht stellt. Die Begründung steht im Protokoll; das Ergebnis bleibt, wie es ist."
   Comment, needed as the reason when skipping: Kommentar, beim Überspringen als Begründung nötig
-  Please give the reason this point is dropped.: Bitte begründen, warum dieser Punkt entfällt.
+  Please give the reason this point is dropped.: Bitte begründen, warum dieser Messschritt entfällt.
   Counts as passed.: Gilt als bestanden.
   Counts as failed. A comment tells later what was noticed.: Gilt als nicht bestanden. Ein Kommentar sagt später, was auffiel.
-  Skip step: Schritt auslassen
+  Skip step: Messschritt auslassen
   Skip: Auslassen
   Reason, it appears in the report: Begründung, sie erscheint im Protokoll
   "Step {number} of {total}": "Messschritt {number} von {total}"
@@ -245,7 +245,7 @@ texts:
   "The rotary switch is set to {position}.": "Der Drehschalter steht auf {position}."
   All connections made.: Alle Verbindungen hergestellt.
   "Make connection {number} of {total} and click it in the drawing.": "Verbindung {number} von {total} herstellen und in der Grafik anklicken."
-  Measure step again: Schritt erneut messen
+  Measure step again: Messschritt erneut messen
   "Instrument {name} is connected": "Messgerät {name} ist verbunden"
   "Connecting to the instrument {name} …": "Verbinde mit dem Messgerät {name} …"
   "Instrument {name} was disconnected": "Messgerät {name} wurde getrennt"

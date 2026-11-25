@@ -1,13 +1,13 @@
 # OkeyDocu - German texts of campaign templates.
 texts:
   "Leave out: {title}": "Weglassen: {title}"
-  "New point: {title}": "Neuer Punkt: {title}"
+  "New point: {title}": "Neuer Messpunkt: {title}"
   "New hint at {title}: {text}": "Neuer Hinweis bei {title}: {text}"
   Take over the order as measured: Reihenfolge wie gemessen übernehmen
   Without template: Ohne Vorlage
   Campaign template: Kampagnenvorlage
-  Take over as point: Als Punkt übernehmen
-  "The reading becomes a point of this campaign; when the campaign is ended, the template can keep it": "Der Messwert wird ein Punkt dieser Kampagne; beim Beenden der Kampagne kann die Vorlage ihn übernehmen"
+  Take over as point: Als Messpunkt übernehmen
+  "The reading becomes a point of this campaign; when the campaign is ended, the template can keep it": "Der Messwert wird ein Messpunkt dieser Kampagne; beim Beenden der Kampagne kann die Vorlage ihn übernehmen"
   Save as campaign template …: Als Kampagnenvorlage speichern …
   "Campaign template “{title}” saved.": "Kampagnenvorlage „{title}“ gespeichert."
   Campaign templates …: Kampagnenvorlagen …
@@ -15,18 +15,18 @@ texts:
   ▼ Later: ▼ Später
   Earlier in the order of the points: Früher in der Reihenfolge der Messpunkte
   Later in the order of the points: Später in der Reihenfolge der Messpunkte
-  Remove point: Punkt entfernen
-  "The point leaves this campaign; when the campaign is ended, the template can leave it out as well.": "Der Punkt fällt aus dieser Kampagne; beim Beenden der Kampagne kann ihn auch die Vorlage weglassen."
+  Remove point: Messpunkt entfernen
+  "The point leaves this campaign; when the campaign is ended, the template can leave it out as well.": "Der Messpunkt fällt aus dieser Kampagne; beim Beenden der Kampagne kann ihn auch die Vorlage weglassen."
   "Delete the campaign template “{title}”?": "Kampagnenvorlage „{title}“ löschen?"
   Campaign templates: Kampagnenvorlagen
   Delete template …: Vorlage löschen …
   Mode: Modus
-  Points: Punkte
+  Points: Messpunkte
   "Save an ended campaign as a template first.": "Zuerst eine beendete Kampagne als Vorlage speichern."
-  "open (pattern): points and measurements can change, learns from every campaign": "offen (Muster): Punkte und Messungen änderbar, lernt aus jeder Kampagne"
-  "series (series devices): points and measurements fixed, order free": "Serie (Seriengeräte): Punkte und Messungen fest, Reihenfolge frei"
+  "open (pattern): points and measurements can change, learns from every campaign": "offen (Muster): Messpunkte und Messungen änderbar, lernt aus jeder Kampagne"
+  "series (series devices): points and measurements fixed, order free": "Serie (Seriengeräte): Messpunkte und Messungen fest, Reihenfolge frei"
   Save as campaign template: Als Kampagnenvorlage speichern
-  Keeps the structure of the installation and every point measured, in the order measured, without the values.: Behält die Struktur der Anlage und jeden gemessenen Punkt in der Reihenfolge der Messung, ohne die Messwerte.
+  Keeps the structure of the installation and every point measured, in the order measured, without the values.: Behält die Struktur der Anlage und jeden gemessenen Messpunkt in der Reihenfolge der Messung, ohne die Messwerte.
   "Elements for {installation}": "Elemente für {installation}"
   Make them: Anlegen
   The template's tree is made below this installation.: Der Baum der Vorlage wird unter dieser Anlage angelegt.

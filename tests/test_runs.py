@@ -57,7 +57,7 @@ def test_a_run_is_one_line_until_it_is_opened(shown):
     head = values.table.item(0, 0)
     assert head.data(RUN_ID) == shown["run"]
     assert _texts(values, VALUES)[0] == (
-        "Sichtprüfung der Betriebsmittel  ·  3 Schritte  ·  1 Mangel")
+        "Sichtprüfung der Betriebsmittel  ·  3 Messschritte  ·  1 Mangel")
     assert _texts(values, FUNCTION)[0] == "Sichtprüfung"
     values._clicked(0, 0, False)
     assert _texts(values, FUNCTION)[1:4] == ["Zugänglichkeit", "Schaltpläne", "Warnhinweise"]

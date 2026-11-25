@@ -63,7 +63,7 @@ def _point_rows(values):
 def test_the_dialog_offers_to_repeat_the_last_inspection(repeat):
     shown, checked, plan_enabled, text = repeat["seen"][0]
     assert shown and checked and not plan_enabled
-    assert text.startswith("Wie die Prüfung vom ") and text.endswith("(2 Punkte)")
+    assert text.startswith("Wie die Prüfung vom ") and text.endswith("(2 Messpunkte)")
 
 
 def test_open_points_stand_in_the_table_and_count_in_the_head(repeat):

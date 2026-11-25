@@ -112,3 +112,20 @@ def test_a_deleted_measurement_leaves_the_list_of_those_without_a_step(window, a
         page.values._delete_measurement()
         assert len(app.service.open_measurements(page.campaign_id)) == 1
         assert page.guided.open_table.rowCount() == 1
+
+
+def test_a_step_and_a_point_are_never_named_without_what_they_belong_to():
+    """A plan has measuring steps, a repeat or a template has measuring points; a bare
+    "Schritt" or "Punkt" would leave open which is meant."""
+    import re
+
+    from okeydocu.l10n.catalog import catalog
+
+    bare = re.compile(r"(?<![A-Za-zÄÖÜäöüß])(Schritt|Punkt)(e|en|es)?(?![a-zäöüß])")
+    sayings = ("Schritt für Schritt", "entferntesten Punkt")  # an idiom and a term of a standard
+    german = catalog("de")
+    texts = list(german.texts.values())
+    texts += [text for found in german.contexts.values() for text in found.values()]
+    left = [text for text in texts
+            if bare.search(re.sub("|".join(sayings), "", text))]
+    assert not left

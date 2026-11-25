@@ -14,7 +14,7 @@ texts:
   New test plan: Neuer Messplan
   "{title} (copy)": "{title} (Kopie)"
   Delete test plan: Messplan löschen
-  "Delete “{title}”? Campaigns keep their copy of the points.": "„{title}“ löschen? Kampagnen behalten ihre Kopie der Punkte."
+  "Delete “{title}”? Campaigns keep their copy of the points.": "„{title}“ löschen? Kampagnen behalten ihre Kopie der Messschritte."
   Untitled: Ohne Namen
   Saving …: Wird gespeichert …
   Saved: Gespeichert
@@ -30,7 +30,7 @@ texts:
   "No": Nein
   Measured quantity: Messgröße
   Expected answer: Erwartete Antwort
-  Choose or add a point.: Einen Punkt wählen oder hinzufügen.
+  Choose or add a point.: Einen Messschritt wählen oder hinzufügen.
   Connection diagram and instructions come from the collection.: Anschlussbild und Anleitung kommen aus der Sammlung.
   There are no instructions for this measurement yet.: Für diese Messung gibt es noch keine Anleitung.
   "Test run: {title}": "Testlauf: {title}"

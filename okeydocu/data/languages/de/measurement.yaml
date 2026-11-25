@@ -51,8 +51,8 @@ texts:
   Remove reading: Messwert entfernen
   Time: Zeitpunkt
   "Value {number}": "Wert {number}"
-  "{count} step": "{count} Schritt"
-  "{count} steps": "{count} Schritte"
+  "{count} step": "{count} Messschritt"
+  "{count} steps": "{count} Messschritte"
   "{count} defect": "{count} Mangel"
   "{count} defects": "{count} Mängel"
   several locations: mehrere Orte
@@ -60,7 +60,7 @@ texts:
   missing: fehlt
   "Limit {limits}": "Grenze {limits}"
   skipped: ausgelassen
-  Click on the time or double-click to fold the steps open and shut: Klick auf die Zeit oder Doppelklick klappt die Schritte auf und zu
+  Click on the time or double-click to fold the steps open and shut: Klick auf die Zeit oder Doppelklick klappt die Messschritte auf und zu
   "Search: customer, installation, comment, reading …": "Suchen: Kunde, Anlage, Kommentar, Messwert …"
   only with photo: nur mit Foto
   from: von
@@ -77,7 +77,7 @@ texts:
   Any reading: Beliebiger Messwert
   All installations: Alle Anlagen
   Readings: Messwerte
-  Double-click on a field edits it while the campaign is open. On a test run it folds the steps open and shut.: Doppelklick auf ein Feld bearbeitet es, solange die Kampagne offen ist. Bei einem Prüfablauf klappt er die Schritte auf und zu.
+  Double-click on a field edits it while the campaign is open. On a test run it folds the steps open and shut.: Doppelklick auf ein Feld bearbeitet es, solange die Kampagne offen ist. Bei einem Prüfablauf klappt er die Messschritte auf und zu.
   Edit measurement: Messung bearbeiten
   Edit: Bearbeiten
   Delete measurement …: Messung löschen …
@@ -123,12 +123,12 @@ texts:
   Reopen: Wieder öffnen
   "Skipped: {note}": "Ausgelassen: {note}"
   Still to be answered: Noch zu beantworten
-  "Still to be measured: measure on the instrument and send while this point is selected, or enter it by hand.": "Noch zu messen: am Gerät messen und senden, solange dieser Punkt gewählt ist, oder von Hand eintragen."
+  "Still to be measured: measure on the instrument and send while this point is selected, or enter it by hand.": "Noch zu messen: am Gerät messen und senden, solange dieser Messpunkt gewählt ist, oder von Hand eintragen."
   "Limit {label}: {limits}": "Grenze {label}: {limits}"
   "As last time:  {settings}": "Wie zuletzt:  {settings}"
   "Hint from the inspection of {day}": "Hinweis aus der Prüfung vom {day}"
   "Remark back then: {remark}": "Bemerkung damals: {remark}"
-  Skip point: Punkt auslassen
+  Skip point: Messpunkt auslassen
   "Images and PDF ({patterns})": "Bilder und PDF ({patterns})"
   What is to be recorded; it appears in the report: Was festgehalten werden soll, es erscheint im Protokoll
   Drag files here or attach them.: Dateien hierher ziehen oder anhängen.

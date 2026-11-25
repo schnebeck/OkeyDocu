@@ -4,7 +4,7 @@ texts:
   Standard report, compact: Standardprotokoll, kompakt
   Report by measured quantity: Protokoll nach Messgröße
   Outside every confirmed step: Außerhalb jedes bestätigten Messschritts
-  Measuring function does not match the step: Messfunktion passt nicht zum Schritt
+  Measuring function does not match the step: Messfunktion passt nicht zum Messschritt
   "{name}: only pictures and PDF files can be attached.": "{name}: Nur Bilder und PDF lassen sich anhängen."
   "Instrument clock in sync, set at {time}": "Geräteuhr synchron, gestellt um {time}"
   "Instrument clock in sync, checked at {time}": "Geräteuhr synchron, geprüft um {time}"
@@ -37,8 +37,8 @@ texts:
   "{label} notably higher than last time": "{label} deutlich höher als zuletzt"
   "{label} notably lower than last time": "{label} deutlich niedriger als zuletzt"
   "Last time on {day}: {values}": "Zuletzt am {day}: {values}"
-  "{count} point of the repeat open: measure it or skip it with a reason": "{count} Punkt der Wiederholung offen: messen oder mit Begründung auslassen"
-  "{count} points of the repeat open: measure them or skip them with a reason": "{count} Punkte der Wiederholung offen: messen oder mit Begründung auslassen"
+  "{count} point of the repeat open: measure it or skip it with a reason": "{count} Messpunkt der Wiederholung offen: messen oder mit Begründung auslassen"
+  "{count} points of the repeat open: measure them or skip them with a reason": "{count} Messpunkte der Wiederholung offen: messen oder mit Begründung auslassen"
   "Different setting at “{title}” without a reason": "Abweichende Einstellung bei „{title}“ ohne Begründung"
   "Measurements of ended campaigns stay where they are.": "Messungen beendeter Kampagnen bleiben, wo sie sind."
   An element needs a name.: Ein Element braucht einen Namen.

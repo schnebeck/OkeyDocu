@@ -67,7 +67,7 @@ def test_the_last_inspection_becomes_a_list_of_points(app, last):
     _, check = points["Zugänglichkeit/"]
     assert (check.kind, check.question, check.remark) == (
         "check", "Ist der Schrank zugänglich?", "nur mit Schlüssel")
-    assert app.service.blockers(last["again"])[0].startswith("3 Punkte der Wiederholung offen")
+    assert app.service.blockers(last["again"])[0].startswith("3 Messpunkte der Wiederholung offen")
 
 
 def test_a_reading_takes_the_point_of_its_element_and_conductor(app, last):
