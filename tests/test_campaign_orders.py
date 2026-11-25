@@ -74,7 +74,7 @@ def test_a_folded_installation_stays_folded_until_one_of_its_orders_is_shown(win
 def test_the_header_names_the_order(window, orders):
     window.campaign.show_campaign(orders["first"])
     details = window.campaign.header.details.text()
-    assert tr("Job {number}", number="V-1") in details and "Frau Alt" in details
+    assert tr("Job") in details and "V-1" in details and "Frau Alt" in details
 
 
 def test_a_next_order_repeats_the_one_chosen_with_its_contact(app, window, orders):

@@ -22,7 +22,7 @@ SELECT c.id, c.title, c.status, c.driver, c.tester, c.plan_title, c.plan_key,
        (SELECT count(*) FROM steps s WHERE s.campaign_id = c.id
             AND s.status IN ('done', 'skipped')) AS steps_done,
        (SELECT count(*) FROM measurements m WHERE m.campaign_id = c.id AND m.step_id IS NULL
-            AND EXISTS (SELECT 1 FROM steps s WHERE s.campaign_id = c.id)) AS loose,
+            AND m.asset_id IS NULL AND EXISTS (SELECT 1 FROM steps s WHERE s.campaign_id = c.id)) AS loose,
        (SELECT count(*) FROM reports r WHERE r.campaign_id = c.id) AS reports,
        max(c.started_at,
            coalesce(c.closed_at, ''),

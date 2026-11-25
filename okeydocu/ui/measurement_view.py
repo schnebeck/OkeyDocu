@@ -201,7 +201,8 @@ class MeasurementView(RowMenu, MeasurementDetail, QWidget):
         )
         count = plural(len(rows), "{count} measurement", "{count} measurements")
         if points:
-            count += "  ·  " + tr("{count} open", count=len(points))
+            count += "  ·  " + plural(len(points), "{count} measuring point open",
+                                      "{count} measuring points open")
         self.count.setText(count)
         restore = row_of(self.table, selected) if selected is not None else self._run_row(run)
         if restore >= 0:
@@ -226,7 +227,6 @@ class MeasurementView(RowMenu, MeasurementDetail, QWidget):
         gathered = self.columns.apply(set(alike))
         shared += [(tr(label), alike[column]) for column, label in SHARED_COLUMNS.items()
                    if column in gathered and alike[column]]
-        self.common.setText(
-            " &nbsp;·&nbsp; ".join(f"{label}: <b>{escape(text)}</b>" for label, text in shared)
-        )
+        told = " &nbsp;·&nbsp; ".join(f"{label} <b>{escape(text)}</b>" for label, text in shared)
+        self.common.setText(f'{tr("in common:")} {told}')
         self.common.setVisible(bool(shared))

@@ -47,6 +47,23 @@ def test_the_tree_shows_kinds_counts_and_what_has_no_place(shown):
     assert shown["page"].values.table.rowCount() == 1
 
 
+def test_a_measurement_on_the_installation_itself_names_it_as_its_place(shown, app):
+    """Booking writes the place of a measurement as the way from the installation down."""
+    page = shown["page"]
+    first, second, loose = (row["id"] for row in app.db.query(
+        "SELECT id FROM measurements ORDER BY asset_id IS NULL, id"))
+    app.service.move_measurements([first], shown["press"])
+    app.service.move_measurements([second], shown["cabinet"])
+    page._data_changed()
+    page.structure.select(shown["press"])
+    table = page.values.table
+    column = next(c for c in range(table.columnCount())
+                  if table.horizontalHeaderItem(c).text() == "Messort")
+    places = {table.item(row, 0).data(0x0100): table.item(row, column).text()
+              for row in range(table.rowCount())}
+    assert places == {first: "Presse", second: "Schrank", loose: ""}
+
+
 def test_measurements_are_booked_by_dropping_them_on_an_element(shown, app):
     page = shown["page"]
     page.structure.select(UNPLACED)

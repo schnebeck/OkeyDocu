@@ -158,7 +158,7 @@ class MeasurementsPage(MeasurementView):
         self._customer_changed()
         self._refill(
             self.campaign, tr("All campaigns"),
-            [(f"{c['title']} ({stored_day(c['started_at'])})", c["id"])
+            [(f"{c['title']} ({stored_day(c['tested_at'])})", c["id"])
              for c in self.app.service.campaigns()],
         )
         keys = db.query(

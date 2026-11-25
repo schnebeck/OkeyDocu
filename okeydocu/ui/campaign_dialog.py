@@ -11,13 +11,14 @@ from __future__ import annotations
 from datetime import date, datetime
 
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QLineEdit
+from PySide6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QLineEdit, QSizePolicy
 
 from ..campaign.editing import CONTACT_COLUMNS
 from ..devices import FoundInstrument, find_instruments
 from ..l10n import day, tr
 from .campaign_order import OrderFields
 from .common import AppContext
+from .confirm_overlay import TemplateChoice
 from .kind_catalog import KindCatalog
 from .overlay import Overlay
 from .users import UserChoice
@@ -96,6 +97,11 @@ class CampaignDialog(Overlay):
         if self.template.count() > 1:
             form.addRow(tr("Campaign template"), self.template)
         form.addRow(tr("Title"), self.title)
+        default = app.db.default_template()
+        self.report_template = TemplateChoice(app, default["name"] if default else "")
+        self.report_template.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        if self.report_template.count() > 1:  # with a single one there is nothing to choose
+            form.addRow(tr("Report template"), self.report_template)
         form.addRow(tr("Instrument"), self.source)
         self.order = OrderFields(form, {})
         self.asset.currentIndexChanged.connect(self._suggest_contact)

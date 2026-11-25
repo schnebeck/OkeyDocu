@@ -76,7 +76,7 @@ class TemplateEditor(Overlay):
         self.list.setCurrentRow(0)
         if not self.kept:
             self.hint.setEnabled(False)
-            self.footer.hint.setText(tr("Save a confirmed campaign as a template first."))
+            self.footer.hint.setText(tr("Save an ended campaign as a template first."))
 
     def _chosen(self, row: int) -> None:
         self.current = list(self.kept.values())[row] if row >= 0 else None

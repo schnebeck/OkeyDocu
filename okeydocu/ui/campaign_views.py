@@ -8,17 +8,13 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
     QFormLayout,
     QHBoxLayout,
-    QLabel,
     QPushButton,
-    QVBoxLayout,
-    QWidget,
 )
 
 from ..campaign.measuring_place import measured_functions
@@ -29,6 +25,9 @@ from ..devices.simulator import SIMULATED_FUNCTIONS
 from ..l10n import N_, tr
 from .campaign_items import count_text
 from .common import AppContext, function_short
+from .board import UNIT, row_height
+from .elided_label import ElidedLabel
+from .framed import TEXT, Framed
 from .guide_starter import GuideStarter
 from .instruction_panel import InstructionPanel
 from .overlay import Overlay
@@ -50,9 +49,14 @@ MANUAL_GUIDANCE = N_(
     " This campaign runs without an instrument."
 )
 IMPORT_GUIDANCE = N_(
-    "<b>Check and revise the imported data.</b>"
-    " Completing seals the record, only then is the report created."
+    "<b>Check and revise the imported data.</b> Ending the campaign seals the record, only then is"
+    " the report created."
 )
+PAUSED = N_("<b>Measuring is paused.</b>"
+            " Resume measuring connects the instrument with this campaign.")
+ELSEWHERE = N_("<b>The instrument measures for another campaign.</b>"
+               " Resume measuring brings it to this one.")
+ENDED = N_("<b>The campaign is ended.</b> Its record is sealed and can only be read.")
 
 
 class TesterOverlay(Overlay):
@@ -106,17 +110,24 @@ class AssignPlanOverlay(Overlay):
         return self.plan
 
 
-class FreeRunView(QWidget):
-    """Measuring without a plan: what to do next, and on request how to wire it."""
+class FreeRunView(Framed):
+    """The row below the head: what to do now, measuring without a plan, and on request how
+    to wire it.
+
+    One line of one height, whatever the campaign is doing: what to do now at the left, the
+    guided measurement at the right end, as wide as the actions of the head above it. A
+    campaign nothing is measured for only says so, and what stands below keeps its place."""
 
     def __init__(self, app: AppContext):
-        super().__init__()
+        super().__init__(top=False, joined=True)
         self.app = app
         self.session = None
         self.driver = None
-        self.guidance = QLabel()
-        self.guidance.setWordWrap(True)
-        self.guidance.setTextFormat(Qt.TextFormat.RichText)
+        self.leading = False  # the operator is led by this row
+        self.guidance = ElidedLabel()
+        font = self.guidance.font()
+        font.setBold(True)
+        self.guidance.setFont(font)
         self.simulate_function = QComboBox()
         for key in SIMULATED_FUNCTIONS:
             self.simulate_function.addItem(function_short(key), key)
@@ -133,17 +144,19 @@ class FreeRunView(QWidget):
         self.instruction_action.toggled.connect(self._toggle_instruction)
         self.instruction.read_requested.connect(self._read_selector)
         self.starter = GuideStarter()
+        self.guidance.setMinimumHeight(row_height())
         row = QHBoxLayout()
+        row.setContentsMargins(TEXT, 0, 0, 0)
+        row.setSpacing(2 * UNIT)
         row.addWidget(self.guidance, 1)
-        row.addWidget(self.starter)
         row.addWidget(self.simulate_function)
         row.addWidget(self.simulate_button)
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addLayout(row)
-        layout.addWidget(self.instruction)
+        row.addWidget(self.starter)
+        self.box.addLayout(row)
+        self.box.addWidget(self.instruction)
 
     def show_campaign(self, campaign, session) -> None:
+        self._lead(True)
         self.session = session
         self.driver = driver = session.driver if session is not None else None
         simulated = driver is not None and Capability.SIMULATED_TRIGGER in driver.capabilities
@@ -157,15 +170,35 @@ class FreeRunView(QWidget):
         if driver is None:
             self._say(IMPORT_GUIDANCE if campaign["driver"] == IMPORTED else MANUAL_GUIDANCE)
 
+    def show_idle(self, text: str) -> None:
+        """Nothing is measured for the campaign on screen: the row only says why."""
+        self._lead(False)
+        self.session = self.driver = None
+        self.simulate_function.hide()
+        self.simulate_button.hide()
+        self.starter.show_campaign("", set())
+        self._say(text)
+
+    def _lead(self, leading: bool) -> None:
+        self.leading = leading
+        if not leading:
+            self.instruction_action.setChecked(False)
+        self.instruction_action.setEnabled(leading and self.isVisible())
+
+    def align_starter(self, width: int | None) -> None:
+        """The guide choice takes the width of the head's actions, so both share their edges."""
+        least = self.starter.minimumSizeHint().width()
+        self.starter.setFixedWidth(max(width or least, least))
+
     def _say(self, text: str) -> None:
         """The bold first sentence stays in view, what explains it waits under the mouse."""
-        head, end, rest = tr(text).partition("</b>")
-        self.guidance.setText(head + end)
-        self.guidance.setToolTip(rest.strip())
+        head, _, rest = tr(text).partition("</b>")
+        self.guidance.setText(head.removeprefix("<b>"))
+        self.guidance.setToolTip(tr(text) if rest.strip() else "")
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
-        self.instruction_action.setEnabled(True)
+        self.instruction_action.setEnabled(self.leading)
 
     def hideEvent(self, event) -> None:
         super().hideEvent(event)

@@ -49,14 +49,14 @@ def test_wizard_opens_for_a_plan_without_an_instrument(window, page):
 
 
 def test_position_is_always_in_sight(page):
-    assert "Punkt 1 von 4" in page.position.text()
+    assert "Messschritt 1 von 4" in page.position.text()
 
 
 def test_note_is_shown_and_passed_with_next(page):
     assert page.pages.currentWidget() is page.note_page
     assert page.note_page.text.text() == "Anlage freischalten."
     page.next_button.click()
-    assert "Punkt 2 von 4" in page.position.text()
+    assert "Messschritt 2 von 4" in page.position.text()
     assert page.app.service.steps(page.campaign_id)[0]["status"] == "done"
 
 
@@ -64,7 +64,7 @@ def test_back_is_there_from_the_second_point_on(page):
     assert not page.back_button.isEnabled()
     page.next_button.click()
     page.back_button.click()
-    assert "Punkt 1 von 4" in page.position.text()
+    assert "Messschritt 1 von 4" in page.position.text()
 
 
 def test_next_waits_for_an_answer(page):
@@ -75,21 +75,21 @@ def test_next_waits_for_an_answer(page):
 def test_the_expected_answer_goes_straight_on(page):
     check = at_question(page)
     check.buttons["yes"].click()
-    assert "Punkt 3 von 4" in page.position.text()
+    assert "Messschritt 3 von 4" in page.position.text()
     assert page.app.service.step_answer(page.app.service.steps(page.campaign_id)[1]["id"])[0] == "yes"
 
 
 def test_the_expected_answer_can_be_a_no(page):
     at_question(page).buttons["yes"].click()
     page.check_page.buttons["no"].click()
-    assert "Punkt 4 von 4" in page.position.text()
+    assert "Messschritt 4 von 4" in page.position.text()
 
 
 def test_another_answer_stays_for_a_comment(window, page):
     check = at_question(page)
     window.activateWindow()
     check.buttons["no"].click()
-    assert "Punkt 2 von 4" in page.position.text()
+    assert "Messschritt 2 von 4" in page.position.text()
     assert page.next_button.isEnabled()
     check.comment.setPlainText("fehlt")
     page.next_button.click()
@@ -107,6 +107,41 @@ def test_skipping_needs_a_reason(page):
     assert check.hint.text() == ""
     page.next_button.click()
     assert page.app.service.steps(page.campaign_id)[1]["status"] == "skipped"
+
+
+def test_skipping_with_the_reason_already_written_goes_on_at_once(page):
+    check = at_question(page)
+    check.comment.setPlainText("nicht zugänglich")
+    check.buttons["skip"].click()
+    steps = page.app.service.steps(page.campaign_id)
+    assert steps[1]["status"] == "skipped"
+    assert page.app.service.step_answer(steps[1]["id"]) == ("skip", "nicht zugänglich")
+    assert "Messschritt 3 von 4" in page.position.text()
+
+
+def test_a_question_is_shown_in_full_below_its_short_name(window, app, asset):
+    plan = parse_plan("""
+key: asked
+title: Besichtigung
+released: true
+steps:
+  - {key: a, kind: check, title: Typschild, question: "Trägt das Gehäuse ein Typschild?",
+     text: "Norm, 1.2", instructions: ["Am Gehäuse nahe der Einspeisung nachsehen."]}
+  - {key: b, kind: check, title: "Schäden sichtbar?", expected: "no"}
+""")
+    campaign = app.service.create(asset, "T", "Anna", plan)
+    window.campaign.refresh()
+    window.campaign.enter(campaign)
+    window.campaign.run_plan(app.service.plan_blocks(campaign)[0])
+    check = window.guided.check_page
+    assert check.question.text() == "Typschild"
+    assert check.asked.text() == "Trägt das Gehäuse ein Typschild?" and not check.asked.isHidden()
+    assert check.text.text() == "Norm, 1.2"
+    assert "Am Gehäuse nahe der Einspeisung nachsehen." in check.how.text()
+    assert not check.how.isHidden()
+    check.buttons["yes"].click()
+    assert check.question.text() == "Schäden sichtbar?" and check.asked.isHidden()
+    assert check.how.isHidden()
 
 
 def test_going_back_shows_what_was_answered(page):
@@ -133,7 +168,7 @@ def test_passing_an_unchanged_answer_leaves_it_alone(page):
 def test_keys_answer_without_the_mouse(page):
     check = at_question(page)
     QTest.keyClick(check, Qt.Key.Key_J)
-    assert "Punkt 3 von 4" in page.position.text()
+    assert "Messschritt 3 von 4" in page.position.text()
 
 
 def test_a_key_in_the_comment_field_only_writes(page):
@@ -147,17 +182,17 @@ def test_a_key_in_the_comment_field_only_writes(page):
 def test_enter_goes_on_once_an_answer_is_given(page):
     check = at_question(page)
     QTest.keyClick(check, Qt.Key.Key_Return)
-    assert "Punkt 2 von 4" in page.position.text()
+    assert "Messschritt 2 von 4" in page.position.text()
     check.buttons["no"].click()
     QTest.keyClick(check, Qt.Key.Key_Return)
-    assert "Punkt 3 von 4" in page.position.text()
+    assert "Messschritt 3 von 4" in page.position.text()
 
 
 def test_refreshing_keeps_the_point_on_screen(page):
     page.next_button.click()
     page.next_button.setEnabled(False)
     page.reload()
-    assert "Punkt 2 von 4" in page.position.text()
+    assert "Messschritt 2 von 4" in page.position.text()
 
 
 def test_the_list_marks_a_failed_answer(page):
@@ -167,11 +202,56 @@ def test_the_list_marks_a_failed_answer(page):
     assert page.steps.item(1).text().startswith("✗")
 
 
-def test_all_done_says_what_comes_next(page):
+def all_done(page):
     at_question(page).buttons["yes"].click()
     page.check_page.buttons["no"].click()
     page.skip("nicht messbar")
-    assert "nacharbeiten" in page.position.text()
+
+
+def test_all_done_says_so_and_stays_on_the_last_step(window, page):
+    all_done(page)
+    assert "Messschritt 4 von 4" in page.position.text()
+    assert "sind bearbeitet" in page.position.text()
+    assert window.campaign.current_work() is page
+
+
+def test_the_list_of_plans_counts_along(window, page):
+    page.next_button.click()
+    assert "1 von 4" in window.campaign.plan_list.list.item(0).text()
+
+
+def test_next_on_the_last_step_ends_a_plan_worked_through(window, page):
+    assert page.next_button.text() == "Weiter →"
+    all_done(page)
+    assert page.next_button.text() == "Messplan beenden" and page.next_button.isEnabled()
+    page.next_button.click()
+    assert window.campaign.current_work() is not page
+    assert window.campaign.running_block() is None
+
+
+def test_next_on_the_last_step_leads_to_a_step_still_open(window, page):
+    page.next_button.click()
+    page.steps.setCurrentRow(3)
+    page.skip("nicht messbar")
+    assert "Messschritt 2 von 4" in page.position.text()
+    assert window.campaign.current_work() is page
+
+
+def test_the_last_answer_of_a_plan_offers_to_end_it(window, page):
+    at_question(page).buttons["yes"].click()
+    page.steps.setCurrentRow(3)
+    page.skip("nicht messbar")
+    assert "Messschritt 3 von 4" in page.position.text()
+    page.check_page.buttons["no"].click()
+    page.steps.setCurrentRow(3)
+    assert page.next_button.text() == "Messplan beenden"
+
+
+def test_ending_a_plan_worked_through_asks_for_no_reason(window, page, monkeypatch):
+    all_done(page)
+    monkeypatch.setattr(ReasonOverlay, "exec", lambda overlay: pytest.fail("asked for a reason"))
+    window.campaign.plan_run.end_button.click()
+    assert window.campaign.running_block() is None
 
 
 def test_measuring_step_can_be_left_out_with_a_reason(page, monkeypatch):
@@ -248,3 +328,14 @@ def test_field_grows_while_one_long_line_wraps(qtbot):
     lines = round(field.document().documentLayout().documentSize().height())
     assert lines > 1
     assert field.viewport().height() >= lines * field.fontMetrics().lineSpacing()
+
+
+def test_field_keeps_a_height_while_its_viewport_is_not_laid_out_yet(qtbot):
+    """Hidden, the field has its own height at once but its viewport only once it is shown;
+    a text set in between must not reckon a negative height."""
+    field = GrowingEdit()
+    qtbot.addWidget(field)
+    field.viewport().resize(200, 480)
+    field.setPlainText("Zeile")
+    assert field.height() >= field.fontMetrics().lineSpacing()
+    assert field.minimumHeight() == field.maximumHeight() > 0

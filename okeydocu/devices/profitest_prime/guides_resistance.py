@@ -21,6 +21,7 @@ from ...l10n import N_
 from ..guide import Action, Guide, Lead
 from . import screens
 from .guide_parts import (
+    ALL_ON,
     CONDUCTORS,
     L_LEAD,
     LIMITS,
@@ -66,14 +67,17 @@ HIGH_CURRENT = replace(
 CHARGED = N_("The probes carry the test voltage: do not touch them, and leave them on until the"
              " voltage shown has fallen below 10 V.")
 DISCHARGE = Action((), N_("Leave the probes on until the voltage shown has fallen below 10 V."))
+AGAINST_PE = Action((), N_(
+    "Only a conductor against PE counts: L1-PE, L2-PE, L3-PE, N-PE (EN 60204-1, 18.3). Without"
+    " PE, as L1-N or L1-L2, a connected load reads low and says nothing about the insulation:"
+    " skip these and leave the circuit switched on."))
 INSULATION = Guide(
     "riso", N_("Insulation resistance"), 15, "cee_plug", N_("CEE plug of the machine, pulled"),
     (Lead(*PE_LEAD, "pe_pin", N_("Place probe PE (L2) on the PE contact of the CEE plug.")),
      Lead(*L_LEAD, "l_pin", N_("Place probe L (L1) on the contact of line conductor L1."))),
     CHARGED, element_features=(*CONDUCTORS, "supply_connection"), live=False,
     preparation=((PLUG_OFF, N_("The insulation is measured without voltage.")),
-                 (N_("Switch the machine's main switch on"),
-                  N_("So the circuits behind it are measured too.")),
+                 ALL_ON,
                  (N_("Mind sensitive parts"),
                   N_("Disconnect what the test voltage would damage, or lower it."))),
     selector_label="RISO",
@@ -81,7 +85,7 @@ INSULATION = Guide(
     settings=(Action((), N_("Test voltage: 500 V is usual; lower where parts would not stand"
                             " it."), screens.TEST_VOLTAGE),
               Action((), LIMITS, screens.LIMITS), Action((), PATH, screens.RISO_PATH)),
-    steps=(START, DISCHARGE, STORE, NEXT_PAIR),
+    steps=(START, DISCHARGE, STORE, NEXT_PAIR, AGAINST_PE),
     screen=screens.RISO, result_key=screens.RESULT, drawing_features=("rated_current",),
     every_path=True, flow=flow())
 RISING = replace(

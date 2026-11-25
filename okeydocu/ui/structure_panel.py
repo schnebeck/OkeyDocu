@@ -18,7 +18,8 @@ from .structure_menu import StructureActions, kind_menu
 from .structure_tree import StructureTree
 
 DROP_HINT = N_("Drag measurements from the table onto an element to book them there."
-               " New measurements go to the chosen element.")
+               " New measurements go to the chosen element. A photo dragged onto an element lies"
+               " there as a picture.")
 
 
 class StructurePanel(QWidget):

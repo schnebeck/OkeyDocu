@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QFrame,
     QLineEdit,
+    QPushButton,
     QSizePolicy,
     QVBoxLayout,
 )
@@ -21,12 +22,16 @@ from PySide6.QtWidgets import (
 from ..l10n import tr
 from ..model import Verdict
 from ..store.search import MeasurementFilter
-from .board import Strip
+from .board import UNIT, Strip
 from .campaign_points import CampaignPoints
 from .common import ROW_ID, RUN_ID, AppContext, row_of, selected_ids
+from .framed import TEXT
 from .measurement_overlays import MeasurementOverlay
 from .measurement_view import ASSET, CAMPAIGN, CUSTOMER, MeasurementView
 from .move_overlay import MoveOverlay
+
+
+FIND_WIDTH = 260  # of the filter, while nothing above gives it one
 
 
 class CampaignValues(CampaignPoints, MeasurementView):
@@ -56,12 +61,12 @@ class CampaignValues(CampaignPoints, MeasurementView):
         self.actions_row.removeWidget(self.count)
         self.common.setWordWrap(False)
         self.common.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
-        self.head = Strip(ruled=False)
-        self.head.row.setContentsMargins(8, 5, 8, 1)
+        self.head = Strip()
+        self.head.row.setContentsMargins(UNIT + TEXT, UNIT, UNIT + TEXT, UNIT)
         # The filter sits with what it narrows; in the tools it would push them aside.
-        self.head.row.addWidget(self.common, 1)
-        self.head.row.addStretch(0)  # keeps the right end in place while `common` is hidden
         self.head.row.addWidget(self.count)
+        self.head.row.addWidget(self.common, 1)
+        self.head.row.addStretch(0)  # takes the room while `common` is hidden
         # Row actions live in the row's context menu and on keys; the bar keeps entering
         # by hand and a filter, so nothing in it stands grey most of the time.
         for button in (self.edit_measurement, self.delete_measurement, self.add_photo):
@@ -72,9 +77,15 @@ class CampaignValues(CampaignPoints, MeasurementView):
         self.editor.movable = True
         self.editor.place.move_requested.connect(self._move_to)
         self.editor.place.chosen.connect(self.place_requested)
+        # Narrows the table to what failed; on show only while the campaign has defects.
+        self.defects_button = QPushButton(tr("Defects only"), checkable=True)
+        self.defects_button.setToolTip(tr("Shows only the measurements that failed."))
+        self.defects_button.toggled.connect(lambda _: self.refresh())
+        self.defects_button.hide()
+        self.actions_row.addWidget(self.defects_button)
         self.find = QLineEdit(placeholderText=tr("Filter readings …"))
         self.find.setClearButtonEnabled(True)
-        self.find.setFixedWidth(260)
+        self.find.setFixedWidth(FIND_WIDTH)
         self._typing = QTimer(self, singleShot=True, interval=250)
         self._typing.timeout.connect(self.refresh)
         self.find.textChanged.connect(lambda: self._typing.start())
@@ -93,11 +104,33 @@ class CampaignValues(CampaignPoints, MeasurementView):
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.refresh()
 
+    def align_filter(self, width: int | None) -> None:
+        """The filter takes the width of the actions it stands below, if there are any."""
+        self.find.setFixedWidth(width or FIND_WIDTH)
+
+    def show_defects(self, count: int) -> None:
+        """The button to narrow the table is there while there is something to narrow to."""
+        self.defects_button.setVisible(count > 0 or self.defects_button.isChecked())
+
+    def narrow_to_defects(self) -> None:
+        """Only what failed, the runs it lies in unfolded, the first defect chosen."""
+        self.defects_button.setChecked(True)
+        failed = self.app.db.query(
+            "SELECT id, run_id FROM measurements WHERE campaign_id=? AND verdict=?"
+            " ORDER BY local_time, id", self.campaign_id, Verdict.FAILED.value)
+        self.open_runs |= {row["run_id"] for row in failed if row["run_id"] is not None}
+        self.refresh()
+        if failed:
+            self.select_measurement(failed[0]["id"])
+
     def show_campaign(self, campaign_id: int) -> None:
         if campaign_id != self.campaign_id:
-            self.find.blockSignals(True)
+            for control in (self.find, self.defects_button):
+                control.blockSignals(True)
             self.find.clear()  # a filter belongs to the campaign it was typed for
-            self.find.blockSignals(False)
+            self.defects_button.setChecked(False)
+            for control in (self.find, self.defects_button):
+                control.blockSignals(False)
         self.campaign_id = campaign_id
         self.point_id, self.unplaced = None, False
         self.refresh()
@@ -140,6 +173,7 @@ class CampaignValues(CampaignPoints, MeasurementView):
         return MeasurementFilter(
             text=self.find.text().strip(),
             campaign_id=self.campaign_id, point_id=self.point_id, unplaced=self.unplaced,
+            verdict=Verdict.FAILED.value if self.defects_button.isChecked() else None,
         )
 
     def _show_detail(self) -> None:
@@ -154,6 +188,8 @@ class CampaignValues(CampaignPoints, MeasurementView):
     def _move_common_to_head(self, day: str, area: str) -> None:
         super()._move_common_to_head(day, area)
         self.common.setToolTip(self.common.text())
+        # It follows the number of rows in one line.
+        self.common.setText("·&nbsp; " + self.common.text())
 
     def _update_actions(self, row) -> None:
         super()._update_actions(row)
@@ -171,10 +207,11 @@ class CampaignValues(CampaignPoints, MeasurementView):
     def _menu_actions(self) -> tuple:
         taken = (self.plan_action, None) if self.menu_run is not None else ()
         return (self.details_action, None, *taken, *self.point_actions(), self.edit_action,
-                self.photo_action, self.move_action, None, self.delete_action)
+                *self.path_actions(), self.photo_action, self.move_action, None,
+                self.delete_action)
 
     def _many_actions(self) -> tuple:
-        return (self.move_action, None, self.delete_action)
+        return (self.move_action, *self.path_actions(), None, self.delete_action)
 
     def _move_to(self) -> None:
         ids = selected_ids(self.table)

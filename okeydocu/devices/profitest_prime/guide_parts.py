@@ -75,3 +75,7 @@ CONDUCTORS = ("line_conductors", "n_conductor")  # what reaches the test point
 SWITCH = ("main_switch", N_("Main switch, incoming terminals"))
 RCD_SIDE = ("rcd", N_("RCD, outgoing side"))
 PLUG_OFF = N_("Switch off and pull the plug")
+ALL_ON = (N_("Switch on the main switch and every breaker"),
+          N_("Main switch, circuit breakers and motor protection switches on, fuses in: only what"
+             " is connected through is measured. What lies behind a contactor is measured at its"
+             " output, section by section."))

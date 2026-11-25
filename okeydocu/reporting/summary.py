@@ -29,8 +29,11 @@ OVERVIEW = N_("Overview")
 DEFECTS = N_("Defects")
 NOTICES = N_("Notices")
 NO_DEFECTS = N_("No defects were found.")
-LEGEND = N_("✓ passed · ✗ failed · – not judged · [n] photo n of this report · symbols of"
-            " quantities after ISO 80000, the index names what was measured")
+# What the marks of the report mean; the photos are explained only where the report has some.
+VERDICTS = N_("✓ passed · ✗ failed · – not judged")
+PHOTO_REFERENCE = N_("a number in brackets, such as [1], refers to the photo with that number in"
+                     " this report")
+SYMBOLS = N_("symbols of quantities after ISO 80000, the index names what was measured")
 ELEMENT = N_("Element")
 MEASUREMENTS = N_("Measurements")
 
@@ -115,4 +118,5 @@ def summary_nodes(values: dict) -> list[Node]:
     if hints:
         nodes += [Heading(tr(NOTICES), 3), Table([tr(ELEMENT), tr("Photo"), tr("Remark")], hints,
                                                  [], 2)]
-    return nodes + [Paragraph(tr(LEGEND))]
+    legend = [VERDICTS, PHOTO_REFERENCE, SYMBOLS] if notes.numbers else [VERDICTS, SYMBOLS]
+    return nodes + [Paragraph(" · ".join(tr(part) for part in legend))]

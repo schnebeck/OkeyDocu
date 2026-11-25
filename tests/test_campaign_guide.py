@@ -123,3 +123,37 @@ def test_each_measurement_shows_its_dial_marking(qtbot):
     assert dial_icon(None, 12).isNull()
     assert dial_icon(panel.DRAWING, None).isNull()
     assert dial_icon(panel.DRAWING, 99).isNull()
+
+
+def test_the_guide_choice_shares_the_edges_of_the_actions_above(page, qtbot):
+    from PySide6.QtCore import QPoint
+
+    page.window().resize(1500, 700)
+    qtbot.wait(50)
+    actions, starter = page.header.actions, page.free.starter
+    assert starter.width() == actions.width()
+    assert starter.mapTo(page, QPoint(0, 0)).x() == actions.mapTo(page, QPoint(0, 0)).x()
+
+
+def test_the_guide_button_keeps_its_place_for_either_text(page, qtbot):
+    starter = page.free.starter
+    starter.choice.setCurrentIndex(starter.choice.findData("u"))
+    qtbot.wait(50)
+    first = (starter.button.text(), starter.button.geometry(), starter.choice.geometry())
+    with speaking("de"):
+        starter.show_campaign("simulator", {"u"})
+    qtbot.wait(50)
+    assert starter.button.text() != first[0]
+    assert (starter.button.geometry(), starter.choice.geometry()) == first[1:]
+
+
+def test_what_to_do_now_stays_one_line_in_a_narrow_window(page, qtbot):
+    window = page.window()
+    window.resize(1500, 700)
+    qtbot.wait(50)
+    height = page.free.height()
+    window.resize(window.minimumSizeHint().width(), 700)
+    qtbot.wait(50)
+    assert page.free.guidance.is_cut()
+    assert page.free.height() == height
+    assert page.free.guidance.text().startswith("Jetzt am Messgerät")

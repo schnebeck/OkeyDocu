@@ -39,9 +39,10 @@ def values_text(row) -> str:
 
 
 def path_of(row) -> list[str]:
-    """Where in the installation, without repeating the installation itself."""
+    """Where in the installation. Below it the installation is not repeated; a measurement
+    booked on the installation itself names it, so only one without a place reads empty."""
     parts = row["location"].split(LOCATION_SEPARATOR) if row["location"] else []
-    return parts[1:] if parts[:1] == [row["asset_name"]] else parts
+    return parts[1:] if len(parts) > 1 and parts[0] == row["asset_name"] else parts
 
 
 def sort_key(column: int, row):

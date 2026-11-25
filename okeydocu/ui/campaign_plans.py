@@ -28,6 +28,7 @@ class CampaignPlans:
         self.plan_run = PlanRun(self.guided)
         self.plan_run.paused.connect(self.pause_plan)
         self.plan_run.end_requested.connect(self.end_plan)
+        self.guided.plan_done.connect(self.end_plan)
         self.plan_run.by_hand_requested.connect(lambda: self.values.manual_action.trigger())
 
     def _has_plans(self, campaign) -> bool:
@@ -86,11 +87,12 @@ class CampaignPlans:
         block = self.running_block()
         if block is None:
             return
-        overlay = ReasonOverlay(self, tr("End test plan"))
-        overlay.ok_button.setText(tr("End plan"))
-        if not overlay.exec():
-            return
-        self.app.service.end_plan(block, overlay.reason.toPlainText().strip())
+        if not block.finished:
+            overlay = ReasonOverlay(self, tr("End test plan"))
+            overlay.ok_button.setText(tr("End test plan"))
+            if not overlay.exec():
+                return
+            self.app.service.end_plan(block, overlay.reason.toPlainText().strip())
         self.plan_runs.pop(self.campaign_id, None)
         self._after_plan_change()
 

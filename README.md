@@ -10,11 +10,12 @@ their measurement by the time they were shot, and the test report comes together
 is still being done, not on the evening after.
 
 It starts from what the inspector really meets. No structure has to be typed in before the first
-measurement: elements are made on the way, where they are found. The first measurement of a kind
-is guided step by step on a drawing of the instrument's own front panel, from the rotary switch to
-the probes on the terminals; every one after that goes straight to its element. A finished
-inspection becomes a template for the next one, and the template learns from every campaign until
-the order of the points, the hints and the remarks are just right.
+measurement: elements are made on the way, where they are found. A measurement is guided step by
+step on a drawing of the instrument's own front panel, from the rotary switch to the probes on
+the terminals, and says which standard it rests on and why it is taken. The next one of its kind
+runs the same steps and passes by what stays as it was. A finished inspection becomes a template
+for the next one, and the template learns from every campaign until the order of the points, the
+hints and the remarks are just right.
 
 OkeyDocu is free software under the GPL. It is made for the Linux desktop, keeps all data on the
 inspector's own computer and talks to the instrument over USB or Bluetooth. It is built and tried
@@ -29,20 +30,25 @@ can follow.
 ## What it does
 
 **Measurement campaigns.** Every inspection is a campaign on an installation of a customer, with
-its order number, contact person and inspector. Its readings stand in a table next to the
+its order number, contact person and inspector. The workspace is one framed table whose rows share
+their edges. The first says what the campaign is, a line each for customer, installation,
+inspector and plan, and holds what can be done with it: pause measuring, photos, report preview,
+end the campaign, and beside them what is still open before it can be ended. The second says what
+to do at the instrument now and
+starts a guided measurement. The third holds the data: the readings in a table next to the
 structure of the installation, like files next to folders. Dragging rows onto an element rebooks
 them; the tree counts what has been measured this time against last time.
 
 ![A campaign following a template: structure, readings, open points and the chosen element](docs/images/campaign.png)
 
-**Live readings by Push/Print.** In Push/Print mode the PROFITEST PRIME keeps nothing in its
-own memory: the softkey that otherwise stores a result shares it instead, printed to the
-interface. The result therefore exists only in
-OkeyDocu, which stores it before anything else happens and books it on the element chosen. The
-measurement itself is started and run on the instrument. The instrument clock is set at the start
-of a campaign. Readings the inspector stored in the instrument's memory while the link was down
-are fetched later. Values can also be entered by hand, and a built-in simulator delivers random
-readings for trying everything out without an instrument.
+**Live readings by Push/Print.** In Push/Print mode the PROFITEST PRIME keeps nothing in its own
+memory: the softkey that otherwise stores a result shares it instead, printed to the interface. The
+result therefore exists only in OkeyDocu, which stores it before anything else happens and books it
+on the element chosen. The measurement itself is started and run on the instrument. The instrument
+clock is set at the start of a campaign. A silent instrument is probed, and the status bar says
+whether it is connected. Readings the inspector stored in the instrument's memory while the link
+was down are fetched later. Values can also be entered by hand, and a built-in simulator delivers
+random readings for trying everything out without an instrument.
 
 **Settings checked against the equipment.** An RCD test arrives with the settings the instrument
 was set to: rated residual current, type and rated current. OkeyDocu holds them against what the
@@ -54,18 +60,36 @@ RCD does not state is named instead of judged.
 
 ![An RCD tested with 300 mA and type AC, where the RCD states 30 mA and type A](docs/images/settings-check.png)
 
-**Guided first measurement.** The first measurement of a kind is guided station by station, and
-each instrument brings its own flow. With the PROFITEST PRIME there are six: installation, rotary
-switch, test leads, supply, mode and limits, measure. The program reads the position of the rotary
-switch, lays the leads one by one from the sockets to the terminals of the test point (an RCD, a
-main switch, a CEE plug, a monitoring device, a touchable part, the cores of the supply cable),
-shows the instrument's display with the softkeys to set beside their labels and waits for the
-result. Guided are voltage, protective conductor with 200 mA and 25 A, insulation with constant
-and rising voltage, the three RCD tests, the loop impedance in its four ways (with the full test
+**Guided measurement.** A measurement is guided station by station, and each instrument brings
+its own flow. With the PROFITEST PRIME there are six: installation, rotary switch, test leads,
+supply, mode and limits, measure. The first station shows the structure tree: elements of every
+kind are made, moved and deleted there while measuring. The drawn knob stands where the
+instrument reports it, and the position to turn to pulses until the switch serves the
+measurement. The leads are laid one by one from the sockets to the terminals of the test point:
+an RCD, a main switch, a CEE plug, a Schuko plug, a monitoring device, a touchable part, the
+cores of the supply cable. The supply station says whether to measure live or dead. Mode and
+limits shows the key block of the instrument alone, with the softkeys to set beside their
+labels, and names the standards with their clauses the measurement rests on and what it is taken
+for. The last station waits for the result and says where further readings are taken.
+
+Guided are voltage, protective conductor with 200 mA and 25 A, insulation with constant and
+rising voltage, the three RCD tests, the loop impedance in its four ways (with the full test
 current, and three made for a circuit behind an RCD), residual voltage, the response of
 insulation monitors and residual current monitors, the leakage current at touchable parts, the
-current with a clamp and the voltage drop. The first station shows the structure tree: elements of every kind are made, moved and
-deleted there while measuring.
+current with a clamp and the voltage drop. The list to choose from shows each with the marking
+printed at its position of the rotary switch.
+
+A guide follows what the element states. A machine, a device or a piece of equipment states its
+supply connection: fixed, CEE plug or Schuko plug. Protective conductor and insulation are then
+measured at the supply terminals, at the pulled CEE plug or at the pulled Schuko plug, each with
+its own picture of the leads. Where the RCD at the element is of type B, the guide for the loop
+impedance warns of the methods this type rules out and points at the one that fits.
+
+**Repeating a measurement.** Once a campaign holds a reading of a kind, the next measurement of
+that kind runs the same stations and passes two of them by: the rotary switch where the
+instrument already stands right, and the test leads where the probes go where they already are.
+Supply, mode and limits and the measurement itself are shown every time, because whether to
+measure live or dead and the limits of a new element are asked every time.
 
 ![Station 2: the knob turns to IΔN, the instrument still reports IF](docs/images/guide-dial.png)
 
@@ -84,7 +108,8 @@ data or its file name. A timeline shows measurements and photos as tracks, like 
 with a line from every photo to its measurement. Where the camera's clock is off, dragging one
 photo sideways moves all of them until they sit on their measurements; dragging a photo up onto a
 measurement ties just this one; a gap moves everything after a pause. A photo that fits nowhere
-waits on a stack and can be dropped onto a row of the table later.
+waits on a stack and can be dropped onto a row of the table later, or onto an element of the
+structure, where it lies as a picture of that element.
 
 ![The camera's clock was 2½ minutes fast: one drag and every photo sits on its measurement](docs/images/photo-timeline.gif)
 
@@ -96,18 +121,21 @@ it, a defect in red.
 ![A photo of an RCD with two numbered marks, classed as a defect](docs/images/photo-marks.png)
 
 **Test plans, repeat inspections and campaign templates.** A test plan leads through questions
-and measurements in a wizard; a visual inspection to DIN VDE 0100-600 and an electrical machine
-inspection come as drafts. Any campaign takes any number of plans at any time, run in any order;
-each must be worked off before confirming. A repeat inspection turns the last confirmed campaign
+and measurements in a wizard; a visual inspection to DIN VDE 0100-600, the inspection of a machine
+to EN 60204-1 and its electrical test come as drafts. Any campaign takes any number of plans at any
+time, run in any order; each must be worked off before the campaign is ended, and a step skipped
+with its reason counts as worked off. A repeat inspection turns the last ended campaign
 into a list of open points. A campaign template keeps the structure and the points of an
 inspection and can be used on the same installation or copied onto another of the same build. As
 an open pattern it is edited along the way and offers what a campaign did differently when it is
-confirmed; for series devices its points and measurements are fixed, their order is free, and
+ended; for series devices its points and measurements are fixed, their order is free, and
 deviations need a reason.
 
 **Reports.** Reports are made from templates in a graphical editor with live preview, letterhead
 and logo, in German or English, chosen for each report. A template block can show none,
-one or many measurements per element. Confirming a campaign seals the record;
+one or many measurements per element. A campaign is given its template, and its preview shows
+the report drawn with it. A report names the day measured on and, by the signature,
+the day the campaign was ended. Ending a campaign seals the record;
 archived PDFs carry a checksum and keep the template they were made with. Reports can be signed
 as PAdES with an X.509 certificate from a PKCS#12 file or straight from an NSS database such as
 the one of Firefox or Thunderbird; pinentry asks for the key password.
@@ -158,7 +186,8 @@ selects another folder.
 ## Documentation
 
 How the program is built is described in [docs/architecture.md](docs/architecture.md), the
-instrument layer in [docs/hardware-abstraction.md](docs/hardware-abstraction.md).
+instrument layer in [docs/hardware-abstraction.md](docs/hardware-abstraction.md), the rules the
+surface follows in [docs/gui-design.md](docs/gui-design.md).
 
 ## License
 

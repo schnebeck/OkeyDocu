@@ -24,8 +24,8 @@ from ..l10n import moment, plural, tr
 
 SEPARATOR = "  ·  "
 
-def heading(text: str, size: int = 18) -> QLabel:
-    label = QLabel(text)
+def heading(text: str, size: int = 18, kind: type[QLabel] = QLabel) -> QLabel:
+    label = kind(text)
     font = label.font()
     font.setPointSize(size)
     font.setBold(True)
@@ -38,8 +38,9 @@ def count_text(count: int) -> str:
 
 
 def campaign_lines(row, count: int, mark: str = "") -> str:
-    """Title, the order and when with how much, a line each; a line with nothing is left out."""
-    since = datetime.fromisoformat(row["started_at"])
+    """Title, the order and when with how much, a line each; a line with nothing is left out.
+    When is the first measurement; a campaign without one tells when it was created."""
+    since = datetime.fromisoformat(row["tested_at"])
     details = f"{moment(since)}{SEPARATOR}{count_text(count)}"
     lines = (f"{mark}{row['title']}", order_line(row), details)
     return "\n".join(line for line in lines if line)

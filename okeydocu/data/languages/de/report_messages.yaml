@@ -1,8 +1,8 @@
 # OkeyDocu - German texts: messages while reports are made, signed and archived.
 texts:
-  The record was changed after it was completed and is refused.: Der Datensatz wurde nach dem Abschluss verändert und wird abgewiesen.
-  Reports are created from completed campaigns.: Protokolle werden aus abgeschlossenen Kampagnen erzeugt.
-  A draft is made from an open campaign only.: Ein Entwurf entsteht nur aus einer offenen Kampagne.
+  "The record was changed after the campaign was ended and is refused.": "Der Datensatz wurde nach dem Beenden der Kampagne verändert und wird abgewiesen."
+  "Reports are created from ended campaigns.": "Protokolle werden aus beendeten Kampagnen erzeugt."
+  "A preview is made from an open campaign only.": "Eine Vorschau entsteht nur aus einer offenen Kampagne."
   Reports with simulated values are not signed.: Protokolle mit simulierten Messwerten werden nicht signiert.
   This report is already signed.: Dieses Protokoll ist bereits signiert.
   The archived file was changed.: Die archivierte Datei wurde verändert.

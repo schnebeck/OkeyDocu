@@ -34,7 +34,7 @@ from .place_line import PlaceLine
 from .value_rows import QuietCombo, ValueRows, verdict_combo
 
 READ_ONLY_STYLE = "background: transparent; border: none;"
-LOCKED_TEXT = N_("The campaign is completed. The measurement can only be read.")
+LOCKED_TEXT = N_("The campaign is ended. The measurement can only be read.")
 
 
 def _facts(row, capture: str, db) -> str:

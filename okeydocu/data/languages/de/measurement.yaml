@@ -25,10 +25,10 @@ texts:
   "Delete {count} measurements …": "{count} Messungen löschen …"
   Inspector: Prüfer
   Limit: Grenzwert
-  The campaign has been completed in the meantime. The change to the measurement is not saved.: Die Kampagne wurde inzwischen abgeschlossen. Die Änderung an der Messung ist nicht gespeichert.
+  "The campaign has been ended in the meantime. The change to the measurement is not saved.": "Die Kampagne wurde inzwischen beendet. Die Änderung an der Messung ist nicht gespeichert."
   "Marked as “changed” in the report: {fields}.": "Im Protokoll als „geändert“ vermerkt: {fields}."
   Text correction, not marked in the report.: Textkorrektur, ohne Vermerk im Protokoll.
-  The campaign is completed. The measurement can only be read.: Die Kampagne ist abgeschlossen. Die Messung lässt sich nur lesen.
+  "The campaign is ended. The measurement can only be read.": "Die Kampagne ist beendet. Die Messung lässt sich nur lesen."
   Where it was measured: Wo gemessen wurde
   Remark on the measurement: Bemerkung zur Messung
   No measurement selected.: Keine Messung gewählt.
@@ -86,7 +86,9 @@ texts:
   Photo …: Foto …
   "{count} measurement": "{count} Messung"
   "{count} measurements": "{count} Messungen"
-  "{count} open": "{count} offen"
+  "Change measuring path": "Messpfad ändern"
+  "Sets right between which conductors the measurement was taken. The readings stay; the change is logged.": "Stellt richtig, zwischen welchen Leitern gemessen wurde. Die Messwerte bleiben; die Änderung wird protokolliert."
+  "in common:": "gemeinsam:"
   Date: Datum
   Area: Bereich
   Reading: Messwert

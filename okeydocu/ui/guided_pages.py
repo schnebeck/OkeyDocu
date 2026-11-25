@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from html import escape
+
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QKeySequence
 from PySide6.QtWidgets import (
@@ -46,7 +48,8 @@ def _big_label(point_size_step: int) -> QLabel:
 
 
 class CheckPage(QWidget):
-    """One question. The expected answer goes on at once, any other waits for a comment."""
+    """One question: its short name, what is asked in full, how to check it and where it is
+    required. The expected answer goes on at once, any other waits for a comment."""
 
     chosen = Signal(str)
     edited = Signal()
@@ -57,12 +60,20 @@ class CheckPage(QWidget):
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.question = _big_label(5)
         self.question.setStyleSheet("font-weight: bold;")
+        self.asked = _big_label(1)
+        self.how = QLabel()
+        self.how.setWordWrap(True)
+        self.how.setTextFormat(Qt.TextFormat.RichText)
         self.text = QLabel()
         self.text.setWordWrap(True)
+        self.text.setEnabled(False)  # the source stands back behind what is asked
         self.buttons = {
             "yes": QPushButton(tr("&Yes")), "no": QPushButton(tr("&No")),
             "skip": QPushButton(tr("&Skip")),
         }
+        self.buttons["skip"].setToolTip(tr(
+            "The question is left out, for example because it does not arise on this"
+            " installation. The reason appears in the report; the result stays as it is."))
         self.keys = {_mnemonic(button): choice for choice, button in self.buttons.items()}
         self.group = QButtonGroup(self)
         row = QHBoxLayout()
@@ -85,6 +96,8 @@ class CheckPage(QWidget):
         layout.setSpacing(12)
         layout.addStretch(1)
         layout.addWidget(self.question)
+        layout.addWidget(self.asked)
+        layout.addWidget(self.how)
         layout.addWidget(self.text)
         layout.addSpacing(8)
         layout.addLayout(row)
@@ -100,11 +113,22 @@ class CheckPage(QWidget):
     def comment_text(self) -> str:
         return self.comment.toPlainText().strip()
 
+    @property
+    def reasoned(self) -> bool:
+        """A question is left out only with its reason."""
+        return self.choice == "skip" and bool(self.comment_text)
+
     def ready(self) -> bool:
-        return self.choice in ("yes", "no") or (self.choice == "skip" and bool(self.comment_text))
+        return self.choice in ("yes", "no") or self.reasoned
 
     def show_step(self, step: PlanStep, answer: str, comment: str) -> None:
         self.question.setText(step.title)
+        asked = step.question if step.question != step.title else ""
+        self.asked.setText(asked)
+        self.asked.setVisible(bool(asked))
+        told = " ".join(escape(line) for line in step.instructions)
+        self.how.setText(f"<b>{escape(tr('How to check:'))}</b> {told}")
+        self.how.setVisible(bool(told))
         self.expected = step.expected
         self.text.setText(step.text)
         self.text.setVisible(bool(step.text))

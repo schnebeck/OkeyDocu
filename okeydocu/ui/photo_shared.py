@@ -88,9 +88,14 @@ class ThumbCache(QObject):
             self._timer.start()
         return known
 
-    def forget(self, path) -> None:
-        """A photo shown another way from now on is read again on its next call."""
-        self._pixmaps.pop(str(path), None)
+    def renew(self, path) -> None:
+        """A photo shown another way from now on is read again at once; `ready` then tells
+        every widget that shows it, wherever it stands."""
+        key = str(path)
+        self._pixmaps.pop(key, None)
+        if key not in self._waiting:
+            self._waiting.append(key)
+            self._timer.start()
 
     def pause(self, paused: bool) -> None:
         """A held gesture goes first: one large file takes longer than a frame."""

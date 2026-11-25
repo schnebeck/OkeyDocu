@@ -78,30 +78,53 @@ class GuidedActions:
     def previous(self) -> None:
         self.steps.setCurrentRow(self.steps.currentRow() - 1)
 
+    def _open_rows(self) -> list[int]:
+        return [index for index, row in enumerate(self._rows())
+                if row["status"] in ("pending", "active")]
+
     def _go_on(self) -> None:
-        """All marks are redrawn, then the next point in the plan comes up."""
+        """All marks are redrawn, then the next step in the plan comes up. Past the last one
+        the first step still open follows; with none open the last one stays."""
         row = self.steps.currentRow()
         self._fill_steps()
-        self.steps.setCurrentRow(min(row + 1, self.steps.count() - 1))
+        if row + 1 < self.steps.count():
+            self.steps.setCurrentRow(row + 1)
+        elif self._open_rows():
+            self.steps.setCurrentRow(self._open_rows()[0])
         self.changed.emit()
+
+    def _closes_plan(self) -> bool:
+        """On the last step, with no other step open, going on leaves nothing to come up."""
+        last = self.steps.count() - 1
+        return last >= 0 and self.steps.currentRow() == last and self._open_rows() in ([], [last])
+
+    def _next_text(self) -> str:
+        return tr("End test plan") if self._closes_plan() else tr("Next →")
 
     def _next_if_ready(self) -> None:
         if self.next_button.isEnabled():
             self.next_point()
 
     def next_point(self) -> None:
+        """The button and the Enter key. Passing the last step with nothing left open says
+        the plan is worked through."""
+        closing = self._closes_plan()
+        if self._pass_step() and closing and not self._open_rows():
+            self.plan_done.emit()
+
+    def _pass_step(self) -> bool:
         row = self._step()
         if row is None:
-            return
+            return False
         step = self.app.service.plan_step(row)
         if step.kind == "check":
             self._store_check(row)
         elif step.kind == "note" and row["status"] != "done":
             self.app.service.finish_step(row["id"])
         elif row["status"] == "active":
-            self.finish()
-            return
+            return self.finish()
         self._go_on()
+        return True
 
     def _store_check(self, row) -> None:
         page = self.check_page
@@ -114,11 +137,12 @@ class GuidedActions:
             self.app.service.answer_step(row["id"], page.choice, page.comment_text)
 
     def _check_chosen(self, choice: str) -> None:
-        """The expected answer needs no more words, anything else is worth a comment."""
+        """The expected answer needs no more words, anything else is worth a comment. A step
+        left out with its reason already written goes on as well."""
         step = self.app.service.plan_step(self._step())
         self.check_page.show_hint()
-        if choice == step.expected:
-            self.next_point()
+        if choice == step.expected or self.check_page.reasoned:
+            self._pass_step()
             return
         self._update_actions()
         self.check_page.comment.setFocus()
@@ -127,24 +151,26 @@ class GuidedActions:
         self.check_page.show_hint()
         self._update_actions()
 
-    def finish(self) -> None:
-        """With a live connection every reading is here already, otherwise it is fetched."""
+    def finish(self) -> bool:
+        """With a live connection every reading is here already, otherwise it is fetched.
+        Says whether the step is finished."""
         row = self._step()
         campaign = self._campaign()
         pushed = self.instrument.session is not None or campaign["driver"] in NO_INSTRUMENT
         if row is None or not (pushed or self.fetch()):
-            return
+            return False
         count = len(self.app.service.measurements(self.campaign_id, row["id"]))
         if count == 0:
             answer = QMessageBox.question(
                 self, tr("No measurement"),
-                tr("This step has no measurement. Complete it anyway? The report then shows it"
+                tr("This step has no measurement. Count it as done anyway? The report then shows it"
                    " as not measured."),
             )
             if answer != QMessageBox.StandardButton.Yes:
-                return
+                return False
         self.app.service.finish_step(row["id"])
         self._go_on()
+        return True
 
     def skip(self, reason: str) -> None:
         row = self._step()

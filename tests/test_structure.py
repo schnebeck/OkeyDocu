@@ -85,7 +85,7 @@ def test_what_a_sealed_record_or_a_campaign_needs_stays(app, tree):
     campaign = app.service.create(tree["press"], "Prüfung", "Prüfer")
     _measure(app, campaign, tree["point"])
     app.service.close(campaign)
-    assert "Abgeschlossene" in app.service.deletion_blocker(tree["cabinet"])
+    assert "Beendete" in app.service.deletion_blocker(tree["cabinet"])
     assert "Kampagne" in app.service.deletion_blocker(tree["press"])
     with pytest.raises(StructureError):
         app.service.delete_element(tree["point"])

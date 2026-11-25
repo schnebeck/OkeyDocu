@@ -106,7 +106,7 @@ def test_place_does_not_repeat_the_installation(window, app):
 def test_shared_start_of_the_path_moves_to_the_head(window, app):
     two_places(app)
     page = data_page(window, app)
-    assert "Bereich: <b>Schrank</b>" in page.common.text()
+    assert "Bereich <b>Schrank</b>" in page.common.text()
 
 
 def test_paths_of_different_depth_keep_their_last_part(window, app):

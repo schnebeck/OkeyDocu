@@ -13,12 +13,16 @@ as it was."""
 from __future__ import annotations
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QComboBox, QHBoxLayout, QPushButton, QWidget
+from PySide6.QtWidgets import QComboBox, QHBoxLayout, QPushButton, QSizePolicy, QWidget
 
 from ..devices import driver_info
-from ..l10n import tr
+from ..l10n import N_, tr
+from .board import UNIT
+from .button_width import widest
 from .dial_icons import BADGE, dial_icon
 
+LEAST = 16  # characters of a name the choice keeps in view when room is short
+FIRST, REPEAT = N_("Guided measurement …"), N_("Guided repeat …")
 
 class GuideStarter(QWidget):
     requested = Signal(str)  # the function to be guided through
@@ -29,11 +33,18 @@ class GuideStarter(QWidget):
         self.measured: set[str] = set()
         self.choice = QComboBox()
         self.choice.setIconSize(BADGE)
+        # The choice fills the room it gets and gives way to a short name; its list stays
+        # as wide as the longest.
+        self.choice.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToContents)
+        self.choice.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.choice.setMinimumWidth(BADGE.width() + 40
+                                    + self.choice.fontMetrics().averageCharWidth() * LEAST)
         self.choice.currentIndexChanged.connect(lambda _: self._label())
         self.button = QPushButton()
         self.button.clicked.connect(self._request)
         row = QHBoxLayout(self)
         row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(2 * UNIT)
         row.addWidget(self.choice)
         row.addWidget(self.button)
         self.hide()
@@ -52,6 +63,7 @@ class GuideStarter(QWidget):
             for function in (info.guided if info is not None else ()):
                 guide = info.guide(function)
                 self.choice.addItem(dial_icon(panel, guide.selector), tr(guide.title), function)
+            self.choice.view().setMinimumWidth(self.choice.sizeHint().width())
             self.choice.setCurrentIndex(max(self.choice.findData(kept), 0))
             self.choice.blockSignals(False)
         self.setVisible(self.choice.count() > 0)
@@ -74,7 +86,9 @@ class GuideStarter(QWidget):
     def _label(self) -> None:
         function = self.choice.currentData()
         first = function is not None and self.is_first(function)
-        self.button.setText(tr("Guided measurement …") if first else tr("Guided repeat …"))
+        # Wide enough for either text, so the choice beside it keeps its width.
+        self.button.setFixedWidth(widest(self.button, (tr(FIRST), tr(REPEAT))))
+        self.button.setText(tr(FIRST) if first else tr(REPEAT))
         self.button.setToolTip(tr("Leads through the first measurement of this kind step by"
                                   " step.") if first else
                                tr("Leads through the next measurement of this kind, passing"

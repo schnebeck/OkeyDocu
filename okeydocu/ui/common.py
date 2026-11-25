@@ -36,6 +36,7 @@ from ..reporting.archive import ReportArchive
 from ..reporting.context import VERDICT_TEXT
 from .readings import readings_line
 from ..store import Database
+from .steady_text import SteadyText
 from .table_stretch import TitledStretch
 
 T = TypeVar("T")
@@ -142,8 +143,8 @@ def make_table(headers: list[str], stretch: int | None = None) -> QTableWidget:
     table.verticalHeader().hide()
     # As many rows in view as fit: this is a table to read through, not to tap on.
     table.verticalHeader().setDefaultSectionSize(table.fontMetrics().height() + 8)
-    header = table.horizontalHeader()
-    header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+    table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+    table.setItemDelegate(SteadyText(table))
     if stretch is not None:
         TitledStretch(table, stretch)
     return table

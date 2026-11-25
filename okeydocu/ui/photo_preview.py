@@ -223,5 +223,5 @@ class PhotoPreview(PhotoViewing, Overlay):
     def accept(self) -> None:
         if self.editable:
             self.app.service.save_photo_notes(self.photo_id, self.role(), self.marks(), self.view)
-            shared_thumbs().forget(self.path)
+            shared_thumbs().renew(self.path)
         super().accept()

@@ -35,7 +35,7 @@ QFrame#card:hover { border: 1px solid palette(highlight); }
 CHIP_STYLE = "color: white; background: %s; border-radius: 3px; padding: 1px 6px;"
 LIVE, ALERT = "#2e7d32", "#c62828"
 TODO, READY = "#b26a00", "#2e7d32"
-READY_TEXT = N_("Ready to confirm")
+READY_TEXT = N_("Can be ended")
 CARD_WIDTH = 280
 
 # What the button on a card does, sent with the campaign it belongs to.
@@ -62,13 +62,16 @@ def attention(summary: CampaignSummary) -> list[str]:
     return [tr(READY_TEXT)] if summary.steps and summary.steps_done == summary.steps else []
 
 
-def dim(label: QLabel) -> QLabel:
+def dim_colour(palette: QPalette) -> QColor:
     """Secondary, yet readable: the text colour half way to the background."""
-    palette = label.palette()
     text = palette.color(QPalette.ColorRole.WindowText)
     base = palette.color(QPalette.ColorRole.Base)
-    mixed = QColor(*((a * 3 + b * 2) // 5 for a, b in zip(text.getRgb()[:3], base.getRgb()[:3])))
-    palette.setColor(QPalette.ColorRole.WindowText, mixed)
+    return QColor(*((a * 3 + b * 2) // 5 for a, b in zip(text.getRgb()[:3], base.getRgb()[:3])))
+
+
+def dim(label: QLabel) -> QLabel:
+    palette = label.palette()
+    palette.setColor(QPalette.ColorRole.WindowText, dim_colour(palette))
     label.setPalette(palette)
     return label
 

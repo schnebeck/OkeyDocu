@@ -74,7 +74,8 @@ CREATE TABLE campaigns (
     contact_phone TEXT NOT NULL DEFAULT '',
     contact_email TEXT NOT NULL DEFAULT '',
     cost_center TEXT NOT NULL DEFAULT '',  -- the contractor's own account for this job
-    job_number TEXT NOT NULL DEFAULT ''  -- the contractor's own reference for this job
+    job_number TEXT NOT NULL DEFAULT '',  -- the contractor's own reference for this job
+    report_template TEXT NOT NULL DEFAULT ''  -- by name; empty takes the first there is
 );
 
 CREATE TABLE steps (
@@ -153,7 +154,8 @@ CREATE TABLE templates (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
     body TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    standard INTEGER NOT NULL DEFAULT 0  -- 1 on the one a new campaign starts with
 );
 
 CREATE TABLE reports (

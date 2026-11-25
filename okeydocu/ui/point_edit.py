@@ -34,8 +34,8 @@ class PointEdit(QWidget):
         self.up = QPushButton(tr("▲ Earlier"))
         self.down = QPushButton(tr("▼ Later"))
         self.remove = QPushButton(tr("Remove point"))
-        self.remove.setToolTip(tr("The point leaves this campaign; on confirming, the template"
-                                  " can leave it out as well."))
+        self.remove.setToolTip(tr("The point leaves this campaign; when the campaign is ended, the"
+                                  " template can leave it out as well."))
         self.up.clicked.connect(lambda: self._move(-1))
         self.down.clicked.connect(lambda: self._move(1))
         self.remove.clicked.connect(self._remove)

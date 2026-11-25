@@ -1,0 +1,202 @@
+# OkeyDocu - measuring plan, draft.
+# The inspection of the electrical equipment of a machine before it is measured: each point a
+# question answered yes when in order. The points follow DIN EN 60204-1 (VDE 0113-1):2026-06,
+# which asks to verify that the equipment agrees with its technical documentation (18.1 a); each
+# step names the clause its question comes from. How a point is checked is practice, not the
+# wording of the standard.
+key: machine_inspection
+title: Machine – inspection to EN 60204-1
+released: false
+steps:
+- key: documentation_overview
+  kind: check
+  title: "Documentation: overview and identification"
+  question: "With more than one document: is there a main document that lists all documents of the electrical equipment, and does the documentation identify the equipment as its marking does?"
+  text: "EN 60204-1, 17.2 a), b)"
+  instructions: ["Ask for the documentation of the machine. With several documents look for a list of them or a cover sheet, and compare type and serial number with the marking on the enclosure."]
+- key: documentation_supply
+  kind: check
+  title: "Documentation: connection to the supply"
+  question: "Does it describe installation and connection, and state for every supply connection the rated short-circuit current, nominal voltage, number of line conductors, frequency, type of system (TT, TN, IT) and full-load current, with further demands on the supply such as its highest impedance or the leakage current?"
+  text: "EN 60204-1, 17.2 c)"
+  instructions: ["Look in the installation instructions and on the first sheets of the circuit diagram. Compare voltage, frequency and full-load current with the marking on the enclosure and with the supply on site."]
+- key: documentation_site
+  kind: check
+  title: "Documentation: place of installation"
+  question: "Does it state, where needed, the room for removal and maintenance, what the cooling asks of the arrangement, the limits of the surroundings, functional limits such as starting currents and permitted voltage drop, and the measures for electromagnetic compatibility?"
+  text: "EN 60204-1, 17.2 c)"
+  instructions: ["Look in the installation instructions for the conditions of the place. What this machine does not need is left out with the reason."]
+- key: documentation_bonding
+  kind: check
+  title: "Documentation: extraneous conductive parts"
+  question: "Does it say how extraneous conductive parts that can be touched together with the machine, for example within 2.5 m, are connected to its protective bonding: metal pipes, fences, ladders, handrails?"
+  text: "EN 60204-1, 17.2 d)"
+  instructions: ["Look around the machine for metal pipes, fences, ladders and handrails within reach, about 2.5 m, and for what the instructions say about bonding them."]
+- key: documentation_operation
+  kind: check
+  title: "Documentation: function and operation"
+  question: "Does it hold, where needed, an overview of the layout of the electrical equipment, the procedures for programming or configuring, for restarting after an unexpected stop, and the sequence of operations?"
+  text: "EN 60204-1, 17.2 e)"
+  instructions: ["Look in the operating instructions for a layout drawing or overview and for the parts on setting up, restarting and the sequence of operations."]
+- key: documentation_maintenance
+  kind: check
+  title: "Documentation: maintenance"
+  question: "Does it state how often and how functions are tested, how to maintain safely, how to adjust and repair, the connections of the components for their replacement, by circuit diagrams or connection tables, and the special tools and spare parts?"
+  text: "EN 60204-1, 17.2 f)"
+  instructions: ["Look for the part on maintenance, the circuit diagrams or connection tables and the list of spare parts. Take a sample: find one component of the cabinet in the diagram."]
+- key: documentation_safety
+  kind: check
+  title: "Documentation: residual risks and settings"
+  question: "Does it name residual risks, the training and protective equipment needed, the restriction of access by key or tool to skilled or instructed persons, the settings such as DIP switches and parameter values, and how safety-related control functions are verified after repairs and at periodic tests?"
+  text: "EN 60204-1, 17.2 f)"
+  instructions: ["Look for the part on safety and for a list of settings: parameters, DIP switches. Where the machine has safety functions, look for how they are tested."]
+- key: documentation_handling
+  kind: check
+  title: "Documentation: transport and disposal"
+  question: "Does it state, where needed, how to handle, transport and store the equipment, and how to dismantle it and treat its components?"
+  text: "EN 60204-1, 17.2 g), h)"
+  instructions: ["Look for the parts on transport, storage and disposal. For a machine that stands in place a short statement is enough."]
+- key: conformity
+  kind: check
+  title: "Agreement with the documentation"
+  question: "Does the electrical equipment agree with its technical documentation?"
+  text: "EN 60204-1, 18.1 a)"
+  instructions: ["Take samples with the circuit diagram at the open cabinet, dead: the supply, the protective devices with their ratings and settings, a motor circuit, a control circuit. Note every difference."]
+- key: enclosure_marking
+  kind: check
+  title: "Marking of the enclosure"
+  question: "Does the enclosure on the supply show, legible and durable, the supplier and for every supply the nominal voltage, the number of line conductors, the frequency and the full-load current?"
+  text: "EN 60204-1, 16.4"
+  instructions: ["Look at the enclosure near the incoming supply, where the standard recommends the marking. Read it from where one stands once the machine is installed."]
+- key: reference_designations
+  kind: check
+  title: "Reference designations"
+  question: "Can every enclosure, assembly, control device and component be identified by the reference designation the documentation shows?"
+  text: "EN 60204-1, 16.5"
+  instructions: ["Take samples: choose three components in the cabinet and one at the machine, read the designation on each and find the same one in the diagram."]
+- key: warning_signs
+  kind: check
+  title: "Warning signs"
+  question: "Do enclosures that do not clearly show that they hold electrical equipment carry the warning sign ISO 7010-W012, clearly visible on the door or cover?"
+  text: "EN 60204-1, 16.2.1"
+  instructions: ["Go round the machine and look at every enclosure. No sign is needed on the enclosure of the supply disconnecting device, on operator stations and on single devices with an enclosure of their own."]
+- key: hot_surfaces
+  kind: check
+  title: "Hot surfaces"
+  question: "Where the risk assessment asks for it: is there a warning of hot surfaces with the sign ISO 7010-W017?"
+  text: "EN 60204-1, 16.2.2"
+  instructions: ["Look at heat sinks, braking resistors, heaters and motors within reach. Where the documentation names hot surfaces, the sign has to be there."]
+- key: function_marking
+  kind: check
+  title: "Marking of control devices"
+  question: "Are control devices and visual indicators marked with their function, clearly and durably, on or beside them?"
+  text: "EN 60204-1, 16.3"
+  instructions: ["Go through every push-button, switch and indicator light: its function is written or shown by a symbol on or beside it, and still legible."]
+- key: supply_terminals
+  kind: check
+  title: "Terminals of the incoming supply"
+  question: "Are the terminals of the incoming supply clearly marked, a neutral conductor on an insulated terminal of its own marked N, and N not connected to the protective bonding circuit inside the equipment?"
+  text: "EN 60204-1, 5.1"
+  instructions: ["Open the terminal compartment of the supply, dead. Look for the markings of the line conductors and of N, and for a link between N and PE: there must be none, except one at the point of supply on a TN-C system."]
+- key: pe_terminal
+  kind: check
+  title: "Terminal of the external protective conductor"
+  question: "Is there, in the same terminal compartment as the line conductors, a terminal for the external protective conductor, marked PE and of a size to suit them?"
+  text: "EN 60204-1, 5.2"
+  instructions: ["In the same compartment look for the terminal marked PE. Its conductor has the cross-section of the line conductors up to 16 mm², 16 mm² up to 35 mm², and half of theirs above that."]
+- key: disconnecting_device
+  kind: check
+  title: "Supply disconnecting device"
+  question: "Does every incoming supply have a supply disconnecting device: a switch with only an OFF and an ON position, marked O and I and lockable in OFF, or a plug and socket combination?"
+  text: "EN 60204-1, 5.3.2, 5.3.3"
+  instructions: ["At the main switch: only O and I, and a place for a padlock in the O position; try it. Where a plug disconnects, there has to be a switch to switch the machine on and off."]
+- key: disconnecting_handle
+  kind: check
+  title: "Handle of the disconnecting device"
+  question: "Is the operating means of the supply disconnecting device outside the enclosure, easy to reach and between 0.6 m and 1.9 m above the access level?"
+  text: "EN 60204-1, 5.3.4"
+  instructions: ["Measure the height of the handle above the floor one stands on. Where a plug disconnects, leave the step out with that reason."]
+- key: enclosure_access
+  kind: check
+  title: "Protection by enclosures"
+  question: "Are live parts inside enclosures protected to at least IP2X or IPXXB, and can an enclosure be opened only with a key or tool, or once its live parts are disconnected?"
+  text: "EN 60204-1, 6.2.2"
+  instructions: ["Try doors and covers: they open only with a key or tool, or the main switch interlocks the door. With the door open, dead: what can be touched while resetting or adjusting is covered finger-safe."]
+- key: degree_of_protection
+  kind: check
+  title: "Degree of protection"
+  question: "Do the enclosures of the controlgear suit the surroundings, with at least IP22, and do openings such as cable entries keep the degree of protection?"
+  text: "EN 60204-1, 11.3, 11.4"
+  instructions: ["Read the IP rating from the plate of the enclosure or from the documentation. Look for open cable entries, missing blanking plugs, damaged seals and holes left over from mounting."]
+- key: protective_bonding
+  kind: check
+  title: "Protective bonding circuit"
+  question: "Are the exposed conductive parts of the electrical equipment and the structural parts used for bonding connected to the protective bonding circuit, with no switching or overcurrent device in it?"
+  text: "EN 60204-1, 8.2.1, 8.2.3"
+  instructions: ["Follow the protective conductor from the PE terminal: motor housings, mounting plate, enclosure. Look for a fuse, switch or link in its path; there must be none. Its continuity is measured as test 1."]
+- key: doors_and_covers
+  kind: check
+  title: "Equipment on doors and covers"
+  question: "Where electrical equipment is mounted on lids, doors or cover plates: is the continuity of the protective bonding circuit ensured, by a protective conductor or by fasteners of low resistance?"
+  text: "EN 60204-1, 8.2.3"
+  instructions: ["Look at every door and cover that carries equipment: a green-and-yellow conductor to it, or hinges and fasteners that make contact. Without a conductor, measure across it with test 1."]
+- key: pe_identification
+  kind: check
+  title: "Identification of the protective conductor"
+  question: "Is every protective conductor clearly told apart from other conductors, by GREEN-AND-YELLOW or at its ends by the letters PE or the symbol IEC 60417-5019, and is GREEN-AND-YELLOW used for nothing else?"
+  text: "EN 60204-1, 13.2.2"
+  instructions: ["Look at the conductors in the cabinet and at the terminals: green-and-yellow on protective conductors only; bare or braided ones carry PE or the symbol at their ends."]
+- key: n_identification
+  kind: check
+  title: "Identification of the neutral conductor"
+  question: "Is a neutral conductor that is identified by colour alone BLUE, and is that colour used for no other conductor it could be confused with?"
+  text: "EN 60204-1, 13.2.3"
+  instructions: ["Look at the terminal N and the conductors on it: blue, and no blue conductor that could be taken for it used otherwise."]
+- key: conductor_identification
+  kind: check
+  title: "Identification of conductors and terminals"
+  question: "Can each conductor be identified at each termination by means of the documentation, and do the terminals of terminal blocks carry the markings of the diagrams?"
+  text: "EN 60204-1, 13.2.1, 13.1.1"
+  instructions: ["Take samples: choose three conductors at their terminals and find number or colour in the diagram; compare the markings of one terminal block with the diagram."]
+- key: connections
+  kind: check
+  title: "Terminal connections"
+  question: "Are all connections, those of the protective bonding circuit in particular, secured against loosening, with one protective conductor only at each terminal connecting point?"
+  text: "EN 60204-1, 13.1.1"
+  instructions: ["Dead: look at the terminals and pull lightly at the conductors, the protective conductors first. Stranded conductors carry ferrules where the terminal is not made for them."]
+- key: pelv_circuits
+  kind: check
+  title: "PELV circuits"
+  question: "Is one side of every PELV circuit connected to the protective bonding circuit, its source of a permitted kind, and are its conductors run apart from other circuits or insulated for them?"
+  text: "EN 60204-1, 6.4.1, 6.4.2"
+  instructions: ["At the supply of the extra-low voltage: marked as a safety isolating transformer or as a SELV/PELV supply, and 0 V or one side wired to the PE bar. The voltage is at most 60 V DC or 25 V AC in dry locations; it is measured."]
+- key: control_circuits
+  kind: check
+  title: "Control circuits"
+  question: "Are control circuits fed from AC supplied through a transformer with separate windings, and is the common conductor of an earthed control circuit connected to the protective bonding circuit at the point of supply?"
+  text: "EN 60204-1, 9.1.1, 9.4.3.1"
+  instructions: ["In the diagram and the cabinet: the control transformer or power supply and the connection of its common conductor to PE at the supply. Coils sit directly on the common conductor, contacts in the switched one."]
+- key: actuator_colours
+  kind: check
+  title: "Colours of actuators"
+  question: "Are the actuators for emergency stop and emergency switching off RED, on YELLOW where they have a background, START actuators not RED and STOP actuators not GREEN?"
+  text: "EN 60204-1, 10.2.1"
+  instructions: ["Go through the operator stations and compare the colour of each actuator with its function."]
+- key: emergency_stop
+  kind: check
+  title: "Emergency stop devices"
+  question: "Are emergency stop devices easy to reach and present wherever an emergency stop may have to be given?"
+  text: "EN 60204-1, 10.7.1"
+  instructions: ["Stand at every place where somebody works at the machine: an emergency stop device is within reach. Whether it works belongs to the functional tests."]
+- key: socket_outlets
+  kind: check
+  title: "Socket-outlets for accessories"
+  question: "Where the machine has socket-outlets for accessories: are those up to 20 A protected in addition by an RCD of at most 30 mA, and does the protective bonding circuit reach them?"
+  text: "EN 60204-1, 15.1"
+  instructions: ["Look for socket-outlets on the machine and in the cabinet and find their circuit in the diagram: an RCD of at most 30 mA in front. Without socket-outlets leave the step out with that reason."]
+- key: leakage_current
+  kind: check
+  title: "Earth leakage current above 10 mA"
+  question: "Where the earth leakage current in a protective conductor exceeds 10 mA: is one of the measures of 8.2.6 taken and named in the installation instructions?"
+  text: "EN 60204-1, 8.2.6, 18.1 g)"
+  instructions: ["Look in the documentation for the leakage current; drives and filters are the usual source. It is measured with a clamp around the protective conductor."]

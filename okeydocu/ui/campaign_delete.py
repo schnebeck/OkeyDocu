@@ -20,9 +20,9 @@ from .common import AppContext
 
 OPEN = N_("Photos and files go to the trash, readings cannot be restored.")
 SEALED = N_(
-    "The campaign is closed and sealed. The record and the reports in the archive disappear"
-    " with it; the files go to the trash. Reports passed on stay where they are. A deletion"
-    " note keeps the seal chain of the other campaigns intact."
+    "The campaign is ended and sealed. The record and the reports in the archive disappear with it;"
+    " the files go to the trash. Reports passed on stay where they are. A deletion note keeps the"
+    " seal chain of the other campaigns intact."
 )
 
 

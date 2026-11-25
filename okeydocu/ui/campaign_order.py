@@ -6,10 +6,11 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""A campaign is one order: its job number and the contact person stay in view. What is given
-less often, the client's department and lines and the contractor's own account, folds away
-below; it opens by itself where it already holds something. The fields are rows of the dialog's own form, so their
-labels line up with the rest."""
+"""A campaign is one order. First come the inspector's own references for it, the job number
+and the cost centre; then, under the heading of the customer, the contact person there. What
+is given less often about that person, department, extension and email, folds away below and
+opens by itself where it already holds something. The fields are rows of the dialog's own form,
+so their labels line up with the rest."""
 from __future__ import annotations
 
 from PySide6.QtCore import Qt
@@ -18,12 +19,12 @@ from PySide6.QtWidgets import QFormLayout, QLabel, QLineEdit, QToolButton
 from ..campaign.editing import CONTACT_COLUMNS, ORDER_COLUMNS
 from ..l10n import N_, tr
 
-JOB = ("job_number", N_("Job number"), N_("own reference for this job"))
+OWN = (("job_number", N_("Job number"), N_("own reference for this job")),
+       ("cost_center", N_("Cost centre"), N_("own cost centre for this job")))
 CONTACT = ("contact", N_("Contact person"), N_("e.g. Ms Sample"))
-CLIENT = (("department", N_("Department"), N_("e.g. maintenance")),
-          ("contact_phone", N_("Extension"), N_("e.g. 0511 1234-56")),
-          ("contact_email", N_("Email"), N_("name@customer.example")))
-CONTRACTOR = (("cost_center", N_("Cost centre"), N_("own cost centre for this job")),)
+MORE = (("department", N_("Department"), N_("e.g. maintenance")),
+        ("contact_phone", N_("Extension"), N_("e.g. 0511 1234-56")),
+        ("contact_email", N_("Email"), N_("name@customer.example")))
 
 
 class OrderFields:
@@ -34,26 +35,19 @@ class OrderFields:
         self.fields: dict[str, QLineEdit] = {}
         self.folded: list = []
         self.expanded = False
-        self._add(*JOB, values)
+        for key, label, hint in OWN:
+            self._add(key, label, hint, values)
+        form.addRow(QLabel(tr("<b>Customer</b>")))
         self._add(*CONTACT, values)
         # Not a checkable button: open, it would look pressed.
         self.fold = QToolButton(autoRaise=True)
-        self.fold.setText(tr("More about the order"))
+        self.fold.setText(tr("More about the contact person"))
         self.fold.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         form.addRow(self.fold)
-        self._heading(tr("<b>Client</b>"))
-        for key, label, hint in CLIENT:
-            self._add(key, label, hint, values, folded=True)
-        self._heading(tr("<b>Contractor</b>"))
-        for key, label, hint in CONTRACTOR:
+        for key, label, hint in MORE:
             self._add(key, label, hint, values, folded=True)
         self.fold.clicked.connect(lambda: self._show(not self.expanded))
-        self._show(any(values.get(key) for key, _, _ in CLIENT + CONTRACTOR))
-
-    def _heading(self, text: str) -> None:
-        label = QLabel(text)
-        self.form.addRow(label)
-        self.folded.append(label)
+        self._show(any(values.get(key) for key, _, _ in MORE))
 
     def _add(self, key: str, label: str, hint: str, values: dict, folded: bool = False) -> None:
         field = QLineEdit(values.get(key) or "")
@@ -74,7 +68,7 @@ class OrderFields:
         for key, value in values.items():
             if key in self.fields:
                 self.fields[key].setText(value or "")
-        if any(values.get(key) for key, _, _ in CLIENT + CONTRACTOR):
+        if any(values.get(key) for key, _, _ in MORE):
             self._show(True)
 
     def contact_values(self) -> tuple[str, ...]:

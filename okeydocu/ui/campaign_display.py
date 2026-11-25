@@ -16,7 +16,8 @@ from PySide6.QtWidgets import QMenu, QWidget
 from .. import APP_NAME
 from ..campaign.service import NO_INSTRUMENT
 from ..l10n import tr
-from .campaign_items import SEPARATOR, count_text, order_line
+from .campaign_items import SEPARATOR
+from .campaign_views import ELSEWHERE, ENDED, PAUSED
 from .dashboard_card import MAKE_REPORT, MENU, OPEN_REPORT, RESUME
 from .report_signing import open_report
 
@@ -46,9 +47,13 @@ class CampaignDisplay:
         tester = escape(campaign["tester"]) or tr("Inspector missing")
         if campaign["status"] == "open":
             tester = f'<a href="tester">{tester}</a>'
-        order = escape(order_line(campaign))
-        parts = (escape(customer["name"]), escape(asset["name"]), order, tester, escape(plan))
-        self.header.details.setText(SEPARATOR.join(part for part in parts if part))
+        job = SEPARATOR.join(part for part in (campaign["job_number"], campaign["contact"])
+                             if part)
+        lines = ((tr("Customer"), escape(customer["name"])),
+                 (tr("Installation"), escape(asset["name"])),
+                 (tr("Job") if campaign["job_number"] else tr("Contact person"), escape(job)),
+                 (tr("Inspector"), tester), (tr("Test plan"), escape(plan)))
+        self.header.show_details([line for line in lines if line[1]])
         self.values.show_campaign(campaign_id)
         self.guided.only = self.plan_runs.get(campaign_id)
         self.guided.show_campaign(campaign_id if self._has_plans(campaign) else None)
@@ -125,7 +130,9 @@ class CampaignDisplay:
         self.campaign_menu(campaign_id).exec(position)
 
     def _show_loose(self, count: int) -> None:
-        self.loose_section.setVisible(count > 0)
+        """Measurements beside the plans are offered to the step shown while a plan is run;
+        otherwise they are simply measurements."""
+        self.loose_section.setVisible(count > 0 and self.running_block() is not None)
         self.loose_section.set_count(count)
 
     def _update(self) -> None:
@@ -136,17 +143,27 @@ class CampaignDisplay:
         reachable = instrument and (self.session is None or here)
         guided = bool(campaign) and self.running_block() is not None
         manual = is_open and not instrument and not guided
-        self.free.setVisible(manual or (here and not guided))
+        # The row below the head is there whenever no plan is run, so the board keeps its
+        # place; a campaign nothing is measured for says why.
+        self.free.setVisible(bool(campaign) and not guided)
         if manual:
             self.free.show_campaign(campaign, None)
         elif here and not guided:
             self.free.show_campaign(campaign, self.session)
+        elif campaign:
+            busy = self.session is not None
+            self.free.show_idle(ENDED if not is_open else ELSEWHERE if busy else PAUSED)
         self._show_link()
         self.resume_action.setEnabled(instrument and not here)
         self.pause_action.setEnabled(self.session is not None)
         empty = is_open and self.app.service.is_empty(campaign["id"])
-        self.finish_action.setEnabled(is_open and not empty)
+        # What still stands in the way is said at the button, which waits for it.
+        blockers = self.app.service.blockers(campaign["id"]) if is_open else []
+        self.finish_action.setEnabled(is_open and not empty and not blockers)
+        self.header.show_blockers(blockers)
         self.draft_open = is_open
+        template = self.app.service.report_template(campaign["id"]) if is_open else None
+        self.draft_template = template["name"] if template else ""
         self._proxies_changed()
         self.tester_action.setEnabled(is_open)
         self.edit_action.setEnabled(is_open)
@@ -169,12 +186,15 @@ class CampaignDisplay:
         self.header.finish_button.setVisible(is_open and not empty)
         self.header.delete_button.setVisible(empty)
         # Once nothing is left to do, confirming is the next step and looks like it.
-        ready = is_open and campaign["plan_key"] and not self.app.service.blockers(campaign["id"])
+        ready = is_open and campaign["plan_key"] and not blockers
         self.header.finish_button.setStyleSheet("font-weight: bold;" if ready else "")
         self.header.draft_button.setVisible(is_open)
         self.header.report_button.setVisible(bool(campaign) and not is_open)
         self._show_checks(campaign)
         self._show_status(campaign)
+        # The guide choice and the filter end with the actions and begin where one begins.
+        self.free.align_starter(self.header.span())
+        self.values.align_filter(self.header.span(2))
 
     def _show_status(self, campaign) -> None:
         shown = self.live_id or self.campaign_id
@@ -183,9 +203,8 @@ class CampaignDisplay:
         if campaign is None:
             self.summary.setText("")
             return
-        count = self.app.service.measurement_counts().get(campaign["id"], 0)
-        state = tr("open") if campaign["status"] == "open" else tr("completed")
-        self.summary.setText(f"{count_text(count)}  ·  {state}")
+        is_open = campaign["status"] == "open"
+        self.summary.setText(tr("Campaign open") if is_open else tr("Campaign ended"))
 
     def current_work(self) -> QWidget | None:
         """What the operator is led by right now, if anything."""
@@ -194,4 +213,4 @@ class CampaignDisplay:
             return None
         if self.guided.isVisibleTo(self):
             return self.guided
-        return self.free if self.free.isVisibleTo(self) else None
+        return self.free if self.free.isVisibleTo(self) and self.free.leading else None

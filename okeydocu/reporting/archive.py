@@ -65,7 +65,7 @@ class ReportArchive:
         check = self.service.check_seal(campaign_id)
         if check.rejected:
             raise ReportError(
-                tr("The record was changed after it was completed and is refused.") + "\n"
+                tr("The record was changed after the campaign was ended and is refused.") + "\n"
                 + "\n".join(check.reasons)
             )
 
@@ -80,7 +80,7 @@ class ReportArchive:
         """Render a closed campaign to a new archived PDF, keeping template and language."""
         campaign = self.service.campaign(campaign_id)
         if campaign["status"] != "closed":
-            raise ReportError(tr("Reports are created from completed campaigns."))
+            raise ReportError(tr("Reports are created from ended campaigns."))
         self._refuse_tampered(campaign_id)
         folder = self.service.folder(campaign_id) / "reports"
         folder.mkdir(exist_ok=True)
@@ -102,13 +102,13 @@ class ReportArchive:
               run: Runner = _at_once) -> Path:
         """A preview of an open campaign. It is overwritten each time and never archived."""
         if self.service.campaign(campaign_id)["status"] != "open":
-            raise ReportError(tr("A draft is made from an open campaign only."))
+            raise ReportError(tr("A preview is made from an open campaign only."))
         path = self.service.folder(campaign_id) / "drafts" / "entwurf.pdf"
         path.parent.mkdir(parents=True, exist_ok=True)
         self.service.tidy_proxies(campaign_id)
         with speaking(language):
             nodes = resolve(parse_template(template_body), build_context(self.service, campaign_id))
-            footer = tr("DRAFT – not valid")
+            footer = tr("PREVIEW – not valid")
         run(_render(nodes, path, footer, language))
         return path
 

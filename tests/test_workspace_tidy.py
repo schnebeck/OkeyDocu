@@ -62,11 +62,13 @@ def test_a_pinned_list_does_not_slide(window):
 def test_the_head_counts_what_is_left_and_leads_there(shown):
     page = shown["page"]
     checks = page.header.checks.text()
-    assert "1 ohne Ort" in checks and "1 Mangel" in checks
+    assert "1 Messung ohne Ort" in checks and "1 Mangel an der Anlage" in checks
     page._follow_check(UNPLACED_LINK)
     assert page.structure.current_id() == UNPLACED
     page._follow_check(FAILED_LINK)
-    assert page.structure.current_id() == shown["cabinet"]
+    # The whole installation, narrowed to what failed, the first defect chosen.
+    assert page.structure.current_id() == shown["press"]
+    assert page.values.defects_button.isChecked() and page.values.table.rowCount() == 1
     assert page.values.table.currentItem() is not None
     row = page.values.table.currentRow()
     assert page.values.table.item(row, 8).text() == "nicht bestanden"

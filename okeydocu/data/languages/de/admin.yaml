@@ -6,15 +6,15 @@ texts:
   "{shown} of {total}, all are listed on the left": "{shown} von {total}, alle stehen links in der Liste"
   Choose customer and installation and start the next measurement: Kunde und Anlage wählen und die nächste Messung beginnen
   Measurement campaigns: Messkampagnen
-  Choose customer and installation, measure, confirm the report.: Kunde und Anlage wählen, messen, Protokoll bestätigen.
+  "Choose customer and installation, measure, end the campaign.": "Kunde und Anlage wählen, messen, Kampagne beenden."
   A campaign needs a customer and an installation first.: Für eine Kampagne braucht es zuerst einen Kunden und eine Anlage.
   Go to master data: Zu den Stammdaten
   Search campaign, customer, location, installation or inspector …: Kampagne, Kunde, Ort, Anlage oder Prüfer suchen …
-  Open measurements: Offene Messungen
-  Completed measurements: Abgeschlossene Messungen
+  "Open campaigns": "Offene Kampagnen"
+  "Ended campaigns": "Beendete Kampagnen"
   Set up and manage: Einrichten und verwalten
   "No campaign matches “{search}”.": "Keine Kampagne passt zu „{search}“."
-  Ready to confirm: Bereit zum Bestätigen
+  "Can be ended": "Kann beendet werden"
   "today {time}": "heute {time}"
   "yesterday {time}": "gestern {time}"
   No report made yet: Noch kein Protokoll erstellt

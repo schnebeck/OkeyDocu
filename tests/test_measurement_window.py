@@ -239,5 +239,5 @@ def test_an_edit_on_a_record_closed_meanwhile_is_reported(window, app, monkeypat
     page.editor.comment.setPlainText("zu spät")
     app.service.close(stored_campaign(app, measurement))
     assert not page.editor.apply()
-    assert "abgeschlossen" in errors[0]
+    assert "beendet" in errors[0]
     assert page.editor.comment.toPlainText() == "alt"

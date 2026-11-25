@@ -82,6 +82,13 @@ texts:
   "Main switch: on": "Hauptschalter: ein"
   "Main switch: off": "Hauptschalter: aus"
   "Limits: set them as the test basis requires.": "Grenzwerte: so einstellen, wie es die Prüfgrundlage verlangt."
+  "{length} m of {section} mm² copper": "{length} m Kupfer mit {section} mm²"
+  "{cable}: a cord of up to 1.5 mm² has its limit by its length.": "{cable}: Eine Anschlussleitung bis 1,5 mm² hat ihren Grenzwert nach der Länge."
+  "{cable}: {conductor} for the conductor plus {contacts} for the contacts.": "{cable}: {conductor} für den Leiter und {contacts} für die Übergänge."
+  "Proposed limit for {element}: {value}": "Vorgeschlagener Grenzwert für {element}: {value}"
+  "Limit of the appliance tests (EN 50678 and EN 50699, 5.3). For a machine they are a supplement the inspector decides on; EN 60204-1 sets no limit of its own.": "Grenzwert der Geräteprüfung (EN 50678 und EN 50699, 5.3). Für eine Maschine ist sie eine Ergänzung, über die der Prüfer entscheidet; die EN 60204-1 nennt keinen eigenen Grenzwert."
+  "No fixed limit for {element}; to be expected: up to {value}": "Kein fester Grenzwert für {element}; zu erwarten: bis {value}"
+  "EN 60204-1, 18.2.2, sets no limit: the reading has to fit length, cross-section and material.": "EN 60204-1, 18.2.2, nennt keinen Grenzwert: Der Messwert muss zu Länge, Querschnitt und Werkstoff der Leiter passen."
   "Press the share softkey at the bottom right: the instrument prints the result to OkeyDocu and keeps nothing.": "Softkey „Teilen“ unten rechts drücken: Das Gerät druckt das Ergebnis an OkeyDocu und speichert nichts."
   The voltage is measured on the live supply.: Die Spannung wird an der eingeschalteten Versorgung gemessen.
   Main switch, incoming terminals: Hauptschalter, Klemmen der Einspeisung
@@ -143,8 +150,11 @@ texts:
   "The probes carry the test voltage: do not touch them, and leave them on until the voltage shown has fallen below 10 V.": "An den Prüfspitzen liegt die Prüfspannung: nicht berühren und erst abnehmen, wenn die angezeigte Spannung unter 10 V gefallen ist."
   Leave the probes on until the voltage shown has fallen below 10 V.: Prüfspitzen aufgesetzt lassen, bis die angezeigte Spannung unter 10 V gefallen ist.
   The insulation is measured without voltage.: Die Isolation wird spannungsfrei gemessen.
-  Switch the machine's main switch on: Hauptschalter der Maschine einschalten
-  So the circuits behind it are measured too.: So werden die Stromkreise dahinter mitgemessen.
+  "Switch on the main switch and every breaker": "Hauptschalter und alle Schutzschalter einschalten"
+  "Main switch, circuit breakers and motor protection switches on, fuses in: only what is connected through is measured. What lies behind a contactor is measured at its output, section by section.": "Hauptschalter, Leitungsschutzschalter und Motorschutzschalter ein, Sicherungen eingesetzt: Gemessen wird nur, was durchverbunden ist. Was hinter einem Schütz liegt, wird abschnittsweise an dessen Abgang gemessen."
+  "Prepared?": "Vorbereitet?"
+  "Only a line conductor against PE is a loop: L1-PE, L2-PE, L3-PE. The display goes on to L1-N and to pairs of line conductors: skip these with IΔN, the probes N and PE stay where they are. The line impedance L-N is taken at the position ZLOOP with two probes, probe PE on N.": "Eine Schleife ist nur ein Außenleiter gegen PE: L1-PE, L2-PE, L3-PE. Die Anzeige geht weiter zu L1-N und zu Paaren von Außenleitern: diese mit IΔN überspringen, die Prüfspitzen N und PE bleiben, wo sie sind. Die Netzinnenimpedanz L-N wird in der Stellung ZLOOP mit zwei Prüfspitzen gemessen, Prüfspitze PE auf N."
+  "Only a conductor against PE counts: L1-PE, L2-PE, L3-PE, N-PE (EN 60204-1, 18.3). Without PE, as L1-N or L1-L2, a connected load reads low and says nothing about the insulation: skip these and leave the circuit switched on.": "Es zählt nur ein Leiter gegen PE: L1-PE, L2-PE, L3-PE, N-PE (EN 60204-1, 18.3). Ohne PE, etwa L1-N oder L1-L2, zeigt ein angeschlossener Verbraucher einen niedrigen Wert, der nichts über die Isolation sagt: diese überspringen und den Stromkreis eingeschaltet lassen."
   Mind sensitive parts: Empfindliche Teile beachten
   "Disconnect what the test voltage would damage, or lower it.": "Abklemmen, was die Prüfspannung beschädigen würde, oder die Prüfspannung senken."
   Measures the insulation resistance with a constant test voltage.: Misst den Isolationswiderstand mit konstanter Prüfspannung.

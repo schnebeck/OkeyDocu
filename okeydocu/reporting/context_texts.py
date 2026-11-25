@@ -11,7 +11,7 @@ from __future__ import annotations
 from datetime import date, datetime
 
 from ..l10n import signed_seconds, tr
-from .language import moment
+from .language import day, moment
 from .logo import LogoError, decode_logo
 
 
@@ -58,8 +58,16 @@ def campaign_signature(db, campaign) -> bytes | None:
     return user["signature"] if user else None
 
 
-def reference_day(campaign) -> date:
-    return datetime.fromisoformat(campaign["started_at"]).date()
+def signing_day(campaign) -> date:
+    """The day the report is signed: the campaign was ended and sealed with the inspector's
+    signature. A draft is not signed yet and shows today."""
+    closed = campaign["closed_at"]
+    return datetime.fromisoformat(closed).date() if closed else date.today()
+
+
+def days_text(first: date, last: date) -> str:
+    """The day of a test, or its first and its last where it took several."""
+    return day(first) if first == last else f"{day(first)} \u2013 {day(last)}"
 
 
 def date_text(value: str | None) -> str:

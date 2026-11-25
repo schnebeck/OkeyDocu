@@ -57,7 +57,7 @@ class PlanStepMixin:
         template give the campaign its key; a test plan keeps a key there is."""
         campaign = self.campaign(campaign_id)
         if campaign["status"] != "open":
-            raise CampaignClosed(tr("The campaign is closed."))
+            raise CampaignClosed(tr("The campaign is ended."))
         key = plan.key if has_points(plan.key) else (campaign["plan_key"] or plan.key)
         with self.db.transaction() as connection:
             self._insert_steps(connection, campaign_id, plan)

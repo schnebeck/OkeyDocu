@@ -22,7 +22,7 @@ from dataclasses import replace
 
 from ...l10n import N_
 from ..guide import Guide, Lead, Variant
-from .guide_parts import L_LEAD, PE_BAR, PE_LEAD
+from .guide_parts import ALL_ON, L_LEAD, PE_BAR, PE_LEAD
 from .guides_resistance import HIGH_CURRENT, INSULATION, PROTECTIVE_CONDUCTOR, RISING
 
 CONNECTION = "supply_connection"
@@ -44,8 +44,7 @@ INSULATION_AT_TERMINALS = (
 FIXED_INSULATION = (
     (N_("Switch off in front"), N_("Switch the supply off ahead of the machine and secure"
                                    " it.")),
-    (N_("Switch the machine's main switch on"),
-     N_("So the circuits behind it are measured too.")),
+    ALL_ON,
     (N_("Open the N-PE bridge"), N_("Where N and PE are bridged at the supply, open the"
                                     " bridge.")),
     (N_("Mind sensitive parts"),

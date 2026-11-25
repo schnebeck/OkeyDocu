@@ -35,6 +35,7 @@ from .structure import structure_nodes
 from .summary import SummaryPlace, summary_nodes
 from .template_loading import (  # noqa: F401
     SHIPPED,
+    STANDARD,
     TemplateError,
     default_template_text,
     parse_template,
@@ -54,7 +55,7 @@ from .nodes import (  # noqa: F401
     Table,
 )
 
-DRAFT_NOTICE = N_("DRAFT – the inspection is still open, this report is not valid.")
+DRAFT_NOTICE = N_("PREVIEW – the campaign is still open, this report is not valid.")
 SIMULATED_NOTICE = N_("SIMULATED VALUES – not a valid test report.")
 _env = SandboxedEnvironment(undefined=jinja2.ChainableUndefined, autoescape=False)
 # Headings may hold symbols set as in mathematics: their data is escaped, markup kept.

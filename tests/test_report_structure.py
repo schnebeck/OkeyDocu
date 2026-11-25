@@ -125,6 +125,31 @@ def test_by_function_the_shared_limit_is_said_once(app, tree):
     assert [list(dict(head.rows)) for head in heads] == [["Grenzwerte"]]
 
 
+def test_by_function_and_time_one_table_holds_the_whole_installation(app):
+    db = app.db
+    customer = db.add_customer("Muster AG")
+    root = db.add_asset(customer, "machine", "Presse")
+    first, second = (db.add_asset(customer, "measuring_point", name, parent_id=root)
+                     for name in ("Zuleitung", "Antrieb"))
+    campaign = app.service.create(root, "Prüfung", "Prüfer")
+    low = ResultValue("rlo", "RLO", Quantity.parse("0.10Ω"), Verdict.PASSED, "", "<1.00Ω")
+    high = ResultValue("riso", "RISO", Quantity.parse("2MΩ"), Verdict.PASSED, ">1MΩ", "")
+    for asset, minute, function, value in ((second, 30, "rlo", low), (first, 20, "riso", high),
+                                           (first, 10, "rlo", low), (second, 5, "rlo", low)):
+        app.service.add_measurement(campaign, function, [value], T0 + timedelta(minutes=minute),
+                                    Verdict.PASSED, asset_id=asset)
+        app.service.move_measurements(
+            [app.db.one("SELECT max(id) AS id FROM measurements")["id"]], asset)
+    block = {"type": "structure", "order": "function_time"}
+    nodes = resolve({"blocks": [block]}, build_context(app.service, campaign))
+    # Each quantity once, in the order it was first measured; no heading per element.
+    assert headings(nodes) == ["RLO – Schutzleiterwiderstand", "RISO – Isolationswiderstand"]
+    table = next(node.body for node in nodes if hasattr(node, "body"))
+    place, time = table.headers.index("Messort"), table.headers.index("Zeitpunkt")
+    assert [(row[time][:8], row[place]) for row in table.rows] == [
+        ("10:05:00", "Antrieb"), ("10:10:00", "Zuleitung"), ("10:30:00", "Antrieb")]
+
+
 def test_steps_without_measurement_are_listed_with_their_reason():
     step = ReportStep("Schutzleiter Motor", "rlo", "skipped", "kein Zugang", [])
     values = {"campaign": {}, "steps": [step], "asset": {"name": "Presse"}}

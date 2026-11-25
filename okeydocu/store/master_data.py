@@ -155,6 +155,16 @@ class MasterDataMixin:
             name, body,
         )
 
+    def default_template(self) -> sqlite3.Row | None:
+        """The report template a campaign takes that names none: the one marked, or the
+        first by name while none is; None without any template."""
+        return self.one("SELECT * FROM templates ORDER BY standard DESC, name COLLATE NOCASE"
+                        " LIMIT 1")
+
+    def set_default_template(self, name: str) -> None:
+        with self.transaction() as connection:
+            connection.execute("UPDATE templates SET standard = (name = ?)", (name,))
+
     # The own firm -----------------------------------------------------------
 
     COMPANY_FIELDS = ("name", "street", "zip", "city", "phone", "email", "web", "logo")

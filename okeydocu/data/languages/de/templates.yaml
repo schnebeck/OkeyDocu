@@ -65,7 +65,7 @@ texts:
   Drag the logo to move it, drag the corner to scale it: Logo ziehen zum Verschieben, Ecke ziehen zum Skalieren
   Generate report: Protokoll erzeugen
   Generate: Erzeugen
-  Completed campaign: Abgeschlossene Kampagne
+  Completed campaign: Beendete Kampagne
   Template: Vorlage
   Language: Sprache
   "Search: customer, installation, campaign, inspector …": "Suchen: Kunde, Anlage, Kampagne, Prüfer …"
@@ -86,7 +86,7 @@ texts:
   CHANGED OR MISSING: VERÄNDERT ODER FEHLT
   "{count} report": "{count} Protokoll"
   "{count} reports": "{count} Protokolle"
-  There is no completed campaign yet.: Es gibt noch keine abgeschlossene Kampagne.
+  "There is no ended campaign yet.": "Es gibt noch keine beendete Kampagne."
   Creating the report …: Erstelle das Protokoll …
   "Signing as {signer}, issued by {issuer}, valid until {day}.": "Signiert wird als {signer}, ausgestellt von {issuer}, gültig bis {day}."
   This is an email certificate (S/MIME). The signature is technically valid. Whether a PDF program shows it as trustworthy depends on whether it trusts the issuer.: Das ist ein E-Mail-Zertifikat (S/MIME). Die Signatur ist technisch gültig. Ob ein PDF-Programm sie als vertrauenswürdig anzeigt, hängt davon ab, ob es dem Aussteller vertraut.

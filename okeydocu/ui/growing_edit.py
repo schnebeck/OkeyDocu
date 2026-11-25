@@ -43,8 +43,11 @@ class GrowingEdit(QPlainTextEdit):
             else Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
         # Frame, style margins and viewport margins: whatever the field has around its text.
-        around = self.height() - self.viewport().height() if self.viewport().height() else (
-            2 * self.frameWidth() if self.frameShape() != QFrame.Shape.NoFrame else 0)
+        # Before the field is laid out its viewport can still be taller than the field itself;
+        # then only the frame is known.
+        around = self.height() - self.viewport().height()
+        if self.viewport().height() <= 0 or around < 0:
+            around = 2 * self.frameWidth() if self.frameShape() != QFrame.Shape.NoFrame else 0
         padding = 2 * round(self.document().documentMargin())
         height = shown * self.fontMetrics().lineSpacing() + padding + around
         if height != self.maximumHeight():

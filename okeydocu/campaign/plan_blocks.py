@@ -100,7 +100,7 @@ class PlanBlockMixin:
     def remove_plan(self, campaign_id: int, block: PlanBlock) -> None:
         campaign = self.campaign(campaign_id)
         if campaign["status"] != "open":
-            raise CampaignClosed(tr("The campaign is closed."))
+            raise CampaignClosed(tr("The campaign is ended."))
         marks = ",".join("?" * block.total)
         for row in self.db.query(f"SELECT id FROM measurements WHERE step_id IN ({marks})",
                                  *block.step_ids):

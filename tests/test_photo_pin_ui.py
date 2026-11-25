@@ -153,7 +153,7 @@ def test_a_campaign_closed_behind_the_timeline_is_said_and_locks(
     start = centre_of(view, photo_ids(app, case[0])[0])
     app.service.close(case[0])
     drag(view, start, start + QPoint(80, 0))
-    assert said and "abgeschlossen" in said[0]
+    assert said and "beendet" in said[0]
     assert seen == []
     assert timeline.read_only
     assert stored_shift(app, case[0]) == 0

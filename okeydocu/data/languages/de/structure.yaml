@@ -29,7 +29,7 @@ texts:
   "Identifier: {identifier}": "Kennung: {identifier}"
   "Last inspection: {before} measurements here, this inspection: {now}": "Letzte Prüfung: {before} Messungen hier, diese Prüfung: {now}"
   "{total} in this branch: {here} here, {below} below": "{total} in diesem Zweig: {here} hier, {below} darunter"
-  Drag measurements from the table onto an element to book them there. New measurements go to the chosen element.: Messungen aus der Tabelle auf ein Element ziehen, um sie dort zu buchen. Neue Messungen landen beim gewählten Element.
+  "Drag measurements from the table onto an element to book them there. New measurements go to the chosen element. A photo dragged onto an element lies there as a picture.": "Messungen aus der Tabelle auf ein Element ziehen, um sie dort zu buchen. Neue Messungen landen beim gewählten Element. Ein Foto, auf ein Element gezogen, liegt dort als Bild."
   "+ Element": "+ Element"
   Create an element below the chosen one (Ins): Ein Element unter dem gewählten anlegen (Einfg)
   Search elements …: Element suchen …

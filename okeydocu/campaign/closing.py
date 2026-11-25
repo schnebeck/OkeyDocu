@@ -51,10 +51,11 @@ class ClosingMixin:
         if has_points(plan_key):
             strict = self.template_mode(plan_key) != OPEN
             return self.repeat_blockers(campaign_id, strict) + problems
-        unassigned = len(self.open_measurements(campaign_id))
+        unassigned = len(self.unassigned_measurements(campaign_id))
         if unassigned:
-            problems.append(plural(unassigned, "{count} measurement not assigned to a step",
-                                   "{count} measurements not assigned to a step"))
+            problems.append(plural(
+                unassigned, "{count} measurement assigned to neither a step nor an element",
+                "{count} measurements assigned to neither a step nor an element"))
         return problems
 
     def close(self, campaign_id: int) -> None:

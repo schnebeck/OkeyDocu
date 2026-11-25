@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
+    QSizePolicy,
 )
 
 from ..campaign.editing import CONTACT_COLUMNS, ORDER_COLUMNS
@@ -22,6 +23,7 @@ from ..l10n import tr
 from .campaign_dialog import fill_assets
 from .campaign_order import OrderFields
 from .common import AppContext
+from .confirm_overlay import TemplateChoice
 from .overlay import Overlay
 
 TESTER, PLAN = "tester", "plan"
@@ -47,13 +49,20 @@ class CampaignEditOverlay(Overlay):
         self.asset.currentIndexChanged.connect(lambda _: self._update())
         form = QFormLayout()
         form.addRow(tr("Title"), self.title)
+        chosen = app.service.report_template(campaign["id"])
+        self.template = TemplateChoice(app, chosen["name"] if chosen else "")
+        self.template.setToolTip(tr("The preview and the report of this campaign are drawn with"
+                                    " this template."))
+        # As wide as the fields around it, so the column keeps one right edge.
+        self.template.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        form.addRow(tr("Report template"), self.template)
         form.addRow(tr("Installation"), self.asset)
         tester = campaign["tester"] or tr("Inspector missing")
         form.addRow(tr("Inspector"), self._link(tester, tr("Change …"), TESTER))
         plan = campaign["plan_title"] if campaign["plan_key"] else tr("Without test plan")
         more = tr("Assign another …") if campaign["plan_key"] else tr("Assign test plan …")
         form.addRow(tr("Test plan"), self._link(plan, more, PLAN))
-        # Both sides of the job, named as in the report's letterhead.
+        # The own references for the job, then the customer's contact person.
         self.order = OrderFields(form, dict(campaign))
         self.body.addLayout(form)
         self._update()
@@ -80,7 +89,8 @@ class CampaignEditOverlay(Overlay):
         return (self.title.text().strip() != self.campaign["title"]
                 or self.asset.currentData() != self.campaign["asset_id"]
                 or self.order.contact_values() != tuple(self.campaign[k] for k in CONTACT_COLUMNS)
-                or self.order.order_values() != tuple(self.campaign[k] for k in ORDER_COLUMNS))
+                or self.order.order_values() != tuple(self.campaign[k] for k in ORDER_COLUMNS)
+                or self.template.currentText() != self.campaign["report_template"])
 
     def first_field(self):
         return self.title

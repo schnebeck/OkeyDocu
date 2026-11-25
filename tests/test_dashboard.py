@@ -95,7 +95,7 @@ def test_open_and_closed_measurements_stand_apart(window, app):
     home = _home(window)
     assert [card.summary.id for card in home.open_section.cards] == [ids[0]]
     assert len(home.closed_section.cards) == CLOSED_SHOWN
-    assert home.open_section.heading.text() == "Offene Messungen"
+    assert home.open_section.heading.text() == "Offene Kampagnen"
 
 
 def test_with_few_campaigns_there_is_nothing_to_search(window, app):

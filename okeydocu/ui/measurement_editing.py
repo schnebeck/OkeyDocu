@@ -19,7 +19,7 @@ FIELD_NAMES = {
     "lower_limit": N_("Limit"), "upper_limit": N_("Limit"),
 }
 CLOSED_MEANWHILE = N_(
-    "The campaign has been completed in the meantime. The change to the measurement is not saved."
+    "The campaign has been ended in the meantime. The change to the measurement is not saved."
 )
 
 

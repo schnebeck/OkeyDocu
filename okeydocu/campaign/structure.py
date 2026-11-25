@@ -62,7 +62,7 @@ class StructureMixin:
         rows = [self.db.one("SELECT * FROM measurements WHERE id=?", i) for i in measurement_ids]
         for row in rows:
             if self.campaign(row["campaign_id"])["status"] != "open":
-                raise CampaignClosed(tr("Measurements of closed campaigns stay where they are."))
+                raise CampaignClosed(tr("Measurements of ended campaigns stay where they are."))
         with self.db.transaction() as connection:
             for row in rows:
                 root = self.campaign(row["campaign_id"])["asset_id"]

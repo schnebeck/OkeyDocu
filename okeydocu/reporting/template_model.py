@@ -61,7 +61,7 @@ PLACEHOLDERS = [
     (N_("Campaign: inspector"), "{{ campaign.tester }}"),
     (N_("Campaign: start"), "{{ campaign.started }}"),
     (N_("Campaign: day of the test"), "{{ campaign.date }}"),
-    (N_("Campaign: completion"), "{{ campaign.closed }}"),
+    (N_("Campaign: end"), "{{ campaign.closed }}"),
     (N_("Instrument: manufacturer"), "{{ device.manufacturer }}"),
     (N_("Instrument: model"), "{{ device.model }}"),
     (N_("Instrument: serial number"), "{{ device.serial_no }}"),

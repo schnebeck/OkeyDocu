@@ -36,6 +36,8 @@ from .due import DueMixin
 from .overview import CampaignSummary, OverviewMixin
 from .structure import StructureError, StructureMixin
 from .photo_marks import PhotoMarkMixin
+from .photo_places import PhotoPlaceMixin
+from .report_choice import ReportChoiceMixin
 from .carry_over import CarryOverMixin
 from .instrument_history import InstrumentHistoryMixin
 from .photo_proxies import ProxyMixin
@@ -95,7 +97,8 @@ class CampaignService(
     ReadingMixin, ClockMixin, FilingMixin, EditingMixin, PhotoMixin, AttachmentMixin, PlanStepMixin,
     PlanBlockMixin, ClosingMixin, OverviewMixin, StructureMixin, DueMixin, RunMixin, RepeatMixin,
     RepeatCheckMixin, PhotoMarkMixin, ProxyMixin, CarryOverMixin, InstrumentHistoryMixin,
-    TemplateMixin, TemplateUseMixin, TemplateLearningMixin, ElementOrderMixin,
+    TemplateMixin, TemplateUseMixin, TemplateLearningMixin, ElementOrderMixin, PhotoPlaceMixin,
+    ReportChoiceMixin,
 ):
     def __init__(self, db: Database, archive_root: Path, key_store: KeyStore | None = None):
         self.db = db

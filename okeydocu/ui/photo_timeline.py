@@ -19,13 +19,13 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QStyle,
     QToolButton,
-    QVBoxLayout,
-    QWidget,
 )
 
 from ..l10n import N_, tr
 from ..store import CampaignClosed
+from .board import UNIT
 from .common import AppContext, function_short, show_error
+from .framed import TEXT, Framed
 from .photo_overlays import TimelineAsking
 from .photo_shared import shared_thumbs
 from .photo_timeline_data import TimelineData
@@ -35,11 +35,12 @@ from .photo_timeline_view import WIDEST_RATIO, TrackView
 
 NO_TIME = N_("This photo has no time taken. Please drag it onto a measurement.")
 PICK_A_PHOTO = N_("First click a photo that is not pinned: the gap appears right before it.")
-CLOSED = N_("The campaign is completed, photos can no longer be changed.")
+CLOSED = N_("The campaign is ended, photos can no longer be changed.")
 
 
-class PhotoTimeline(TimelineAsking, QWidget):
-    """The track of measurements above the track of photos. Hint line below."""
+class PhotoTimeline(TimelineAsking, Framed):
+    """The track of measurements above the track of photos. Hint line below. A block of its
+    own in a closed frame."""
 
     changed = Signal()
     measurement_chosen = Signal(int)
@@ -74,15 +75,15 @@ class PhotoTimeline(TimelineAsking, QWidget):
         self.hint_label = QLabel()
         self.hint_label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
         bar = QHBoxLayout()
-        bar.setContentsMargins(0, 0, 4, 0)
+        bar.setContentsMargins(0, 0, 0, 0)
+        bar.setSpacing(2 * UNIT)
+        self.hint_label.setIndent(TEXT)
         for button in (self.fit_button, self.gap_button, self.start_button):
             bar.addWidget(button)
         bar.addStretch(1)
         bar.addWidget(self.shift_label)
         bar.addWidget(self.close_button)
-        column = QVBoxLayout(self)
-        column.setContentsMargins(0, 0, 0, 0)
-        column.setSpacing(2)
+        column = self.box
         column.addLayout(bar)
         column.addWidget(self.view, 1)
         column.addWidget(self.scroll)

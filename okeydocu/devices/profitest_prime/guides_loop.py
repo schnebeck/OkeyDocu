@@ -56,6 +56,11 @@ RCD_DATA = Action((), N_("RCD: its rated residual current and type, or it trips 
 NEXT_LINE = Action(("key-idn",), N_(
     "For further line conductors move probe L to the one the display names. IΔN skips a pair"
     " the test point does not have."))
+LOOPS_ONLY = Action((), N_(
+    "Only a line conductor against PE is a loop: L1-PE, L2-PE, L3-PE. The display goes on to"
+    " L1-N and to pairs of line conductors: skip these with IΔN, the probes N and PE stay where"
+    " they are. The line impedance L-N is taken at the position ZLOOP with two probes, probe PE"
+    " on N."))
 CHANGED_OVER = (
     Lead(*N_LEAD, "pe", N_("Place probe N (L3) on the PE bar: here N and PE change places.")),
     TO_L,
@@ -69,7 +74,7 @@ def behind_rcd(function: str, title: str, selector: int, label: str, note: str, 
     return Guide(
         function, title, selector, *RCD_SIDE, leads, caution, "rcd_type", STATED, True, BEHIND,
         label, note, settings=(DEVICE, own, JUDGED, Action((), PATH, path)),
-        steps=(START, STORE, NEXT_LINE if len(leads) > 2 else NEXT_PAIR),
+        steps=(START, STORE, *((NEXT_LINE, LOOPS_ONLY) if len(leads) > 2 else (NEXT_PAIR,))),
         screen=screen, result_key=screens.RESULT, every_path=True, flow=flow())
 
 

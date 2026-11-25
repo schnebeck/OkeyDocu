@@ -20,7 +20,9 @@ class TemplateError(Exception):
     """The template is not valid."""
 
 
-SHIPPED = {"standard.yaml": N_("Standard report"), "compact.yaml": N_("Standard report, compact")}
+STANDARD = "standard.yaml"  # the default template of a fresh installation
+SHIPPED = {STANDARD: N_("Standard report"), "compact.yaml": N_("Standard report, compact"),
+           "by_function.yaml": N_("Report by measured quantity")}
 
 
 def shipped_template_text(file: str) -> str:
@@ -28,7 +30,7 @@ def shipped_template_text(file: str) -> str:
 
 
 def default_template_text() -> str:
-    return shipped_template_text("standard.yaml")
+    return shipped_template_text(STANDARD)
 
 
 def parse_template(text: str) -> dict:

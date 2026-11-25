@@ -21,8 +21,8 @@ from .confirm_overlay import ConfirmOverlay
 from .report_signing import open_report, settings
 
 WEAK_SEAL = N_(
-    "The record is closed, but the seal key could not be fetched from the password store.\n\n"
-    "So the seal only detects accidental changes, not deliberate tampering."
+    "The campaign is ended, but the seal key could not be fetched from the password store.\n\nSo"
+    " the seal only detects accidental changes, not deliberate tampering."
 )
 DRAWING = N_("Creating the report …")
 LATER = N_("The report can be created and signed again under “Reports”.")
@@ -32,14 +32,15 @@ class CampaignConfirm:
     """The draft shows the protocol as it stands; confirming makes it final."""
 
     def show_draft(self) -> None:
+        """The preview is drawn with the report template the campaign was given."""
         campaign = self._campaign()
-        templates = self.app.db.templates()
-        if campaign is None or campaign["status"] != "open" or not templates:
+        template = self.app.service.report_template(campaign["id"]) if campaign else None
+        if template is None or campaign["status"] != "open":
             return
         self.values.editor.apply()  # the draft shows what was typed, too
         language = settings().value("protocol_language", current())
         try:
-            path = self.app.archive.draft(campaign["id"], templates[0]["body"], language,
+            path = self.app.archive.draft(campaign["id"], template["body"], language,
                                           lambda work: run_busy(self, tr(DRAWING), work))
         except (ReportError, TemplateError) as err:
             show_error(self, str(err))
@@ -109,7 +110,7 @@ class CampaignConfirm:
                 return tr("Report filed.")
             self.app.archive.sign(report, overlay.certificate.signer())
         except (ReportError, TemplateError, SigningError) as err:
-            show_error(self, tr("The campaign is closed and sealed, but:\n{error}\n\n{later}",
+            show_error(self, tr("The campaign is ended and sealed, but:\n{error}\n\n{later}",
                                 error=err, later=tr(LATER)))
             return ""
         overlay.certificate.remember()

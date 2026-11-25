@@ -246,12 +246,14 @@ def test_save_as_creates_a_second_template_and_delete_removes_it(page, monkeypat
     monkeypatch.setattr(QMessageBox, "question", lambda *_: QMessageBox.StandardButton.Yes)
     page.save_as("Kurzprotokoll")
     assert page.choice.currentText() == "Kurzprotokoll"
-    assert len(page.app.db.templates()) == 3
+    shipped = ["Protokoll nach Messgröße", "Standardprotokoll", "Standardprotokoll, kompakt"]
+    assert len(page.app.db.templates()) == len(shipped) + 1
     page._delete()
-    assert [t["name"] for t in page.app.db.templates()] == ["Standardprotokoll",
-                                                            "Standardprotokoll, kompakt"]
-    page.choice.setCurrentIndex(page.choice.findText("Standardprotokoll, kompakt"))
-    page._delete()
+    assert [t["name"] for t in page.app.db.templates()] == shipped
+    for name in shipped[:0:-1]:
+        page.choice.setCurrentIndex(page.choice.findText(name))
+        page._delete()
+    assert [t["name"] for t in page.app.db.templates()] == shipped[:1]
     assert not page.delete_button.isEnabled()  # the last template stays
 
 

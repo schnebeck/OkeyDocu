@@ -69,7 +69,7 @@ def test_open_steps_are_named_and_hold_the_button(window, app, monkeypatch, qtbo
     campaign = app.service.campaign(window.campaign.campaign_id)
     overlay = ConfirmOverlay(app, campaign)
     qtbot.addWidget(overlay)
-    assert "Schritt offen" in overlay.open_points.text()
+    assert "Messschritt offen" in overlay.open_points.text()
     assert not overlay.ok_button.isEnabled()
     assert not overlay.sign.isEnabled()  # simulated values are never signed
 
@@ -120,7 +120,7 @@ def test_a_failure_after_closing_says_what_is_done(window, app, monkeypatch):
     confirm(monkeypatch)
     window.campaign.finish()
     assert app.service.campaign(window.campaign.campaign_id)["status"] == "closed"
-    assert "abgeschlossen und versiegelt" in errors[0] and "kaputt" in errors[0]
+    assert "beendet und versiegelt" in errors[0] and "kaputt" in errors[0]
 
 
 def test_the_draft_shows_the_open_campaign_without_archiving(window, app, monkeypatch):

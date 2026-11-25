@@ -8,9 +8,11 @@
 
 from __future__ import annotations
 
+import json
 from datetime import datetime
 
 from ..l10n import tr
+from ..model import CONDUCTOR, Parameter, is_conductor
 from ..store import CampaignClosed, ReadingIsFinal
 from .assignment import ISSUE_TEXT
 from .records import EDITABLE_FIELDS, EDITABLE_VALUE_FIELDS, TEXT_FIELDS, _iso, full_name
@@ -38,7 +40,7 @@ class EditingMixin:
     def assign_tester(self, campaign_id: int, user_id: int, measurements: bool = False) -> None:
         """Change who answers for an open campaign and, with `measurements`, for its readings."""
         if self.campaign(campaign_id)["status"] != "open":
-            raise CampaignClosed(tr("The campaign is closed."))
+            raise CampaignClosed(tr("The campaign is ended."))
         name = full_name(self.db.user(user_id))
         rows = self.measurements(campaign_id) if measurements else []
         with self.db.transaction() as connection:
@@ -71,7 +73,7 @@ class EditingMixin:
         """Title and installation. Nothing recorded may end up outside the installation."""
         campaign = self.campaign(campaign_id)
         if campaign["status"] != "open":
-            raise CampaignClosed(tr("The campaign is closed."))
+            raise CampaignClosed(tr("The campaign is ended."))
         title = title.strip()
         if not title:
             raise ValueError(tr("The title is missing."))
@@ -85,7 +87,7 @@ class EditingMixin:
         """The customer's department and person for this job, in the order of
         `CONTACT_COLUMNS`; a closed campaign keeps what it had."""
         if self.campaign(campaign_id)["status"] != "open":
-            raise CampaignClosed(tr("The campaign is closed."))
+            raise CampaignClosed(tr("The campaign is ended."))
         if len(values) != len(CONTACT_COLUMNS):
             raise ValueError(tr("Expected: {columns}", columns=", ".join(CONTACT_COLUMNS)))
         self.db.execute(
@@ -97,7 +99,7 @@ class EditingMixin:
         """The contractor's own account and reference for this job, in the order of
         `ORDER_COLUMNS`. Both belong to one job, so a new campaign starts without them."""
         if self.campaign(campaign_id)["status"] != "open":
-            raise CampaignClosed(tr("The campaign is closed."))
+            raise CampaignClosed(tr("The campaign is ended."))
         if len(values) != len(ORDER_COLUMNS):
             raise ValueError(tr("Expected: {columns}", columns=", ".join(ORDER_COLUMNS)))
         self.db.execute(
@@ -171,6 +173,27 @@ class EditingMixin:
         if "function" in changes:
             self.rematch(row["campaign_id"])
         return changed
+
+    def set_conductor(self, measurement_id: int, pair: str) -> bool:
+        """Sets right between which conductors a measurement was taken. The readings stay as
+        they are and the change is logged. Whether anything changed."""
+        row = self.db.one("SELECT * FROM measurements WHERE id=?", measurement_id)
+        if self.campaign(row["campaign_id"])["status"] != "open":
+            raise CampaignClosed(tr("The campaign is ended."))
+        stored = json.loads(row["parameters_json"] or "[]")
+        named = next((item for item in stored if is_conductor(Parameter(**item))), None)
+        old = named["value"] if named else ""
+        if old == pair:
+            return False
+        if named is None:
+            stored.append({"key": CONDUCTOR, "value": pair})
+        else:
+            named["value"] = pair
+        with self.db.transaction() as connection:
+            connection.execute("UPDATE measurements SET parameters_json=? WHERE id=?",
+                               (json.dumps(stored, ensure_ascii=False), measurement_id))
+            self._log(connection, row, "edit", CONDUCTOR, old, pair)
+        return True
 
     def delete_measurement(self, measurement_id: int) -> None:
         """Measuring a point twice and deleting one is normal, so this leaves no note.

@@ -32,13 +32,18 @@ def stored(app, editor):
     return parse_plan(row["body"])
 
 
+def shown_plan(editor):
+    """The shipped plan the editor opens with: the first by its title."""
+    return next(plan for plan in load_plans() if plan.key == editor.data["key"])
+
+
 def test_seeded_plan_is_listed(editor):
     assert editor.plans.count() == len(load_plans())
-    assert editor.steps.count() == 5
+    assert editor.steps.count() == len(shown_plan(editor).steps) > 0
 
 
 def test_a_shipped_plan_is_titled_in_the_language_of_the_program(editor):
-    assert editor.title.text() == tr("Machine – electrical inspection")
+    assert editor.title.text() == tr("Machine – inspection to EN 60204-1")
     assert editor.plans.currentItem().text() == editor.title.text()
 
 
@@ -131,7 +136,7 @@ def test_a_test_run_leaves_no_trace(qtbot, app, editor):
     editor.run_button.click()
     run = editor.test_runs[0]
     qtbot.addWidget(run)
-    assert run.page.steps.count() == 5
+    assert run.page.steps.count() == editor.steps.count() > 0
     assert app.service.campaigns() == []
     run.close()
 
@@ -162,7 +167,7 @@ def test_plan_can_be_assigned_to_an_open_campaign(window, app, asset, monkeypatc
     window.campaign.show_campaign(campaign)
     monkeypatch.setattr(AssignPlanOverlay, "exec", lambda self: 1)
     window.campaign.assign_action.trigger()
-    assert len(app.service.steps(campaign)) == 5
+    assert len(app.service.steps(campaign)) == len(app.service.plans()[0].steps) > 0
     assert window.campaign.plan_section.isVisible()
     assert window.campaign.current_work() is not window.guided  # assigned, not yet run
     window.campaign.plan_list.run_button.click()

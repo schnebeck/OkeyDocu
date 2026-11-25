@@ -135,7 +135,7 @@ def test_complete_run_from_first_step_to_report(page, window, monkeypatch):
 def test_campaign_cannot_close_with_open_steps(page, window, qtbot):
     overlay = ConfirmOverlay(window.app, window.app.service.campaign(page.campaign_id))
     qtbot.addWidget(overlay)
-    assert "Schritt offen" in overlay.open_points.text()
+    assert "Messschritt offen" in overlay.open_points.text()
     assert not overlay.ok_button.isEnabled()
 
 

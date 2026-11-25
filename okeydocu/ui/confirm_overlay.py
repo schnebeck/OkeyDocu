@@ -22,8 +22,8 @@ from .overlay import Overlay
 from .report_signing import CertificateFields, settings, user_certificate
 
 WHAT_HAPPENS = N_(
-    "The campaign is completed and sealed. After that the measurements can no longer be"
-    " changed, and any later change to the record is detected. The report is filed as a PDF."
+    "The campaign is ended and sealed. After that the measurements can no longer be changed, and"
+    " any later change to the record is detected. The report is filed as a PDF."
 )
 
 
@@ -44,10 +44,13 @@ def _summary(app: AppContext, campaign_id: int) -> str:
 
 
 class TemplateChoice(QComboBox):
-    def __init__(self, app: AppContext):
+    """The report templates by name; `chosen` comes selected where it is one of them."""
+
+    def __init__(self, app: AppContext, chosen: str = ""):
         super().__init__()
         for row in app.db.templates():
             self.addItem(row["name"], row["body"])
+        self.setCurrentIndex(max(0, self.findText(chosen)))
 
 
 class LanguageChoice(QComboBox):
@@ -70,8 +73,8 @@ class ConfirmOverlay(Overlay):
     """One decision: after it the record is final and the protocol lies in the archive."""
 
     def __init__(self, app: AppContext, campaign, parent=None):
-        super().__init__(tr("Confirm report"), parent, width=580)
-        self.ok_button.setText(tr("Confirm and file"))
+        super().__init__(tr("End campaign"), parent, width=580)
+        self.ok_button.setText(tr("End and file the report"))
         self.problems = app.service.blockers(campaign["id"])
         simulated = is_simulated(campaign["driver"])
         what = QLabel(tr(WHAT_HAPPENS))
@@ -81,7 +84,8 @@ class ConfirmOverlay(Overlay):
         self.open_points = QLabel()
         self.open_points.setWordWrap(True)
         self.open_points.setTextFormat(Qt.TextFormat.RichText)
-        self.template = TemplateChoice(app)
+        # The template the campaign was given, the one its preview showed.
+        self.template = TemplateChoice(app, campaign["report_template"])
         form = QFormLayout()
         form.addRow(tr("Template"), self.template)
         self.language = LanguageChoice()

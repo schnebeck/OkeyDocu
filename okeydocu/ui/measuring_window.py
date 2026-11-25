@@ -26,6 +26,7 @@ from ..devices import driver_info
 from ..devices.guide import CONFIGURE, CONNECT, PLACE, SELECT
 from ..l10n import N_, tr
 from .bench_view import BenchView
+from .button_width import widest
 from .dial_station import POLL_MS, DialStation
 from .footer_bar import FooterBar
 from .guide_run import GuideRun
@@ -40,15 +41,6 @@ from .station_kinds import StationKinds
 RIGHT, GAP = 1, 2  # rows of the side column: what the station shows, and the room below
 NEXT_TEXTS = (N_("Prepared – next ▶"), N_("Turned – next ▶"), N_("Connected – next ▶"),
               N_("Set – next ▶"), N_("Next ▶"), N_("Done ▶"))
-
-
-def widest(button: QPushButton, texts) -> int:
-    """The width `button` needs for the longest of `texts`."""
-    widths = []
-    for text in texts:
-        button.setText(text)
-        widths.append(button.sizeHint().width())
-    return max(widths)
 
 
 class Absent:

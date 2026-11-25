@@ -109,7 +109,19 @@ class TemplateDocument:
         self._set_source(body)
         self._set_dirty(False)
         self.delete_button.setEnabled(self.choice.count() > 1)
+        self._show_default()
         self.preview()
+
+    def _show_default(self) -> None:
+        """The button says what the template shown is, or offers to make it the default."""
+        default = self.app.db.default_template()
+        is_default = default is not None and default["name"] == self.choice.currentText()
+        self.default_button.setText(tr("Default template") if is_default else tr("Set as default"))
+        self.default_button.setEnabled(not is_default and self.choice.count() > 0)
+
+    def _make_default(self) -> None:
+        self.app.db.set_default_template(self.choice.currentText())
+        self._show_default()
 
     def _set_source(self, text: str) -> None:
         self._loading = True

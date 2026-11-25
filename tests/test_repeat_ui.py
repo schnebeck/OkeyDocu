@@ -70,8 +70,8 @@ def test_open_points_stand_in_the_table_and_count_in_the_head(repeat):
     values, page = repeat["values"], repeat["page"]
     assert len(_point_rows(values)) == 2
     assert values.table.item(_point_rows(values)[0], 0).text() == "offen"
-    assert "2 offen" in values.count.text()
-    assert "2 offen" in page.header.checks.text()
+    assert "2 Messpunkte offen" in values.count.text()
+    assert "2 Messpunkte offen" in page.header.checks.text()
     assert not page.guided.isVisibleTo(page)  # filled in any order, not led through
 
 

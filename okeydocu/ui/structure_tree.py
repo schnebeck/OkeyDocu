@@ -29,7 +29,8 @@ def _count_text(now: int, then: int) -> str:
 
 
 class StructureTree(StructureDrop, QTreeWidget):
-    """Dropping elements moves them; dropping rows of the measurement table books them here."""
+    """Dropping elements moves them; dropping rows of the measurement table books them here;
+    a dropped photo lies at the element as a picture."""
 
     chosen = Signal(object)  # an element, None for the whole installation, or UNPLACED
     changed = Signal()

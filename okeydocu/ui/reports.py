@@ -41,7 +41,7 @@ class GenerateOverlay(Overlay):
         self.campaign = QComboBox()
         for row in app.service.campaigns():
             if row["status"] == "closed":
-                label = f"{row['title']} ({stored_day(row['started_at'])})"
+                label = f"{row['title']} ({stored_day(row['tested_at'])})"
                 self.campaign.addItem(label, row["id"])
         self.template = TemplateChoice(app)
         form = QFormLayout()
@@ -135,7 +135,7 @@ class ReportsPage(QWidget):
     def _generate(self, campaign_id: int | None = None) -> None:
         dialog = GenerateOverlay(self.app, self)
         if dialog.campaign.count() == 0:
-            show_error(self, tr("There is no completed campaign yet."))
+            show_error(self, tr("There is no ended campaign yet."))
             return
         if campaign_id is not None:
             dialog.campaign.setCurrentIndex(max(dialog.campaign.findData(campaign_id), 0))

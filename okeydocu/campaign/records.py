@@ -51,18 +51,36 @@ def identity_from_json(text: str) -> DeviceIdentity | None:
     return DeviceIdentity(**data)
 
 
+# A test begins with its first measurement, whenever its campaign was created; `tested_at`
+# says so, and names the creation only while nothing is measured.
+_CAMPAIGNS = ("SELECT c.*, coalesce((SELECT min(m.local_time) FROM measurements m"
+              " WHERE m.campaign_id = c.id), c.started_at) AS tested_at FROM campaigns c")
+
+
 class ReadingMixin:
     """Reading campaigns and what they recorded."""
 
     def campaign(self, campaign_id: int):
-        return self.db.one("SELECT * FROM campaigns WHERE id=?", campaign_id)
+        return self.db.one(_CAMPAIGNS + " WHERE c.id=?", campaign_id)
 
     def campaigns(self, asset_id: int | None = None):
+        """The test begun last comes first."""
+        order = " ORDER BY tested_at DESC, c.id DESC"
         if asset_id is None:
-            return self.db.query("SELECT * FROM campaigns ORDER BY started_at DESC, id DESC")
-        return self.db.query(
-            "SELECT * FROM campaigns WHERE asset_id=? ORDER BY started_at DESC, id DESC", asset_id
-        )
+            return self.db.query(_CAMPAIGNS + order)
+        return self.db.query(_CAMPAIGNS + " WHERE c.asset_id=?" + order, asset_id)
+
+    def test_days(self, campaign_id: int) -> tuple[date, date]:
+        """The first and the last day measured on; answers of an inspection count as well.
+        Until something is measured, the day the campaign was created stands in."""
+        row = self.db.one(
+            "SELECT min(local_time) AS first, max(local_time) AS last FROM measurements"
+            " WHERE campaign_id=?", campaign_id)
+        if row["first"] is None:
+            created = datetime.fromisoformat(self.campaign(campaign_id)["started_at"]).date()
+            return created, created
+        return (datetime.fromisoformat(row["first"]).date(),
+                datetime.fromisoformat(row["last"]).date())
 
     def measurement_counts(self) -> dict[int, int]:
         rows = self.db.query(
@@ -94,6 +112,11 @@ class ReadingMixin:
             " ORDER BY local_time, id",
             campaign_id,
         )
+
+    def unassigned_measurements(self, campaign_id: int):
+        """Measurements that belong nowhere: to no step of a plan and to no element. One
+        taken beside the plans and booked on an element is where it belongs."""
+        return [row for row in self.open_measurements(campaign_id) if row["asset_id"] is None]
 
     def values(self, measurement_id: int):
         return self.db.query(

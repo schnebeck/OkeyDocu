@@ -1,5 +1,5 @@
 # OkeyDocu - okeydocu/ui/place_files.py
-# Notes and files at an element, with those of the last inspection ready to take over.
+# Notes and files at an element, photos dropped there, and what the last inspection left.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
@@ -10,13 +10,15 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QFont, QPalette
 from PySide6.QtWidgets import QListWidgetItem, QPushButton
 
 from ..l10n import day, tr
 from .attachment_list import SHOWN_ROWS, AttachmentList
 from .common import ROW_ID, AppContext
+from .photo_shared import dropped_photo
+from .photo_to_place import place_photo
 
 EARLIER = Qt.ItemDataRole.UserRole + 40  # set on an entry of the last inspection
 
@@ -24,11 +26,13 @@ EARLIER = Qt.ItemDataRole.UserRole + 40  # set on an entry of the last inspectio
 class PlaceFiles(AttachmentList):
     """Entries of the last inspection stand greyed below the own ones until taken over."""
 
+    photo_taken = Signal()  # a photo of the campaign lies here now and left the photos
+
     def __init__(self, app: AppContext, target_name: str):
         super().__init__(app, target_name)
         self.take_button = QPushButton(tr("Take over"))
         self.take_button.setToolTip(tr("Fetch the chosen entry of the last inspection into this"
-                                       " campaign. The completed inspection stays unchanged."))
+                                       " campaign. The ended campaign stays unchanged."))
         self.take_button.clicked.connect(self._take_over)
         self.layout().itemAt(self.layout().count() - 1).layout().insertWidget(1, self.take_button)
         self._update()
@@ -89,3 +93,31 @@ class PlaceFiles(AttachmentList):
         """An entry of the sealed inspection is never removed from here."""
         if self._chosen_earlier() is None:
             super()._remove()
+
+    # A photo of the campaign ------------------------------------------------
+
+    def _takes_photo(self, event) -> bool:
+        return (self.editable and self.target.get("asset_id") is not None
+                and dropped_photo(event.mimeData()) is not None)
+
+    def dragEnterEvent(self, event) -> None:
+        if self._takes_photo(event):
+            event.setDropAction(Qt.DropAction.MoveAction)
+            event.accept()
+        else:
+            super().dragEnterEvent(event)
+
+    def dropEvent(self, event) -> None:
+        if not self._takes_photo(event):
+            super().dropEvent(event)
+            return
+        photo = dropped_photo(event.mimeData())
+        event.setDropAction(Qt.DropAction.MoveAction)
+        event.accept()
+        # Once the drag is over: laying it here may ask a question first.
+        QTimer.singleShot(0, lambda: self.take_photo(photo))
+
+    def take_photo(self, photo_id: int) -> None:
+        if place_photo(self, self.app.service, photo_id, self.target["asset_id"]):
+            self._after_change()
+            self.photo_taken.emit()

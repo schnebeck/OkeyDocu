@@ -36,7 +36,7 @@ texts:
   "Campaign: inspector": "Kampagne: Prüfer"
   "Campaign: start": "Kampagne: Beginn"
   "Campaign: day of the test": "Kampagne: Prüftag"
-  "Campaign: completion": "Kampagne: Abschluss"
+  "Campaign: end": "Kampagne: Ende"
   "Instrument: manufacturer": "Messgerät: Hersteller"
   "Instrument: model": "Messgerät: Modell"
   "Instrument: serial number": "Messgerät: Seriennummer"
@@ -87,7 +87,8 @@ texts:
   # Measurements by structure
   Measurements by structure: Messungen nach Struktur
   By element of the installation: Nach Element der Anlage
-  By measured quantity: Nach Messgröße
+  "By measured quantity, then by element": "Nach Messgröße, darin nach Element"
+  "By measured quantity, then by time": "Nach Messgröße, darin nach Zeit"
   Order: Anordnung
   "Show what each element is: identifier, maker, features, remark": "Zeigen, was jedes Element ist: Kennung, Hersteller, Merkmale, Bemerkung"
   "Each element of the installation with measurements becomes a section. Every measured quantity in it first states what its measurements share: settings, conditions and limits.": "Jedes Element der Anlage mit Messungen wird ein Abschnitt. Jede Messgröße darin nennt zuerst, was ihre Messungen gemeinsam haben: Einstellungen, Bedingungen und Grenzwerte."

@@ -1,5 +1,5 @@
 # OkeyDocu - okeydocu/ui/structure_drop.py
-# Dropping onto the structure tree: elements move, measurement rows are booked onto an element.
+# Dropping onto the structure tree: elements move, measurements are booked, photos are laid.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
@@ -8,10 +8,12 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QAbstractItemView
 
 from .common import ROW_ID, selected_ids
+from .photo_shared import PHOTO_MIME, dropped_photo
+from .photo_to_place import place_photo
 
 Position = QAbstractItemView.DropIndicatorPosition
 UNPLACED = -1  # the item for measurements booked onto no element
@@ -20,8 +22,17 @@ UNPLACED = -1  # the item for measurements booked onto no element
 class StructureDrop:
     """Drag and drop of the structure tree; the tree supplies items, selection and `_apply`."""
 
+    def mimeTypes(self) -> list[str]:
+        """A photo counts as droppable, so the tree marks the element it is carried over."""
+        return [*super().mimeTypes(), PHOTO_MIME]
+
+    def _carries(self, event) -> bool:
+        """Something of an open campaign: rows of its table or one of its photos."""
+        return self.bookable and (event.source() is self.measurement_source
+                                  or dropped_photo(event.mimeData()) is not None)
+
     def dragEnterEvent(self, event) -> None:
-        if event.source() is self or (self.bookable and event.source() is self.measurement_source):
+        if event.source() is self or self._carries(event):
             event.acceptProposedAction()
         else:
             event.ignore()
@@ -43,6 +54,14 @@ class StructureDrop:
             event.ignore()
             return
         target_id = None if to_top else target.data(0, ROW_ID)
+        photo = dropped_photo(event.mimeData())
+        if photo is not None:
+            # Once the drag is over: laying it there may ask a question first.
+            QTimer.singleShot(0, lambda: self._apply(
+                lambda: place_photo(self, self.app.service, photo, target_id)))
+            event.setDropAction(Qt.DropAction.MoveAction)
+            event.accept()
+            return
         if event.source() is self:
             moving = [i for i in self.selected_ids() if i != self.root_id]
             beside = self._beside(target_id)

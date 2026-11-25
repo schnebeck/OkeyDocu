@@ -26,8 +26,11 @@ from .levels import REMARK, Level
 from .measurement_table import Columns, group_nodes
 from .nodes import Fields, Heading, Markup, Node
 
-ORDERS = {"place": N_("By element of the installation"), "function": N_("By measured quantity")}
+ORDERS = {"place": N_("By element of the installation"),
+          "function": N_("By measured quantity, then by element"),
+          "function_time": N_("By measured quantity, then by time")}
 NOT_MEASURED = N_("Not measured")
+LEFT_OUT = N_("Questions left out, with the reason")
 NO_REASON = N_("no reason given")
 
 
@@ -56,14 +59,19 @@ def structure_nodes(block: dict, values: dict) -> list[Node]:
     notes = values["_footnotes"]
     options = block.get("many", {})
     nodes: list[Node] = []
-    if block.get("order", "place") == "function":
+    order = block.get("order", "place")
+    if order in ("function", "function_time"):
         everything = sorted((m for level in levels for m in level.measurements),
                             key=lambda m: m.local_time)
         functions = _by_function(everything)
         for function, everywhere in functions.items():
+            nodes.append(Heading(Markup(function_markup(function)), 2))
+            if order == "function_time":
+                # One table for the whole installation, as measured; each row names its place.
+                nodes.extend(group_nodes(everywhere, options, notes, points=True))
+                continue
             # What every level shares is said once, under the function.
             shared = Columns(everywhere)
-            nodes.append(Heading(Markup(function_markup(function)), 2))
             nodes += [Fields(shared.head())] if shared.head() else []
             for level in levels:
                 group = [m for m in level.measurements if m.data.function == function]
@@ -83,8 +91,13 @@ def structure_nodes(block: dict, values: dict) -> list[Node]:
             for function, group in _by_function(level.measurements).items():
                 nodes.append(Heading(Markup(function_markup(function)), 3))
                 nodes.extend(group_nodes(group, options, notes, points=True))
-    missing = [(step.title, step.note or tr(NO_REASON))
-               for step in values.get("steps", ()) if not step.measurements]
+    steps = values.get("steps", ())
+    # A question left out with its reason was not measured in any sense; it is listed apart.
+    left_out = [(step.title, step.note) for step in steps if step.question and step.left_out]
+    if left_out:
+        nodes += [Heading(tr(LEFT_OUT), 2), Fields(left_out)]
+    missing = [(step.title, step.note or tr(NO_REASON)) for step in steps
+               if not step.measurements and not (step.question and step.left_out)]
     if missing:
         nodes += [Heading(tr(NOT_MEASURED), 2), Fields(missing)]
     return nodes

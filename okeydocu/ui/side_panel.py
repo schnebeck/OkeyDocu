@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtCore import QEvent, QSize, Qt, Signal
 from PySide6.QtWidgets import (
     QFrame,
     QLabel,
@@ -19,16 +19,19 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-
+from .framed import TEXT, Framed
 
 SECTION_ALERT = "#d35400"
 
 
-class Section(QWidget):
+class Section(Framed):
+    """Heading and content, a row of the table the sections form: the panel lets the first
+    one on show begin the frame, each closes it below for the next."""
+
     folded = Signal()
 
     def __init__(self, title: str, content: QWidget, grows: bool = True):
-        super().__init__()
+        super().__init__(top=False, joined=True)
         self.title = title
         self.grows = grows  # takes a share of free height while it is open
         self.content = content
@@ -40,7 +43,6 @@ class Section(QWidget):
         self.toggle.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.toggle.setStyleSheet("QToolButton { font-weight: bold; text-align: left; }")
         self.toggle.toggled.connect(self._toggled)
-        # The content stands in a little from the heading, as text on a page does.
         self.body = QWidget()
         self.empty = False
         self.placeholder = QLabel()  # stands for content that has nothing to show
@@ -48,14 +50,11 @@ class Section(QWidget):
         self.placeholder.setEnabled(False)
         self.placeholder.hide()
         inset = QVBoxLayout(self.body)
-        inset.setContentsMargins(8, 2, 2, 8)
+        inset.setContentsMargins(TEXT, 0, TEXT, 0)
         inset.addWidget(content)
         inset.addWidget(self.placeholder)
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(2)
-        layout.addWidget(self.toggle)
-        layout.addWidget(self.body, 1)
+        self.box.addWidget(self.toggle)
+        self.box.addWidget(self.body, 1)
         self.set_count(None)
         self._show_arrow()
 
@@ -90,6 +89,12 @@ class Section(QWidget):
             Qt.ArrowType.DownArrow if self.expanded else Qt.ArrowType.RightArrow
         )
 
+    def event(self, event) -> bool:
+        # Shown or hidden by the page, another section may be the first: the panel looks.
+        if event.type() in (QEvent.Type.ShowToParent, QEvent.Type.HideToParent):
+            self.folded.emit()
+        return super().event(event)
+
     def _toggled(self, expanded: bool) -> None:
         self.body.setVisible(expanded)
         self._show_arrow()
@@ -97,7 +102,7 @@ class Section(QWidget):
 
 
 class SidePanel(QScrollArea):
-    """Sections share the height. When they need more than there is, the panel scrolls
+    """Sections stand on each other as the rows of one table and share the height. When they need more than there is, the panel scrolls
     instead of pressing a section below the size its fields need."""
 
     def __init__(self):
@@ -106,6 +111,7 @@ class SidePanel(QScrollArea):
         inner = QWidget()
         self.column = QVBoxLayout(inner)
         self.column.setContentsMargins(0, 0, 0, 0)
+        self.column.setSpacing(0)
         self.column.addStretch(0)  # takes the room once everything is folded
         self.setWidget(inner)
         self.setWidgetResizable(True)
@@ -133,7 +139,9 @@ class SidePanel(QScrollArea):
         and so fewer lines of wrapped text than the panel shows; its height follows its width.
         """
         growing = False
+        first = next((section for section in self.sections if not section.isHidden()), None)
         for index, section in enumerate(self.sections):
+            section.set_top(section is first)
             grows = section.grows and section.expanded and not section.empty
             growing = growing or grows
             self.column.setStretch(index, 1 if grows else 0)

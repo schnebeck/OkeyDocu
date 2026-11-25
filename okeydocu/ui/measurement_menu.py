@@ -8,14 +8,22 @@
 
 from __future__ import annotations
 
+from functools import partial
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMenu, QMessageBox
 
 from ..l10n import tr
-from .common import selected_id, selected_ids
+from ..model import conductor_of
+from .common import selected_id, selected_ids, stored_parameters
 from .measurement_details import MeasurementDetails
 from .table_columns import GROUP
+
+
+PATHS = ("L1-PE", "L2-PE", "L3-PE", "N-PE", "L1-N", "L2-N", "L3-N", "L1-L2", "L2-L3", "L1-L3")
+PATH_QUERY = ("SELECT m.parameters_json, c.status FROM measurements m"
+              " JOIN campaigns c ON c.id = m.campaign_id WHERE m.id=?")
 
 
 class RowMenu:
@@ -30,6 +38,13 @@ class RowMenu:
         self.plan_action.setToolTip(tr("The sequence becomes a draft test plan with the same"
                                        " questions and measurements"))
         self.plan_action.triggered.connect(self._take_over_plan)
+        self.path_action = QAction(tr("Change measuring path"), self)
+        self.path_action.setToolTip(tr("Sets right between which conductors the measurement was"
+                                       " taken. The readings stay; the change is logged."))
+        paths = QMenu(self)
+        for pair in PATHS:
+            paths.addAction(pair).triggered.connect(partial(self._set_path, pair))
+        self.path_action.setMenu(paths)
         self.menu_run: int | None = None
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self._row_menu)
@@ -37,12 +52,25 @@ class RowMenu:
     def _menu_actions(self) -> tuple:
         """Actions in their order; None draws a line between them."""
         taken = (self.plan_action, None) if self.menu_run is not None else ()
-        return (self.details_action, None, *taken, self.edit_action, self.photo_action, None,
-                self.delete_action)
+        return (self.details_action, None, *taken, self.edit_action, *self.path_actions(),
+                self.photo_action, None, self.delete_action)
 
     def _many_actions(self) -> tuple:
         """Actions for several rows at once."""
-        return (self.delete_action,)
+        return (*self.path_actions(), self.delete_action)
+
+    def path_actions(self) -> tuple:
+        """The measuring path may be set right where every chosen row names one and its
+        campaign is still open."""
+        rows = [self.app.db.one(PATH_QUERY, chosen) for chosen in selected_ids(self.table)]
+        named = rows and all(row and row["status"] == "open"
+                             and conductor_of(stored_parameters(row)) for row in rows)
+        return (self.path_action,) if named else ()
+
+    def _set_path(self, pair: str, *_) -> None:
+        for chosen in selected_ids(self.table):
+            self.app.service.set_conductor(chosen, pair)
+        self._after_change()
 
     def _row_menu(self, point) -> None:
         row = self.table.indexAt(point).row()

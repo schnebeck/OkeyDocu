@@ -17,7 +17,7 @@ from .l10n import tr
 from .campaign.service import CampaignService
 from .paths import data_dir
 from .reporting.archive import ReportArchive
-from .reporting.template import SHIPPED, shipped_template_text
+from .reporting.template import SHIPPED, STANDARD, shipped_template_text
 from .reporting.template_model import in_program_language
 from .store import Database, SchemaMismatch
 
@@ -30,6 +30,7 @@ def build_context():
     if not db.templates():
         for file, name in SHIPPED.items():
             db.save_template(tr(name), in_program_language(shipped_template_text(file)))
+        db.set_default_template(tr(SHIPPED[STANDARD]))  # whatever the names sort like
     service = CampaignService(db, root, SecretKeyStore())
     service.seed_plans()
     return AppContext(db, service, ReportArchive(service))

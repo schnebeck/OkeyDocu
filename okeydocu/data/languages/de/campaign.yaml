@@ -1,7 +1,6 @@
 # OkeyDocu - German texts: campaigns, guided measuring and the main window.
 texts:
   End test plan: Messplan beenden
-  End plan: Plan beenden
   "{done} of {total} done": "{done} von {total} erledigt"
   done: erledigt
   "Its {count} step goes with it.": "Sein {count} Schritt geht mit."
@@ -13,9 +12,9 @@ texts:
   "{count} measurements and answers booked on them are deleted.": "{count} darauf gebuchte Messungen und Antworten werden gelöscht."
   This cannot be undone.: Das lässt sich nicht rückgängig machen.
   Continue: Fortsetzen
-  Pause plan: Plan unterbrechen
-  "Closes the plan; everything stays, and it goes on at the first open step": "Schließt den Plan; alles bleibt erhalten, weiter geht es am ersten offenen Schritt"
-  End plan …: Plan beenden …
+  "Pause test plan": "Messplan unterbrechen"
+  "Closes the test plan; everything stays, and it goes on at the first open step": "Schließt den Messplan; alles bleibt erhalten, weiter geht es am ersten offenen Schritt"
+  "End test plan …": "Messplan beenden …"
   "The steps still open count as skipped, with a reason that appears in the report": "Die noch offenen Schritte gelten als ausgelassen, mit einem Grund, der im Protokoll erscheint"
   Enters a reading by hand into the step shown: Trägt einen Messwert von Hand in den gezeigten Schritt ein
   "Test plan: {title}": "Messplan: {title}"
@@ -23,17 +22,27 @@ texts:
   "{state}, measuring for “{title}”": "{state}, misst für „{title}“"
   Disconnecting from the instrument …: Trenne vom Messgerät …
   "{matched} photos assigned, {open} open, {duplicates} already there.": "{matched} Fotos zugeordnet, {open} offen, {duplicates} schon vorhanden."
-  "{count} without location": "{count} ohne Ort"
+  "{count} measurement without location": "{count} Messung ohne Ort"
+  "{count} measurements without location": "{count} Messungen ohne Ort"
   "{count} photo not assigned": "{count} Foto nicht zugeordnet"
   "{count} photos not assigned": "{count} Fotos nicht zugeordnet"
   "{count} defect": "{count} Mangel"
   "{count} defects": "{count} Mängel"
-  "{count} open": "{count} offen"
+  "{count} defect on the installation": "{count} Mangel an der Anlage"
+  "{count} defects on the installation": "{count} Mängel an der Anlage"
+  "Defects only": "Nur Mängel"
+  "Shows only the measurements that failed.": "Zeigt nur die nicht bestandenen Messungen."
+  "Not possible yet:": "Noch nicht möglich:"
+  "How to check:": "So prüfen:"
+  "{count} measuring point open": "{count} Messpunkt offen"
+  "{count} measuring points open": "{count} Messpunkte offen"
   Setting differs: Einstellung abweichend
-  "{count} point open": "{count} Punkt offen"
-  "{count} points open": "{count} Punkte offen"
-  "✓ ready to confirm": "✓ bereit zum Bestätigen"
-  "The record is closed, but the seal key could not be fetched from the password store.\n\nSo the seal only detects accidental changes, not deliberate tampering.": "Der Datensatz ist abgeschlossen, aber der Siegelschlüssel war im Passwortspeicher nicht erreichbar.\n\nDas Siegel erkennt damit nur zufällige Änderungen, keine gezielte Manipulation."
+  "Test plan: {count} step open": "Messplan: {count} Messschritt offen"
+  "Test plan: {count} steps open": "Messplan: {count} Messschritte offen"
+  "{count} measurement without a step": "{count} Messung ohne Messschritt"
+  "{count} measurements without a step": "{count} Messungen ohne Messschritt"
+  "✓ The campaign can be ended": "✓ Kampagne kann beendet werden"
+  "The campaign is ended, but the seal key could not be fetched from the password store.\n\nSo the seal only detects accidental changes, not deliberate tampering.": "Die Kampagne ist beendet, aber der Siegelschlüssel war im Passwortspeicher nicht erreichbar.\n\nDas Siegel erkennt damit nur zufällige Änderungen, keine gezielte Manipulation."
   Creating the report …: Erstelle das Protokoll …
   The report can be created and signed again under “Reports”.: Das Protokoll lässt sich unter „Protokolle“ erneut erstellen und signieren.
   Fetching the seal key …: Hole den Siegelschlüssel …
@@ -42,10 +51,10 @@ texts:
   Sealing the record …: Versiegele den Datensatz …
   Open: Öffnen
   Report filed.: Protokoll abgelegt.
-  "The campaign is closed and sealed, but:\n{error}\n\n{later}": "Die Kampagne ist abgeschlossen und versiegelt, aber:\n{error}\n\n{later}"
+  "The campaign is ended and sealed, but:\n{error}\n\n{later}": "Die Kampagne ist beendet und versiegelt, aber:\n{error}\n\n{later}"
   Report filed and signed.: Protokoll abgelegt und signiert.
   Photos and files go to the trash, readings cannot be restored.: Fotos und Dateien kommen in den Papierkorb, Messwerte lassen sich nicht wiederherstellen.
-  The campaign is closed and sealed. The record and the reports in the archive disappear with it; the files go to the trash. Reports passed on stay where they are. A deletion note keeps the seal chain of the other campaigns intact.: Die Kampagne ist abgeschlossen und versiegelt. Mit ihr verschwinden der Datensatz und die Protokolle im Archiv; die Dateien kommen in den Papierkorb. Weitergegebene Protokolle bleiben, wo sie sind. Ein Löschvermerk hält die Siegelkette der übrigen Kampagnen intakt.
+  "The campaign is ended and sealed. The record and the reports in the archive disappear with it; the files go to the trash. Reports passed on stay where they are. A deletion note keeps the seal chain of the other campaigns intact.": "Die Kampagne ist beendet und versiegelt. Mit ihr verschwinden der Datensatz und die Protokolle im Archiv; die Dateien kommen in den Papierkorb. Weitergegebene Protokolle bleiben, wo sie sind. Ein Löschvermerk hält die Siegelkette der übrigen Kampagnen intakt."
   "{count} photo": "{count} Foto"
   "{count} photos": "{count} Fotos"
   "{count} note or file": "{count} Notiz oder Datei"
@@ -77,8 +86,8 @@ texts:
   a title: ein Titel
   "Still missing: {items}.": "Es fehlt noch {items}."
   Inspector missing: Prüfer fehlt
-  open: offen
-  completed: abgeschlossen
+  "Campaign open": "Kampagne offen"
+  "Campaign ended": "Kampagne beendet"
   Department: Abteilung
   e.g. maintenance: z. B. Instandhaltung
   Contact person: Ansprechpartner
@@ -92,16 +101,16 @@ texts:
   Change …: Ändern …
   Without test plan: Ohne Messplan
   Assign another …: Weiteren zuweisen …
-  "<b>Client</b>": "<b>Auftraggeber</b>"
-  "<b>Contractor</b>": "<b>Auftragnehmer</b>"
+  "<b>Customer</b>": "<b>Kunde</b>"
   own cost centre for this job: eigene Kostenstelle für diesen Auftrag
   Cost centre: Kostenstelle
   Job number: Vorgangsnummer
+  Job: Vorgang
   Job {number}: Vorgang {number}
   Next order …: Folgeauftrag …
   A new order on the same installation that repeats this one, with its contact person: Ein neuer Auftrag an derselben Anlage, der diesen wiederholt, mit seinem Ansprechpartner
   own reference for this job: eigene Vorgangsnummer für diesen Auftrag
-  More about the order: Weitere Angaben zum Auftrag
+  More about the contact person: Weitere Angaben zum Ansprechpartner
   The title is missing.: Der Titel fehlt.
   "{count} measurements or files belong to parts of the previous installation that are not part of this one.": "{count} Messungen oder Dateien hängen an Teilen der bisherigen Anlage, die nicht zu dieser gehören."
   To the overview (Alt+Home): Zur Übersicht (Alt+Pos1)
@@ -112,10 +121,10 @@ texts:
   Import photos; they are assigned by the time they were taken.: Fotos importieren; sie ordnen sich nach Aufnahmezeit zu.
   Assign photos: Fotos zuordnen
   Show or hide the photo timeline below the table (F7).: Die Zeitleiste der Fotos unter der Tabelle ein- und ausblenden (F7).
-  View draft: Entwurf ansehen
+  "Report preview": "Protokoll-Vorschau"
   The report as it would look now. It is not valid yet.: Das Protokoll, wie es jetzt aussähe. Es ist noch nicht gültig.
-  Confirm …: Bestätigen …
-  Complete, seal, file and sign the report. Nothing can be changed afterwards.: Abschließen, versiegeln, Protokoll ablegen und signieren. Danach lässt sich nichts mehr ändern.
+  "End campaign …": "Kampagne beenden …"
+  "Ends and seals the campaign and files the report, signed if wanted. Nothing can be changed afterwards.": "Beendet und versiegelt die Kampagne und legt das Protokoll ab, auf Wunsch signiert. Danach lässt sich nichts mehr ändern."
   Create report …: Protokoll erstellen …
   "⚠ CHANGED": "⚠ VERÄNDERT"
   not sealed: nicht versiegelt
@@ -124,8 +133,8 @@ texts:
   Overview: Übersicht
   Back to the overview with the campaigns worked on last: Zurück zur Übersicht mit den zuletzt bearbeiteten Kampagnen
   New campaign …: Neue Kampagne …
-  Open measurements: Offene Messungen
-  Completed measurements: Abgeschlossene Messungen
+  "Open campaigns": "Offene Kampagnen"
+  "Ended campaigns": "Beendete Kampagnen"
   "Double-click: continue measuring with the instrument": "Doppelklick: mit dem Messgerät weitermessen"
   Seal without key: Siegel ohne Schlüssel
   Only once the photos are prepared for the report (see status bar).: Erst wenn die Fotos für das Protokoll vorbereitet sind (siehe Statuszeile).
@@ -145,7 +154,10 @@ texts:
   "<b>The instrument is not connected.</b> Without a connection it shows the memory manager instead of sharing. Save there or wait, the app connects by itself.": "<b>Das Messgerät ist nicht verbunden.</b> Ohne Verbindung zeigt es statt Teilen den Speichermanager. Dort speichern oder warten, die App verbindet sich von selbst."
   "<b>Connecting to the instrument …</b>": "<b>Verbinde mit dem Messgerät …</b>"
   "<b>Enter readings by hand or add photos.</b> This campaign runs without an instrument.": "<b>Messwerte von Hand eingeben oder Fotos hinzufügen.</b> Diese Kampagne läuft ohne Messgerät."
-  "<b>Check and revise the imported data.</b> Completing seals the record, only then is the report created.": "<b>Importierte Daten prüfen und überarbeiten.</b> Mit dem Abschluss wird der Datensatz versiegelt, erst dann entsteht das Protokoll."
+  "<b>Check and revise the imported data.</b> Ending the campaign seals the record, only then is the report created.": "<b>Importierte Daten prüfen und überarbeiten.</b> Beim Beenden der Kampagne wird der Datensatz versiegelt, erst dann entsteht das Protokoll."
+  "<b>Measuring is paused.</b> Resume measuring connects the instrument with this campaign.": "<b>Die Messung ist unterbrochen.</b> „Messung fortsetzen“ verbindet das Messgerät mit dieser Kampagne."
+  "<b>The instrument measures for another campaign.</b> Resume measuring brings it to this one.": "<b>Das Messgerät misst für eine andere Kampagne.</b> „Messung fortsetzen“ holt es zu dieser."
+  "<b>The campaign is ended.</b> Its record is sealed and can only be read.": "<b>Die Kampagne ist beendet.</b> Ihr Datensatz ist versiegelt und lässt sich nur lesen."
   Change inspector: Prüfer ändern
   "Also for the previous {measurements}": "Auch für die bisherigen {measurements}"
   An inspector is still missing.: Es fehlt noch ein Prüfer.
@@ -158,7 +170,7 @@ texts:
   Measurement instructions: Anleitung zur Messung
   Location: Ort
   Assign test plan …: Messplan zuweisen …
-  Not assigned: Nicht zugeordnet
+  Without a step: Ohne Messschritt
   Measurement: Messung
   Files: Dateien
   No readings.: Keine Messwerte.
@@ -167,8 +179,6 @@ texts:
   Reports: Protokolle
   Edit campaign …: Kampagne bearbeiten …
   Change inspector …: Prüfer ändern …
-  View report draft: Protokoll-Entwurf ansehen
-  Confirm report …: Protokoll bestätigen …
   Delete campaign …: Kampagne löschen …
   Import photos …: Fotos importieren …
   Set clock …: Uhr stellen …
@@ -182,12 +192,12 @@ texts:
   "The instrument clock is {offset} s off.": "Die Uhr des Messgeräts weicht um {offset} s ab."
   Set automatically: Automatisch stellen
   Set by hand: Von Hand stellen
-  The campaign is completed and sealed. After that the measurements can no longer be changed, and any later change to the record is detected. The report is filed as a PDF.: Die Kampagne wird abgeschlossen und versiegelt. Danach lässt sich an den Messungen nichts mehr ändern, und jede spätere Änderung am Datensatz wird erkannt. Das Protokoll wird als PDF abgelegt.
+  "The campaign is ended and sealed. After that the measurements can no longer be changed, and any later change to the record is detected. The report is filed as a PDF.": "Die Kampagne wird beendet und versiegelt. Danach lässt sich an den Messungen nichts mehr ändern, und jede spätere Änderung am Datensatz wird erkannt. Das Protokoll wird als PDF abgelegt."
   "{measurements}, of which {failed} failed": "{measurements}, davon {failed} nicht bestanden"
   "{count} photo is not assigned to any measurement and is missing from the report.": "{count} Foto ist keiner Messung zugeordnet und fehlt im Protokoll."
   "{count} photos are not assigned to any measurement and are missing from the report.": "{count} Fotos sind keiner Messung zugeordnet und fehlen im Protokoll."
-  Confirm report: Protokoll bestätigen
-  Confirm and file: Bestätigen und ablegen
+  "End campaign": "Kampagne beenden"
+  "End and file the report": "Beenden und Protokoll ablegen"
   Template: Vorlage
   Language: Sprache
   Sign with certificate: Mit Zertifikat signieren
@@ -215,11 +225,12 @@ texts:
   "Saved on the instrument: {values}. Not fetched yet.": "Am Gerät gespeichert: {values}. Noch nicht abgerufen."
   "{added} new, {assigned} assigned, {open} open.": "{added} neu, {assigned} zugeordnet, {open} offen."
   No measurement: Keine Messung
-  This step has no measurement. Complete it anyway? The report then shows it as not measured.: Dieser Schritt hat keine Messung. Trotzdem abschließen? Das Protokoll weist ihn dann als nicht gemessen aus.
+  "This step has no measurement. Count it as done anyway? The report then shows it as not measured.": "Dieser Messschritt hat keine Messung. Trotzdem als erledigt werten? Das Protokoll weist ihn dann als nicht gemessen aus."
   Please choose a measurement and, on the left, the step.: Bitte eine Messung und links den Schritt wählen.
   "&Yes": "&Ja"
   "&No": "&Nein"
   "&Skip": "Über&springen"
+  "The question is left out, for example because it does not arise on this installation. The reason appears in the report; the result stays as it is.": "Die Frage wird ausgelassen, zum Beispiel weil sie sich an dieser Anlage nicht stellt. Die Begründung steht im Protokoll; das Ergebnis bleibt, wie es ist."
   Comment, needed as the reason when skipping: Kommentar, beim Überspringen als Begründung nötig
   Please give the reason this point is dropped.: Bitte begründen, warum dieser Punkt entfällt.
   Counts as passed.: Gilt als bestanden.
@@ -227,8 +238,8 @@ texts:
   Skip step: Schritt auslassen
   Skip: Auslassen
   Reason, it appears in the report: Begründung, sie erscheint im Protokoll
-  "Point {number} of {total}": "Punkt {number} von {total}"
-  All points done, now rework and complete.: Alle Punkte bearbeitet, jetzt nacharbeiten und abschließen.
+  "Step {number} of {total}": "Messschritt {number} von {total}"
+  "All steps of the test plan are done.": "Alle Messschritte des Messplans sind bearbeitet."
   "⚠ The rotary switch is at no measuring position, {wanted} is needed.": "⚠ Der Drehschalter steht auf keiner Messstellung, gebraucht wird {wanted}."
   "⚠ The rotary switch is set to {position}, {wanted} is needed.": "⚠ Der Drehschalter steht auf {position}, gebraucht wird {wanted}."
   "The rotary switch is set to {position}.": "Der Drehschalter steht auf {position}."
@@ -268,6 +279,12 @@ texts:
   Master data: Stammdaten
   Report archive: Protokollarchiv
   Report templates: Protokollvorlagen
+  Report template: Protokollvorlage
+  Default template: Standardvorlage
+  Set as default: Als Standard festlegen
+  "A new campaign starts with the default template; each campaign can be given another among its properties.": "Eine neue Kampagne startet mit der Standardvorlage; jeder Kampagne kann in ihren Eigenschaften eine andere gegeben werden."
+  The preview and the report of this campaign are drawn with this template.: Vorschau und Protokoll dieser Kampagne werden mit dieser Vorlage erstellt.
+  "Report template: {name}. It is chosen under “Edit campaign”.": "Protokollvorlage: {name}. Gewählt wird sie unter „Kampagne bearbeiten“."
   Test plans: Messpläne
   Structure kinds: Strukturtypen
   About {name}: Über {name}
@@ -299,5 +316,5 @@ texts:
   Report templates …: Protokollvorlagen …
   Structure kinds …: Strukturtypen …
   "&Help": "&Hilfe"
-  Nothing has been recorded yet. An empty campaign is deleted, not confirmed.: Es wurde noch nichts erfasst. Eine leere Kampagne wird gelöscht, nicht bestätigt.
+  "Nothing has been recorded yet. An empty campaign is deleted, not ended.": "Es wurde noch nichts erfasst. Eine leere Kampagne wird gelöscht, nicht beendet."
   nothing recorded yet: noch nichts erfasst

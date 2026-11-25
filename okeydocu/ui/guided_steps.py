@@ -89,9 +89,9 @@ class GuidedSteps:
         done = sum(1 for row in self._rows() if row["status"] in ("done", "skipped"))
         self.progress.setRange(0, max(rows, 1))
         self.progress.setValue(done)
-        text = tr("Point {number} of {total}", number=index + 1, total=rows) if rows else ""
+        text = tr("Step {number} of {total}", number=index + 1, total=rows) if rows else ""
         if rows and done == rows:
-            text += "  ·  " + tr("All points done, now rework and complete.")
+            text += "  ·  " + tr("All steps of the test plan are done.")
         self.position.setText(text)
 
     def _show_step(self) -> None:
@@ -197,12 +197,18 @@ class GuidedSteps:
         self.skip_button.setEnabled(status in ("pending", "active"))
         self.back_button.setEnabled(self.steps.currentRow() > 0)
         self.next_button.setEnabled(row is not None and self._can_go_on(row, status))
+        self.next_button.setText(self._next_text())
 
     def _can_go_on(self, row, status: str) -> bool:
         kind = self.app.service.plan_step(row).kind
         if kind == "check":
             return self.check_page.ready()
         return kind == "note" or status != "pending"
+
+    def show_open(self) -> None:
+        """The measurements of the campaign that belong to no step, read again; the step
+        on show keeps what was entered in it."""
+        self._show_open()
 
     def _show_open(self) -> None:
         service = self.app.service

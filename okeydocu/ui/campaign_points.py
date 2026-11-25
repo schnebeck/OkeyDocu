@@ -33,8 +33,8 @@ class CampaignPoints:
             widget.changed.connect(self._after_change)
         self.point.by_hand.connect(self._point_by_hand)
         self.point_action = QAction(tr("Take over as point"), self)
-        self.point_action.setToolTip(tr("The reading becomes a point of this campaign; on"
-                                        " confirming, the template can keep it"))
+        self.point_action.setToolTip(tr("The reading becomes a point of this campaign; when the"
+                                        " campaign is ended, the template can keep it"))
         self.point_action.triggered.connect(self._take_as_point)
         self.point.hide()
         holder = QWidget()
@@ -67,6 +67,8 @@ class CampaignPoints:
     def point_lines(self, area: list[str]) -> list:
         campaign = self.app.service.campaign(self.campaign_id) if self.campaign_id else None
         if campaign is None or not has_points(campaign["plan_key"]):
+            return []
+        if self.defects_button.isChecked():  # a point not yet measured has not failed
             return []
         below = (set(self.app.service.subtree(self.point_id))
                  if self.point_id is not None else None)

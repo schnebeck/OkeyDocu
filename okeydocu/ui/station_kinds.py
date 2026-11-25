@@ -15,8 +15,9 @@ from ..campaign.line_conductors import LINE_CONDUCTORS
 from ..devices.guide import MEASURE, PLACE, Station
 from ..l10n import tr
 from ..vocabulary import setting_name
+from .limit_text import limit_text
 from .station_texts import actions_text, basis_text, conductors_text, fits, leads_text, \
-    mode_text, unsuited_text
+    mode_text, prepared_text, unsuited_text
 
 
 def parts_of(actions) -> list[str]:
@@ -68,7 +69,8 @@ class StationKinds:
 
     def _enter_connect(self, station: Station) -> None:
         self.next.setText(tr("Connected – next ▶"))
-        self.step_text.setText(leads_text(self.guide) + actions_text(station.actions))
+        self.step_text.setText(leads_text(self.guide) + prepared_text(self.guide)
+                               + actions_text(station.actions))
         self.bench.lay_leads()
 
     def _enter_prepare(self, station: Station) -> None:
@@ -87,6 +89,7 @@ class StationKinds:
         advice = conductors_text(self.guide, self.place.stated(LINE_CONDUCTORS),
                                  self.place.has_n)
         advice += unsuited_text(self.guide.function, self.place.stated)
+        advice += limit_text(self.guide.function, self.place.stated, self.place.title)
         self.step_text.setText(mode_text([action for action, _ in to_set], station.actions,
                                          self._settings(), self.place.title, advice)
                                + basis_text(self.guide.function))

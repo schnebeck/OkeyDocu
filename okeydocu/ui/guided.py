@@ -55,6 +55,7 @@ class GuidedPage(GuidedSteps, GuidedActions, QWidget):
     started = Signal(int)
     step_shown = Signal(object)
     loose_counted = Signal(int)
+    plan_done = Signal()  # the last step passed with none left open
 
     def __init__(self, app: AppContext, instrument: InstrumentControl):
         super().__init__()
@@ -146,6 +147,9 @@ class GuidedPage(GuidedSteps, GuidedActions, QWidget):
         self.back_button = QPushButton(tr("← Back"))
         self.next_button = QPushButton(tr("Next →"))
         self.next_button.setDefault(True)
+        # Wide enough for either wording, so the buttons beside it keep their place.
+        wide = QPushButton(tr("End test plan")).sizeHint().width()
+        self.next_button.setMinimumWidth(max(wide, self.next_button.sizeHint().width()))
         self.back_button.clicked.connect(self.previous)
         self.next_button.clicked.connect(self.next_point)
         navigation = QHBoxLayout()

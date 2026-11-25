@@ -130,9 +130,30 @@ def test_template_cannot_reach_python_internals():
         (
             [
                 ReportStep("a", "riso", "done", "", [reading()]),
-                ReportStep("b", "rlo", "skipped", "x", []),
+                ReportStep("b", "rlo", "skipped", "", []),
             ],
             "Nicht vollständig geprüft",
+        ),
+        (
+            [
+                ReportStep("a", "riso", "done", "", [reading()]),
+                ReportStep("b", "rlo", "pending", "", []),
+            ],
+            "Nicht vollständig geprüft",
+        ),
+        (
+            [
+                ReportStep("a", "riso", "done", "", [reading()]),
+                ReportStep("b", "rlo", "skipped", "x", []),
+            ],
+            "Bestanden",
+        ),
+        (
+            [
+                ReportStep("a", "riso", "done", "", [reading(verdict=Verdict.FAILED)]),
+                ReportStep("b", "rlo", "skipped", "x", []),
+            ],
+            "Nicht bestanden",
         ),
     ],
 )
@@ -158,7 +179,10 @@ def test_full_report_shows_all_three_cases(service, asset_id, plan):
     assert "Anlage nicht zugänglich" in text  # 0: reason
     assert "Rekalibrierung fällig" in text
     assert "überfällig" not in text
-    assert "Nicht vollständig geprüft" in text
+    # Skipped with its reason: listed as not measured, and no gap in the result.
+    assert "Nicht gemessen" in text
+    assert "Nicht vollständig geprüft" not in text
+    assert "Ergebnis der Prüfung: Bestanden" in text
     assert "MΩ" in text and "Ω" in text
     assert "Seite 1 von" in text
     assert "SIMULIERT" not in text
@@ -176,7 +200,7 @@ def test_simulated_report_says_so_and_cannot_be_signed(service, asset_id, plan, 
 
 def test_open_campaign_produces_no_archived_report(service, asset_id, plan):
     campaign = service.start(asset_id, plan, "T", "P", "simulator", SimulatedMeter())
-    with pytest.raises(ReportError, match="abgeschlossenen"):
+    with pytest.raises(ReportError, match="beendeten"):
         ReportArchive(service).generate(campaign, "Standard", default_template_text())
 
 

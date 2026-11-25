@@ -20,6 +20,7 @@ from .proxy_progress import ProxyProgress
 
 WAIT_FOR_PROXIES = N_("Only once the photos are prepared for the report (see status bar).")
 DRAFT_TIP = N_("The report as it would look now. It is not valid yet.")
+TEMPLATE_TIP = N_("Report template: {name}. It is chosen under “Edit campaign”.")
 
 
 class CampaignPhotos:
@@ -31,6 +32,7 @@ class CampaignPhotos:
         self.stack = PhotoStack(self.app)
         self.proxies = ProxyProgress(self)
         self.draft_open = False  # set with the campaign shown, so the timer needs no database
+        self.draft_template = ""  # the name of the template the preview is drawn with
         self.proxy_note = QLabel()
         self.proxy_note.hide()
         self.proxies.changed.connect(self._proxies_changed)
@@ -147,4 +149,7 @@ class CampaignPhotos:
         usable = self.draft_open and ready
         self.draft_action.setEnabled(usable)
         self.header.draft_button.setEnabled(usable)
-        self.header.draft_button.setToolTip(tr(DRAFT_TIP if ready else WAIT_FOR_PROXIES))
+        tip = tr(DRAFT_TIP if ready else WAIT_FOR_PROXIES)
+        if ready and self.draft_template:
+            tip += "\n" + tr(TEMPLATE_TIP, name=self.draft_template)
+        self.header.draft_button.setToolTip(tip)

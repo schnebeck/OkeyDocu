@@ -67,6 +67,14 @@ def further_text(function: str) -> str:
     return f"<p><b>{head}:</b> {escape(tr(basis.further))}</p>"
 
 
+def prepared_text(guide: Guide) -> str:
+    """What the test object needs beforehand, in one line where the probes are placed."""
+    if not guide.preparation:
+        return ""
+    steps = " · ".join(escape(tr(heading)) for heading, _ in guide.preparation)
+    return f"<p><b>{escape(tr('Prepared?'))}</b> {steps}</p>"
+
+
 def leads_text(guide: Guide) -> str:
     steps = "".join(f"<li>{escape(tr(lead.text))}</li>" for lead in guide.leads)
     plugs = ", ".join(sorted(lead.plug for lead in guide.leads if lead.tool == PROBE))

@@ -56,10 +56,13 @@ def test_the_edit_overlay_takes_the_contact(app, window, press):
     overlay = CampaignEditOverlay(app, app.service.campaign(campaign), window)
     order = overlay.order
     assert not order.expanded  # nothing but the contact person is given yet
-    # The order is known by its number, so that stays in view with the contact person.
-    assert order.form.isRowVisible(order.fields["job_number"])
-    assert order.form.isRowVisible(order.fields["contact"])
-    assert not order.form.isRowVisible(order.fields["cost_center"])
+    # The own references for the order stay in view, and so does the contact person.
+    for key in ("job_number", "cost_center", "contact"):
+        assert order.form.isRowVisible(order.fields[key])
+    assert not order.form.isRowVisible(order.fields["department"])
+    rows = [order.form.getWidgetPosition(order.fields[key])[0]
+            for key in ("job_number", "cost_center", "contact", "department")]
+    assert rows == sorted(rows) and rows[1] == rows[0] + 1  # the cost centre below the number
     order.fields["department"].setText("Werkstatt")
     order.fields["contact"].setText("Herr Beispiel")
     order.fields["contact_email"].setText("beispiel@kunde.example ")
@@ -69,11 +72,18 @@ def test_the_edit_overlay_takes_the_contact(app, window, press):
     assert order.order_values() == ("", "V-0815")
 
 
-def test_the_order_opens_where_it_holds_something(app, window, press):
+def test_more_about_the_contact_person_opens_where_it_holds_something(app, window, press):
     campaign = app.service.create(press, "Prüfung", "Anna Prüfer")
-    app.service.set_order(campaign, "4711", "")
+    app.service.set_contact(campaign, "Instandhaltung", "", "", "")
     overlay = CampaignEditOverlay(app, app.service.campaign(campaign), window)
     assert overlay.order.expanded
+
+
+def test_the_report_template_stands_below_the_title(app, window, press):
+    campaign = app.service.create(press, "Prüfung", "Anna Prüfer")
+    overlay = CampaignEditOverlay(app, app.service.campaign(campaign), window)
+    form = overlay.order.form
+    assert form.getWidgetPosition(overlay.template)[0] == form.getWidgetPosition(overlay.title)[0] + 1
 
 
 def test_a_new_campaign_asks_for_the_same_order_and_suggests_the_last_contact(app, window, press):

@@ -97,7 +97,7 @@ def finish_all(service, campaign):
 
 def test_campaign_cannot_close_with_open_steps(service, asset_id, plan):
     campaign = start(service, asset_id, plan, SimulatedMeter(seed=1))
-    with pytest.raises(ValueError, match="Schritt offen"):
+    with pytest.raises(ValueError, match="Messschritt offen"):
         service.close(campaign)
 
 
@@ -107,7 +107,7 @@ def test_campaign_cannot_close_with_unassigned_measurements(service, asset_id, p
     meter.simulate_measurement("rlo", at=T0)
     service.collect(campaign, meter)
     finish_all(service, campaign)
-    with pytest.raises(ValueError, match="keinem Schritt"):
+    with pytest.raises(ValueError, match="weder einem Messschritt noch einem Element"):
         service.close(campaign)
 
 

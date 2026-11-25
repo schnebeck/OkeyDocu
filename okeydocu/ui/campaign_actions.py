@@ -59,6 +59,7 @@ class CampaignActions(CampaignTasks):
             self.app.devices.ports[created] = instrument.port
         self.app.service.set_contact(created, *dialog.order.contact_values())
         self.app.service.set_order(created, *dialog.order.order_values())
+        self.app.service.set_report_template(created, dialog.report_template.currentText())
         if follows:
             self.app.service.mark_follow_up(created, follows)
         if dialog.repeat.isChecked() and dialog.previous is not None:

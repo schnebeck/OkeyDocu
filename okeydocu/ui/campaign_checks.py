@@ -8,10 +8,9 @@
 
 from __future__ import annotations
 
-from ..campaign.line_conductors import ConductorBook, failed_counts
+from ..campaign.line_conductors import failed_counts
 from ..campaign.point_plans import has_points
 from ..l10n import plural, tr
-from ..model import Verdict
 from .common import POINT_ID, ROW_ID
 from .setting_warning import differing
 from .structure_tree import UNPLACED
@@ -26,22 +25,26 @@ class CampaignChecks:
 
     def _show_checks(self, campaign) -> None:
         label = self.header.checks
+        found = failed_counts(self.app.db, campaign["id"]) if campaign else {}
+        failed = found.get(campaign["id"], 0) if campaign else 0
+        self.values.show_defects(failed)
         if campaign is None or campaign["status"] != "open":
             label.setText("")
             return
         unplaced = self._count(campaign["id"], "asset_id IS NULL")
-        failed = failed_counts(self.app.db, campaign["id"]).get(campaign["id"], 0)
         blockers = self.app.service.blockers(campaign["id"])
         parts = []
         if unplaced:
-            text = tr("{count} without location", count=unplaced)
+            text = plural(unplaced, "{count} measurement without location",
+                          "{count} measurements without location")
             parts.append(f'<a href="{UNPLACED_LINK}">{text}</a>')
         loose = len(self.app.service.stacked_photos(campaign["id"]))
         if loose:
             text = plural(loose, "{count} photo not assigned", "{count} photos not assigned")
             parts.append(f'<a href="{STACK_LINK}" style="color:{NOTE}">{text}</a>')
         if failed:
-            text = plural(failed, "{count} defect", "{count} defects")
+            text = plural(failed, "{count} defect on the installation",
+                          "{count} defects on the installation")
             parts.append(f'<a href="{FAILED_LINK}" style="color:{ALERT}">{text}</a>')
         set_apart = len(differing(self.app.db, campaign["id"]))
         if set_apart:
@@ -51,17 +54,26 @@ class CampaignChecks:
             missing = sum(row["status"] in ("pending", "active")
                           for row, _ in self.app.service.points(campaign["id"]))
             if missing:
-                text = tr("{count} open", count=missing)
+                text = plural(missing, "{count} measuring point open",
+                              "{count} measuring points open")
                 parts.append(f'<a href="{POINTS_LINK}">{text}</a>')
             if len(blockers) > (1 if missing else 0):
                 text = tr("Setting differs")
                 parts.append(f'<span style="color:{ALERT}">{text}</span>')
         elif blockers:
-            parts.append(plural(len(blockers), "{count} point open", "{count} points open"))
+            steps = sum(step["status"] in ("pending", "active")
+                        for step in self.app.service.plan_step_rows(campaign["id"]))
+            if steps:
+                parts.append(plural(steps, "Test plan: {count} step open",
+                                    "Test plan: {count} steps open"))
+            apart = len(self.app.service.unassigned_measurements(campaign["id"]))
+            if apart:
+                parts.append(plural(apart, "{count} measurement without a step",
+                                    "{count} measurements without a step"))
         if self.app.service.is_empty(campaign["id"]):
             parts.append(tr("nothing recorded yet"))
         elif not blockers:
-            text = tr("✓ ready to confirm")
+            text = tr("✓ The campaign can be ended")
             parts.append(f'<span style="color:{DONE}">{text}</span>')
         label.setText("  ·  ".join(parts))
         label.setToolTip("\n".join(blockers))
@@ -76,7 +88,9 @@ class CampaignChecks:
         if link == UNPLACED_LINK:
             self.structure.select(UNPLACED)
         elif link == FAILED_LINK:
-            self._next_defect()
+            # The whole installation, narrowed to what failed: all defects at one glance.
+            self.structure.select(self._campaign()["asset_id"])
+            self.values.narrow_to_defects()
         elif link == POINTS_LINK:
             self._next_point()
         elif link == STACK_LINK:
@@ -93,16 +107,6 @@ class CampaignChecks:
             after = [row for row in rows if row > table.currentRow()]
             table.selectRow((after or rows)[0])
             table.scrollToItem(table.item((after or rows)[0], 0))
-
-    def _next_defect(self) -> None:
-        """Each click goes on to the next defect, in the order they were measured."""
-        rows = self.app.db.query(
-            "SELECT id, asset_id, parameters_json FROM measurements"
-            " WHERE campaign_id = ? AND verdict = ? ORDER BY local_time, id",
-            self.campaign_id, Verdict.FAILED.value,
-        )
-        book = ConductorBook(self.app.db)
-        self._next_of([row for row in rows if not book.omitted(row)])
 
     def _next_of(self, rows: list) -> None:
         """The measurement after the one shown, among `rows`; after the last, the first."""

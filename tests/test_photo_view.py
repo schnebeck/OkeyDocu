@@ -19,7 +19,7 @@ from okeydocu.campaign.seal import content
 from okeydocu.model import Quantity, ResultValue, Verdict
 from okeydocu.reporting.pdf_parts import _photo
 from okeydocu.ui.photo_preview import PhotoPreview
-from okeydocu.ui.photo_shared import read_thumbnail
+from okeydocu.ui.photo_shared import read_thumbnail, shared_thumbs
 
 
 def test_a_quarter_turn_moves_the_top_to_the_right():
@@ -98,6 +98,20 @@ def test_turning_and_cutting_in_the_large_view_keep_the_original(app, window, ph
     assert (mark.x, mark.y) == pytest.approx((0.7, 0.2))
     assert app.service.view_of_file(photo["path"]) == view
     assert hashlib.sha256(photo["path"].read_bytes()).hexdigest() == before
+
+
+def test_a_photo_turned_in_the_large_view_turns_on_the_timeline_too(app, window, photo):
+    page = window.campaign
+    page.refresh()
+    page.show_campaign(photo["campaign"])
+    shared_thumbs().finish()
+    item = page.timeline.view.photo_items[photo["photo"]]
+    assert item.pixmap.width() > item.pixmap.height()
+    preview = PhotoPreview("schrank.jpg", "", photo["path"], window, app, photo["photo"])
+    preview.turn_right.click()
+    preview.accept()
+    shared_thumbs().finish()
+    assert item.pixmap.width() < item.pixmap.height()
 
 
 def test_the_seal_takes_the_view_only_where_there_is_one(app, photo):

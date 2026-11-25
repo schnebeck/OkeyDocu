@@ -36,7 +36,8 @@ from .photo_shared import accept_photo_drops, shared_thumbs, start_photo_drag
 ICON = QSize(96, 72)
 CELL = QSize(112, 112)
 EMPTY_TEXT = N_("The stack is empty. Photos detached from a measurement land here.")
-HELP_TEXT = N_("Drag onto a row of the table or onto the “Measurement” tab.")
+HELP_TEXT = N_("Drag onto a row of the table or onto the “Measurement” tab; onto an element of"
+               " the structure, the photo lies there as a picture.")
 READ_ONLY_TEXT = N_("Completed campaign: view only.")
 
 
@@ -182,7 +183,7 @@ class PhotoStack(QWidget):
                 work(photo)
         except CampaignClosed:
             self.refresh()
-            show_error(self, tr("The campaign is completed, photos can no longer be changed."))
+            show_error(self, tr("The campaign is ended, photos can no longer be changed."))
             return
         self.refresh()
         self.changed.emit()

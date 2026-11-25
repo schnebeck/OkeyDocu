@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLineEdit,
     QMenu,
+    QPushButton,
     QSplitter,
     QSplitterHandle,
     QToolButton,
@@ -23,13 +24,22 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from .pixel_lines import LINE, device_rect, frame, line_width, rule_below
+
 GUTTER = 8  # between the main blocks of a window, so they do not run into each other
 EDGE = 8  # between the blocks and the window's border
+UNIT = 4  # between a frame and what stands in it; controls in a row keep twice that apart
 
 
 def control_height() -> int:
     """A line edit is the tallest thing in a bar; buttons beside it take on its height."""
     return QLineEdit().sizeHint().height()
+
+
+def row_height() -> int:
+    """A button is the tallest thing in a row of a block; a row that holds only text takes
+    the same height, so rows taking each other's place leave what is below where it is."""
+    return QPushButton("x").sizeHint().height()
 
 
 def rule_colour(widget: QWidget) -> QColor:
@@ -77,10 +87,10 @@ class Strip(QWidget):
         super().__init__()
         self.ruled = ruled  # a line below closes the head of the board off
         self.row = row or QHBoxLayout()
-        self.row.setContentsMargins(6, 4, 6, 4)
-        self.row.setSpacing(4)
+        self.row.setContentsMargins(UNIT, UNIT, UNIT, UNIT)
+        self.row.setSpacing(2 * UNIT)
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 1 if ruled else 0)
+        layout.setContentsMargins(0, 0, 0, LINE if ruled else 0)
         layout.addLayout(self.row)
 
     def even_out(self) -> None:
@@ -95,7 +105,7 @@ class Strip(QWidget):
         painter = QPainter(self)
         painter.fillRect(self.rect(), self.palette().color(QPalette.ColorRole.Window))
         if self.ruled:
-            painter.fillRect(0, self.height() - 1, self.width(), 1, rule_colour(self))
+            rule_below(painter, self.rect(), rule_colour(self))
 
 
 def pane(bar: Strip, view: QAbstractScrollArea) -> QWidget:
@@ -110,16 +120,22 @@ def pane(bar: Strip, view: QAbstractScrollArea) -> QWidget:
     return widget
 
 
-RULE_GAP = 4  # background between the left pane, often ending in its scroll bar, and the line
-
-
 class _Rule(QSplitterHandle):
-    """Background, then a thin line at the right edge, where the next pane begins."""
+    """A thin line and nothing beside it, so the lines of the panes run into it. A handle
+    this thin is grabbed a few pixels to either side as well.
+
+    In a window scaled by a fraction the handle covers a pixel more in some places. The
+    line then spreads over all of them, lighter, and keeps its weight."""
 
     def paintEvent(self, event) -> None:
         painter = QPainter(self)
         painter.fillRect(self.rect(), self.palette().color(QPalette.ColorRole.Window))
-        painter.fillRect(self.width() - 1, 0, 1, self.height(), rule_colour(self))
+        area = device_rect(painter, self.rect())
+        upright = self.orientation() == Qt.Orientation.Horizontal
+        across = area.width() if upright else area.height()
+        colour = rule_colour(self)
+        colour.setAlphaF(colour.alphaF() * min(1.0, line_width(painter) / max(across, 1)))
+        painter.fillRect(self.rect(), colour)
 
 
 class _Splitter(QSplitter):
@@ -147,25 +163,27 @@ class GutterSplitter(QSplitter):
 
 class Board(QWidget):
     """A drawn frame; a line across the top if there is one, then panes that share a rule.
+    Every line inside runs from one line to another: the rules from the head to the frame,
+    the lines below the bars from the frame to a rule.
 
     The frame is painted rather than left to the style, some styles hardly show one.
     """
 
-    def __init__(self, name: str, *panes: QWidget, head: QWidget | None = None):
+    def __init__(self, name: str, *panes: QWidget, head: QWidget | None = None,
+                 top: bool = True):
         super().__init__()
+        self.top = top  # without one, the board continues the block standing on it
         self.splitter = _Splitter(objectName=name)
-        self.splitter.setHandleWidth(RULE_GAP + 1)
+        self.splitter.setHandleWidth(LINE)
         self.splitter.setChildrenCollapsible(False)
         for widget in panes:
             self.splitter.addWidget(widget)
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(1, 1, 1, 1)
+        layout.setContentsMargins(LINE, LINE if top else 0, LINE, LINE)
         layout.setSpacing(0)
         if head is not None:
             layout.addWidget(head)
         layout.addWidget(self.splitter, 1)
 
     def paintEvent(self, event) -> None:
-        painter = QPainter(self)
-        painter.setPen(rule_colour(self))
-        painter.drawRect(self.rect().adjusted(0, 0, -1, -1))
+        frame(QPainter(self), self.rect(), rule_colour(self), self.top)

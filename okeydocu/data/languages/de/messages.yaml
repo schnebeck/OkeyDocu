@@ -2,6 +2,7 @@
 texts:
   Standard report: Standardprotokoll
   Standard report, compact: Standardprotokoll, kompakt
+  Report by measured quantity: Protokoll nach Messgröße
   Outside every confirmed step: Außerhalb jedes bestätigten Messschritts
   Measuring function does not match the step: Messfunktion passt nicht zum Schritt
   "{name}: only pictures and PDF files can be attached.": "{name}: Nur Bilder und PDF lassen sich anhängen."
@@ -16,15 +17,15 @@ texts:
   "Photo changed: {name}": "Foto wurde verändert: {name}"
   "Attachment missing: {name}": "Anlage fehlt: {name}"
   "Attachment changed: {name}": "Anlage wurde verändert: {name}"
-  "Step open: {title}": "Schritt offen: {title}"
-  "{count} measurement not assigned to a step": "{count} Messung(en) keinem Schritt zugeordnet"
-  "{count} measurements not assigned to a step": "{count} Messung(en) keinem Schritt zugeordnet"
+  "Step open: {title}": "Messschritt offen: {title}"
+  "{count} measurement assigned to neither a step nor an element": "{count} Messung weder einem Messschritt noch einem Element zugeordnet"
+  "{count} measurements assigned to neither a step nor an element": "{count} Messungen weder einem Messschritt noch einem Element zugeordnet"
   A campaign sealed earlier is missing.: Eine früher versiegelte Kampagne fehlt.
   The deletion note of an earlier campaign is not genuine.: Der Löschvermerk einer früheren Kampagne ist nicht echt.
   The data no longer match the seal.: Die Daten stimmen nicht mehr mit dem Siegel überein.
   The seal is not genuine.: Das Siegel ist nicht echt.
   The seal was set or removed without the key.: Das Siegel wurde ohne Schlüssel gesetzt oder entfernt.
-  The campaign is closed.: Die Kampagne ist abgeschlossen.
+  "The campaign is ended.": "Die Kampagne ist beendet."
   The title is missing.: Der Titel fehlt.
   Measurements or files are at places outside this installation.: Messungen oder Dateien liegen an Orten außerhalb dieser Anlage.
   "Expected: {columns}": "Erwartet: {columns}"
@@ -39,12 +40,12 @@ texts:
   "{count} point of the repeat open: measure it or skip it with a reason": "{count} Punkt der Wiederholung offen: messen oder mit Begründung auslassen"
   "{count} points of the repeat open: measure them or skip them with a reason": "{count} Punkte der Wiederholung offen: messen oder mit Begründung auslassen"
   "Different setting at “{title}” without a reason": "Abweichende Einstellung bei „{title}“ ohne Begründung"
-  Measurements of closed campaigns stay where they are.: Messungen abgeschlossener Kampagnen bleiben, wo sie sind.
+  "Measurements of ended campaigns stay where they are.": "Messungen beendeter Kampagnen bleiben, wo sie sind."
   An element needs a name.: Ein Element braucht einen Namen.
   An element cannot be moved below itself.: Ein Element lässt sich nicht unter sich selbst schieben.
   Elements stay with their customer.: Elemente bleiben bei ihrem Kunden.
   A whole campaign hangs on this element or below it.: An diesem Element oder darunter hängt eine ganze Kampagne.
-  Closed campaigns measured here and need the place.: Abgeschlossene Kampagnen haben hier gemessen und brauchen den Ort.
+  Closed campaigns measured here and need the place.: Beendete Kampagnen haben hier gemessen und brauchen den Ort.
   "The database has version {found}, this program needs version {needed}. It has to be converted with an external tool first.": "Die Datenbank hat die Version {found}, dieses Programm braucht die Version {needed}. Sie muss vorher mit einem externen Werkzeug umgestellt werden."
   "Unknown customer fields: {fields}": "Unbekannte Kundenfelder: {fields}"
   The database holds no inspections.: Die Datenbank enthält keine Prüfungen.

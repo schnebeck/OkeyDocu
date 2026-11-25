@@ -31,7 +31,8 @@ from .context_texts import (
     clock_summary,
     company_context,
     date_text,
-    reference_day,
+    days_text,
+    signing_day,
 )
 from .language import day
 from .levels import asset_features, structure_levels
@@ -66,15 +67,22 @@ class ReportStep:
     status: str
     note: str
     measurements: list[ReportMeasurement] = field(default_factory=list)
+    question: bool = False  # of an inspection, not a measurement
+
+    @property
+    def left_out(self) -> bool:
+        """Skipped with its reason: listed with it, and not held against the result."""
+        return self.status == "skipped" and bool(self.note)
 
 
 def overall_verdict(steps: list[ReportStep]) -> str:
-    """Summarise honestly: a skipped or empty step is not a pass."""
+    """Summarise honestly: a step still open or left empty is not a pass. A step skipped
+    with its reason leaves the result as it is; without anything judged there is no pass."""
     verdicts = [m.data.verdict for step in steps for m in step.measurements]
     if Verdict.FAILED in verdicts:
         return tr("Failed")
-    complete = bool(steps) and all(
-        s.status == "done" and s.measurements for s in steps
+    complete = bool(verdicts) and all(
+        s.left_out or (s.status == "done" and s.measurements) for s in steps
     )
     if complete and all(v is Verdict.PASSED for v in verdicts):
         return tr("Passed")
@@ -151,7 +159,8 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
             title = _point_title(service, plan_step, title)
         for measurement in measured:
             measurement.point = title
-        steps.append(ReportStep(title, plan_step.function, row["status"], row["note"], measured))
+        steps.append(ReportStep(title, plan_step.function, row["status"], row["note"], measured,
+                                plan_step.kind == "check"))
 
     # Without a plan, measurements are simply grouped by what was measured.
     for row in service.open_measurements(campaign_id):
@@ -162,6 +171,8 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
         steps.append(ReportStep(title, function, "done", "", measured))
 
     measured = [m for step in steps for m in step.measurements]
+    # The test is dated by its measurements; the instrument has to be calibrated on its last day.
+    first_day, last_day = service.test_days(campaign_id)
     return {
         **company_context(service.db.company()),
         "customer": dict(customer),
@@ -180,8 +191,8 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
             "signature": campaign_signature(service.db, campaign),
             "plan": campaign["plan_title"],
             "uuid": campaign["uuid"],
-            "started": date_text(campaign["started_at"]),
-            "date": day(datetime.fromisoformat(campaign["started_at"])),
+            "started": date_text(campaign["tested_at"]),
+            "date": days_text(first_day, last_day),
             "closed": date_text(campaign["closed_at"]),
             "clock_offset_s": round(campaign["clock_offset_s"]),
             "clock_summary": clock_summary(
@@ -198,10 +209,10 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
             "firmware": identity.firmware,
             "calibrated_on": day(identity.calibrated_on),
             "recalibration_due": day(identity.recalibration_due),
-            "overdue": identity.calibration_overdue(reference_day(campaign)),
+            "overdue": identity.calibration_overdue(last_day),
         },
         "steps": steps,
-        "report": {"date": day(date.today())},
+        "report": {"date": day(signing_day(campaign))},
         "structure": structure_levels(service, campaign["asset_id"], measured),
         "places": places(service, campaign_id),
         "verdict": overall_verdict(steps),

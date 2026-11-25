@@ -85,7 +85,7 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.asset_section = self.side.add(tr("Location"), self.place, grows=False)
         self._build_plans()
         self.plan_section = self.side.add(tr("Test plans"), self.plan_list)
-        self.loose_section = self.side.add(tr("Not assigned"), self.guided.open_box)
+        self.loose_section = self.side.add(tr("Without a step"), self.guided.open_box)
         self.detail_section = self.side.add(tr("Measurement"), self.values.detail, grows=False)
         self.readings_section = self.side.add(tr("Readings"), self.values.readings, grows=False)
         self.files_section = self.side.add(tr("Files"), self.values.files, grows=False)
@@ -98,18 +98,21 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
                         self.files_section, self.report_section):
             section.hide()
 
-        self.work = GutterSplitter(Qt.Orientation.Vertical, objectName="campaign-panes",
-                                   width=GUTTER // 2)
+        self.work = GutterSplitter(Qt.Orientation.Vertical, objectName="campaign-panes")
         # The structure and what was measured on it, side by side like folders and files.
         self.board = Board("campaign-board", self.structure_panel, self.values,
-                           head=self.values.head)
+                           head=self.values.head, top=False)
         self.board.splitter.setStretchFactor(1, 1)
+        # The buttons on either side of the rule are a pair of one width.
+        pair = (self.structure_panel.new_button, self.values.manual_button)
+        for button in pair:
+            button.setFixedWidth(max(each.sizeHint().width() for each in pair))
         self.board.splitter.setSizes([320, 900])
         self.work.addWidget(self.board)
         self.work.addWidget(self.timeline)
         self.work.setStretchFactor(0, 1)
         self.work.setStretchFactor(1, 0)
-        self.work.setSizes([760, 190])
+        self.work.setSizes([760, 206])
         # A plan being run takes the place of structure and table.
         self.middle = QStackedWidget()
         self.middle.addWidget(self.work)
@@ -117,6 +120,8 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         centre = QWidget()
         centre_layout = QVBoxLayout(centre)
         centre_layout.setContentsMargins(0, 0, 0, 0)
+        # Head, what to do now and the board are the rows of one table.
+        centre_layout.setSpacing(0)
         centre_layout.addWidget(self.header)
         centre_layout.addWidget(self.free)
         centre_layout.addWidget(self.middle, 1)
@@ -134,7 +139,7 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.splitter.setStretchFactor(1, 1)
         self.splitter.setSizes([230, 1130])
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(EDGE, EDGE, EDGE, 0)
+        layout.setContentsMargins(EDGE, EDGE, EDGE, EDGE // 2)
         layout.addWidget(self.splitter)
         # Not pinned, the list waits at the left edge and leaves the room to the work.
         self.drawer = EdgeDrawer(self)
@@ -170,6 +175,7 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.structure_panel.actions.properties_requested.connect(self._edit_element)
         self.place.properties_requested.connect(self._edit_element)
         self.place_files.changed.connect(self.changed)
+        self.place_files.photo_taken.connect(self._photos_changed)
         self._connect_photos()
         self.free.starter.requested.connect(self.open_guide)
         self.guided.started.connect(self._started)
@@ -206,6 +212,8 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         if self.campaign_id is not None:
             self.list.update_campaign(self.campaign_id)
             self.values.refresh()
+            self.guided.show_open()  # a measurement deleted or moved leaves that list too
+            self._show_plans(self.app.service.campaign(self.campaign_id))  # their progress
             self._refresh_photos()
             self._refresh_structure()
         self._refresh_home()

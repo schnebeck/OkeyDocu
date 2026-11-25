@@ -161,7 +161,9 @@ The block `structure` orders the measurements along the structure tree of the in
 every element with measurements is a section with its features and within it one block per measured
 quantity; with `order: function` every measured quantity appears once, with what all its elements share,
 and below it per element only what differs from that. Steps of a plan without a measurement follow with
-their reason. The standard template uses `order: place`. With `layout: compact` every element has
+their reason. With `order: function_time` every measured quantity has one table for the whole
+installation, in the order measured, each row naming its place; the shipped template “Report by
+measured quantity” uses it. The standard template uses `order: place`. With `layout: compact` every element has
 a single table over all measurement types in the order of the measurements, with measurement type, result,
 limit and remark; what the measurements of one measurement type share at the element is stated once above it. The
 template “Standard report, compact” uses it. Every element shows below its heading what
@@ -180,8 +182,23 @@ original in `data/languages/<code>.yaml`, and anything missing stays German. Mea
 are never rounded; only the decimal separator and spacing follow the language. Notes and attachments on
 measurements are shown with them, those on locations in the block `attachments`.
 
-The overall result does not overstate: a skipped or empty step gives “Not completely
-tested”, never “Passed”.
+A campaign names the report template its preview and its report are drawn with
+(`campaigns.report_template`, `campaign/report_choice.py`); it is chosen among the properties of the
+campaign, offered when a campaign is created, and comes selected when the campaign is ended. One template
+is the default (`templates.standard`, set in the template editor; the first by name while none is marked): a
+campaign that names no template, or one that is gone, takes it.
+
+A report carries two dates. The day of the test (`campaign.date`) is the day measured on, or the first
+and the last where the test took several; answers of an inspection count as measurements. The date of the
+report (`report.date`) stands by the signature and is the day the campaign was ended and sealed; a preview
+shows today. When a campaign was created dates nothing: `tested_at` of a campaign row is its first
+measurement and names the creation only while nothing is measured. The calibration of the instrument is
+judged on the last day measured.
+
+The overall result does not overstate: a step still open, left empty or skipped without a reason gives
+“Not completely tested”, never “Passed”, and so does a report in which nothing is judged. A step skipped
+with its reason is no gap: the result stays what the answers and measurements give, and the report lists
+the step with its reason, questions of an inspection under a heading of their own.
 
 ## Languages
 
@@ -378,7 +395,9 @@ chosen measurement, its readings, its files, photos and reports (`ui/side_panel.
 measurement hands its table of readings and its attachments to sections of their own
 (`ui/campaign_detail.py`), whose headings count what they hold; for an open point, a run or no row they
 stay hidden. Sections without content shrink there to a grey line that says what would appear there;
-only open sections with content get free height.
+only open sections with content get free height. The sections stand on each other as the rows of one
+table: the first on show begins the frame, each closes it below for the next. The photo timeline
+below the board is a block of its own in a closed frame.
 
 The list of all campaigns (`ui/campaign_list.py`) does not lie permanently next to the work. It slides
 in as a drawer (`ui/edge_drawer.py`) over the content as soon as the mouse touches the left window edge,
@@ -404,12 +423,41 @@ Del and Ins work on the tree. Without a mouse, “Move to …” in the context 
 (`ui/move_overlay.py`). The number per element is “this inspection / last inspection”. Tree and table
 are in a drawn frame (`ui/board.py`): at the top across the full width the line with what
 all rows have in common, and the count, below it one toolbar of equal height each,
-then the header rows of tree and table on one line. The toolbar of the table holds only
+then the header rows of tree and table on one line. Every line in the frame runs from one line
+to another: the head and the toolbars are ruled off below, and the rule between the panes is a
+bare line from the head's rule to the frame, grabbed a few pixels to either side. The toolbar of the table holds only
 “By hand …” and a filter field; edit, photo, move and delete of a row are in
 its context menu and on F2 and Del, so nothing stands permanently greyed out in the picture. Explanatory
 sentences are tooltips: at the header “Structure” and at the hint above the frame, whose bold part
 stays visible. Between the main blocks of the window lie 8 px of window background; a
 stored splitter position does not change that.
+
+The middle of the workspace is one table (rules in [gui-design.md](gui-design.md)): blocks
+(`ui/framed.py`) standing on each other without room between them, in one frame, a line between
+the rows. The head (`ui/campaign_header.py`) says what the campaign
+is, the title and a named line each for customer, installation, job, inspector and plan, and
+holds the actions at its right end with what is left before confirming below them. The row
+below it says what to do now: measuring without a plan (`FreeRunView` in
+`ui/campaign_views.py`) the sentence about the instrument and the choice of a guided
+measurement, running a plan (`ui/plan_run.py`) the plan and its buttons. The row is always
+there and always as high: a campaign nothing is measured for says why, paused, measured
+elsewhere or completed, so the board below keeps its place. The board, or steps and wizard of
+a plan, continue the table without a line of their own above. One unit (`UNIT` in `ui/board.py`) lies between a frame and
+what stands in it, two between controls in a row, so the contents of all blocks begin and end
+on the same two lines down the window. Two widths follow the actions of the head, so that left
+edges meet as well: the guide choice with its button is as wide as all actions, the filter of
+the table as wide as the last two. A text that may run out of room is one line and ends in an
+ellipsis (`ui/elided_label.py`): the title and the sentence about the instrument never change
+the height of their row. No block touches the border of the window.
+
+Frames and rules are laid on the pixels of the screen (`ui/pixel_lines.py`). A window scaled by
+a fraction, 125 % for example, puts the edges of a widget between two pixels; a line drawn in
+the widget's own units can then fall on the pixel outside the widget and vanish, or come out
+twice as thick as its neighbour. The area of the widget is therefore rounded first, the way Qt
+rounds it, and each line is laid along an edge of that area, as thick as the whole part of the
+scale. A frame lies on the pixels next to its inside, a rule on the last pixels of its bar, so
+lines of widgets that touch meet. The rule between two panes fills its handle; where the handle
+covers a pixel more, the line spreads over it, lighter.
 
 Measuring function, measurement and test run are three levels. The measuring function says what is measured
 (RISO, RLO). A measurement is a result, a measured value or the answer to a question. A
@@ -530,7 +578,14 @@ Measuring without a plan, the campaign offers the measurements the instrument's 
 guide for (`ui/guide_starter.py`). The first measurement of a kind in a campaign opens its own
 window (`ui/measuring_window.py`) that leads through the stations of the guide; no station can be
 skipped, but “Next” never waits for the instrument, the tester confirms by going on. A later
-measurement of the same kind only shows the first station, the element the next readings go to.
+measurement of the same kind is a repeat (`ui/repeat_run.py`): it runs the same stations and
+passes two of them by, the rotary switch where the instrument already stands right and the
+leads where the probes go where they already are. Where they are is what the run before left:
+the leads of the last guide of the run that booked the campaign's latest reading of this kind
+(`campaign/last_measured.py`), and within a run the leads of the station before. Supply, mode
+and limits and the measurement are shown every time. The button that goes on keeps one width
+and one place for all its texts. The choice of measurements shows for each the marking printed
+at its dial position, cut from the drawing of the front panel (`ui/dial_icons.py`).
 
 The guide belongs to the driver, because every instrument chooses, connects, sets and measures
 in its own way. A guide (`devices/guide.py`) names a flow: stations of the kinds the application
@@ -596,11 +651,20 @@ each have a guide of their own, with other probes and settings, and none passes 
 
 What a measurement rests on belongs to its function, not to an instrument: `data/basis.yaml`
 names per function the standards with their clauses, why the inspector takes the measurement and
-where to measure next (`vocabulary/basis.py`). The dial station shows standards and purpose below
-the position to turn to; once a reading has arrived, the measure station says where further
+where to measure next (`vocabulary/basis.py`). The station for mode and limits shows standards and purpose below
+its settings, with the key block of the instrument alone in view; once a reading has arrived, the measure station says where further
 readings are taken, each booked to the element it was taken at. Every driver's guide for a
 function shows the same. Standards are codes and read the same in every language; the texts are
 translated by the catalogues.
+
+Where the element states what a limit follows from, the station proposes one and shows the
+reckoning (`ui/limit_text.py`). For the protective conductor (`campaign/conductor_limit.py`) that
+is the cable length and the cross-section: the resistance of the copper conductor plus a tenth of
+an ohm for the contacts. On a plug this is the limit of the appliance tests, which give a cord of
+up to 1.5 mm² a fixed limit by its length instead and are a supplement where a machine is tested;
+at a fixed connection no standard sets a
+limit, and the sum is shown as what to expect. Nothing is proposed from what the element does
+not state.
 
 The PROFITEST PRIME's views (`devices/profitest_prime/screens.py`) are kept per rotary switch
 position; [profitest-prime-display.md](profitest-prime-display.md) tells what was read from the
@@ -756,6 +820,12 @@ Attachments (`attachments`) are comments, images and PDFs on a measurement or a 
 to a campaign, so that a record stays complete in itself. Removing detaches them from measurement
 and location; deleting ends them together with the file. Photos, gaps, attachments and their files are part of the seal.
 
+A photo belongs to a measurement, an image attachment to a location. A photo dropped onto an element of
+the structure tree or onto the files of the chosen element becomes such an attachment
+(`campaign/photo_places.py`, `ui/photo_to_place.py`): the file is written as the photo was turned and cut,
+and the photo leaves timeline and stack. Marks and the role of a hint or a defect exist only on photos, so
+a photo carrying them is laid there only after a question.
+
 Files and notes of the last confirmed inspection of the same installation appear in a new campaign
 grey with date at the respective element (`campaign/carry_over.py`, `ui/place_files.py`). What was then attached to
 a measurement of the element counts as at the element; what was attached to the campaign itself, as at the
@@ -833,7 +903,10 @@ replaces the old answer. In the report, answers form a table; hints do not appea
 
 A measuring point runs like this: click the setup in the connection diagram, confirm the settings, measure, Next.
 With a live connection every value is already there; without it, Next fetches the instrument memory. A measured value
-is assigned to the active step if the function fits; otherwise it is listed under “Not assigned”.
+is assigned to the active step if the function fits; otherwise it is listed under “Without a step” while a
+plan is run, ready to be assigned to the step shown. A measurement taken beside the plans and booked on an
+element is where it belongs. Only one with neither a step nor an element counts as unassigned: the overview
+names it, and in a campaign with plans it stands against ending.
 Without an instrument, values are entered by hand; they land in the step shown.
 
 Two drafts are supplied (`released: false`). “Machine – electrical inspection” measures; its
