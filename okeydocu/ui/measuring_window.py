@@ -162,6 +162,10 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, RepeatRun, GuideR
         """To the first station of a kind in this run."""
         self.go([station.kind for station in self.flow].index(kind))
 
+    def _allow_next(self) -> None:
+        """The first station is left only with an element the readings go to."""
+        self.next.setEnabled(self.kind != PLACE or self.has_place)
+
     def go(self, index: int) -> None:
         if index >= self.count:
             if self.kind == PLACE:
@@ -192,4 +196,5 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, RepeatRun, GuideR
         self._on_display()
         last = self.index == self.count - 1
         self.next.setText(tr("Done ▶") if last else tr("Next ▶"))
+        self._allow_next()
         getattr(self, f"_enter_{station.kind}")(station)

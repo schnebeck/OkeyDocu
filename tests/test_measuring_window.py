@@ -341,3 +341,24 @@ def test_the_bench_keeps_room_for_probes_that_come_from_below(window):
     bench.repaint()
     lowest = max(anchor.point.y() for anchor in bench.anchors.values() if anchor.side == 1)
     assert lowest + 100 < bench.height()
+
+
+def test_without_an_element_the_first_station_cannot_be_left(qtbot, app, plant):
+    """A measurement that suits any element has none to go to until one is picked."""
+    shown = opened(qtbot, app, plant, None, "rlo")
+    tree = shown.form.panel.tree
+    assert not shown.next.isEnabled()
+    assert tree.currentItem() is None  # nothing looks chosen
+    tree.select(plant["machine"])  # the installation itself can be picked like any element
+    assert shown.next.isEnabled() and shown.place.asset_id == plant["machine"]
+    kept = []
+    shown.place_kept.connect(kept.append)
+    shown.next.click()
+    assert shown.kind == SELECT and kept == [plant["machine"]]
+    shown.back.click()
+    assert shown.next.isEnabled()
+
+
+def test_an_element_still_to_be_made_lets_the_first_station_be_left(qtbot, app, plant):
+    shown = opened(qtbot, app, plant, plant["machine"], "rcd_time")
+    assert shown.place.is_new and shown.next.isEnabled()

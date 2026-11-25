@@ -86,11 +86,15 @@ class PlaceForm(QWidget):
         self.panel.tree.show_root(root_id, campaign_id)
         self.quiet = False
 
-    def select(self, asset_id: int) -> None:
-        """Rebuilt from the database first, so an element just made is there to be chosen."""
+    def select(self, asset_id: int | None) -> None:
+        """Rebuilt from the database first, so an element just made is there to be chosen.
+        None marks no element at all."""
         self.quiet = True
         self.panel.tree.reload()
-        self.panel.tree.select(asset_id)
+        if asset_id is None:
+            self.panel.tree.setCurrentItem(None)
+        else:
+            self.panel.tree.select(asset_id)
         self.quiet = False
 
     def _picked(self, asset_id) -> None:

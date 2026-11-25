@@ -31,12 +31,20 @@ class PlaceStation:
         if found.asset_id is None:
             found = new_place(service, self.base_guide, self.parent_id, self.root)
         self._take(found)
-        self.form.select(self.parent_id if found.asset_id is None else found.asset_id)
+        # With nothing to measure at, the tree marks no element: any of them can be picked.
+        marked = found.asset_id if found.asset_id is not None else self.parent_id
+        self.form.select(marked if self.has_place else None)
+
+    @property
+    def has_place(self) -> bool:
+        """An element readings can go to: one there is, or one about to be made."""
+        return self.place.asset_id is not None or self.place.is_new
 
     def _take(self, place, typed: dict[str, str] | None = None) -> None:
         self.place = place
         self.form.show_place(self.base_guide, place, typed)
         self._preview()
+        self._allow_next()
 
     def _choose(self, asset_id) -> None:
         """An element picked in the tree, or the tree worked on. Where the guide finds no

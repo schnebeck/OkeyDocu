@@ -611,7 +611,8 @@ driver; the user interface never imports a driver.
   element of a kind with that feature at or above the chosen one; where none stands there, one
   is entered and made below the chosen element, which is kept per campaign as the place for
   further new ones. What is typed at the element stays while the tree is worked on. The element
-  kept becomes where the readings go.
+  kept becomes where the readings go. Opened with no element to book on, the tree marks none and
+  the station cannot be left until one is picked, the installation itself included.
 - **select** (`ui/dial_station.py`): with a drawn dial and a position named, the knob turns there;
   otherwise the station says what to choose. The instrument is asked where it stands on entering
   the station and on request, never in a steady stream; a position that serves the measurement
