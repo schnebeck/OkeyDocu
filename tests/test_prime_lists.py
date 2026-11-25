@@ -8,7 +8,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import pytest
-from PySide6.QtCore import QRectF
+from PySide6.QtCore import QRectF, Qt
+from PySide6.QtTest import QTest
 
 from okeydocu.devices.guide import CONFIGURE, MEASURE
 from okeydocu.devices.profitest_prime import screens
@@ -18,7 +19,7 @@ from okeydocu.devices.profitest_prime.setting_lists import LISTS, RCD_DATA, sett
 from okeydocu.devices.screen import LIST_KEYS, SettingList
 from okeydocu.l10n import speaking
 from okeydocu.ui.front_panel import FrontPanel
-from okeydocu.ui.list_art import ROWS, page_of, said
+from okeydocu.ui.list_art import ROWS, page_of, reading, said, spot_of
 from okeydocu.ui.measuring_window import MeasuringWindow
 
 FORM, RATED = RCD_DATA.settings[2], RCD_DATA.settings[3]
@@ -116,3 +117,116 @@ def test_leaving_the_station_puts_the_list_away(window):
     assert window.listed is None and not isinstance(window.bench.panel.screen, SettingList)
     window.go_to(CONFIGURE)
     assert window.bench.panel.screen == screens.RCD_TIME
+
+
+# Working a list with its softkeys --------------------------------------------------------
+
+UP, DOWN, THIRD, TAKE = range(4)
+
+
+def test_the_cursor_moves_among_settings_and_among_choices_and_turns_the_page():
+    form = RCD_DATA.at(2)
+    assert form.moved(-5).selected == 0 and form.moved(5).selected == 3  # stops at the ends
+    among = form.across((0, 0))
+    assert among.keys()[THIRD] == "enter" and form.keys()[THIRD] == "right"
+    assert among.moved(9).cursor == (0, 9) and among.moved(10).cursor == (1, 0)
+    assert among.moved(99).cursor == (1, 1) and among.moved(-1).cursor == (0, 0)
+
+
+def test_a_confirmed_choice_is_how_the_setting_reads_from_then_on():
+    taken = RCD_DATA.at(2).across((0, 0)).moved(2).confirmed()
+    assert taken.cursor is None and taken.wording(2) == "B" and taken.wording(0).startswith("IΔN")
+    limits = setting_list(screens.RCD_TIME, screens.LIMITS)
+    typed = limits.at(1).across().confirmed()  # only a value entered by hand is offered
+    assert typed.wording(1) == "ta: <300ms"
+    by_hand = setting_list(screens.RLO, screens.LIMITS).across().moved(5).confirmed()
+    assert by_hand.wording(0) == "RLO <9,99Ω"
+
+
+def press(window, index):
+    """A click on the softkey `index` of the drawn panel."""
+    panel = window.bench.panel
+    centre = panel.part_rect(DRAWING.softkeys[index]).center().toPoint()
+    QTest.mouseClick(panel, Qt.MouseButton.LeftButton, pos=centre)
+
+
+def test_the_softkey_beside_a_setting_opens_its_list(window):
+    assert "Softkeys im Bild lassen sich drücken" in window.step_text.text()
+    press(window, 1)  # the test current: no list is known for it
+    assert window.listed is None
+    press(window, 0)
+    panel = window.bench.panel
+    assert panel.screen == RCD_DATA and window.key_press.isVisible()
+    assert panel.pointed == ("soft-1", "soft-2", "soft-3", "soft-4")
+
+
+def test_the_softkeys_work_the_list_as_the_instrument_does(window):
+    panel = window.bench.panel
+    press(window, 0)
+    press(window, DOWN)
+    press(window, DOWN)  # the form of the RCD
+    press(window, THIRD)  # to its choices: the cursor stands on what the RCD states
+    assert panel.screen.cursor == (0, 0) and panel.screen.keys()[THIRD] == "enter"
+    press(window, DOWN)
+    press(window, DOWN)
+    press(window, THIRD)  # confirmed: back on the settings
+    assert panel.screen.cursor is None and panel.screen.wording(2) == "B"
+    press(window, TAKE)
+    assert window.listed is None and panel.screen == screens.RCD_TIME
+    assert window.display_stated("rcd_type") == "B"  # the view shows what was set
+    assert window.place.stated("rcd_type") == "A"  # the element states what it did
+    press(window, 0)
+    assert panel.screen.wording(2) == "B"  # and the list remembers it
+
+
+def test_taking_over_confirms_the_choice_under_the_cursor(window):
+    press(window, 0)
+    press(window, THIRD)
+    press(window, DOWN)
+    press(window, DOWN)
+    press(window, DOWN)  # from 30 mA to 200 mA
+    press(window, TAKE)
+    assert window.display_stated("rated_residual_current") == "200mA"
+
+
+def test_a_click_beside_the_softkeys_and_at_another_station_does_nothing(window):
+    panel = window.bench.panel
+    QTest.mouseClick(panel, Qt.MouseButton.LeftButton,
+                     pos=panel.part_rect("lcd").center().toPoint())
+    assert window.listed is None
+    window.go_to(MEASURE)
+    press(window, 0)
+    assert window.listed is None and not isinstance(panel.screen, SettingList)
+
+
+def test_a_list_opens_on_the_page_of_the_value_in_force():
+    path = setting_list(screens.U, screens.U_PATH)
+    assert spot_of(path.settings[0], reading(path, 0, None)) == (1, 0)  # AUTO, on page two
+    time = setting_list(screens.RLO, screens.TIME)
+    assert spot_of(time.settings[0], reading(time, 0, None)) == (0, 0)
+    limits = setting_list(screens.RCD_TIME, screens.LIMITS)
+    assert spot_of(limits.settings[1], reading(limits, 1, None)) == (0, 0)  # entered by hand
+    stated = {"rcd_type": "AC", "rated_residual_current": "30 mA"}.get
+    assert spot_of(FORM, reading(RCD_DATA, 2, stated)) == (1, 1)
+    assert spot_of(FORM, reading(RCD_DATA, 2, None)) is None  # the element says nothing
+
+
+def test_the_cursor_passes_to_the_value_in_force_and_back_over_the_page(qtbot, app):
+    customer = app.db.add_customer("Muster AG")
+    machine = app.db.add_asset(customer, "machine", "Presse")
+    campaign = app.service.create(machine, "Prüfung", "Tester")
+    with speaking("de"):
+        shown = MeasuringWindow(app, campaign, DRIVER_KEY, "u", machine)
+        qtbot.addWidget(shown)
+        shown.show()
+        shown.go_to(CONFIGURE)
+        press(shown, DRAWING.softkeys.index("soft-4"))  # the measuring path
+        panel = shown.bench.panel
+        assert isinstance(panel.screen, SettingList)
+        press(shown, THIRD)
+        assert panel.screen.cursor == (1, 0)  # on AUTO, the only row of page two
+        press(shown, UP)
+        assert panel.screen.cursor == (0, 9)  # back onto page one
+        press(shown, DOWN)
+        press(shown, DOWN)
+        assert panel.screen.cursor == (1, 0)

@@ -46,7 +46,7 @@ class StationKinds:
                   if found.quantity is not None}
         if result is not None:
             values[CONDUCTOR] = conductor_of(result.measurement.parameters)
-        self.bench.panel.show_screen(screen, self.place.stated, values)
+        self.bench.panel.show_screen(screen, self.display_stated, values)
 
     def _to_set(self) -> list[tuple[object, tuple[str, ...]]]:
         """The settings the view on the display has, each with the parts to press. One named
@@ -104,8 +104,9 @@ class StationKinds:
             self._on_display()
             self.bench.panel.point_at(*[part for _, pressed in to_set for part in pressed],
                                       *parts_of(station.actions))
-        advice = conductors_text(self.guide, self.place.stated(LINE_CONDUCTORS),
-                                 self.place.has_n)
+        advice = self._list_hint()
+        advice += conductors_text(self.guide, self.place.stated(LINE_CONDUCTORS),
+                                  self.place.has_n)
         advice += unsuited_text(self.guide.function, self.place.stated)
         advice += limit_text(self.guide.function, self.place.stated, self.place.title)
         self.step_text.setText(mode_text([action for action, _ in to_set], station.actions,

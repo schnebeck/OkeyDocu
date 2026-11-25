@@ -224,4 +224,5 @@ of the rising voltage, the RCD data with its four settings and the limits of the
 views, the limits and the DC variant of ZLOOP, and the limits of Ures. A list or a page that
 was not seen is left out: the test signal of RLO, the protective device of ZLOOP, the second
 page of the rated current of an RCD, and the lists of IMD, RCM, IL, the clamp and ΔU. At the
-station "Mode and limits" a link beside a setting shows its list on the drawn display.
+station "Mode and limits" the softkeys of the drawing open and work these lists: up, down, to
+the choices, confirm with the third softkey, take over with the fourth.

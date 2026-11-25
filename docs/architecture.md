@@ -667,11 +667,16 @@ A softkey of a setting opens its setting list on the instrument, the second kind
 (`SettingList`): the settings of that softkey in a column on the left, the choices of the
 selected one on the right, page by page. The driver hands out the list of a view's softkey row
 (`DriverInfo.setting_list`, for the PROFITEST PRIME `setting_lists.py`). At the station that
-sets the instrument up, each setting with a known list carries a link (`ui/list_station.py`):
-it puts the list on the drawn display (`ui/list_art.py`), steps through the settings of the
-softkey and returns to the view. The choice the element states, such as the rated residual
-current of the RCD, is framed, on the page it stands on, and the softkeys that work a list are
-pointed at.
+sets the instrument up, the softkeys of the drawn panel work as on the instrument
+(`ui/list_station.py`): a click on the softkey beside a setting opens its list on the drawn
+display (`ui/list_art.py`); there the softkeys move the cursor up and down, pass to the
+choices, where the third one confirms the choice under the cursor, and take the list over,
+which closes it. The list keeps what was taken over, and a setting that describes the test
+point shows on the view from then on; the element's own statement stays what it was. The
+choice the element states, such as the rated residual current of the RCD, is framed, on the
+page it stands on, and the softkeys that work a list are pointed at. A key clicked is shown
+going down for a moment (`ui/key_press.py`). A link beside each such setting opens the list as
+well and steps through its settings.
 
 A guide names a setting by the softkey row that shows it, not by a key. Where several dial
 positions serve one measurement, the guide names the view of each (`Guide.screens`); the view

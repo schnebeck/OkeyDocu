@@ -30,6 +30,7 @@ from .button_width import widest
 from .dial_station import POLL_MS, DialStation
 from .footer_bar import FooterBar
 from .guide_run import GuideRun
+from .key_press import KeyPress
 from .list_station import ListStation
 from .place_form import PlaceForm
 from .place_scene import PlaceScene
@@ -92,7 +93,9 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, ListStation, Repe
         self.bench = BenchView(info.panel) if info.panel is not None else Absent()
         self.softkeys = info.panel.softkeys if info.panel is not None else ()
         self.setting_list = info.setting_list
-        self.listed: tuple[int, int] | None = None
+        self.listed = None  # the setting whose list is open, and the list as it stands
+        self.taken: dict[tuple, tuple] = {}
+        self.set_values: dict[str, str] = {}
         self.left = QStackedWidget()
         self.left.addWidget(self.scene)
         if self.bench:
@@ -128,6 +131,8 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, ListStation, Repe
         self.simulated = simulated
         if self.bench:
             self.bench.panel.position_chosen.connect(self.dial_turned)
+            self.key_press = KeyPress(self.bench.panel)
+            self.bench.panel.installEventFilter(self)
         self._lay_out()
         self.show_place(asset_id)
         self.go(0)

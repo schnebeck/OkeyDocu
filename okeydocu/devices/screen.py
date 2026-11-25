@@ -85,18 +85,76 @@ class Setting:
     def page_count(self) -> int:
         return max(self.of, len(self.pages), 1)
 
+    def offered(self) -> tuple[tuple[str, ...], ...]:
+        """Every row the cursor can stand on, page by page: the choices, and behind the last
+        of them the value entered by hand."""
+        pages = self.pages or ((),)
+        return (*pages[:-1], (*pages[-1], *((self.typed,) if self.typed else ())))
 
-LIST_KEYS = ("up", "down", "right", "take")  # what the softkeys do in a setting list, top down
+    def worded(self, choice: str) -> str:
+        """How the list names the setting once `choice` is taken: a choice words itself, a
+        value entered by hand follows the name the setting carries."""
+        if choice != self.typed or any(choice in page for page in self.pages):
+            return choice
+        name = self.shown[:min((self.shown.find(sign) for sign in "<>" if sign in self.shown),
+                               default=0)]
+        return name + choice
+
+
+# What the softkeys do in a setting list, top down: with the cursor on the settings, and with
+# it on the choices, where the third one confirms.
+LIST_KEYS = ("up", "down", "right", "take")
+CHOICE_KEYS = ("up", "down", "enter", "take")
 
 
 @dataclass(frozen=True)
 class SettingList:
     """The view a softkey of a setting opens: the settings of that softkey in a column on the
-    left, the one selected framed, and its choices in a column on the right."""
+    left, the one selected framed, and its choices in a column on the right. `cursor` is the
+    page and row of the choice the cursor stands on once it has passed to the right column;
+    `taken` what has been confirmed there, by setting."""
 
     settings: tuple[Setting, ...]
     selected: int = 0
+    cursor: tuple[int, int] | None = None
+    taken: tuple[tuple[int, str], ...] = ()
 
     def at(self, index: int) -> SettingList:
-        """The same list with another setting selected."""
-        return replace(self, selected=index)
+        """The same list with another setting selected and the cursor on the settings."""
+        return replace(self, selected=index, cursor=None)
+
+    def keys(self) -> tuple[str, ...]:
+        return LIST_KEYS if self.cursor is None else CHOICE_KEYS
+
+    def wording(self, index: int) -> str:
+        """How the setting `index` reads: as confirmed, or as the list opens with it."""
+        return dict(self.taken).get(index, self.settings[index].shown)
+
+    def moved(self, step: int) -> SettingList:
+        """The cursor one row up or down: among the settings, or among the choices, where it
+        turns the page at either end. It stops at the first and the last row."""
+        if self.cursor is None:
+            index = min(max(self.selected + step, 0), len(self.settings) - 1)
+            return replace(self, selected=index)
+        pages = self.settings[self.selected].offered()
+        spots = [(page, row) for page, rows in enumerate(pages) for row in range(len(rows))]
+        if not spots:
+            return self
+        here = spots.index(self.cursor) if self.cursor in spots else 0
+        return replace(self, cursor=spots[min(max(here + step, 0), len(spots) - 1)])
+
+    def across(self, start: tuple[int, int] = (0, 0)) -> SettingList:
+        """From the settings to the choices of the one selected, the cursor on `start`."""
+        pages = self.settings[self.selected].offered()
+        known = start[0] < len(pages) and start[1] < len(pages[start[0]])
+        return replace(self, cursor=start if known else (0, 0)) if any(pages) else self
+
+    def confirmed(self) -> SettingList:
+        """The choice under the cursor taken for its setting, the cursor back on the settings."""
+        if self.cursor is None:
+            return self
+        page, row = self.cursor
+        setting = self.settings[self.selected]
+        choice = setting.offered()[page][row]
+        taken = {**dict(self.taken), self.selected: setting.worded(choice)}
+        return replace(self, cursor=None, taken=tuple(sorted(taken.items())))
