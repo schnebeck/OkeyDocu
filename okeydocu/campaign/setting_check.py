@@ -8,8 +8,10 @@
 
 """The settings of an RCD test describe the RCD it tests: the nearest element at or above the
 measured one whose kind has an RCD type. Each setting keyed like a feature of that element is
-compared with it. An RCD test without such an element, or at one that does not state a
-setting, is a finding of its own: nothing could be compared. Numbers are compared in base
+compared with it. Where no such element stands there, the RCD in front of the installation
+is the one tested, as the installation states it (`campaign/upstream_rcd.py`). An RCD test
+with neither, or with an RCD that does not state a setting, is a finding of its own: nothing
+could be compared. Numbers are compared in base
 units, so 30 mA on the instrument meets 30 at a feature counted in mA; words without spaces,
 dashes and a leading `Typ`, so `Typ B` meets `B` and `A - EV` meets `A-EV` but not `A`. A
 value that is not known or cannot be read, on either side, is not compared: the check never
@@ -26,8 +28,8 @@ from ..devices.registry import setting_words
 from ..l10n import tr
 from ..model import Quantity
 from ..vocabulary import setting_name
+from .upstream_rcd import OWNER, UPSTREAM, holder, stated_in_front, units_in_front
 
-OWNER = "rcd_type"  # the feature that marks the kind of element the compared settings describe
 COMPARED = ("rcd_type", "rated_residual_current", "rated_current")
 RCD_FUNCTIONS = frozenset({"rcd_time", "rcd_touch", "rcd_current", "rcd_ramp_touch", "i_ramp"})
 
@@ -51,7 +53,7 @@ class NoRcd:
 
     def text(self) -> str:
         return tr("Not booked on an RCD: the settings cannot be checked. Book the reading on"
-                  " the RCD it tests.")
+                  " the RCD it tests, or state the RCD in front at the installation.")
 
 
 @dataclass(frozen=True)
@@ -119,24 +121,39 @@ class SettingCheck:
             self._owners[asset_id] = found
         return self._owners[asset_id]
 
+    def _in_front(self, asset_id: int | None):
+        """The element that states the RCD in front of `asset_id` where no RCD element is
+        tested and one is stated, or None."""
+        if self.owner(asset_id) is not None or not stated_in_front(self.db, asset_id):
+            return None
+        return self.db.asset(holder(self.db, asset_id))
+
     def element(self, asset_id: int | None) -> str:
-        """The designation of the element whose settings are compared, or nothing."""
+        """The designation of the RCD whose settings are compared, or nothing."""
         row = self.owner(asset_id)
-        return (row["identifier"] or row["name"]) if row is not None else ""
+        if row is not None:
+            return row["identifier"] or row["name"]
+        row = self._in_front(asset_id)
+        return tr("the RCD in front of {element}",
+                  element=row["identifier"] or row["name"]) if row is not None else ""
 
     def expected(self, asset_id: int | None) -> list[tuple[str, str]]:
         """What the instrument should be set to for `asset_id`: each compared setting the
-        element states, with its unit."""
-        row = self.owner(asset_id)
+        RCD states, with its unit."""
+        row, keys = self.owner(asset_id), {key: key for key in COMPARED}
+        units = {key: self._units.get((row["kind"], key), "") for key in COMPARED} if row else {}
         if row is None:
-            return []
+            row, keys = self._in_front(asset_id), UPSTREAM
+            if row is None:
+                return []
+            known = units_in_front(self.db, row["id"])
+            units = {key: known.get(keys[key], "") for key in COMPARED}
         features = json.loads(row["features_json"] or "{}")
         found = []
         for key in COMPARED:
-            value = str(features.get(key) or "").strip()
+            value = str(features.get(keys[key]) or "").strip()
             if value:
-                unit = self._units.get((row["kind"], key), "")
-                found.append((key, f"{value} {unit}".strip()))
+                found.append((key, f"{value} {units[key]}".strip()))
         return found
 
     def _word(self, value: str) -> tuple[str, bool]:
@@ -151,7 +168,7 @@ class SettingCheck:
         judged."""
         if function not in RCD_FUNCTIONS:
             return []
-        if self.owner(asset_id) is None:
+        if self.owner(asset_id) is None and self._in_front(asset_id) is None:
             return [NoRcd()]
         expected = dict(self.expected(asset_id))
         element = self.element(asset_id)

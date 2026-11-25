@@ -11,6 +11,7 @@ import pytest
 from okeydocu.devices.guide import CLAMP, CONFIGURE, CONNECT, MEASURE, PREPARE, SELECT
 from okeydocu.devices.profitest_prime import screens
 from okeydocu.devices.profitest_prime.guides import GUIDES as PRIME
+from okeydocu.devices.profitest_prime.guides_loop import LOOPS_OF_TWO, LOOPS_ONLY
 from okeydocu.devices.profitest_prime.info import DRIVER_KEY
 from okeydocu.devices.profitest_prime.panel import DRAWING
 from okeydocu.devices.profitest_prime.selector import selector_position
@@ -169,3 +170,9 @@ def test_the_voltage_drop_is_one_function_of_a_position_that_names_none():
     assert {lead.probe: lead.terminal for lead in drop.leads} == {
         "L (L1)": "in_l1", "PE (L2)": "in_n"}
     assert drop.served_at(30) and not selector_position(30).functions
+
+
+def test_the_loop_with_two_probes_says_which_pairs_are_loops():
+    assert LOOPS_OF_TWO in PRIME["zloop_half"].steps
+    assert LOOPS_ONLY in PRIME["zloop_dc"].steps
+    assert LOOPS_OF_TWO not in PRIME["zloop"].steps  # there L-N is measured as well

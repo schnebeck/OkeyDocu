@@ -300,7 +300,7 @@ against the element.
 
 **RCD tests against their RCD** (`campaign/setting_check.py`): only RCD tests are checked. Their
 settings describe the RCD: the nearest element at or above the measured one whose kind has an RCD
-type. Each setting that element states is compared with it: numbers in base units, so 30 mA meets a
+type, or, where none stands there, the RCD in front that the installation states. Each setting that element states is compared with it: numbers in base units, so 30 mA meets a
 feature of 30 in mA; words without spaces, dashes and a leading “Typ”, so “A - EV” is not “A”. A
 value that is not known, or a code without words, is not compared. An RCD test without an RCD
 element is a finding, and so is an RCD that does not state type, rated residual current or rated
@@ -612,7 +612,16 @@ driver; the user interface never imports a driver.
   is entered and made below the chosen element, which is kept per campaign as the place for
   further new ones. What is typed at the element stays while the tree is worked on. The element
   kept becomes where the readings go. Opened with no element to book on, the tree marks none and
-  the station cannot be left until one is picked, the installation itself included.
+  the station cannot be left until one is picked, the installation itself included. Where a
+  measurement needs an RCD and none stands at or above the chosen element, the station asks
+  where the RCD stands (`ui/rcd_where.py`): in the installation, to be made on the way, or in
+  front of it, in the building installation. An RCD in front is no element. Type, rated
+  residual current and rated current are stated at the nearest element at or above that can
+  state them, a machine, a device or a piece of equipment (`campaign/upstream_rcd.py`); the
+  readings go to the element chosen, and the guide takes its variant at the supply, with the
+  probes on the incoming terminals of the main switch
+  (`devices/profitest_prime/guides_in_front.py`). An element that states an RCD in front is
+  measured that way without being asked again.
 - **select** (`ui/dial_station.py`): with a drawn dial and a position named, the knob turns there;
   otherwise the station says what to choose. The instrument is asked where it stands on entering
   the station and on request, never in a steady stream; a position that serves the measurement

@@ -17,6 +17,7 @@ from ...l10n import N_
 from ..guide import Action, Guide, Lead
 from . import screens
 from .guide_parts import L_LEAD, LIMITS, N_LEAD, PE_BAR, RCD_SIDE, STORE, flow
+from .guides_in_front import AT_SUPPLY, with_rcd_in_front
 
 FEATURES = ("rcd_type", "rated_residual_current", "rated_current", "number_of_poles",
             "n_terminal")
@@ -41,12 +42,12 @@ BOTH_VIEW = ((19, screens.RCD_BOTH),)
 def rcd_guide(function: str, title: str, selector: int, label: str, note: str, own: tuple,
               trip: str, screen, **more) -> Guide:
     """`own` are the settings between RCD data and limits, `trip` what the IΔN key does."""
-    return Guide(
+    return with_rcd_in_front(Guide(
         function, title, selector, *RCD_SIDE, LEADS, CAUTION, "rcd_type", FEATURES, True,
         BEFORE, label, note,
         settings=(DATA, *own, Action((), LIMITS, screens.LIMITS)),
         steps=(TOUCH, Action(("key-idn",), trip), STORE),
-        screen=screen, result_key=screens.RESULT, flow=flow(), **more)
+        screen=screen, result_key=screens.RESULT, flow=flow(), **more), AT_SUPPLY)
 
 
 RCD_TIME = rcd_guide(

@@ -31,6 +31,9 @@ KIND_TITLES = {PLACE: N_("Installation"), SELECT: N_("Function"), CONNECT: N_("T
 
 
 PROBE, CLAMP = "probe", "clamp"
+# Asked of the element a guide is taken for: where the RCD stands that the measurement needs.
+# An RCD of the building installation stands in front and is no element of the structure.
+RCD_PLACE, IN_FRONT = "rcd_place", "upstream"
 
 
 @dataclass(frozen=True)

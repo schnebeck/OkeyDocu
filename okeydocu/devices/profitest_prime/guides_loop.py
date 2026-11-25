@@ -33,6 +33,7 @@ from .guide_parts import (
     SWITCH,
     flow,
 )
+from .guides_in_front import AT_SUPPLY, CHANGED_AT_SUPPLY, with_rcd_in_front
 from .guides_rcd import LEADS, SECURE, TO_L
 
 PRINTED = ("nominal_voltage", "rated_current")
@@ -61,6 +62,10 @@ LOOPS_ONLY = Action((), N_(
     " L1-N and to pairs of line conductors: skip these with IΔN, the probes N and PE stay where"
     " they are. The line impedance L-N is taken at the position ZLOOP with two probes, probe PE"
     " on N."))
+LOOPS_OF_TWO = Action((), N_(
+    "Only a line conductor against PE is a loop: L1-PE, L2-PE, L3-PE. The display goes on to"
+    " L1-N and to pairs of line conductors: skip these with IΔN, probe PE stays on the PE bar."
+    " The line impedance L-N is taken at the position ZLOOP, with probe PE on N."))
 CHANGED_OVER = (
     Lead(*N_LEAD, "pe", N_("Place probe N (L3) on the PE bar: here N and PE change places.")),
     TO_L,
@@ -71,11 +76,13 @@ def behind_rcd(function: str, title: str, selector: int, label: str, note: str, 
                own: Action, path, screen, caution: str = LIVE_PARTS) -> Guide:
     """A loop guide taken at the outgoing side of an RCD. `own` is the setting in the second
     softkey row, `path` the row of the measuring path at this position."""
-    return Guide(
+    guide = Guide(
         function, title, selector, *RCD_SIDE, leads, caution, "rcd_type", STATED, True, BEHIND,
         label, note, settings=(DEVICE, own, JUDGED, Action((), PATH, path)),
-        steps=(START, STORE, *((NEXT_LINE, LOOPS_ONLY) if len(leads) > 2 else (NEXT_PAIR,))),
+        steps=(START, STORE, NEXT_LINE, LOOPS_ONLY if len(leads) > 2 else LOOPS_OF_TWO),
         screen=screen, result_key=screens.RESULT, every_path=True, flow=flow())
+    supply = CHANGED_AT_SUPPLY if leads is CHANGED_OVER else AT_SUPPLY[:len(leads)]
+    return with_rcd_in_front(guide, supply)
 
 
 LOOP = Guide(

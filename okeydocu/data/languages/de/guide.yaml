@@ -54,6 +54,13 @@ texts:
   "Choose the element that is measured. A right click or Ins makes new elements of every kind below the chosen one; dragging moves them.": "Das Element wählen, an dem gemessen wird. Rechtsklick oder Einfg legt neue Elemente jeder Art unter dem gewählten an; Ziehen verschiebt sie."
   Choose the element this test is for.: Das Element wählen, für das diese Messung ist.
   Details from the rating plate: Angaben vom Typenschild
+  Where is the RCD?: Wo sitzt der RCD?
+  An element of this installation: Teil dieser Anlage
+  In front of it, in the building installation: Vorgeschaltet, in der Gebäudeinstallation
+  The RCD in front, from its rating plate: Vorgeschalteter RCD, Angaben vom Typenschild
+  "Main switch, incoming terminals; the RCD stands in front": "Hauptschalter, Klemmen der Einspeisung; der RCD ist vorgeschaltet"
+  Place probe N (L3) on the incoming N terminal.: Spitze N (L3) an die zugeführte N-Klemme setzen.
+  Place probe PE (L2) on the incoming N terminal.: Spitze PE (L2) an die zugeführte N-Klemme setzen.
   Missing details are stored at the element. Without them the drawing shows the usual layout.: Fehlende Angaben werden am Element gespeichert. Ohne sie zeigt die Zeichnung die übliche Bauform.
   Prepared – next ▶: Vorbereitet – weiter ▶
   "{title} (new)": "{title} (neu)"
@@ -192,6 +199,7 @@ texts:
   "The RCD is not meant to trip, but it can: the circuit is then switched off.": "Der FI soll nicht auslösen, kann es aber: Dann wird der Stromkreis abgeschaltet."
   Where to measure: Messort
   "The loop is greatest at the far end of the circuit: measure there where possible.": "Am Ende des Stromkreises ist die Schleife am größten: möglichst dort messen."
+  "Only a line conductor against PE is a loop: L1-PE, L2-PE, L3-PE. The display goes on to L1-N and to pairs of line conductors: skip these with IΔN, probe PE stays on the PE bar. The line impedance L-N is taken at the position ZLOOP, with probe PE on N.": "Eine Schleife ist nur ein Außenleiter gegen PE: L1-PE, L2-PE, L3-PE. Die Anzeige geht weiter zu L1-N und zu Paaren von Außenleitern: diese mit IΔN überspringen, die Prüfspitze PE bleibt an der PE-Schiene. Die Netzinnenimpedanz L-N wird in der Stellung ZLOOP gemessen, Prüfspitze PE auf N."
   For further line conductors move probe L to the one the display names. IΔN skips a pair the test point does not have.: Für weitere Außenleiter die Spitze L an den setzen, den die Anzeige nennt. IΔN überspringt ein Paar, das es an der Prüfstelle nicht gibt.
   "Place probe N (L3) on the PE bar: here N and PE change places.": "Spitze N (L3) an die PE-Schiene setzen: Hier tauschen N und PE die Plätze."
   Place probe PE (L2) on the outgoing N terminal of the RCD.: Spitze PE (L2) an die Abgangsklemme N des FI setzen.

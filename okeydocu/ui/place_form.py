@@ -9,9 +9,12 @@
 """The element is chosen in the structure tree, which can be worked on as anywhere else: new
 elements of every kind, renamed, moved, grouped and deleted. Where the guide is taken at a
 kind of element of its own, such as an RCD, and none stands at or above the chosen one, a new
-one is entered that will hang below it. A missing statement is marked, not demanded: going on
-without it keeps the measurement possible and the drawing in its usual layout. What is entered
-is stored when the tester goes on, as if entered in the element's own form."""
+one is entered that will hang below it. An RCD may also stand in front of the installation,
+in the building: the station asks which, and the RCD in front is stated at the installation
+instead of being made (`campaign/upstream_rcd.py`). A missing statement is marked, not
+demanded: going on without it keeps the measurement possible and the drawing in its usual
+layout. What is entered is stored when the tester goes on, as if entered in the element's own
+form."""
 
 from __future__ import annotations
 
@@ -19,11 +22,14 @@ from PySide6.QtCore import QEvent, Qt, Signal
 from PySide6.QtWidgets import QComboBox, QFormLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
 
 from ..campaign.measuring_place import MeasuringPlace
+from ..campaign.upstream_rcd import OWNER, UPSTREAM
 from ..devices.guide import Guide
 from ..l10n import N_, tr, value_text
+from ..vocabulary import setting_name
 from .choice_box import feature_field, field_text
 from .element_form import ElementOverlay
 from .pending_marks import PendingMarks
+from .rcd_where import RcdWhere
 from .structure_panel import StructurePanel
 
 MISSING_STYLE = "background:#fde2c4"
@@ -55,6 +61,7 @@ class PlaceForm(QWidget):
         self.identifier = QLineEdit()
         for line in (self.name, self.identifier):
             line.textEdited.connect(lambda _: self.edited.emit())
+        self.rcd_where = RcdWhere()
         self.new_title = QLabel()
         self.new_title.setWordWrap(True)
         self.new_form = QFormLayout()
@@ -70,6 +77,7 @@ class PlaceForm(QWidget):
         layout.addWidget(QLabel(f"<b>{tr('Where do we measure?')}</b>"))
         layout.addWidget(self.panel, 1)
         layout.addSpacing(8)
+        layout.addWidget(self.rcd_where)
         layout.addWidget(self.new_title)
         layout.addLayout(self.new_form)
         layout.addSpacing(8)
@@ -107,10 +115,14 @@ class PlaceForm(QWidget):
             self.changed.emit()
 
     def show_place(self, guide: Guide, place: MeasuringPlace,
-                   typed: dict[str, str] | None = None) -> None:
-        """`typed` is what the fields hold beyond what the element states, not yet stored."""
+                   typed: dict[str, str] | None = None, may_be_in_front: bool = False) -> None:
+        """`typed` is what the fields hold beyond what the element states, not yet stored;
+        `may_be_in_front` whether an RCD in front can be stated for the element chosen."""
         self.place = place
         self.show_parent(place)
+        self.rcd_where.setVisible(guide.owner_feature == OWNER and may_be_in_front
+                                  and (place.is_new or place.in_front))
+        self.rcd_where.show_answer(place.in_front)
         while self.form.rowCount():
             self.form.removeRow(0)
         self.fields.clear()
@@ -134,11 +146,17 @@ class PlaceForm(QWidget):
             self.new_title.setText(f"<b>{text}</b>")
 
     def _feature_rows(self, guide: Guide, place: MeasuringPlace) -> None:
-        kind = self.app.db.kind(place.kind)
+        """The details the guide needs of the element, or of the RCD in front of it as the
+        element that holds them states them."""
+        holder = self.app.db.asset(place.holder_id) if place.in_front else None
+        kind = self.app.db.kind(holder["kind"] if holder else place.kind)
         lists = self.app.db.choice_lists()
         features = {feature.key: feature for feature in kind.features}
-        self.data_title.setText(f"<b>{tr('Details from the rating plate')}</b>")
-        for key in guide.element_features:
+        title = tr("The RCD in front, from its rating plate") if holder else \
+            tr("Details from the rating plate")
+        self.data_title.setText(f"<b>{title}</b>")
+        named = {held: key for key, held in UPSTREAM.items()}
+        for key in tuple(named) if holder else guide.element_features:
             if key not in features:
                 continue
             field = feature_field(features[key], str(place.features.get(key) or ""), lists)
@@ -151,7 +169,9 @@ class PlaceForm(QWidget):
             edits.connect(lambda text, field=field, above=above: self._typed(field, text, above))
             self.fields[key] = field
             unit = features[key].unit
-            self.form.addRow(tr(features[key].label) + (f" ({unit})" if unit else ""), field)
+            # Under its own heading the RCD in front needs no word of it in every row.
+            label = tr(setting_name(named[key])) if holder else tr(features[key].label)
+            self.form.addRow(label + (f" ({unit})" if unit else ""), field)
         hint = tr("Missing details are stored at the element. Without them the drawing shows"
                   " the usual layout.")
         missing = place.missing(self.fields)
@@ -180,8 +200,10 @@ class PlaceForm(QWidget):
     def store(self) -> bool:
         """Stores what was entered at an existing element; whether anything changed."""
         changed = self.entered()
-        if changed and self.place.asset_id is not None:
-            features = dict(self.place.features)
+        # The RCD in front is stated at the element that holds it, not at the one measured.
+        target = self.place.holder_id if self.place.in_front else self.place.asset_id
+        if changed and target is not None:
+            features = dict(self.app.db.asset_features(target))
             features.update(changed)
-            self.app.db.set_asset_features(self.place.asset_id, features)
+            self.app.db.set_asset_features(target, features)
         return bool(changed)

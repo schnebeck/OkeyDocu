@@ -97,6 +97,7 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, RepeatRun, GuideR
         self.form.changed.connect(
             lambda: self._choose(self.form.panel.tree.current_id()))
         self.form.edited.connect(self._preview)
+        self.form.rcd_where.chosen.connect(self._rcd_place)
         self.step_text = QLabel()
         self.step_text.setWordWrap(True)
         self.step_text.setTextFormat(Qt.TextFormat.RichText)

@@ -14,7 +14,8 @@ from __future__ import annotations
 
 from html import escape
 
-from ..campaign.measuring_place import make_place, measuring_place, new_place
+from ..campaign.measuring_place import in_front_place, make_place, measuring_place, new_place
+from ..campaign.upstream_rcd import holder
 from ..l10n import tr
 from .structure_tree import UNPLACED
 
@@ -42,9 +43,21 @@ class PlaceStation:
 
     def _take(self, place, typed: dict[str, str] | None = None) -> None:
         self.place = place
-        self.form.show_place(self.base_guide, place, typed)
+        chosen = place.asset_id if place.in_front else self.parent_id
+        self.form.show_place(self.base_guide, place, typed,
+                             holder(self.app.db, chosen) is not None)
         self._preview()
         self._allow_next()
+
+    def _rcd_place(self, in_front: bool) -> None:
+        """The answer to where the RCD stands: in front of the element chosen, which then
+        states it and is measured at its supply, or in the installation, as a new element."""
+        chosen = self.place.asset_id if self.place.in_front else self.parent_id
+        service = self.app.service
+        if in_front:
+            self._take(in_front_place(service, chosen, self.root))
+        else:
+            self._take(new_place(service, self.base_guide, chosen, self.root))
 
     def _choose(self, asset_id) -> None:
         """An element picked in the tree, or the tree worked on. Where the guide finds no

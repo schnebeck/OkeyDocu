@@ -19,6 +19,8 @@ from dataclasses import dataclass, field, replace
 
 from ..devices.guide import Guide
 from ..l10n.catalog import source_of
+from .upstream_rcd import IN_FRONT, OWNER, RCD_PLACE, UPSTREAM, holder, stated_in_front, \
+    units_in_front
 from .line_conductors import ABSENT, LINE_CONDUCTORS, N_CONDUCTOR, PRESENT, ConductorBook, \
     neutral_of
 
@@ -34,6 +36,7 @@ class MeasuringPlace:
     units: dict[str, str] = field(default_factory=dict)
     kind: str = ""
     inherited: dict[str, str] = field(default_factory=dict)  # stated above, not at the element
+    holder_id: int | None = None  # the element that states the RCD in front, where one is meant
 
     @property
     def is_new(self) -> bool:
@@ -44,7 +47,18 @@ class MeasuringPlace:
         return replace(self, features={**self.features, **features},
                        title=title or self.title)
 
+    @property
+    def in_front(self) -> bool:
+        """Whether the RCD of this measurement stands in front of the installation."""
+        return self.holder_id is not None
+
     def stated(self, key: str) -> str:
+        """What the element states for `key`; of an RCD, where that one stands in front, what
+        is stated of it."""
+        if self.in_front:
+            if key == RCD_PLACE:
+                return IN_FRONT
+            key = UPSTREAM.get(key, key)
         value = str(self.features.get(key) or self.inherited.get(key) or "").strip()
         unit = self.units.get(key, "")
         return f"{value} {unit}".strip() if value else ""
@@ -76,7 +90,7 @@ class MeasuringPlace:
         if keys:
             return [self.stated(key) for key in keys if self.stated(key)]
         first = " · ".join(text for text in (self.stated("rated_residual_current"),
-                                             str(self.features.get("rcd_type") or "")) if text)
+                                             self.stated("rcd_type")) if text)
         return [first or "? mA", self.stated("rated_current") or "? A"]
 
 
@@ -148,8 +162,14 @@ def measuring_place(service, guide: Guide, asset_id: int | None,
     """Where the guide sends the probes when readings go to `asset_id`."""
     db = service.db
     found = _measured_at(db, guide, asset_id)
-    if found is None:
-        return MeasuringPlace(None)
+    if found is not None:
+        return _place_at(db, found, root_id)
+    if guide.owner_feature == OWNER and stated_in_front(db, asset_id):
+        return in_front_place(service, asset_id, root_id)
+    return MeasuringPlace(None)
+
+
+def _place_at(db, found: int, root_id: int) -> MeasuringPlace:
     row = db.asset(found)
     title = " ".join(part for part in (row["identifier"], row["name"]) if part)
     path = _path(db, row["parent_id"], root_id) if found != root_id else ()
@@ -157,6 +177,20 @@ def measuring_place(service, guide: Guide, asset_id: int | None,
         "SELECT key, unit FROM kind_features WHERE kind=?", row["kind"])}
     return MeasuringPlace(found, title, path, json.loads(row["features_json"] or "{}"), units,
                           row["kind"], _from_above(db, row["parent_id"]))
+
+
+def in_front_place(service, asset_id: int, root_id: int) -> MeasuringPlace | None:
+    """`asset_id` as the place of a measurement that needs an RCD, with the RCD in front as
+    the nearest element that can state it does; None where no element at or above can."""
+    db = service.db
+    found = holder(db, asset_id)
+    if found is None:
+        return None
+    place = _place_at(db, asset_id, root_id)
+    held = json.loads(db.asset(found)["features_json"] or "{}")
+    in_front = {key: str(held.get(key) or "") for key in UPSTREAM.values()}
+    return replace(place, features={**place.features, **in_front},
+                   units={**place.units, **units_in_front(db, found)}, holder_id=found)
 
 
 def _owner_kind(db, guide: Guide) -> str:

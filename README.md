@@ -52,11 +52,11 @@ random readings for trying everything out without an instrument.
 
 **Settings checked against the equipment.** An RCD test arrives with the settings the instrument
 was set to: rated residual current, type and rated current. OkeyDocu holds them against what the
-RCD states on its rating plate, the RCD at the measured element or the nearest one above it. A
-difference raises a warning the moment the reading arrives, while the inspector still stands at
-the RCD and can measure again. The reading stays stored, marked in the table and named in the
-checks above it until the instrument, the RCD's data or the booking is put right. A setting the
-RCD does not state is named instead of judged.
+RCD states on its rating plate: the RCD at the measured element, the nearest one above it, or
+the RCD in front that the machine states. A difference raises a warning the moment the reading
+arrives, while the inspector still stands at the RCD and can measure again. The reading stays
+stored, marked in the table and named in the checks above it until the instrument, the RCD's
+data or the booking is put right. A setting the RCD does not state is named instead of judged.
 
 ![An RCD tested with 300 mA and type AC, where the RCD states 30 mA and type A](docs/images/settings-check.png)
 
@@ -83,7 +83,9 @@ A guide follows what the element states. A machine, a device or a piece of equip
 supply connection: fixed, CEE plug or Schuko plug. Protective conductor and insulation are then
 measured at the supply terminals, at the pulled CEE plug or at the pulled Schuko plug, each with
 its own picture of the leads. Where the RCD at the element is of type B, the guide for the loop
-impedance warns of the methods this type rules out and points at the one that fits.
+impedance warns of the methods this type rules out and points at the one that fits. An RCD of
+the building installation is no part of a machine: the guide asks where the RCD stands, the
+machine states the one in front of it, and the measurement is taken at its main switch.
 
 **Repeating a measurement.** Once a campaign holds a reading of a kind, the next measurement of
 that kind runs the same stations and passes two of them by: the rotary switch where the

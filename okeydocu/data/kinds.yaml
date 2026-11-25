@@ -9,6 +9,10 @@
 # lists:    the choice list (data/choice_lists.yaml) offered by every feature of that label;
 #           any other value may still be typed
 #
+# What is supplied through a connection of its own, a machine, a device or a piece of
+# equipment, can state the RCD in front of it: one of the building installation, which is no
+# element of its structure.
+#
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
@@ -25,10 +29,20 @@ kinds:
                 CE marking, IP rating, Protection class, "Nominal voltage|V", Earthing system type,
                 Supply cable, "Rated current|A", "Rated power|kW", Number of cores, Power factor,
                 Characteristic, "Cross-section|mm²", Ex number, Ex zone,
-                Type of ignition protection, "Cable length|m"]}
+                Type of ignition protection, "Cable length|m",
+                {key: upstream_rcd_type, label: Upstream RCD type, list: rcd_type},
+                {key: upstream_residual_current, label: Upstream RCD IΔN, unit: mA,
+                 list: rated_residual_current},
+                {key: upstream_rated_current, label: Upstream RCD IN, unit: A,
+                 list: rated_current}]}
   - {key: device, label: Device, icon: device, interval: 12,
      features: [Line conductors, N conductor, Supply connection,
-                Protection class, "Nominal voltage|V", "Rated current|A", "Rated power|kW"]}
+                Protection class, "Nominal voltage|V", "Rated current|A", "Rated power|kW",
+                {key: upstream_rcd_type, label: Upstream RCD type, list: rcd_type},
+                {key: upstream_residual_current, label: Upstream RCD IΔN, unit: mA,
+                 list: rated_residual_current},
+                {key: upstream_rated_current, label: Upstream RCD IN, unit: A,
+                 list: rated_current}]}
   - {key: distribution_board, label: Distribution board, icon: distribution_board,
      izytron: 232, interval: 48,
      features: [Line conductors, N conductor,
@@ -70,7 +84,12 @@ kinds:
      interval: 12,
      features: [Line conductors, N conductor, Supply connection,
                 Equipment type, Cable type, Degree of protection, Number of cores,
-                Protection class, "Cross-section|mm²", "Cable length|m"]}
+                Protection class, "Cross-section|mm²", "Cable length|m",
+                {key: upstream_rcd_type, label: Upstream RCD type, list: rcd_type},
+                {key: upstream_residual_current, label: Upstream RCD IΔN, unit: mA,
+                 list: rated_residual_current},
+                {key: upstream_rated_current, label: Upstream RCD IN, unit: A,
+                 list: rated_current}]}
   - {key: electric_engine, label: Electric motor, icon: electric_engine,
      interval: 12,
      features: [IP rating, Insulation class, Year of manufacture, Gearbox, Number of poles,
