@@ -174,6 +174,8 @@ def test_full_report_shows_all_three_cases(service, asset_id, plan):
     report = service.db.one("SELECT * FROM reports WHERE id=?", report_id)
     text = pdf_text(archive.path(report))
     assert "Musterbau GmbH" in text
+    # The two parties of the letterhead: the customer, and who tested.
+    assert "KUNDE" in text and "GEPRÜFT DURCH" in text and "AUFTRAG" not in text
     assert "Max" in text  # n: table with summary
     assert "Grenzwert" in text  # 1: fields
     assert "Anlage nicht zugänglich" in text  # 0: reason

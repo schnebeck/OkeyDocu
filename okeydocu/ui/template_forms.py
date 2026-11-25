@@ -117,8 +117,8 @@ class TemplateForms:
         title.textChanged.connect(lambda text: (block.__setitem__("title", text), self._changed()))
         form.addRow(tr("Title"), title)
         edits = [self._lines_row(block, key, label, form) for key, label in (
-            ("lines", tr("Lines below the title")), ("client", tr("Client")),
-            ("contractor", tr("Contractor")))]
+            ("lines", tr("Lines below the title")), ("client", tr("Customer")),
+            ("contractor", tr("Tested by")))]
         edits[-1].setPlaceholderText(tr("One line per entry; the own company is under"
                                         " Settings → Company"))
         self.letterhead_target = edits[0]

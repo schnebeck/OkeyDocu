@@ -35,8 +35,7 @@ texts:
   "Notes and files at locations of the installation or at the campaign itself.\nWhat belongs to a measurement appears in the report with that measurement.": "Notizen und Dateien an Orten der Anlage oder an der Kampagne selbst.\nWas an einer Messung hängt, steht im Protokoll bei dieser Messung."
   Title: Titel
   Lines below the title: Zeilen unter dem Titel
-  Client: Auftraggeber
-  Contractor: Auftragnehmer
+  Tested by: Geprüft durch
   One line per entry; the own company is under Settings → Company: Eine Zeile je Eintrag; die eigene Firma steht unter Einstellungen → Firma
   QR code with the identifier of the inspection: QR-Code mit der Kennung der Prüfung
   Company logo to the right of the title (Settings → Company): Firmenlogo rechts neben dem Titel (Einstellungen → Firma)

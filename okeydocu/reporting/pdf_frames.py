@@ -88,8 +88,8 @@ def letterhead(node: Letterhead, usable: float, body: ParagraphStyle,
                               ("BOTTOMPADDING", (0, 0), (-1, -1), 8)]))
     half = usable / 2
     parties = PdfTable(
-        [[Paragraph(escape(tr("Client")).upper(), label),
-          Paragraph(escape(tr("Contractor")).upper(), label)],
+        [[Paragraph(escape(tr("Customer")).upper(), label),
+          Paragraph(escape(tr("Tested by")).upper(), label)],
          [_lines(node.client, body), _lines(node.contractor, body)]],
         colWidths=[half, half])
     parties.setStyle(TableStyle([

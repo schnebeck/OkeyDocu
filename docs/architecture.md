@@ -959,12 +959,13 @@ signature.
 
 The block “Letterhead” opens the report: a QR code with the identifier of the inspection (its UUID,
 the same as in the footer), next to it title and lines below, below that a frame with
-client and contractor. Every line may contain data fields; a line whose data fields are all empty is left out
+two parties: the customer, and who tested, headed “Customer” and “Tested by” as the dialogs of
+the campaign speak of the customer and of nobody else. Every line may contain data fields; a line whose data fields are all empty is left out
 together with its label, such as “Phone:” without a number. Department, contact person, extension and e-mail
 belong to the campaign, not to the customer: the contact person changes with the order. It is set under
 “Edit campaign …”; a new campaign takes over that of the last campaign of the same customer.
 In the letterhead it appears below the address of the customer. The own cost centre is also a
-value of the campaign and appears with the contractor; it is not carried over into the next campaign. The own
+value of the campaign and appears with the own company; it is not carried over into the next campaign. The own
 company is set once centrally under Settings → Company (table `company`, one row): name,
 address, phone, e-mail, website and logo. Templates access it through the data fields `company.*`;
 the letterhead sets the logo to the right of the title. A logo block with an image of its own
