@@ -128,6 +128,8 @@ texts:
   "Not measured": "Nicht gemessen"
   "Questions left out, with the reason": "Ausgelassene Prüffragen mit Begründung"
   "no reason given": "ohne Angabe eines Grundes"
+  "The reading of {count} measuring step stands below, under its quantity.": "Der Messwert von {count} Messschritt steht unten bei seiner Messgröße."
+  "The readings of {count} measuring steps stand below, under their quantity.": "Die Messwerte von {count} Messschritten stehen unten bei ihrer Messgröße."
   "Test point": "Prüfpunkt"
   "Tested on {{ campaign.date }}": "Prüfung vom {{ campaign.date }}"
   "Report created with {name}": "Protokoll erstellt mit {name}"

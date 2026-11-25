@@ -128,6 +128,8 @@ texts:
   "Not measured": "No medido"
   "Questions left out, with the reason": "Preguntas omitidas, con su motivo"
   "no reason given": "sin motivo indicado"
+  "The reading of {count} measuring step stands below, under its quantity.": "La lectura de {count} paso de medición figura más abajo, en su magnitud."
+  "The readings of {count} measuring steps stand below, under their quantity.": "Las lecturas de {count} pasos de medición figuran más abajo, en su magnitud."
   "Test point": "Punto de ensayo"
   "Tested on {{ campaign.date }}": "Inspección del {{ campaign.date }}"
   "Report created with {name}": "Informe creado con {name}"

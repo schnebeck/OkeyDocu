@@ -19,7 +19,7 @@ from .photo_shared import ThumbCache
 from .photo_timeline_data import TimelineData
 from .photo_timeline_events import Hit, ViewEvents
 from .photo_timeline_items import MarkItem, PhotoItem
-from .photo_timeline_layers import GapItem, LinkLayer
+from .photo_timeline_layers import GapItem, LinkLayer, names_width
 from .photo_timeline_model import TimeAxis, Tracks
 from .photo_timeline_mouse import TrackMouse
 from .photo_timeline_placing import Z_GAP, Z_PINNED, Z_TIMELINE, TrackPlacing
@@ -48,6 +48,7 @@ class TrackView(ViewEvents, TrackPlacing, QGraphicsView):
         self.thumbs = thumbs
         self.data = TimelineData([], [], [])
         self.axis = TimeAxis()
+        self.axis.left = max(self.axis.left, names_width())  # no track name is cut
         self.tracks = Tracks(120)
         self.read_only = False
         self.fitted = True

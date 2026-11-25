@@ -68,6 +68,7 @@ class ReportStep:
     note: str
     measurements: list[ReportMeasurement] = field(default_factory=list)
     question: bool = False  # of an inspection, not a measurement
+    plan: str = ""  # the test plan the step belongs to, by name; a point of a repeat has none
 
     @property
     def left_out(self) -> bool:
@@ -95,7 +96,8 @@ def _add_answers(steps: list[ReportStep], title: str, measured: list) -> None:
     if last and last.function == SIGHT_CHECK_FUNCTION and last.title == title:
         last.measurements.extend(measured)
     else:
-        steps.append(ReportStep(in_language(title), SIGHT_CHECK_FUNCTION, "done", "", measured))
+        steps.append(ReportStep(in_language(title), SIGHT_CHECK_FUNCTION, "done", "", measured,
+                                plan=in_language(title)))
 
 
 def _point_title(service: CampaignService, step, title: str) -> str:
@@ -159,8 +161,9 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
             title = _point_title(service, plan_step, title)
         for measurement in measured:
             measurement.point = title
+        plan = "" if repeat else in_language(plan_step.run or row["plan_title"])
         steps.append(ReportStep(title, plan_step.function, row["status"], row["note"], measured,
-                                plan_step.kind == "check"))
+                                plan_step.kind == "check", plan))
 
     # Without a plan, measurements are simply grouped by what was measured.
     for row in service.open_measurements(campaign_id):

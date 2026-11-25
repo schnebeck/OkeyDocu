@@ -15,7 +15,9 @@ all measurements of an element into one table:
     function  each function, and within it every level where it was measured
 
 Each function at a level is a block of its own, which states first what its measurements
-share. Steps of a plan that found no measurement follow with their reasons."""
+share. Ordered by function, the test plans of the campaign come first, each with its answers
+and what it left open; ordered by place, steps of a plan that found no measurement follow at
+the end with their reasons."""
 from __future__ import annotations
 
 from ..l10n import N_, tr
@@ -25,13 +27,11 @@ from .context import ReportMeasurement
 from .levels import REMARK, Level
 from .measurement_table import Columns, group_nodes
 from .nodes import Fields, Heading, Markup, Node
+from .plan_sections import loose_ends, open_ends, plan_parts
 
 ORDERS = {"place": N_("By element of the installation"),
           "function": N_("By measured quantity, then by element"),
           "function_time": N_("By measured quantity, then by time")}
-NOT_MEASURED = N_("Not measured")
-LEFT_OUT = N_("Questions left out, with the reason")
-NO_REASON = N_("no reason given")
 
 
 def report_levels(values: dict) -> list[Level]:
@@ -60,9 +60,15 @@ def structure_nodes(block: dict, values: dict) -> list[Node]:
     options = block.get("many", {})
     nodes: list[Node] = []
     order = block.get("order", "place")
+    steps = values.get("steps", ())
     if order in ("function", "function_time"):
-        everything = sorted((m for level in levels for m in level.measurements),
-                            key=lambda m: m.local_time)
+        parts = plan_parts(steps)
+        for title, part in parts.items():
+            nodes.extend(part.nodes(title, options, notes))
+        answers = {id(m) for part in parts.values() for m in part.answers}
+        steps = [step for step in steps if not step.plan]  # the others are said above
+        everything = sorted((m for level in levels for m in level.measurements
+                             if id(m) not in answers), key=lambda m: m.local_time)
         functions = _by_function(everything)
         for function, everywhere in functions.items():
             nodes.append(Heading(Markup(function_markup(function)), 2))
@@ -91,13 +97,4 @@ def structure_nodes(block: dict, values: dict) -> list[Node]:
             for function, group in _by_function(level.measurements).items():
                 nodes.append(Heading(Markup(function_markup(function)), 3))
                 nodes.extend(group_nodes(group, options, notes, points=True))
-    steps = values.get("steps", ())
-    # A question left out with its reason was not measured in any sense; it is listed apart.
-    left_out = [(step.title, step.note) for step in steps if step.question and step.left_out]
-    if left_out:
-        nodes += [Heading(tr(LEFT_OUT), 2), Fields(left_out)]
-    missing = [(step.title, step.note or tr(NO_REASON)) for step in steps
-               if not step.measurements and not (step.question and step.left_out)]
-    if missing:
-        nodes += [Heading(tr(NOT_MEASURED), 2), Fields(missing)]
-    return nodes
+    return nodes + open_ends(*loose_ends(steps), 2)

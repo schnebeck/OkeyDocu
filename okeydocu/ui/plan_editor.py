@@ -27,9 +27,11 @@ from ..campaign.plan import load_instructions, parse_plan
 from ..l10n import in_language, tr
 from .board import GutterSplitter
 from .common import ROW_ID, AppContext
+from .list_rename import rename_from_list
 from .plan_editor_points import PlanEditorPoints, new_key
 from .plan_step_form import PlanStepForm, kept
 from .plan_test_run import PlanTestRun
+from .steady_text import SteadyText
 from .template_editor import TemplateEditor
 
 SAVE_DELAY_MS = 300
@@ -50,7 +52,11 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
         self.plans = QListWidget()
         self.plans.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.plans.setTextElideMode(Qt.TextElideMode.ElideRight)
+        self.plans.setItemDelegate(SteadyText(self.plans))
         self.plans.currentRowChanged.connect(lambda _: self._plan_chosen())
+        # The name is a field of the plan; the list leads to it.
+        rename_from_list(self.plans, self.rename_plan,
+                         tr("Double-click or F2 renames the test plan."))
         self.new_button = QPushButton(tr("New"))
         self.copy_button = QPushButton(tr("Copy"))
         self.delete_button = QPushButton(tr("Delete …"))
@@ -77,6 +83,7 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
         head.addWidget(self.title, 1)
         head.addWidget(self.released)
         self.steps = QListWidget()
+        self.steps.setItemDelegate(SteadyText(self.steps))
         self.steps.currentRowChanged.connect(lambda _: self._step_chosen())
         adders = QHBoxLayout()
         adding = ((tr("+ Check question"), "check"), (tr("+ Measurement"), "measure"),
@@ -170,8 +177,13 @@ class PlanEditorPage(PlanEditorPoints, QWidget):
                 "steps": []}
         self._write(data)
         self.refresh(data["key"])
-        self.title.setFocus()
-        self.title.selectAll()
+        self.rename_plan()
+
+    def rename_plan(self) -> None:
+        # The name ready to be typed over; it is saved like every other change.
+        if self.data is not None:
+            self.title.setFocus()
+            self.title.selectAll()
 
     def copy_plan(self) -> None:
         self.save()

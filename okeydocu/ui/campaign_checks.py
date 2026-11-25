@@ -50,6 +50,8 @@ class CampaignChecks:
         if set_apart:
             text = plural(set_apart, "{count} RCD test to check", "{count} RCD tests to check")
             parts.append(f'<a href="{SETTINGS_LINK}" style="color:{NOTE}">{text}</a>')
+        steps = sum(step["status"] in ("pending", "active")
+                    for step in self.app.service.plan_step_rows(campaign["id"]))
         if has_points(campaign["plan_key"]):
             missing = sum(row["status"] in ("pending", "active")
                           for row, _ in self.app.service.points(campaign["id"]))
@@ -57,15 +59,14 @@ class CampaignChecks:
                 text = plural(missing, "{count} measuring point open",
                               "{count} measuring points open")
                 parts.append(f'<a href="{POINTS_LINK}">{text}</a>')
-            if len(blockers) > (1 if missing else 0):
+            # What blocks besides open points and open plan steps is a setting without a reason.
+            if len(blockers) > steps + (1 if missing else 0):
                 text = tr("Setting differs")
                 parts.append(f'<span style="color:{ALERT}">{text}</span>')
-        elif blockers:
-            steps = sum(step["status"] in ("pending", "active")
-                        for step in self.app.service.plan_step_rows(campaign["id"]))
-            if steps:
-                parts.append(plural(steps, "Test plan: {count} step open",
-                                    "Test plan: {count} steps open"))
+        if steps:
+            parts.append(plural(steps, "Test plan: {count} step open",
+                                "Test plan: {count} steps open"))
+        if blockers and not has_points(campaign["plan_key"]):
             apart = len(self.app.service.unassigned_measurements(campaign["id"]))
             if apart:
                 parts.append(plural(apart, "{count} measurement without a step",

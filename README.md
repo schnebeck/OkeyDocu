@@ -25,7 +25,7 @@ store key would keep the result in the instrument's memory, the instrument print
 interface instead, straight to OkeyDocu. Instruments are kept behind a driver interface, so others
 can follow.
 
-![The overview: open and completed campaigns, master data, plans and templates](docs/images/overview.png)
+![The overview: open and ended campaigns, master data, plans and templates](docs/images/overview.png)
 
 ## What it does
 
@@ -39,7 +39,7 @@ starts a guided measurement. The third holds the data: the readings in a table n
 structure of the installation, like files next to folders. Dragging rows onto an element rebooks
 them; the tree counts what has been measured this time against last time.
 
-![A campaign following a template: structure, readings, open points and the chosen element](docs/images/campaign.png)
+![A campaign following a template, with a test plan assigned: structure, readings, open points and the chosen element](docs/images/campaign.png)
 
 **Live readings by Push/Print.** In Push/Print mode the PROFITEST PRIME keeps nothing in its own
 memory: the softkey that otherwise stores a result shares it instead, printed to the interface. The
@@ -122,18 +122,20 @@ it, a defect in red.
 
 **Test plans, repeat inspections and campaign templates.** A test plan leads through questions
 and measurements in a wizard; a visual inspection to DIN VDE 0100-600, the inspection of a machine
-to EN 60204-1 and its electrical test come as drafts. Any campaign takes any number of plans at any
-time, run in any order; each must be worked off before the campaign is ended, and a step skipped
-with its reason counts as worked off. A repeat inspection turns the last ended campaign
-into a list of open points. A campaign template keeps the structure and the points of an
-inspection and can be used on the same installation or copied onto another of the same build. As
-an open pattern it is edited along the way and offers what a campaign did differently when it is
-ended; for series devices its points and measurements are fixed, their order is free, and
-deviations need a reason.
+to EN 60204-1 and its electrical test come as drafts; they are copied, changed and renamed in an
+editor of their own. Any campaign takes any number of plans at any time, run in any order; each
+must be worked off before the campaign is ended, and a step skipped with its reason counts as
+worked off. A repeat inspection turns the last ended campaign into a list of open points. A
+campaign template keeps the structure and the points of an inspection and can be used on the same
+installation or copied onto another of the same build. As an open pattern it is edited along the
+way and offers what a campaign did differently when it is ended; for series devices its points
+and measurements are fixed, their order is free, and deviations need a reason.
 
 **Reports.** Reports are made from templates in a graphical editor with live preview, letterhead
 and logo, in German or English, chosen for each report. A template block can show none,
-one or many measurements per element. A campaign is given its template, and its preview shows
+one or many measurements per element. Three templates come along: one ordered by element, a
+compact one, and one that states the test plans first and then keeps each measured quantity
+together in the order measured. One of them is the default for new campaigns. A campaign is given its template, and its preview shows
 the report drawn with it. A report names the day measured on and, by the signature,
 the day the campaign was ended. Ending a campaign seals the record;
 archived PDFs carry a checksum and keep the template they were made with. Reports can be signed

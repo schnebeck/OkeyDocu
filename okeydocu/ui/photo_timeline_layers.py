@@ -9,16 +9,18 @@
 from __future__ import annotations
 
 from PySide6.QtCore import QLineF, QPointF, QRectF, Qt
-from PySide6.QtGui import QBrush, QColor, QPainterPath, QPalette, QPen
+from PySide6.QtGui import QBrush, QColor, QFontMetricsF, QPainterPath, QPalette, QPen
 from PySide6.QtWidgets import QGraphicsItem
 
-from ..l10n import day, tr
+from ..l10n import N_, day, tr
 from .photo_timeline_items import PIN_COLOUR, palette_of, small_font, soft
 from .photo_timeline_model import duration_text, ticks, to_moment
 
 GRIP_PX = 12
 CLOSE_PX = 16
 MIN_GAP_DRAWN_PX = 16
+TRACK_NAMES = (N_("Measurements"), N_("Photos"))
+NAME_MARGIN_PX = 14  # left and right of a track name
 Role = QPalette.ColorRole
 
 
@@ -183,9 +185,15 @@ def paint_gutter(painter, view) -> None:
         painter.drawText(QRectF(6, 0, left - 8, tracks.ruler), flags, shown)
     painter.setFont(small_font(bold=True))
     marks_band = QRectF(6, tracks.ruler, left - 8, tracks.marks_bottom - tracks.ruler)
-    painter.drawText(marks_band, flags, tr("Measurements"))
+    painter.drawText(marks_band, flags, tr(TRACK_NAMES[0]))
     photos_band = QRectF(6, tracks.marks_bottom, left - 8, height - tracks.marks_bottom)
-    painter.drawText(photos_band, flags, tr("Photos"))
+    painter.drawText(photos_band, flags, tr(TRACK_NAMES[1]))
+
+
+def names_width() -> int:
+    """The room the track names need left of the time axis, in the language shown."""
+    metrics = QFontMetricsF(small_font(bold=True))
+    return int(max(metrics.horizontalAdvance(tr(name)) for name in TRACK_NAMES)) + NAME_MARGIN_PX
 
 
 def paint_empty_texts(painter, view) -> None:

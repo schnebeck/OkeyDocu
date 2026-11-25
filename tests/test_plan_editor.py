@@ -47,6 +47,40 @@ def test_a_shipped_plan_is_titled_in_the_language_of_the_program(editor):
     assert editor.plans.currentItem().text() == editor.title.text()
 
 
+def test_a_double_click_on_a_plan_leads_to_its_name_and_the_list_follows(app, editor, qtbot):
+    editor.show()
+    editor.activateWindow()
+    qtbot.waitUntil(editor.isActiveWindow)
+    editor.plans.itemDoubleClicked.emit(editor.plans.currentItem())
+    assert editor.title.hasFocus() and editor.title.selectedText() == editor.title.text()
+    editor.title.setText("Anlagenbesichtigung")
+    editor.title.textEdited.emit("Anlagenbesichtigung")
+    assert stored(app, editor).title == "Anlagenbesichtigung"
+    assert editor.plans.currentItem().text() == "Anlagenbesichtigung"
+
+
+def test_long_and_short_plan_names_begin_at_the_same_place(app, editor, qtbot):
+    editor.plans.setFixedWidth(200)
+    editor.show()
+    qtbot.waitExposed(editor)
+    qtbot.wait(50)
+    plans = editor.plans
+    image = plans.viewport().grab().toImage()
+    paper = plans.palette().base().color().lightness()
+    found = set()
+    for row in range(plans.count()):
+        if row == plans.currentRow():
+            continue  # white on the selection colour
+        rect = plans.visualItemRect(plans.item(row))
+        rows = range(rect.top() + 4, rect.bottom() - 3)
+        found.add(next(x for x in range(rect.left(), rect.left() + 60)
+                       if any(image.pixelColor(x, y).lightness() < paper - 100 for y in rows)))
+    texts = [plans.item(row).text() for row in range(plans.count())]
+    widths = [plans.fontMetrics().horizontalAdvance(text) for text in texts]
+    assert min(widths) < 180 < max(widths)  # some fit, some are cut
+    assert len(found) == 1
+
+
 def test_new_plan_is_saved_at_once(app, editor):
     editor.new_plan()
     assert editor.plans.count() == len(load_plans()) + 1

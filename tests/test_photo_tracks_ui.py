@@ -11,12 +11,14 @@ from __future__ import annotations
 import pytest
 from PIL import Image
 from PySide6.QtCore import QPoint
-from PySide6.QtGui import QColor, QPalette
+from PySide6.QtGui import QColor, QFontMetricsF, QPalette
 
+from okeydocu.l10n import speaking, tr
 from okeydocu.model import Verdict
 from okeydocu.ui.photo_shared import THUMB_EDGE_PX, read_thumbnail, shared_thumbs
 from okeydocu.ui.photo_timeline import PhotoTimeline
 from okeydocu.ui.photo_timeline_events import Hit
+from okeydocu.ui.photo_timeline_items import small_font
 
 from .photo_ui_helpers import (
     click,
@@ -199,3 +201,11 @@ def test_read_only_keeps_a_photo_where_it_is(timeline, app, case):
     drag(view, start, start + QPoint(120, 0))
     assert owners(app, case[0]) == before
     assert app.service.campaign(case[0])["photo_shift_s"] == 0
+
+
+@pytest.mark.parametrize("language", ("de", "en"))
+def test_the_track_names_have_room_in_every_language(qtbot, app, case, language):
+    with speaking(language):
+        timeline = open_timeline(qtbot, app, case[0])
+        needed = QFontMetricsF(small_font(bold=True)).horizontalAdvance(tr("Measurements"))
+        assert timeline.view.axis.left >= needed + 8

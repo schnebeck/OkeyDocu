@@ -8,16 +8,22 @@
 
 """The style sets a text it has to cut a few pixels further left than one that fits, so a
 column with long and short texts flutters. Here a text too long for its cell is cut before the
-style sees it: every text fits, and all begin at the same place."""
+style sees it: every text fits, and all begin at the same place. The size asked for holds the
+room kept free, so a column sized to its texts shows them whole."""
 
 from __future__ import annotations
 
+from PySide6.QtCore import QSize
 from PySide6.QtWidgets import QApplication, QStyle, QStyledItemDelegate
 
 SPARE = 6  # pixels kept free: a text that nearly fills its cell is set a pixel off as well
 
 
 class SteadyText(QStyledItemDelegate):
+    def sizeHint(self, option, index) -> QSize:
+        hint = super().sizeHint(option, index)
+        return QSize(hint.width() + SPARE, hint.height())
+
     def initStyleOption(self, option, index) -> None:
         super().initStyleOption(option, index)
         metrics = option.fontMetrics

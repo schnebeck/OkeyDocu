@@ -6,7 +6,7 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from PySide6.QtWidgets import QTableWidgetItem
+from PySide6.QtWidgets import QStyleOptionViewItem, QTableWidgetItem
 
 from okeydocu.ui.common import make_table
 from okeydocu.ui.steady_text import SteadyText
@@ -47,3 +47,18 @@ def test_a_table_is_made_with_the_steady_delegate(qtbot):
     qtbot.addWidget(table)
     assert isinstance(table.itemDelegate(), SteadyText)
 
+
+
+def test_a_column_sized_to_its_texts_shows_them_whole(qtbot):
+    table = make_table(["T"])
+    qtbot.addWidget(table)
+    table.setRowCount(1)
+    table.setItem(0, 0, QTableWidgetItem("09:00:00"))
+    table.resize(420, 300)
+    table.show()
+    qtbot.wait(50)
+    option = QStyleOptionViewItem()
+    table.initViewItemOption(option)
+    option.rect = table.visualItemRect(table.item(0, 0))
+    table.itemDelegate().initStyleOption(option, table.model().index(0, 0))
+    assert option.text == "09:00:00"

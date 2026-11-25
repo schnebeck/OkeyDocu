@@ -75,6 +75,15 @@ def test_open_points_stand_in_the_table_and_count_in_the_head(repeat):
     assert not page.guided.isVisibleTo(page)  # filled in any order, not led through
 
 
+def test_open_steps_of_an_added_test_plan_are_not_a_differing_setting(repeat, app):
+    page = repeat["page"]
+    app.service.assign_plan(repeat["campaign"], page.guided.plans[0])
+    page.show_campaign(repeat["campaign"])
+    checks = page.header.checks.text()
+    assert "Messplan: " in checks and "Messschritte offen" in checks
+    assert "Einstellung abweichend" not in checks
+
+
 def test_a_chosen_point_shows_what_to_take_and_where_readings_go(repeat):
     values, page = repeat["values"], repeat["page"]
     riso = next(row for row in _point_rows(values)

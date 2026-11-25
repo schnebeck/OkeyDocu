@@ -34,6 +34,8 @@ change of state changes what a block says, not where things stand.
   the same height and stand in the same place.
 - A text that may run out of room is one line and ends in an ellipsis (`ui/elided_label.py`);
   the whole text waits under the mouse. A row never grows because the window got narrower.
+- The texts of a column begin on one line, cut or not, in tables and in lists
+  (`ui/steady_text.py`); a column sized to its texts shows them whole.
 - A button that changes its text is as wide as its longest text (`ui/button_width.py`).
 - Details of the same kind stand on a line each, their names dimmed in one column.
 

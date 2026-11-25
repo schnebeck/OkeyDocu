@@ -163,7 +163,11 @@ quantity; with `order: function` every measured quantity appears once, with what
 and below it per element only what differs from that. Steps of a plan without a measurement follow with
 their reason. With `order: function_time` every measured quantity has one table for the whole
 installation, in the order measured, each row naming its place; the shipped template “Report by
-measured quantity” uses it. The standard template uses `order: place`. With `layout: compact` every element has
+measured quantity” uses it. In both orders by quantity the test plans of the campaign come first
+(`reporting/plan_sections.py`): each plan under its name with its answers in one table, the
+questions left out with their reason and the steps without a reading, whenever they were worked
+on; the readings of its measuring steps stand with all others under their quantity. The standard
+template uses `order: place`. With `layout: compact` every element has
 a single table over all measurement types in the order of the measurements, with measurement type, result,
 limit and remark; what the measurements of one measurement type share at the element is stated once above it. The
 template “Standard report, compact” uses it. Every element shows below its heading what
@@ -869,7 +873,8 @@ Overlays can be nested, for example “New …” at the inspector in the campai
 
 A test plan is a sequence of points: `check` (question with yes, no or skip), `measure`
 (measurement) and `note` (hint). Plans are stored as YAML in the table `plans` and are edited under
-Settings → Test plans (`ui/plan_editor.py`). Changes save themselves. The test run
+Settings → Test plans (`ui/plan_editor.py`). Changes save themselves; the name is one of them,
+and a double click on a plan in the list or F2 leads to its field (`ui/list_rename.py`). The test run
 (`ui/plan_test_run.py`) shows the plan in the wizard with a simulated instrument in a throwaway database.
 
 The instructions per measuring range belong to the instrument and lie with its driver
