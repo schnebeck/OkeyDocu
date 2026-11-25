@@ -21,7 +21,6 @@ from ..campaign.measuring_place import measured_functions
 from ..campaign.plan import says_draft
 from ..campaign.service import IMPORTED
 from ..devices import Capability
-from ..devices.simulator import SIMULATED_FUNCTIONS
 from ..l10n import N_, tr
 from .campaign_items import count_text
 from .common import AppContext, function_short
@@ -129,8 +128,6 @@ class FreeRunView(Framed):
         font.setBold(True)
         self.guidance.setFont(font)
         self.simulate_function = QComboBox()
-        for key in SIMULATED_FUNCTIONS:
-            self.simulate_function.addItem(function_short(key), key)
         self.simulate_button = QPushButton(tr("Simulate measurement"))
         self.simulate_button.clicked.connect(self.simulate)
         # Help lives in the help menu; the action is there and works while this view shows.
@@ -163,6 +160,13 @@ class FreeRunView(Framed):
         self.instruction.read_button.setVisible(
             driver is not None and Capability.SELECTOR in driver.capabilities
         )
+        offered = tuple(driver.simulated_functions) if simulated else ()
+        known = [self.simulate_function.itemData(index)
+                 for index in range(self.simulate_function.count())]
+        if list(offered) != known:  # each simulated instrument has its own functions
+            self.simulate_function.clear()
+            for key in offered:
+                self.simulate_function.addItem(function_short(key), key)
         self.simulate_function.setVisible(simulated)
         self.simulate_button.setVisible(simulated)
         self.starter.show_campaign(campaign["driver"] if driver is not None else "",

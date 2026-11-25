@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from shiboken6 import isValid
 
+from ..devices import Capability
 from .measuring_window import MeasuringWindow
 
 
@@ -32,10 +33,15 @@ class CampaignGuide:
         if self.new_parents is None:
             self.new_parents = {}
         campaign_id = campaign["id"]
+        driver = self.session.driver if self.session is not None else None
+        simulated = driver is not None and Capability.SIMULATED_TRIGGER in driver.capabilities
         window = MeasuringWindow(self.app, campaign_id, campaign["driver"], function,
                                  self.place_targets.get(campaign_id),
                                  self.new_parents.get(campaign_id), self.window(),
-                                 repeat=not self.free.starter.is_first(function))
+                                 repeat=not self.free.starter.is_first(function),
+                                 simulated=simulated)
+        window.dial_turned.connect(self._guide_turns_dial)
+        window.simulate_wanted.connect(self._guide_simulates)
         window.place_kept.connect(lambda asset_id: self._guide_place(campaign_id, asset_id))
         window.parent_chosen.connect(
             lambda parent_id: self.new_parents.__setitem__(campaign_id, parent_id))
@@ -56,6 +62,19 @@ class CampaignGuide:
     def _guide_asks_selector(self) -> None:
         if self.session is not None and self.live_id == self.campaign_id:
             self.session.read_selector()
+
+    def _guide_turns_dial(self, value: int) -> None:
+        """A click on the drawn dial turns the switch of an instrument that lets itself be
+        turned that way, a simulated one; a real one is asked where it stands."""
+        driver = self.session.driver if self.session is not None else None
+        if hasattr(driver, "turn"):
+            driver.turn(value)
+        self._guide_asks_selector()
+
+    def _guide_simulates(self, function: str) -> None:
+        driver = self.session.driver if self.session is not None else None
+        if driver is not None and function in getattr(driver, "simulated_functions", ()):
+            driver.simulate_measurement(function)
 
     def _guide_closed(self, window: MeasuringWindow) -> None:
         if self.guide_window is window:

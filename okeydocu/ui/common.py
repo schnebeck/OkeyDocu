@@ -59,9 +59,8 @@ class DeviceSession:
 
     def new_driver(self, key: str, port: str = "") -> MeterDriver:
         if is_simulated(key):
-            return SimulatedMeter(
-                clock_skew_s=random.randint(-300, 300), failure_rate=SIMULATED_FAILURE_RATE
-            )
+            return create_driver(key, clock_skew_s=random.randint(-300, 300),
+                                 failure_rate=SIMULATED_FAILURE_RATE)
         return create_driver(key, port=port)
 
     def attach(self, campaign_id: int, driver: MeterDriver, port: str = "") -> None:
@@ -75,9 +74,8 @@ class DeviceSession:
             return known
         if is_simulated(campaign["driver"]):
             # After a restart: same clock as before, so stored offsets stay right.
-            driver = SimulatedMeter(
-                clock_skew_s=campaign["clock_offset_s"], failure_rate=SIMULATED_FAILURE_RATE
-            )
+            driver = create_driver(campaign["driver"], clock_skew_s=campaign["clock_offset_s"],
+                                   failure_rate=SIMULATED_FAILURE_RATE)
             self.drivers[campaign["id"]] = driver
             return driver
         return create_driver(campaign["driver"], port=self.ports.get(campaign["id"], ""))

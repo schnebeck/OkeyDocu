@@ -11,7 +11,7 @@ from __future__ import annotations
 import signal
 import sys
 
-from . import APP_NAME
+from . import APP_NAME, TAGLINE
 from .campaign.secret_key import SecretKeyStore
 from .l10n import tr
 from .campaign.service import CampaignService
@@ -61,12 +61,31 @@ def program_icon():
     return QIcon(str(resources.files("okeydocu") / "data" / "icons" / "okeydocu.svg"))
 
 
+def options(arguments: list[str]):
+    """What the command line asks for beyond the options Qt takes."""
+    import argparse
+
+    from .testprojects import PROJECTS
+
+    parser = argparse.ArgumentParser(prog="okeydocu", description=TAGLINE)
+    parser.add_argument("--testproject", choices=PROJECTS, metavar="NAME",
+                        help="work on invented data of its own, ready to play with: "
+                             + ", ".join(PROJECTS))
+    parser.add_argument("--fresh", action="store_true",
+                        help="with --testproject: begin the test project anew")
+    return parser.parse_known_args(arguments)[0]
+
+
 def main() -> int:
     from PySide6.QtCore import QTimer
     from PySide6.QtWidgets import QApplication, QMessageBox
 
+    from . import testprojects
     from .ui.main_window import MainWindow
 
+    asked = options(sys.argv[1:])
+    if asked.testproject:  # before anything opens the database
+        testprojects.enter(asked.testproject, asked.fresh)
     application = QApplication(sys.argv)
     application.setApplicationName(APP_NAME)
     application.setDesktopFileName("okeydocu")
@@ -81,7 +100,11 @@ def main() -> int:
     except SchemaMismatch as err:
         QMessageBox.critical(None, APP_NAME, str(err))
         return 1
+    if asked.testproject:
+        testprojects.prepare(context, asked.testproject)
     window = MainWindow(context)
+    if asked.testproject:
+        window.setWindowTitle(f"{APP_NAME} – {tr('Test project')} {asked.testproject}")
     window.show()
     # Python only sees a signal while it runs, hence the timer.
     heartbeat = QTimer(interval=250)

@@ -61,6 +61,9 @@ texts:
   Simulator (no hardware): Simulator (ohne Hardware)
   Virtual instrument: Virtuelles Messgerät
   The rotary switch has not been moved yet.: Der Drehschalter wurde noch nicht bewegt.
+  "PROFITEST PRIME, simulated (no hardware)": "PROFITEST PRIME, simuliert (ohne Hardware)"
+  "PROFITEST PRIME, simulated": "PROFITEST PRIME, simuliert"
+  Test project: Testprojekt
   No instrument found. Please connect it by USB or set it up once over Bluetooth.: Kein Messgerät gefunden. Bitte per USB anschließen oder einmal über Bluetooth einrichten.
   The connection to the instrument is not open.: Die Verbindung zum Messgerät ist nicht geöffnet.
   The clock cannot be set during Push/Print.: Die Uhr lässt sich nicht während Push/Print stellen.

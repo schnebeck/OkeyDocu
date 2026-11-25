@@ -56,7 +56,7 @@ def create_driver(key: str, **options) -> MeterDriver:
 
 
 def _load_builtin() -> None:
-    if _DRIVERS:
+    if "simulator" in _DRIVERS:  # a driver registered from outside does not stand for them
         return
     from .profitest_prime.info import DRIVER as PROFITEST_PRIME
     from .simulator import DRIVER as SIMULATOR

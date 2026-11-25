@@ -129,6 +129,12 @@ class SimulatedMeter(MeterDriver):
         label = function_symbol(self.selector)
         return SelectorPosition(label, frozenset({self.selector}))
 
+    simulated_functions = SIMULATED_FUNCTIONS  # what `simulate_measurement` can be asked for
+
+    def _drawn(self, function: str) -> list[tuple[str, str, str, str, str]]:
+        """Random values of one measurement: key, label, value, lower and upper limit."""
+        return _READINGS[function](self._random)
+
     def simulate_measurement(self, function: str, at: datetime | None = None) -> MeterMeasurement:
         """Store a reading, as if the operator had measured and pressed save."""
         self.selector = function
@@ -139,7 +145,7 @@ class SimulatedMeter(MeterDriver):
             and self._random.random() < self._failure_rate
         )
         results = []
-        for key, label, text, lower, upper in _READINGS[function](self._random):
+        for key, label, text, lower, upper in self._drawn(function):
             limited = bool(lower or upper)
             verdict = Verdict.PASSED if limited else Verdict.NOT_EVALUATED
             if limited and failing:

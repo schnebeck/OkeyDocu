@@ -23,7 +23,7 @@ from PySide6.QtWidgets import QDialog, QFrame, QHBoxLayout, QLabel, QPushButton,
     QStackedWidget, QVBoxLayout
 
 from ..devices import driver_info
-from ..devices.guide import CONFIGURE, CONNECT, PLACE, SELECT
+from ..devices.guide import CONFIGURE, CONNECT, MEASURE, PLACE, SELECT
 from ..l10n import N_, tr
 from .bench_view import BenchView
 from .button_width import widest
@@ -64,10 +64,12 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, ListStation, Repe
     place_kept = Signal(int)  # the element readings now go to, made on the way or chosen
     parent_chosen = Signal(int)  # where new elements hang, kept until changed
     selector_wanted = Signal()  # the guide would like to know where the switch stands
+    dial_turned = Signal(int)  # the drawn dial was clicked to this position
+    simulate_wanted = Signal(str)  # a simulated instrument is to measure this function
 
     def __init__(self, app, campaign_id: int, driver: str, function: str,
                  asset_id: int | None, new_parent: int | None = None, parent=None,
-                 repeat: bool = False):
+                 repeat: bool = False, simulated: bool = False):
         super().__init__(parent)
         info = driver_info(driver)
         self.app = app
@@ -119,6 +121,13 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, ListStation, Repe
         self.next.setFixedWidth(widest(self.next, [tr(text) for text in NEXT_TEXTS]))
         self.back.clicked.connect(lambda: self.go(self.index - 1))
         self.next.clicked.connect(lambda: self.go(self.index + 1))
+        # A simulated instrument is worked on the screen: its dial by a click on the drawing,
+        # its measurement by this button at the last station.
+        self.simulate = QPushButton(tr("Simulate measurement"))
+        self.simulate.clicked.connect(lambda: self.simulate_wanted.emit(self.guide.function))
+        self.simulated = simulated
+        if self.bench:
+            self.bench.panel.position_chosen.connect(self.dial_turned)
         self._lay_out()
         self.show_place(asset_id)
         self.go(0)
@@ -131,6 +140,7 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, ListStation, Repe
         column.addWidget(self.step_title)
         column.addWidget(self.right)
         column.addStretch(1)
+        column.addWidget(self.simulate)
         self.footer = FooterBar()
         self.footer.add_leading(self.back)
         self.footer.add(self.next)
@@ -203,5 +213,6 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, ListStation, Repe
         self._on_display()
         last = self.index == self.count - 1
         self.next.setText(tr("Done ▶") if last else tr("Next ▶"))
+        self.simulate.setVisible(self.simulated and self.kind == MEASURE)
         self._allow_next()
         getattr(self, f"_enter_{station.kind}")(station)

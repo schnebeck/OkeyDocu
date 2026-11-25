@@ -960,7 +960,20 @@ an inspection question, every measurement a measuring step of its function.
 the limits, and has a random clock offset. With the measuring function a
 wrongly set rotary switch can also be reproduced. Its description carries `simulated=True`; by this, not
 by the key, the application recognises simulations. Reports from simulations carry a notice
-and cannot be signed.
+and cannot be signed. A simulated instrument is made by the factory of its driver and names the
+functions it can be asked to measure (`simulated_functions`).
+
+### Test projects
+
+`python -m okeydocu --testproject prime` starts the program on invented data of its own
+(`okeydocu/testprojects/`), in the folder `testprojects/prime` below the program's data: the
+real records are never touched. The project is laid out on the first start and kept from then
+on; `--fresh` begins it anew. Its records are sealed without a key, so the password store of the
+desktop is left alone. The project registers the simulated PROFITEST PRIME
+(`devices/profitest_prime/simulated.py`): the panel, the dial, the guides and the setting lists
+of the instrument, with random readings. In a guided measurement a click on the drawn dial
+turns its switch, and the last station has a button that lets it measure. The plant of the
+project (`testprojects/plant.py`) is also what the pictures of the README show.
 
 ## Template editor
 

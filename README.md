@@ -185,6 +185,15 @@ the Plasma style is used.
 (`--remove` takes both out again). Data is kept in `~/.local/share/OkeyDocu`; `OKEYDOCU_DATA`
 selects another folder.
 
+To try the program without an instrument and without data of your own:
+
+    .venv/bin/python -m okeydocu --testproject prime
+
+This starts it on an invented project in a folder of its own, with a simulated PROFITEST
+PRIME: its front panel, dial, guides and setting lists, and random readings. A click on the
+drawn dial turns the switch, and the last station of a guide has a button that measures. The
+project is kept from start to start; `--fresh` begins it anew.
+
 ## Tests
 
     .venv/bin/python -m pytest

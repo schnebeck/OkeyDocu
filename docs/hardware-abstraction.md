@@ -184,8 +184,9 @@ Nothing in `ui/`, `store/`, `campaign/` or `reporting/` changes for a new instru
 
 - Device codes appear only in `devices/<instrument>/mapping.py`.
 - Nothing outside `devices/` imports a driver package; the application asks the registry.
-  Two places know a driver by design: the UI drives the simulator itself (demos, test runs of
-  a plan), and the IZYTRONIQ import reads results a PROFITEST PRIME took, with its mapping.
+  Three places know a driver by design: the UI drives the simulator itself (demos, test runs of
+  a plan), the IZYTRONIQ import reads results a PROFITEST PRIME took, with its mapping, and the
+  test project `prime` registers that instrument's simulated twin.
 - The instrument's record is kept as `raw`; an unknown code stays the key.
 - New keys exist in `data/vocabulary/`, new names in every language catalogue.
 - Only commands from the instrument's documented reference are sent, through an allowlist.
