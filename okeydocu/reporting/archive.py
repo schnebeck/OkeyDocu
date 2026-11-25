@@ -98,6 +98,14 @@ class ReportArchive:
             datetime.now().isoformat(timespec="seconds"), language,
         )
 
+    def filed_templates(self, campaign_id: int) -> list[tuple[str, str]]:
+        """Name and text of the templates the campaign's reports were made with, the latest
+        first, each once. A report keeps its template, whatever becomes of it later."""
+        rows = self.db.query(
+            "SELECT template_name, template_body FROM reports WHERE campaign_id=?"
+            " ORDER BY created_at DESC, id DESC", campaign_id)
+        return list(dict.fromkeys((row["template_name"], row["template_body"]) for row in rows))
+
     def draft(self, campaign_id: int, template_body: str, language: str = "de",
               run: Runner = _at_once) -> Path:
         """A preview of an open campaign. It is overwritten each time and never archived."""

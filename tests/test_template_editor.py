@@ -254,7 +254,7 @@ def test_save_as_creates_a_second_template_and_delete_removes_it(page, monkeypat
         page.choice.setCurrentIndex(page.choice.findText(name))
         page._delete()
     assert [t["name"] for t in page.app.db.templates()] == shipped[:1]
-    assert not page.delete_button.isEnabled()  # the last template stays
+    assert not page.delete_action.isEnabled()  # the last template stays
 
 
 def test_unsaved_changes_are_not_lost_silently(page, monkeypatch):

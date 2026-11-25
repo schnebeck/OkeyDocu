@@ -155,6 +155,16 @@ class MasterDataMixin:
             name, body,
         )
 
+    def rename_template(self, old: str, new: str) -> None:
+        """Open campaigns given the template follow its name. An ended one is sealed and
+        needs no following: its reports keep the template they were made with."""
+        if self.one("SELECT 1 FROM templates WHERE name=?", new):
+            raise ValueError(tr("A template named “{name}” exists already.", name=new))
+        with self.transaction() as connection:
+            connection.execute("UPDATE templates SET name=? WHERE name=?", (new, old))
+            connection.execute("UPDATE campaigns SET report_template=? WHERE report_template=?"
+                               " AND status='open'", (new, old))
+
     def default_template(self) -> sqlite3.Row | None:
         """The report template a campaign takes that names none: the one marked, or the
         first by name while none is; None without any template."""

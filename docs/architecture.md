@@ -188,6 +188,12 @@ campaign, offered when a campaign is created, and comes selected when the campai
 is the default (`templates.standard`, set in the template editor; the first by name while none is marked): a
 campaign that names no template, or one that is gone, takes it.
 
+A filed report keeps the name and the text of the template it was made with. A further report of an ended
+campaign is therefore independent of what became of the templates since: the dialog offers the templates of
+the campaign's own reports first, marked “as filed” where today's template of that name reads differently
+or is gone, the latest of them selected; a campaign without a report takes the default template. Renaming a
+template in the editor carries the name along to the open campaigns that were given it.
+
 A report carries two dates. The day of the test (`campaign.date`) is the day measured on, or the first
 and the last where the test took several; answers of an inspection count as measurements. The date of the
 report (`report.date`) stands by the signature and is the day the campaign was ended and sealed; a preview

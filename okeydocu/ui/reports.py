@@ -43,7 +43,10 @@ class GenerateOverlay(Overlay):
             if row["status"] == "closed":
                 label = f"{row['title']} ({stored_day(row['tested_at'])})"
                 self.campaign.addItem(label, row["id"])
+        self.app = app
         self.template = TemplateChoice(app)
+        self.campaign.currentIndexChanged.connect(lambda _: self._show_templates())
+        self._show_templates()
         form = QFormLayout()
         form.addRow(tr("Completed campaign"), self.campaign)
         form.addRow(tr("Template"), self.template)
@@ -53,6 +56,12 @@ class GenerateOverlay(Overlay):
 
     def first_field(self):
         return self.campaign
+
+    def _show_templates(self) -> None:
+        """Each ended campaign offers the templates of its own reports first."""
+        campaign = self.campaign.currentData()
+        if campaign is not None:
+            self.template.show_filed(self.app.archive.filed_templates(campaign))
 
 
 class ReportsPage(QWidget):
@@ -144,7 +153,7 @@ class ReportsPage(QWidget):
         try:
             dialog.language.remember()
             self.app.archive.generate(
-                dialog.campaign.currentData(), dialog.template.currentText(),
+                dialog.campaign.currentData(), dialog.template.name(),
                 dialog.template.currentData(), dialog.language.code(),
                 lambda work: run_busy(self, tr("Creating the report …"), work),
             )

@@ -43,14 +43,37 @@ def _summary(app: AppContext, campaign_id: int) -> str:
     return text
 
 
+TEMPLATE_NAME = Qt.ItemDataRole.UserRole + 1  # where an entry reads other than its template
+
+
 class TemplateChoice(QComboBox):
     """The report templates by name; `chosen` comes selected where it is one of them."""
 
     def __init__(self, app: AppContext, chosen: str = ""):
         super().__init__()
+        self.app = app
         for row in app.db.templates():
             self.addItem(row["name"], row["body"])
         self.setCurrentIndex(max(0, self.findText(chosen)))
+
+    def name(self) -> str:
+        return self.currentData(TEMPLATE_NAME) or self.currentText()
+
+    def show_filed(self, filed: list[tuple[str, str]]) -> None:
+        """For an ended campaign: the templates its reports were made with stand first, as
+        they were filed, wherever today's template of that name reads differently or is
+        gone. The latest of them comes selected, the default template where there is none."""
+        self.clear()
+        today = {row["name"]: row["body"] for row in self.app.db.templates()}
+        for name, body in filed:
+            if today.get(name) != body:
+                self.addItem(tr("{name} (as filed)", name=name), body)
+                self.setItemData(self.count() - 1, name, TEMPLATE_NAME)
+        for name, body in today.items():
+            self.addItem(name, body)
+        default = self.app.db.default_template()
+        wanted = filed[0][1] if filed else (default["body"] if default else None)
+        self.setCurrentIndex(max(0, self.findData(wanted)))
 
 
 class LanguageChoice(QComboBox):

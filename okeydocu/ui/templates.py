@@ -32,7 +32,7 @@ from PySide6.QtWidgets import (
 from ..l10n import current, plural, tr
 from ..reporting.language import languages
 from ..reporting.template_model import BLOCK_LABELS
-from .board import GutterSplitter
+from .board import GutterSplitter, menu_button
 from .common import AppContext
 from .template_blocks import TemplateBlocks
 from .template_data_forms import TemplateDataForms
@@ -40,13 +40,14 @@ from .template_structure_form import TemplateStructureForm
 from .template_document import TemplateDocument
 from .template_forms import TemplateForms
 from .template_logo_form import TemplateLogoForm
+from .template_names import TemplateNames
 
 _PREVIEW_DELAY_MS = 350
 
 
 class TemplatesPage(
-    TemplateDocument, TemplateBlocks, TemplateForms, TemplateDataForms, TemplateStructureForm,
-    TemplateLogoForm, QWidget
+    TemplateDocument, TemplateNames, TemplateBlocks, TemplateForms, TemplateDataForms,
+    TemplateStructureForm, TemplateLogoForm, QWidget
 ):
     def __init__(self, app: AppContext):
         super().__init__()
@@ -62,14 +63,21 @@ class TemplatesPage(
         self._shown_index = -1
         save = QPushButton(tr("Save"))
         copy_button = QPushButton(tr("As new template"))
-        self.delete_button = QPushButton(tr("Delete template"))
-        self.default_button = QPushButton()
-        self.default_button.setToolTip(tr("A new campaign starts with the default template; each"
+        # What is done to the template shown as a whole stands in one menu, so the bar
+        # stays narrow enough for a small window.
+        manage = menu_button(tr("Template"), tr("Rename or delete the template shown, or make it"
+                                                " the default"))
+        menu = manage.menu()
+        menu.setToolTipsVisible(True)
+        rename = menu.addAction(tr("Rename …"), self._rename)
+        rename.setToolTip(tr("Campaigns given this template keep it under its new name"))
+        self.default_action = menu.addAction(tr("Default for new campaigns"), self._make_default)
+        self.default_action.setCheckable(True)
+        self.default_action.setToolTip(tr("A new campaign starts with the default template; each"
                                           " campaign can be given another among its properties."))
-        self.default_button.clicked.connect(self._make_default)
+        self.delete_action = menu.addAction(tr("Delete template"), self._delete)
         save.clicked.connect(self._save)
         copy_button.clicked.connect(self._save_as)
-        self.delete_button.clicked.connect(self._delete)
         self.count = QComboBox()
         for shown in (0, 1, 4):
             self.count.addItem(plural(shown, "Preview: {count} measurement",
@@ -84,8 +92,7 @@ class TemplatesPage(
         self.preview_language.currentIndexChanged.connect(self.preview)
         self.state = QLabel()
         bar = QHBoxLayout()
-        for widget in (self.choice, save, copy_button, self.delete_button,
-                       self.default_button, self.state):
+        for widget in (self.choice, save, copy_button, manage, self.state):
             bar.addWidget(widget)
         bar.addStretch()
         bar.addWidget(self.preview_language)

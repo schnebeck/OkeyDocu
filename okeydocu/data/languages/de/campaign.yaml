@@ -280,8 +280,13 @@ texts:
   Report archive: Protokollarchiv
   Report templates: Protokollvorlagen
   Report template: Protokollvorlage
-  Default template: Standardvorlage
-  Set as default: Als Standard festlegen
+  "{name} (as filed)": "{name} (wie abgelegt)"
+  Default for new campaigns: Standard für neue Kampagnen
+  "Rename or delete the template shown, or make it the default": "Die gezeigte Vorlage umbenennen, löschen oder zum Standard machen"
+  Rename template: Vorlage umbenennen
+  "Rename …": "Umbenennen …"
+  Campaigns given this template keep it under its new name: Kampagnen mit dieser Vorlage behalten sie unter dem neuen Namen
+  "A template named “{name}” exists already.": "Eine Vorlage namens „{name}“ gibt es schon."
   "A new campaign starts with the default template; each campaign can be given another among its properties.": "Eine neue Kampagne startet mit der Standardvorlage; jeder Kampagne kann in ihren Eigenschaften eine andere gegeben werden."
   The preview and the report of this campaign are drawn with this template.: Vorschau und Protokoll dieser Kampagne werden mit dieser Vorlage erstellt.
   "Report template: {name}. It is chosen under “Edit campaign”.": "Protokollvorlage: {name}. Gewählt wird sie unter „Kampagne bearbeiten“."
