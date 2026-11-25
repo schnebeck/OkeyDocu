@@ -191,6 +191,9 @@ How the program is built is described in [docs/architecture.md](docs/architectur
 instrument layer in [docs/hardware-abstraction.md](docs/hardware-abstraction.md), the rules the
 surface follows in [docs/gui-design.md](docs/gui-design.md).
 
+The pictures of this page are rendered from invented data by `tools/readme-images.sh`, which
+writes them to `docs/images`.
+
 ## License
 
 OkeyDocu is written by Thorsten Schnebeck, who holds all rights to it. The code is programmed
