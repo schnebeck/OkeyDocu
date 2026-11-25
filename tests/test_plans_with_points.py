@@ -69,7 +69,7 @@ def test_confirming_waits_for_the_points_and_the_plan_steps(app, repeat):
     campaign = repeat["campaign"]
     app.service.assign_plan(campaign, CHECKS)
     problems = app.service.blockers(campaign)
-    assert any("Punkt" in text or "point" in text for text in problems)
+    assert any("Messpunkt" in text or "point" in text for text in problems)
     assert sum("Abdeckung" in text or "Schild" in text for text in problems) == 2
     app.service.add_measurement(campaign, "riso", [_riso()], datetime(2026, 5, 4, 9),
                                 Verdict.PASSED, asset_id=repeat["cabinet"])

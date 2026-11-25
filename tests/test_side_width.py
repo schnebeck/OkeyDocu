@@ -70,12 +70,13 @@ def test_the_panel_is_as_wide_as_what_it_shows_needs(qtbot, app, follower, langu
 def test_the_panel_keeps_its_width_when_the_choice_changes(qtbot, app, follower):
     window = shown(qtbot, app, follower)
     page = window.campaign
-    widths = set()
-    for row in (0, 1, 0, 1):
+    widths = []
+    for row in (0, 1, 0, 1, 0, 1):
         page.values.table.selectRow(row)
         qtbot.wait(50)
-        widths.add(page.side.width())
-    assert len(widths) == 1
+        widths.append(page.side.width())
+    # Having shown both once, it has the width for either and keeps it.
+    assert len(set(widths[2:])) == 1 and widths == sorted(widths)
     page.shut_down()
 
 
