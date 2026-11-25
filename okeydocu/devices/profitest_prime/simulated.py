@@ -24,7 +24,7 @@ from ..simulator import SimulatedMeter
 from . import panel
 from .guides import GUIDES, guide_for
 from .selector import selector_position
-from .setting_lists import setting_list
+from .setting_lists import setting_list, softkey_view
 
 KEY = "profitest-prime-simulated"
 LABEL = N_("PROFITEST PRIME, simulated (no hardware)")
@@ -69,4 +69,5 @@ def find() -> list[FoundInstrument]:
 
 
 DRIVER = DriverInfo(KEY, LABEL, SimulatedPrime, find=find, panel=panel.DRAWING, guide=guide_for,
-                    guided=tuple(GUIDES), setting_list=setting_list, simulated=True)
+                    guided=tuple(GUIDES), setting_list=setting_list, softkey_view=softkey_view,
+                    simulated=True)

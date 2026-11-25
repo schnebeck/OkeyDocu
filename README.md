@@ -70,9 +70,10 @@ an RCD, a main switch, a CEE plug, a Schuko plug, a monitoring device, a touchab
 cores of the supply cable. The supply station says whether to measure live or dead. Mode and
 limits shows the key block of the instrument alone, with the softkeys to set beside their
 labels, and names the standards with their clauses the measurement rests on and what it is taken
-for. The softkeys of the drawing can be pressed: they open the list of a setting and work it
-as on the instrument, with the choice the element states marked. The last station waits for
-the result, puts its values on the drawn display and says where further readings are taken.
+for. The softkeys of the drawing can be pressed: they switch the view or open the list of a
+setting and work it as on the instrument, with the choice the element states marked. The last
+station waits for the result, puts its values on the drawn display and says where further
+readings are taken.
 
 Guided are voltage, protective conductor with 200 mA and 25 A, insulation with constant and
 rising voltage, the three RCD tests, the loop impedance in its four ways (with the full test

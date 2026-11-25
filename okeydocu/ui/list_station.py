@@ -1,5 +1,5 @@
 # OkeyDocu - okeydocu/ui/list_station.py
-# The setting lists of the instrument at the station that sets it up, worked by its softkeys.
+# The softkeys of the drawn panel at the station that sets the instrument up.
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Fable 5.2
@@ -7,12 +7,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 """At the station that sets the instrument up, the softkeys of the drawn panel work as on the
-instrument wherever the driver knows the list of a setting. A click on the softkey beside a
-setting opens its list on the drawn display; there the softkeys move the cursor up and down,
-pass to the choices, confirm the one under the cursor and take the list over, which closes
-it. What was taken over stands in the list the next time, and a setting that describes the
-test point shows on the view from then on. A link beside each such setting opens the list as
-well and steps through its settings."""
+instrument wherever the driver knows what they do. A softkey that switches the view, such as
+between one voltage and the three of a three-phase supply, switches the drawn one. A softkey
+of a setting opens its list on the drawn display; there the softkeys move the cursor up and
+down, pass to the choices, confirm the one under the cursor and take the list over, which
+closes it. What was taken over stands in the list the next time, and a setting that describes
+the test point shows on the view from then on. A link beside each setting the guide names
+opens its list as well and steps through its settings."""
 
 from __future__ import annotations
 
@@ -32,20 +33,26 @@ CLICKABLE = N_("The softkeys in the picture can be pressed: a click works them a
 
 
 class ListStation:
-    """Mixed into the measuring window, which holds `setting_list`, the driver's way to the
-    list of a view's softkey row; `listed`, the station's setting whose list is open with
-    the list as it stands, or None; `taken`, what was taken over in a list, by guide and
-    setting; `set_values`, what that means for the features a view shows; and `key_press`."""
+    """Mixed into the measuring window, which holds `setting_list` and `softkey_view`, the
+    driver's ways to the list a softkey row opens and to the view it switches to; `listed`,
+    the softkey whose list is open with the list as it stands, or None; `taken`, what was
+    taken over in a list, by guide and softkey; `set_values`, what that means for the
+    features a view shows; `view_now`, the view a softkey switched to; and `key_press`."""
 
-    def _listing(self, number: int) -> SettingList | None:
-        """The list of the station's setting `number` as it opens, where the driver knows
-        it, with what was taken over in it before."""
-        action, view = self._to_set()[number][0], self._view()
-        if self.setting_list is None or action.key is None or view is None:
-            return None
-        listing = self.setting_list(view, action.key)
-        taken = self.taken.get((self.guide.function, number), ())
+    def _listing(self, index: int) -> SettingList | None:
+        """The list the softkey `index` opens in the view on the display, where the driver
+        knows it, with what was taken over in it before."""
+        view = self._view()
+        row = view.keys[index] if view is not None and index < len(view.keys) else None
+        listing = self.setting_list(view, row) if self.setting_list and row else None
+        taken = self.taken.get((self.guide.function, index), ())
         return replace(listing, taken=taken) if listing is not None else None
+
+    def _softkey_of(self, number: int) -> int | None:
+        """The softkey beside the station's setting `number`, counted from the top."""
+        beside = [self.softkeys.index(part) for part in self._to_set()[number][1]
+                  if part in self.softkeys]
+        return beside[0] if beside else None
 
     def display_stated(self, key: str) -> str:
         """What the display shows of the test point: as set in a list, else as stated."""
@@ -56,32 +63,43 @@ class ListStation:
         step on in it, or to return to the view; empty where no list is known."""
         links = []
         for number in range(len(self._to_set())):
-            listing = self._listing(number)
-            if listing is None:
+            index = self._softkey_of(number)
+            if index is None or self._listing(index) is None:
                 links.append("")
                 continue
-            shown = self.listed[1] if self.listed and self.listed[0] == number else None
+            shown = self.listed[1] if self.listed and self.listed[0] == index else None
             text = tr("Show its list") if shown is None else \
                 tr("Back to the view") if shown.selected == len(shown.settings) - 1 else \
                 tr("Next in its list")
-            links.append(f' <a href="{LINK}{number}">{escape(text)}</a>')
+            links.append(f' <a href="{LINK}{index}">{escape(text)}</a>')
         return links
 
     def _list_hint(self) -> str:
-        known = any(self._listing(number) for number in range(len(self._to_set())))
+        view = self._view()
+        known = view is not None and any(self._works(index) for index in range(len(view.keys)))
         return f"<p>{escape(tr(CLICKABLE))}</p>" if known else ""
+
+    def _works(self, index: int) -> bool:
+        """Whether the softkey `index` does something on the drawn view."""
+        return self._listing(index) is not None or self._switched(index) is not None
+
+    def _switched(self, index: int):
+        """The view the softkey `index` switches to, or None."""
+        view = self._view()
+        row = view.keys[index] if view is not None and index < len(view.keys) else None
+        return self.softkey_view(view, row) if self.softkey_view and row else None
 
     def _follow_list(self, href: str) -> None:
         if not href.startswith(LINK):
             return
-        number = int(href.removeprefix(LINK))
-        if self.listed and self.listed[0] == number:
+        index = int(href.removeprefix(LINK))
+        if self.listed and self.listed[0] == index:
             shown = self.listed[1]
             last = shown.selected == len(shown.settings) - 1
-            self.listed = None if last else (number, shown.at(shown.selected + 1))
+            self.listed = None if last else (index, shown.at(shown.selected + 1))
         else:
-            listing = self._listing(number)
-            self.listed = (number, listing) if listing is not None else None
+            listing = self._listing(index)
+            self.listed = (index, listing) if listing is not None else None
         self._show_configure()
 
     def _list_on_display(self) -> bool:
@@ -107,13 +125,15 @@ class ListStation:
 
     def press_softkey(self, index: int) -> None:
         """The softkey `index`, counted from the top, as the instrument takes it: on the view
-        it opens the list of the setting beside it, in a list it works the list."""
+        it switches the view or opens the list of its setting, in a list it works the list."""
         if self.listed is None:
-            beside = [number for number, (_, parts) in enumerate(self._to_set())
-                      if self.softkeys[index] in parts and self._listing(number) is not None]
-            self.listed = (beside[0], self._listing(beside[0])) if beside else None
+            listing, other = self._listing(index), self._switched(index)
+            if listing is not None:
+                self.listed = (index, listing)
+            elif other is not None:
+                self.view_now = other
         else:
-            number, listing = self.listed
+            opened, listing = self.listed
             keys = listing.keys()
             key = keys[index] if index < len(keys) else ""
             if key in ("up", "down"):
@@ -122,9 +142,9 @@ class ListStation:
                 listing = listing.across(self._start(listing))
             elif key == "enter":
                 listing = listing.confirmed()
-            self.listed = (number, listing)
+            self.listed = (opened, listing)
             if key == "take":
-                self._take_over(number, listing.confirmed())
+                self._take_over(opened, listing.confirmed())
         self._show_configure()
 
     def _start(self, listing: SettingList) -> tuple[int, int]:
@@ -133,11 +153,11 @@ class ListStation:
         in_force = reading(listing, listing.selected, self.place.stated)
         return spot_of(setting, in_force) or (0, 0)
 
-    def _take_over(self, number: int, listing: SettingList) -> None:
+    def _take_over(self, index: int, listing: SettingList) -> None:
         """Closes the list and keeps what was confirmed in it."""
-        self.taken[(self.guide.function, number)] = listing.taken
-        for index, wording in listing.taken:
-            feature = listing.settings[index].feature
+        self.taken[(self.guide.function, index)] = listing.taken
+        for place, wording in listing.taken:
+            feature = listing.settings[place].feature
             if feature:
                 self.set_values[feature] = wording.rpartition(":")[2].strip()
         self.listed = None

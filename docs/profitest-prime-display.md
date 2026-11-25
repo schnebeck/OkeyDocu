@@ -218,11 +218,29 @@ it was not photographed.
 Once a result has arrived at the measure station, the readings of the view carry its values.
 
 The setting lists are kept in `okeydocu/devices/profitest_prime/setting_lists.py`, by view and
-softkey row, each read off the display: for the measuring path of U and ZLOOP, the measuring
-time, the test voltage and the limits of RLO and RISO, the current and the voltage thresholds
-of the rising voltage, the RCD data with its four settings and the limits of the three RCD
-views, the limits and the DC variant of ZLOOP, and the limits of Ures. A list or a page that
-was not seen is left out: the test signal of RLO, the protective device of ZLOOP, the second
-page of the rated current of an RCD, and the lists of IMD, RCM, IL, the clamp and ΔU. At the
-station "Mode and limits" the softkeys of the drawing open and work these lists: up, down, to
-the choices, confirm with the third softkey, take over with the fourth.
+softkey row, each read off the display: the measuring path of U, RISO and ZLOOP, the
+measuring time, the test signal, the test voltage and the limits of RLO and RISO, the current
+and the voltage thresholds of the rising voltage, the RCD data with its four settings, the
+test current and the limits of the three RCD views, the protective device with its cable, the
+limits and the DC variant of ZLOOP, the limits of Ures, the start value and the path of IMD,
+the test and the limit of RCM, the limit of IL, the ratio and the limits of the clamp, and the
+circuit of ΔU. A wave, which the display shows as a picture, is put into signs: ∿ a full wave
+with its angle, ◡ and ◠ a half wave, ⊔ and ⊓ a smooth current.
+
+A list opens on the page of the value in force, so of a long list one page was seen. The
+other page is taken from the list the instrument's software package carries for that setting,
+wherever the page seen agrees with it entry for entry: the rated current and the
+characteristic of the protective device, the rated current of an RCD, the measuring paths.
+Where the two differ, the display stands and the unseen page is counted but left empty: the
+cross-section opens on 2/2, the cable type has a second page, the start value of IMD stands
+on 5/7. The test current of an RCD was not opened at the RCD positions; its wave and its
+system stand as RCM lists them, the multiples of IΔN and the wave of the rising current as
+the software package does. Not kept are the table of limits by protective device that
+`soft-5` opens in the limits of RLO 25 A, the mode list of the position Extra, the limit of
+ΔU and the offset prompts.
+
+Three softkeys open no list but switch the view at once (`SWITCHES`): U and U3~, °C and °F,
+MAN± and AUTO of IMD. At the station "Mode and limits" the softkeys of the drawing do what
+they do on the instrument: such a softkey switches the drawn view, any other with a known
+list opens it and the list is worked with up, down, to the choices, confirm with the third
+softkey, take over with the fourth.

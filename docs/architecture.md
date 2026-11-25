@@ -666,9 +666,14 @@ the pair of conductors measured.
 A softkey of a setting opens its setting list on the instrument, the second kind of view
 (`SettingList`): the settings of that softkey in a column on the left, the choices of the
 selected one on the right, page by page. The driver hands out the list of a view's softkey row
-(`DriverInfo.setting_list`, for the PROFITEST PRIME `setting_lists.py`). At the station that
-sets the instrument up, the softkeys of the drawn panel work as on the instrument
-(`ui/list_station.py`): a click on the softkey beside a setting opens its list on the drawn
+(`DriverInfo.setting_list`, for the PROFITEST PRIME `setting_lists.py`), and the view a
+softkey row switches to at once, such as from one voltage to the three of a three-phase
+supply (`DriverInfo.softkey_view`). A setting counts the pages the instrument has where not
+all of them are known (`Setting.of`, `Setting.before`). At the station that sets the
+instrument up, the softkeys of the drawn panel work as on the instrument
+(`ui/list_station.py`), whether the guide names them or not: a click on a softkey that
+switches the view shows the other view until the station is left, a click on the softkey
+beside a setting opens its list on the drawn
 display (`ui/list_art.py`); there the softkeys move the cursor up and down, pass to the
 choices, where the third one confirms the choice under the cursor, and take the list over,
 which closes it. The list keeps what was taken over, and a setting that describes the test

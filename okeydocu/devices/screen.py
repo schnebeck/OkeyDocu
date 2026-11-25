@@ -73,17 +73,19 @@ class Screen:
 class Setting:
     """One setting as a setting list names it with its value, and what can be chosen for it.
     `pages` are the choices as the instrument turns them over, each as it words it; `of` says
-    how many pages the instrument has where not all of them are known; `typed` is a value
-    entered by hand, offered last; `feature` what the element states that names the choice."""
+    how many pages the instrument has where not all of them are known, `before` how many of
+    the unknown ones come first; `typed` is a value entered by hand, offered last; `feature`
+    what the element states that names the choice."""
 
     shown: str  # may hold a name in braces, as a softkey row does
     pages: tuple[tuple[str, ...], ...] = ()
     typed: str = ""
     feature: str = ""
     of: int = 0
+    before: int = 0
 
     def page_count(self) -> int:
-        return max(self.of, len(self.pages), 1)
+        return max(self.of, self.before + len(self.pages), 1)
 
     def offered(self) -> tuple[tuple[str, ...], ...]:
         """Every row the cursor can stand on, page by page: the choices, and behind the last

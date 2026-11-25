@@ -20,7 +20,8 @@ from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QPainter, QPen, QPolygonF
 
 from ..devices.screen import Setting, SettingList
-from .screen_art import COLUMN, GRID, INK, LEFT, PAPER, PLACEHOLDER, _frame, _stated, _text
+from .screen_art import (COLUMN, GRID, INK, LEFT, PAPER, PLACEHOLDER, _frame, _stated,
+                         _text)
 
 ROWS = 10  # choices on a page
 DOTTED = Qt.PenStyle.DotLine
@@ -78,7 +79,8 @@ def paint_list(painter: QPainter, box: QRectF, centres: list[float], listing: Se
     counter = QRectF(room.center().x() - 14 * dot, room.top() + 2 * dot, 34 * dot, 9 * dot)
     painter.setPen(QPen(INK, max(0.7 * dot, 1.0), DOTTED))
     painter.drawRoundedRect(counter, 2 * dot, 2 * dot)
-    _text(painter, counter, f"{number + 1}/{setting.page_count()}", 7 * dot, bold=True)
+    _text(painter, counter, f"{setting.before + number + 1}/{setting.page_count()}", 7 * dot,
+          bold=True)
     body = room.adjusted(0, 15 * dot, 0, 0)
     left = QRectF(body.left(), body.top(), body.width() * 0.47, body.height())
     right = QRectF(left.right() + 2 * dot, body.top(), body.right() - left.right() - 2 * dot,

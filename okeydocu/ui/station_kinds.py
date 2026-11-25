@@ -33,7 +33,7 @@ class StationKinds:
         """The view of the dial position the instrument reported, where that serves the
         measurement, else of the guide's own position."""
         there = self.position.value if fits(self.guide, self.position) else None
-        return self.guide.screen_at(there, measured)
+        return self.view_now or self.guide.screen_at(there, measured)
 
     def _on_display(self) -> None:
         """The instrument's display at this station: dark while the element is chosen, the

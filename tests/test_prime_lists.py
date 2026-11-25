@@ -15,7 +15,9 @@ from okeydocu.devices.guide import CONFIGURE, MEASURE
 from okeydocu.devices.profitest_prime import screens
 from okeydocu.devices.profitest_prime.info import DRIVER_KEY
 from okeydocu.devices.profitest_prime.panel import DRAWING
-from okeydocu.devices.profitest_prime.setting_lists import LISTS, RCD_DATA, setting_list
+from okeydocu.devices.profitest_prime.setting_lists import (CABLE, LISTS, RCD_DATA, SECTION,
+                                                            SWITCHES, setting_list,
+                                                            softkey_view)
 from okeydocu.devices.screen import LIST_KEYS, SettingList
 from okeydocu.l10n import speaking
 from okeydocu.ui.front_panel import FrontPanel
@@ -32,14 +34,35 @@ def test_every_list_belongs_to_a_softkey_row_of_its_view_and_fits_the_display():
         for setting in listing.settings:
             assert all(0 < len(page) <= ROWS for page in setting.pages)
             assert setting.pages or setting.typed  # something can be chosen or entered
-            assert setting.page_count() >= len(setting.pages)
+            assert setting.page_count() >= setting.before + len(setting.pages)
     assert len(LIST_KEYS) < len(DRAWING.softkeys)  # the lowest softkey does nothing in a list
 
 
 def test_a_list_is_found_by_view_and_softkey_row_only():
     assert setting_list(screens.RLO, screens.LIMITS) is not setting_list(screens.RISO,
                                                                        screens.LIMITS)
-    assert setting_list(screens.IMD, screens.IMD_START) is None
+    assert setting_list(screens.RLO, screens.OFFSET) is None
+
+
+def test_pages_not_seen_are_counted_where_they_stand():
+    assert (SECTION.before, len(SECTION.pages), SECTION.page_count()) == (1, 1, 2)
+    assert (CABLE.before, len(CABLE.pages), CABLE.page_count()) == (0, 1, 2)
+    start = setting_list(screens.IMD, screens.IMD_START).settings[0]
+    assert (start.before, start.page_count()) == (4, 7)
+    assert spot_of(start, start.shown) == (0, 3)  # the value in force, on the page seen
+
+
+def test_a_softkey_that_switches_the_view_leads_there_and_back():
+    for (view, key), there in SWITCHES.items():
+        assert view.softkey(key) is not None and there != view
+        back = there.keys[view.softkey(key)]
+        assert softkey_view(there, back) == view
+    assert softkey_view(screens.U, screens.VIEW_U) == screens.U3
+    assert softkey_view(screens.U, screens.U_PATH) is None  # that softkey opens a list
+    automatic = softkey_view(screens.IMD, screens.IMD_SEQUENCE)
+    assert automatic.keys[1].inverted == "AUTO"
+    assert setting_list(automatic, screens.IMD_PATH) is setting_list(screens.IMD,
+                                                                     screens.IMD_PATH)
 
 
 def test_values_read_alike_whatever_names_them():
@@ -51,7 +74,8 @@ def test_the_choice_the_element_names_is_found_on_its_page():
     assert page_of(FORM, {"rcd_type": "A"}.get) == (0, "A")
     assert page_of(FORM, {"rcd_type": "AC"}.get) == (1, "AC")
     assert page_of(RATED, {"rated_current": "40 A"}.get) == (0, "IN: 40A")
-    assert page_of(RATED, {"rated_current": "125 A"}.get) == (0, "")  # on a page not known
+    assert page_of(RATED, {"rated_current": "125 A"}.get) == (1, "IN: 125A")
+    assert page_of(RATED, {"rated_current": "250 A"}.get) == (0, "")  # not among the choices
     assert page_of(FORM, None) == (0, "") and RATED.page_count() == 2
 
 
@@ -85,8 +109,8 @@ def window(qtbot, app):
 
 def test_a_setting_with_a_known_list_offers_to_show_it(window):
     text = window.step_text.text()
-    assert text.count("Liste zeigen") == 2  # RCD data and limits; the test current has none
-    assert 'href="list:0"' in text and 'href="list:2"' in text and 'href="list:1"' not in text
+    assert text.count("Liste zeigen") == 3  # RCD data, test current and limits
+    assert all(f'href="list:{softkey}"' in text for softkey in (0, 1, 2))
 
 
 def test_the_link_steps_through_the_list_and_back_to_the_view(window):
@@ -152,7 +176,7 @@ def press(window, index):
 
 def test_the_softkey_beside_a_setting_opens_its_list(window):
     assert "Softkeys im Bild lassen sich drücken" in window.step_text.text()
-    press(window, 1)  # the test current: no list is known for it
+    press(window, 3)  # a softkey without a row beside it
     assert window.listed is None
     press(window, 0)
     panel = window.bench.panel
@@ -230,3 +254,14 @@ def test_the_cursor_passes_to_the_value_in_force_and_back_over_the_page(qtbot, a
         press(shown, DOWN)
         press(shown, DOWN)
         assert panel.screen.cursor == (1, 0)
+        press(shown, TAKE)
+        press(shown, 0)  # the top softkey switches between one voltage and the three
+        assert panel.screen == screens.U3 and shown.listed is None
+        press(shown, 3)  # the three-phase view has no measuring path to list
+        assert panel.screen == screens.U3
+        press(shown, 0)
+        assert panel.screen == screens.U
+        press(shown, 0)
+        shown.go_to(MEASURE)
+        shown.go_to(CONFIGURE)
+        assert panel.screen == screens.U  # a switched view ends with the station

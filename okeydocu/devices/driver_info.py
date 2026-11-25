@@ -44,5 +44,6 @@ class DriverInfo:
     guide: Callable[[str], object] | None = None  # function key to its guide, or None
     guided: tuple[str, ...] = ()  # the functions it has a guide for
     setting_list: Callable[[object, object], object] | None = None  # view, softkey row: its list
+    softkey_view: Callable[[object, object], object] | None = None  # ... or the view it switches to
     preparing: str = PREPARING  # shown while the program gets the instrument ready
     simulated: bool = False  # random readings: shown as such, never signed

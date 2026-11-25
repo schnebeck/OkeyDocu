@@ -92,8 +92,9 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, ListStation, Repe
         self.scene = PlaceScene()
         self.bench = BenchView(info.panel) if info.panel is not None else Absent()
         self.softkeys = info.panel.softkeys if info.panel is not None else ()
-        self.setting_list = info.setting_list
-        self.listed = None  # the setting whose list is open, and the list as it stands
+        self.setting_list, self.softkey_view = info.setting_list, info.softkey_view
+        self.view_now = None  # the view a softkey switched to at this station
+        self.listed = None  # the softkey whose list is open, and the list as it stands
         self.taken: dict[tuple, tuple] = {}
         self.set_values: dict[str, str] = {}
         self.left = QStackedWidget()
@@ -199,7 +200,7 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, ListStation, Repe
         if self.kind == CONNECT and forward:
             self.bench.finish()
         self.index = self._past_passed(max(index, 0), 1 if forward else -1)
-        self.listed = None  # a setting list is looked at in one station only
+        self.listed = self.view_now = None  # lists and switched views end with the station
         self._take_guide()
         if self._leads_passed():
             self.bench.finish()
