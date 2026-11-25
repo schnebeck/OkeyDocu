@@ -45,7 +45,7 @@ texts:
   Value: Wert
   Lower limit: Untergrenze
   Upper limit: Obergrenze
-  Measurement by hand: Messung von Hand
+  Manual measurement: Manuelle Messung
   Add: Hinzufügen
   Add reading: Messwert hinzufügen
   Remove reading: Messwert entfernen
@@ -118,7 +118,6 @@ texts:
   Remark on the answer: Bemerkung zur Antwort
   "Yes": Ja
   "No": Nein
-  Enter by hand …: Von Hand eintragen …
   Skip …: Auslassen …
   Reopen: Wieder öffnen
   "Skipped: {note}": "Ausgelassen: {note}"

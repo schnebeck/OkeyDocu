@@ -51,7 +51,7 @@ class CampaignValues(CampaignPoints, MeasurementView):
         self.step_id: int | None = None
         self.in_plan = False  # a plan is being run: readings typed by hand go to its step
         self.manual_action, self.manual_button = self._action(
-            tr("Reading by hand …"), tr("By hand …"), self._enter_by_hand
+            tr("Manual measurement …"), tr("Manual measurement …"), self._enter_by_hand
         )
         # Made after the others, the button came last; it belongs first, always in one place.
         self.actions_row.removeWidget(self.manual_button)

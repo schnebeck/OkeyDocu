@@ -114,7 +114,7 @@ class RepeatPoint(QWidget):
         self.yes_button, self.no_button = QPushButton(tr("Yes")), QPushButton(tr("No"))
         self.yes_button.clicked.connect(lambda: self._answer("yes"))
         self.no_button.clicked.connect(lambda: self._answer("no"))
-        self.hand_button = QPushButton(tr("Enter by hand …"))
+        self.hand_button = QPushButton(tr("Manual measurement …"))
         self.hand_button.clicked.connect(lambda: self.by_hand.emit(self.step))
         self.skip_button = QPushButton(tr("Skip …"))
         self.skip_button.clicked.connect(self._skip)

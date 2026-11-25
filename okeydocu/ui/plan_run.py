@@ -40,7 +40,7 @@ class PlanRun(QWidget):
         self.end_button.setToolTip(tr("The steps still open count as skipped, with a reason"
                                       " that appears in the report"))
         self.end_button.clicked.connect(self.end_requested)
-        self.hand_button = QPushButton(tr("By hand …"))
+        self.hand_button = QPushButton(tr("Manual measurement …"))
         self.hand_button.setToolTip(tr("Enters a reading by hand into the step shown"))
         self.hand_button.clicked.connect(self.by_hand_requested)
         # The same row as measuring without a plan shows in this place, of the same height.

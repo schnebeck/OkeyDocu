@@ -436,7 +436,7 @@ all rows have in common, and the count, below it one toolbar of equal height eac
 then the header rows of tree and table on one line. Every line in the frame runs from one line
 to another: the head and the toolbars are ruled off below, and the rule between the panes is a
 bare line from the head's rule to the frame, grabbed a few pixels to either side. The toolbar of the table holds only
-“By hand …” and a filter field; edit, photo, move and delete of a row are in
+“Manual measurement …” and a filter field; edit, photo, move and delete of a row are in
 its context menu and on F2 and Del, so nothing stands permanently greyed out in the picture. Explanatory
 sentences are tooltips: at the header “Structure” and at the hint above the frame, whose bold part
 stays visible. Between the main blocks of the window lie 8 px of window background; a

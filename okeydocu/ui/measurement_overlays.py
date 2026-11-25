@@ -63,7 +63,7 @@ class MeasurementOverlay(Overlay):
     HEADERS = (N_("Designation"), N_("Value"), N_("Lower limit"), N_("Upper limit"))
 
     def __init__(self, parent=None):
-        super().__init__(tr("Measurement by hand"), parent, width=640)
+        super().__init__(tr("Manual measurement"), parent, width=640)
         self.ok_button.setText(tr("Add"))
         self._named = ""
         self.function = QuietCombo()
