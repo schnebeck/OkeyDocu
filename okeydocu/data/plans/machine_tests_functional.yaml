@@ -1,0 +1,126 @@
+# OkeyDocu - measuring plan, draft.
+# The functional tests of the electrical equipment of a machine: each point a question answered
+# yes when in order. DIN EN 60204-1 (VDE 0113-1):2026-06 asks in 18.6 to test the functions of
+# the electrical equipment; each step names the clause that describes the function it tests.
+# How a point is tested is practice, not the wording of the standard: a test is agreed with the
+# operator of the machine and left out with its reason where it would itself create a hazard.
+# Plans are offered in the order of their file names: this one stands behind the electrical test
+# and the inspection of a machine.
+key: machine_tests_functional
+title: "Machine – functional tests to EN 60204-1"
+released: false
+steps:
+- key: emergency_stop_works
+  kind: check
+  title: "Emergency stop: every device stops"
+  question: "Does every emergency stop device stop the hazardous movement as fast as possible, in every mode of operation and before every other function?"
+  text: "EN 60204-1, 9.2.3.4.2"
+  instructions: ["Agree the test with the operator of the machine and run it without a workpiece where that is possible. Actuate one device after the other, each in every mode of operation, and note the ones tested."]
+- key: emergency_stop_latches
+  kind: check
+  title: "Emergency stop: command stays, reset starts nothing"
+  question: "Does the stop command stay until the actuated device is reset by hand, does resetting only allow a restart without starting the machine, and is a restart impossible while any emergency stop is still actuated?"
+  text: "EN 60204-1, 9.2.3.4.1"
+  instructions: ["With one device actuated try to start: nothing moves. Reset it: nothing moves. Start deliberately: the machine runs. With two devices actuated reset only one and try to start."]
+- key: emergency_switching_off
+  kind: check
+  title: "Emergency switching off"
+  question: "Where emergency switching off is provided: does it switch off the supply of the drives concerned, and can nothing be switched on again before every command is reset?"
+  text: "EN 60204-1, 9.2.3.4.3"
+  instructions: ["Actuate each device and check with the voltage measurement that the circuit concerned is dead. Without emergency switching off leave the step out with that reason."]
+- key: stop_overrides_start
+  kind: check
+  title: "Stop overrides start"
+  question: "Does a stop command override the start that belongs to it, and is it effective from every operator station where the risk assessment asks for that?"
+  text: "EN 60204-1, 9.2.3.3"
+  instructions: ["Hold stop actuated and press start: nothing starts. Repeat at every operator station."]
+- key: start_conditions
+  kind: check
+  title: "Start only with the safeguards in place"
+  question: "Is a start only possible when all safety functions and protective measures are in place and ready, and where a start needs several operator stations: must all start devices be released and then actuated together?"
+  text: "EN 60204-1, 9.2.3.2"
+  instructions: ["Open one guard or leave one safeguard not ready and try to start; do this for each of them. With several stations hold one start device actuated beforehand: no start."]
+- key: guard_interlocks
+  kind: check
+  title: "Interlocked guards"
+  question: "Does opening an interlocked guard stop the hazardous function, and does closing or resetting it start nothing by itself?"
+  text: "EN 60204-1, 9.3.1"
+  instructions: ["Open every interlocked guard once during operation without a workpiece, then close it again and watch the machine."]
+- key: mode_selection
+  kind: check
+  title: "Modes of operation"
+  question: "Can the mode selector be locked in every position or is it restricted by an access code, does selecting a mode start nothing, and is the selected mode indicated?"
+  text: "EN 60204-1, 9.2.3.5"
+  instructions: ["Switch through every mode and compare the indication with the position. A machine with one mode only: leave the step out with that reason."]
+- key: suspended_safeguards
+  kind: check
+  title: "Operation with safeguards suspended"
+  question: "In the mode that suspends safeguards, for setting or maintenance: are all other modes disabled, is movement possible only with an enabling device or a similar control in view of the hazardous parts, and only at reduced speed, force or in steps?"
+  text: "EN 60204-1, 9.3.6"
+  instructions: ["Select the setting mode, try to start the automatic cycle and move an axis with and without the enabling device."]
+- key: enabling_device
+  kind: check
+  title: "Enabling device"
+  question: "Does movement stop when the enabling device is released, with three positions also when it is pressed through, and does returning from the pressed-through position not enable again?"
+  text: "EN 60204-1, 9.2.3.9, 10.9"
+  instructions: ["Move at reduced speed, release the device, then press it through and let it come back slowly."]
+- key: hold_to_run
+  kind: check
+  title: "Hold-to-run controls"
+  question: "Do hold-to-run controls need to be held all the time, and does the movement stop when they are released?"
+  text: "EN 60204-1, 9.2.3.7"
+  instructions: ["Jog every axis or function that has such a control and release it."]
+- key: two_hand_control
+  kind: check
+  title: "Two-hand control"
+  question: "Does the two-hand control need both actuators at the same time, stop when either is released, need both released before a new start, and for type III accept only an actuation within 0.5 s?"
+  text: "EN 60204-1, 9.2.3.8"
+  instructions: ["Try each actuator alone, both with a clear delay, and release one during the stroke. The type is in the documentation."]
+- key: operating_limits
+  kind: check
+  title: "Operating limits"
+  question: "Do the devices that detect an operating limit being overrun, such as travel, speed or pressure, bring about the intended reaction, and is an automatic restart prevented after overspeed?"
+  text: "EN 60204-1, 9.3.2, 9.2.3.6, 7.6"
+  instructions: ["Approach each travel limit at low speed or actuate the limit switch by hand with the drive enabled. Limits that cannot be reached safely are checked by the documentation and noted so."]
+- key: opposing_movements
+  kind: check
+  title: "Interlocks between opposing movements"
+  question: "Are functions whose simultaneous operation is hazardous, such as opposing movements and reversing contactors, interlocked against each other?"
+  text: "EN 60204-1, 9.3.4"
+  instructions: ["Give both commands at once at the operator station: only one or none is carried out."]
+- key: auxiliary_functions
+  kind: check
+  title: "Auxiliary functions"
+  question: "Is the working of auxiliary functions such as lubrication, coolant supply or swarf removal monitored, and does the machine react as intended when one of them fails?"
+  text: "EN 60204-1, 9.3.3"
+  instructions: ["Switch one auxiliary function off at its protective device or simulate its sensor, as the documentation allows."]
+- key: supply_return
+  kind: check
+  title: "Return of the supply"
+  question: "After an interruption of the supply: does the machine stay stopped when the voltage returns, until it is started deliberately?"
+  text: "EN 60204-1, 7.5"
+  instructions: ["With the machine running without a workpiece switch the supply disconnecting device off and on again."]
+- key: phase_sequence
+  kind: check
+  title: "Phase sequence"
+  question: "Where a wrong phase sequence can cause a hazard or damage: is there a protection against it, and do the drives turn in the right direction?"
+  text: "EN 60204-1, 7.8"
+  instructions: ["Measure the phase sequence at the supply and compare the direction of one drive with its arrow. A mobile machine or one with a plug needs the protection."]
+- key: warning_devices
+  kind: check
+  title: "Warning devices and indicators"
+  question: "Do the visual and audible warning devices work, can they be checked, and do the indicator lights show the state of the machine?"
+  text: "EN 60204-1, 10.3.1, 9.2.3.2"
+  instructions: ["Use the lamp test where there is one and watch the warning before a hazardous operation starts."]
+- key: cableless_control
+  kind: check
+  title: "Cableless control"
+  question: "With a cableless control: is its effectiveness indicated, does the machine stop by itself when the link is lost, and does it stay stopped when the link returns?"
+  text: "EN 60204-1, 9.2.4.2"
+  instructions: ["Switch the control station off during a movement without a load, or take it out of range. Without a cableless control leave the step out with that reason."]
+- key: functions_as_documented
+  kind: check
+  title: "Functions as documented"
+  question: "Do the functions of the electrical equipment work as the documentation describes them?"
+  text: "EN 60204-1, 18.6"
+  instructions: ["Run one complete cycle in every mode and compare it with the description of the sequence in the operating instructions."]

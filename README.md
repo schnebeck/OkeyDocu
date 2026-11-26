@@ -126,8 +126,9 @@ it, a defect in red.
 ![A photo of an RCD with two numbered marks, classed as a defect](docs/images/photo-marks.png)
 
 **Test plans, repeat inspections and campaign templates.** A test plan leads through questions
-and measurements in a wizard; a visual inspection to DIN VDE 0100-600, the inspection of a machine
-to EN 60204-1 and its electrical test come as drafts; they are copied, changed and renamed in an
+and measurements in a wizard; a visual inspection to DIN VDE 0100-600 and, for a machine to
+EN 60204-1, its inspection, its functional tests and its electrical test come as drafts, each
+question with the clause it rests on; they are copied, changed and renamed in an
 editor of their own. Any campaign takes any number of plans at any time, run in any order; each
 must be worked off before the campaign is ended, and a step skipped with its reason counts as
 worked off. A repeat inspection turns the last ended campaign into a list of open points. A

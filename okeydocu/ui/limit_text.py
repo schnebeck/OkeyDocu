@@ -7,12 +7,15 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 """A proposal is made only from what the element states, and it says how it was reckoned, so
-the inspector can check it and set it on the instrument."""
+the inspector can check it and set it on the instrument. For the protective conductor two
+things are told: what its length and cross-section let expect, and what supplementary
+protective bonding may have at most with the protective device the element states."""
 
 from __future__ import annotations
 
 from html import escape
 
+from ..campaign.bonding_limit import TOUCH_VOLTAGE, bonding_limit
 from ..campaign.conductor_limit import CONTACTS, conductor_limit
 from ..l10n import decimal, tr
 
@@ -30,9 +33,30 @@ def _plain(value: float) -> str:
     return text.rstrip("0").rstrip(".,") if not value.is_integer() else decimal(value, 0)
 
 
-def limit_text(function: str, stated, element: str) -> str:
-    """The proposal for `function` at the element that `stated` tells of, or nothing."""
-    found = conductor_limit(stated) if function in PROTECTIVE_CONDUCTOR else None
+def limit_text(function: str, stated, element: str, curve_of=None) -> str:
+    """The proposals for `function` at the element that `stated` tells of, or nothing.
+    `curve_of` gives the curve of a characteristic, where the caller knows the lists."""
+    if function not in PROTECTIVE_CONDUCTOR:
+        return ""
+    return _conductor_text(stated, element) + _bonding_text(stated, curve_of)
+
+
+def _bonding_text(stated, curve_of) -> str:
+    found = bonding_limit(stated, curve_of) if curve_of else None
+    if found is None:
+        return ""
+    head = tr("With supplementary protective bonding: at most {value}", value="§")
+    how = tr("{characteristic} {rated} A trips at {current} A at the latest: {volts} V /"
+             " {current} A. EN 60204-1, A.1.3, asks for this where the protective device"
+             " cannot disconnect in time.",
+             characteristic=found.characteristic, rated=_plain(found.rated),
+             current=_plain(found.current), volts=_plain(TOUCH_VOLTAGE))
+    head = escape(head).replace("§", f"<b>{escape(_ohms(found.value))}</b>")
+    return f"<p style='color:{PROPOSED}'>{head}</p><p>{escape(how)}</p>"
+
+
+def _conductor_text(stated, element: str) -> str:
+    found = conductor_limit(stated)
     if found is None:
         return ""
     cable = tr("{length} m of {section} mm² copper", length=_plain(found.length),

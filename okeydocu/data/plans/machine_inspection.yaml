@@ -116,12 +116,36 @@ steps:
   question: "Is the operating means of the supply disconnecting device outside the enclosure, easy to reach and between 0.6 m and 1.9 m above the access level?"
   text: "EN 60204-1, 5.3.4"
   instructions: ["Measure the height of the handle above the floor one stands on. Where a plug disconnects, leave the step out with that reason."]
+- key: excepted_circuits
+  kind: check
+  title: "Circuits the disconnecting device leaves live"
+  question: "Where circuits stay live with the supply disconnecting device off: is there a durable warning near its handle, does the maintenance manual name them, and are they told apart by the colour of their conductors, by separate laying or by warning labels?"
+  text: "EN 60204-1, 5.3.5"
+  instructions: ["Look in the diagram for circuits tapped in front of the disconnecting device: lighting and socket-outlets for maintenance, undervoltage release, supplies of memories or heaters. Without such circuits leave the step out with that reason."]
+- key: unexpected_start
+  kind: check
+  title: "Prevention of unexpected start-up"
+  question: "Are there means to interrupt the energy supply against an unexpected start-up, easy to identify, and can they be secured in the OFF position where they stand outside a closed electrical operating area?"
+  text: "EN 60204-1, 5.4, 5.6"
+  instructions: ["Find the device for each part somebody works at, and look for the provision for a padlock. A contactor or a drive with safe torque off serves for inspection and adjustment only."]
+- key: isolating_devices
+  kind: check
+  title: "Devices for isolating"
+  question: "Can the equipment or its parts be isolated for work on them, by devices that are easy to reach and that show which part or circuit they isolate?"
+  text: "EN 60204-1, 5.5"
+  instructions: ["Where parts are worked on one by one, each needs a device of its own. Disconnectors and withdrawable fuse links count only inside a closed electrical operating area."]
 - key: enclosure_access
   kind: check
   title: "Protection by enclosures"
   question: "Are live parts inside enclosures protected to at least IP2X or IPXXB, and can an enclosure be opened only with a key or tool, or once its live parts are disconnected?"
   text: "EN 60204-1, 6.2.2"
   instructions: ["Try doors and covers: they open only with a key or tool, or the main switch interlocks the door. With the door open, dead: what can be touched while resetting or adjusting is covered finger-safe."]
+- key: public_access
+  kind: check
+  title: "Equipment within reach of the public"
+  question: "Where the equipment is accessible to the general public, children included: are live parts protected to at least IP4X or IPXXD, or fully covered with insulation?"
+  text: "EN 60204-1, 6.2.1"
+  instructions: ["A machine in a workshop is not accessible to the public: leave the step out with that reason."]
 - key: degree_of_protection
   kind: check
   title: "Degree of protection"
@@ -134,6 +158,24 @@ steps:
   question: "Are the exposed conductive parts of the electrical equipment and the structural parts used for bonding connected to the protective bonding circuit, with no switching or overcurrent device in it?"
   text: "EN 60204-1, 8.2.1, 8.2.3"
   instructions: ["Follow the protective conductor from the PE terminal: motor housings, mounting plate, enclosure. Look for a fuse, switch or link in its path; there must be none. Its continuity is measured as test 1."]
+- key: overcurrent_protection
+  kind: check
+  title: "Overcurrent protection"
+  question: "Is every circuit protected against overcurrent at the point where the cross-section is reduced, with a rating or setting that fits the conductor and the load?"
+  text: "EN 60204-1, 7.2.1, 7.2.8, 7.2.10"
+  instructions: ["Take samples: compare the protective device with the diagram and with the conductor behind it. A reduced conductor may run unprotected for at most 3 m when it carries its load and is laid safe from short circuits."]
+- key: short_circuit_rating
+  kind: check
+  title: "Short-circuit current rating"
+  question: "Is the short-circuit current rating of the equipment stated, and is it at least as high as the short-circuit current to be expected at the place of installation?"
+  text: "EN 60204-1, 7.2.9, 7.10"
+  instructions: ["Read the rating from the documentation and compare it with the short-circuit current at the supply: stated by the operator or taken from the loop impedance measured there."]
+- key: motor_protection
+  kind: check
+  title: "Protection of motors against overheating"
+  question: "Has every motor above 0.5 kW a protection against overheating, by overload protection, temperature detection or current limiting, set to the motor?"
+  text: "EN 60204-1, 7.3"
+  instructions: ["Take samples: compare the setting of the motor protective device with the rated current on the rating plate of its motor."]
 - key: doors_and_covers
   kind: check
   title: "Equipment on doors and covers"
@@ -164,6 +206,36 @@ steps:
   question: "Are all connections, those of the protective bonding circuit in particular, secured against loosening, with one protective conductor only at each terminal connecting point?"
   text: "EN 60204-1, 13.1.1"
   instructions: ["Dead: look at the terminals and pull lightly at the conductors, the protective conductors first. Stranded conductors carry ferrules where the terminal is not made for them."]
+- key: conductor_sizes
+  kind: check
+  title: "Cross-sections of the conductors"
+  question: "Do the cross-sections fit: at least the minimum for their place and use, and a current-carrying capacity that the protective device in front does not exceed?"
+  text: "EN 60204-1, 12.2, 12.4"
+  instructions: ["Take samples with tables 5 and 6 of the standard. Copper in PVC at +40 °C in a duct carries about 13.5 A at 1.5 mm², 18.3 A at 2.5 mm², 24 A at 4 mm² and 31 A at 6 mm²; several loaded circuits together carry less."]
+- key: wiring_on_doors
+  kind: check
+  title: "Wiring to doors and moving parts"
+  question: "Are devices on doors and other moving parts connected with flexible conductors that are anchored on the fixed and on the moving part?"
+  text: "EN 60204-1, 13.3"
+  instructions: ["Open the doors of the cabinet fully and look at the loops of the wiring and at the protective conductor of the door."]
+- key: cable_runs
+  kind: check
+  title: "Cable runs outside the enclosures"
+  question: "Do the conductors run from terminal to terminal without joints, in ducts or adequately protected, with ducts and trays rigidly supported and clear of moving parts?"
+  text: "EN 60204-1, 13.1.2, 13.4.2, 13.5.1"
+  instructions: ["Follow the cables from the cabinet to the machine. Above walkways ducts and trays lie at least 2 m above the working level; the entries keep the degree of protection of the enclosure."]
+- key: flexible_cables
+  kind: check
+  title: "Cables to moving parts of the machine"
+  question: "Are the cables to moving parts flexible, free of pull and sharp bends at their fixing points, protected against being run over or chafed, and at least 25 mm away from moving parts?"
+  text: "EN 60204-1, 13.4.3, 12.6"
+  instructions: ["Move the axes through their travel and watch the cables. A loop needs the bending radius of the cable maker, otherwise at least ten times the diameter of the cable."]
+- key: plug_combinations
+  kind: check
+  title: "Plug and socket combinations"
+  question: "Do plug and socket combinations prevent touching live parts while they are mated and separated, does the protective contact make first and break last, are those rated above 16 A latched and those from 30 A interlocked with a switch, and can mating pairs not be mixed up?"
+  text: "EN 60204-1, 13.4.5"
+  instructions: ["Look at each kind of connector on the machine. The part that stays live after separation is at least IP2X or IPXXB; metal housings are connected to the protective bonding circuit, which the protective conductor measurement shows."]
 - key: pelv_circuits
   kind: check
   title: "PELV circuits"
@@ -188,12 +260,48 @@ steps:
   question: "Are emergency stop devices easy to reach and present wherever an emergency stop may have to be given?"
   text: "EN 60204-1, 10.7.1"
   instructions: ["Stand at every place where somebody works at the machine: an emergency stop device is within reach. Whether it works belongs to the functional tests."]
+- key: indicator_colours
+  kind: check
+  title: "Colours of indicator lights"
+  question: "Do the indicator lights follow the colour code, red for an emergency, yellow for an abnormal state, blue for a mandatory action, green for normal and white for neutral, and does an illuminated emergency stop actuator stay red?"
+  text: "EN 60204-1, 10.3.2, 10.4"
+  instructions: ["Compare the lights at the operator stations and on the signal tower, which reads red, yellow, blue, green, white from the top."]
 - key: socket_outlets
   kind: check
   title: "Socket-outlets for accessories"
   question: "Where the machine has socket-outlets for accessories: are those up to 20 A protected in addition by an RCD of at most 30 mA, and does the protective bonding circuit reach them?"
   text: "EN 60204-1, 15.1"
   instructions: ["Look for socket-outlets on the machine and in the cabinet and find their circuit in the diagram: an RCD of at most 30 mA in front. Without socket-outlets leave the step out with that reason."]
+- key: local_lighting
+  kind: check
+  title: "Local lighting of the machine"
+  question: "Is the local lighting supplied with at most 250 V between conductors, from an isolating transformer or a circuit of its own with overcurrent protection, with its on/off switch neither in the lampholder nor in the flexible cord?"
+  text: "EN 60204-1, 15.2"
+  instructions: ["Find the lighting circuit in the diagram; at most 50 V are recommended. Without local lighting leave the step out with that reason."]
+- key: motors
+  kind: check
+  title: "Motors and their mounting"
+  question: "Are the motors protected against mechanical damage, accessible with their terminal boxes for inspection and replacement, and cooled sufficiently?"
+  text: "EN 60204-1, 14.2, 14.4"
+  instructions: ["Look at each motor: free air intake, clean cooling fins, a degree of protection that fits its surroundings."]
+- key: sliding_contacts
+  kind: check
+  title: "Conductor wires, conductor bars and slip-rings"
+  question: "Where conductor wires, conductor bars or slip-rings are used: are they covered to at least IP2X or IPXXB, and have the protective conductor and the neutral a wire or a ring of their own?"
+  text: "EN 60204-1, 12.7.1, 12.7.2"
+  instructions: ["The continuity of the protective conductor over the sliding contact is measured with the protective conductor measurement, with the collector in several positions. Without sliding contacts leave the step out with that reason."]
+- key: operating_area_doors
+  kind: check
+  title: "Doors of electrical operating areas"
+  question: "Are doors in gangways and to electrical operating areas at least 0.7 m wide and 2.0 m high, do they open outwards, and can they be opened from inside without a key or tool?"
+  text: "EN 60204-1, 11.5"
+  instructions: ["Measure the clear opening. Without an electrical operating area that can be entered leave the step out with that reason."]
+- key: surroundings
+  kind: check
+  title: "Surroundings at the place of installation"
+  question: "Do the surroundings fit what the equipment is built for: air temperature outside the enclosures between +5 °C and +40 °C, relative humidity at most 50 % at +40 °C, no condensation?"
+  text: "EN 60204-1, 4.4.3, 4.4.4"
+  instructions: ["Measure temperature and humidity near the cabinet. At lower temperatures more humidity is permitted, for example 90 % at 20 °C; the documentation may state other limits."]
 - key: leakage_current
   kind: check
   title: "Earth leakage current above 10 mA"

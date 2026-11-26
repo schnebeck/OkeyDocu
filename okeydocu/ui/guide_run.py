@@ -16,13 +16,14 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from ..campaign.expected_voltage import between_lines, misfits
+from ..campaign.expected_voltage import between_lines, misfits, nominal_frequency, \
+    off_frequency
 from ..campaign.line_conductors import LINE_CONDUCTORS
 from ..devices.guide import CONNECT, MEASURE, Guide
 from ..l10n import tr
 from .station_texts import measure_text
 
-NOMINAL = "nominal_voltage"
+NOMINAL, FREQUENCY = "nominal_voltage", "supply_frequency"
 
 
 def _without_n(guide: Guide, has_n: bool | None) -> Guide:
@@ -92,7 +93,12 @@ class GuideRun:
         if self.reading is None:
             return []
         system = between_lines(self.place.stated(LINE_CONDUCTORS), self.place.stated(NOMINAL))
+        mains = nominal_frequency(self.place.stated(FREQUENCY))
+        off = [tr("{label} {value}: within 1 % of {expected} Hz is what a machine is built"
+                  " for (EN 60204-1, 4.3.2).",
+                  label=label, value=value, expected=f"{expected:.0f}")
+               for label, value, expected in off_frequency(self.reading.measurement, mains)]
         return [tr("{label} {value}: about {expected} V are expected here. Check the"
                    " connection and what the element states.",
                    label=label, value=value, expected=f"{expected:.0f}")
-                for label, value, expected in misfits(self.reading.measurement, system)]
+                for label, value, expected in misfits(self.reading.measurement, system)] + off

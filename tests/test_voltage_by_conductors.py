@@ -10,7 +10,8 @@ from datetime import datetime
 
 import pytest
 
-from okeydocu.campaign.expected_voltage import between_lines, expected, misfits
+from okeydocu.campaign.expected_voltage import (between_lines, expected, misfits,
+                                                nominal_frequency, off_frequency)
 from okeydocu.devices.base import LiveReading
 from okeydocu.devices.guide import CONNECT, MEASURE
 from okeydocu.devices.profitest_prime.guides import VOLTAGE
@@ -129,6 +130,17 @@ def test_only_voltages_off_by_more_than_a_tenth_are_named():
     assert [raw for _, raw, _ in misfits(single)] == ["398V"]
     assert misfits(reading("u", value("u", "3V"),
                            parameters=[Parameter("conductor", "N-PE")]).measurement) == []
+
+
+def test_only_a_frequency_off_by_more_than_a_hundredth_is_named():
+    def lines(frequency):
+        return reading("u3", value("u_l1l2", "400V"), value("f", frequency)).measurement
+    assert off_frequency(lines("50.4Hz")) == [] and off_frequency(lines("49.6Hz")) == []
+    assert [(raw, wanted) for _, raw, wanted in off_frequency(lines("50.6Hz"))] == [
+        ("50.6Hz", 50)]
+    assert off_frequency(lines("60.2Hz"), nominal_frequency("60 Hz")) == []
+    assert nominal_frequency("") == 50 and nominal_frequency("400 V") == 50
+    assert misfits(lines("50.6Hz")) == []  # a frequency is no voltage
 
 
 def test_the_measure_station_warns_of_a_voltage_that_does_not_fit(qtbot, app, machine):

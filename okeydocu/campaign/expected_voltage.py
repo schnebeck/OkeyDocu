@@ -9,7 +9,10 @@
 """Between two line conductors stands the voltage of the system, between a line conductor and
 N or PE that voltage divided by the square root of three: 400 V and 230 V unless the element
 states another nominal voltage. With one line conductor the element's nominal voltage is the
-one against N. A reading within a tenth of what is expected fits; N against PE is not judged."""
+one against N. A reading within a tenth of what is expected fits; N against PE is not judged.
+The frequency fits within a hundredth of 50 Hz, or of what the element states. Both spans are
+those a machine is built for (EN 60204-1, 4.3.2): 0.9 to 1.1 of the nominal voltage and 0.99
+to 1.01 of the nominal frequency in continuous operation."""
 
 from __future__ import annotations
 
@@ -23,6 +26,7 @@ TOLERANCE = 0.10
 PATHS = {"u_ln": "L-N", "u_lpe": "L-PE", "u_l1l2": "L1-L2", "u_l2l3": "L2-L3",
          "u_l3l1": "L3-L1"}
 PLAIN = "u"  # a voltage told by the measuring path of its measurement
+FREQUENCY, MAINS, FREQUENCY_TOLERANCE = "f", 50.0, 0.01
 
 
 def between_lines(lines: str, nominal: str) -> float:
@@ -58,4 +62,24 @@ def misfits(measurement: MeterMeasurement, system: float = BETWEEN_LINES) -> lis
             continue
         if abs(value - wanted) > wanted * TOLERANCE:
             found.append((result.label, result.quantity.raw, wanted))
+    return found
+
+
+def nominal_frequency(stated: str) -> float:
+    """The frequency an element states, such as “60 Hz”; that of the mains where it states none."""
+    found = Quantity.parse(stated.replace(" ", "")) if stated else None
+    if found is None or not found.base_value or found.base_unit != "Hz":
+        return MAINS
+    return found.base_value
+
+
+def off_frequency(measurement: MeterMeasurement, nominal: float = MAINS) -> list[tuple]:
+    """The frequencies of a measurement off the nominal one, as (label, reading, nominal)."""
+    found = []
+    for result in measurement.results:
+        value = result.quantity.base_value
+        if result.key != FREQUENCY or value is None or result.quantity.base_unit != "Hz":
+            continue
+        if abs(value - nominal) > nominal * FREQUENCY_TOLERANCE:
+            found.append((result.label, result.quantity.raw, nominal))
     return found

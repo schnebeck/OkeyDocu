@@ -97,6 +97,8 @@ texts:
   "{cable}: a cord of up to 1.5 mm² has its limit by its length.": "{cable}: Eine Anschlussleitung bis 1,5 mm² hat ihren Grenzwert nach der Länge."
   "{cable}: {conductor} for the conductor plus {contacts} for the contacts.": "{cable}: {conductor} für den Leiter und {contacts} für die Übergänge."
   "Proposed limit for {element}: {value}": "Vorgeschlagener Grenzwert für {element}: {value}"
+  "With supplementary protective bonding: at most {value}": "Mit zusätzlichem Schutzpotentialausgleich: höchstens {value}"
+  "{characteristic} {rated} A trips at {current} A at the latest: {volts} V / {current} A. EN 60204-1, A.1.3, asks for this where the protective device cannot disconnect in time.": "{characteristic} {rated} A löst spätestens bei {current} A aus: {volts} V / {current} A. EN 60204-1, A.1.3, verlangt das, wo das Schutzorgan nicht rechtzeitig abschalten kann."
   "Limit of the appliance tests (EN 50678 and EN 50699, 5.3). For a machine they are a supplement the inspector decides on; EN 60204-1 sets no limit of its own.": "Grenzwert der Geräteprüfung (EN 50678 und EN 50699, 5.3). Für eine Maschine ist sie eine Ergänzung, über die der Prüfer entscheidet; die EN 60204-1 nennt keinen eigenen Grenzwert."
   "No fixed limit for {element}; to be expected: up to {value}": "Kein fester Grenzwert für {element}; zu erwarten: bis {value}"
   "EN 60204-1, 18.2.2, sets no limit: the reading has to fit length, cross-section and material.": "EN 60204-1, 18.2.2, nennt keinen Grenzwert: Der Messwert muss zu Länge, Querschnitt und Werkstoff der Leiter passen."
@@ -131,6 +133,7 @@ texts:
   Measuring path: Messstrecke
   Single voltages: Einzelspannungen
   "{label} {value}: about {expected} V are expected here. Check the connection and what the element states.": "{label} {value}: Hier werden etwa {expected} V erwartet. Anschluss und Angaben am Element prüfen."
+  "{label} {value}: within 1 % of {expected} Hz is what a machine is built for (EN 60204-1, 4.3.2).": "{label} {value}: Eine Maschine ist für {expected} Hz mit höchstens 1 % Abweichung gebaut (EN 60204-1, 4.3.2)."
   Switch off and pull the plug: Ausschalten und Stecker ziehen
   The protective conductor is measured without voltage.: Der Schutzleiter wird spannungsfrei gemessen.
   Find a bare metal spot: Blanke Metallstelle suchen

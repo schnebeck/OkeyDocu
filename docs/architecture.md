@@ -706,8 +706,12 @@ is the cable length and the cross-section: the resistance of the copper conducto
 an ohm for the contacts. On a plug this is the limit of the appliance tests, which give a cord of
 up to 1.5 mm² a fixed limit by its length instead and are a supplement where a machine is tested;
 at a fixed connection no standard sets a
-limit, and the sum is shown as what to expect. Nothing is proposed from what the element does
-not state.
+limit, and the sum is shown as what to expect. Where the element states the rated current and
+the characteristic of its protective device, the station also names what supplementary
+protective bonding may have at most (`campaign/bonding_limit.py`, EN 60204-1, A.1.3): 50 V
+divided by the current that trips the device, taken as the upper end of the instantaneous
+range its curve in the list of characteristics names; a fuse has no such range and gives no
+value. Nothing is proposed from what the element does not state.
 
 The PROFITEST PRIME's views (`devices/profitest_prime/screens.py`) are kept per rotary switch
 position; [profitest-prime-display.md](profitest-prime-display.md) tells what was read from the
@@ -759,7 +763,9 @@ A voltage received is compared with what the element lets expect
 (`campaign/expected_voltage.py`): the system's voltage between two line conductors, that divided
 by √3 against N or PE; 400 V and 230 V unless the element states a nominal voltage. A reading
 more than a tenth off is named below the result in the measure station; N against PE is not
-judged.
+judged. A frequency more than a hundredth off 50 Hz, or off what the element states as its
+supply frequency, is named as well. Both spans are those EN 60204-1, 4.3.2, builds a machine
+for.
 
 ## Campaign templates
 

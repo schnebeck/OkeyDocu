@@ -11,6 +11,7 @@ words of a station come from the driver; what stays here is how a kind of statio
 
 from __future__ import annotations
 
+from ..campaign.bonding_limit import CHARACTERISTIC
 from ..campaign.line_conductors import LINE_CONDUCTORS
 from ..devices.guide import MEASURE, PLACE, Station
 from ..l10n import tr
@@ -62,6 +63,12 @@ class StationKinds:
             found.append((action, action.parts + row))
         return found
 
+    def _curve_of(self, characteristic: str) -> str:
+        """The time-current curve the list of characteristics keeps for one of them."""
+        known = self.app.db.choice_list(CHARACTERISTIC)
+        entry = known.entry(characteristic) if known else None
+        return entry.curve if entry else ""
+
     def _enter_place(self, station: Station) -> None:
         self.next.setText(tr("Prepared – next ▶"))
 
@@ -108,7 +115,8 @@ class StationKinds:
         advice += conductors_text(self.guide, self.place.stated(LINE_CONDUCTORS),
                                   self.place.has_n)
         advice += unsuited_text(self.guide.function, self.place.stated)
-        advice += limit_text(self.guide.function, self.place.stated, self.place.title)
+        advice += limit_text(self.guide.function, self.place.stated, self.place.title,
+                             self._curve_of)
         self.step_text.setText(mode_text([action for action, _ in to_set], station.actions,
                                          self._settings(), self.place.title, advice,
                                          self._list_links())
