@@ -13,49 +13,49 @@ steps:
   title: "Documentation: overview and identification"
   question: "With more than one document: is there a main document that lists all documents of the electrical equipment, and does the documentation identify the equipment as its marking does?"
   text: "EN 60204-1, 17.2 a), b)"
-  instructions: ["Ask for the documentation of the machine. With several documents look for a list of them or a cover sheet, and compare type and serial number with the marking on the enclosure."]
+  instructions: ["Ask for the documentation of the machine. With several documents look for a list of them or a cover sheet, and compare type and serial number with the marking on the enclosure.", "Kinds of document for this, after Annex I: a list of documents (IEC 62027), product specifications (IEC/PAS 62569-1) and documents structured to IEC 62023. Simple equipment may have all information in a single document."]
 - key: documentation_supply
   kind: check
   title: "Documentation: connection to the supply"
   question: "Does it describe installation and connection, and state for every supply connection the rated short-circuit current, nominal voltage, number of line conductors, frequency, type of system (TT, TN, IT) and full-load current, with further demands on the supply such as its highest impedance or the leakage current?"
   text: "EN 60204-1, 17.2 c)"
-  instructions: ["Look in the installation instructions and on the first sheets of the circuit diagram. Compare voltage, frequency and full-load current with the marking on the enclosure and with the supply on site."]
+  instructions: ["Look in the installation instructions and on the first sheets of the circuit diagram. Compare voltage, frequency and full-load current with the marking on the enclosure and with the supply on site.", "Kinds of document for this, after Annex I: instructions for installation, erection and assembly on site (IEC 82079-1), circuit diagrams and connection diagrams (IEC 61082-1)."]
 - key: documentation_site
   kind: check
   title: "Documentation: place of installation"
   question: "Does it state, where needed, the room for removal and maintenance, what the cooling asks of the arrangement, the limits of the surroundings, functional limits such as starting currents and permitted voltage drop, and the measures for electromagnetic compatibility?"
   text: "EN 60204-1, 17.2 c)"
-  instructions: ["Look in the installation instructions for the conditions of the place. What this machine does not need is left out with the reason."]
+  instructions: ["Look in the installation instructions for the conditions of the place. What this machine does not need is left out with the reason.", "Kinds of document for this, after Annex I: instructions for installation and erection (IEC 82079-1) and an overview drawing of the equipment with its overall dimensions (IEC 61082-1)."]
 - key: documentation_bonding
   kind: check
   title: "Documentation: extraneous conductive parts"
   question: "Does it say how extraneous conductive parts that can be touched together with the machine, for example within 2.5 m, are connected to its protective bonding: metal pipes, fences, ladders, handrails?"
   text: "EN 60204-1, 17.2 d)"
-  instructions: ["Look around the machine for metal pipes, fences, ladders and handrails within reach, about 2.5 m, and for what the instructions say about bonding them."]
+  instructions: ["Look around the machine for metal pipes, fences, ladders and handrails within reach, about 2.5 m, and for what the instructions say about bonding them.", "Kind of document for this, after Annex I: instructions for installation and erection (IEC 82079-1)."]
 - key: documentation_operation
   kind: check
   title: "Documentation: function and operation"
   question: "Does it hold, where needed, an overview of the layout of the electrical equipment, the procedures for programming or configuring, for restarting after an unexpected stop, and the sequence of operations?"
   text: "EN 60204-1, 17.2 e)"
-  instructions: ["Look in the operating instructions for a layout drawing or overview and for the parts on setting up, restarting and the sequence of operations."]
+  instructions: ["Look in the operating instructions for a layout drawing or overview and for the parts on setting up, restarting and the sequence of operations.", "Kinds of document for this, after Annex I: operating instructions (IEC 82079-1) and an overview drawing of the equipment (IEC 61082-1)."]
 - key: documentation_maintenance
   kind: check
   title: "Documentation: maintenance"
   question: "Does it state how often and how functions are tested, how to maintain safely, how to adjust and repair, the connections of the components for their replacement, by circuit diagrams or connection tables, and the special tools and spare parts?"
   text: "EN 60204-1, 17.2 f)"
-  instructions: ["Look for the part on maintenance, the circuit diagrams or connection tables and the list of spare parts. Take a sample: find one component of the cabinet in the diagram."]
+  instructions: ["Look for the part on maintenance, the circuit diagrams or connection tables and the list of spare parts. Take a sample: find one component of the cabinet in the diagram.", "Kinds of document for this, after Annex I: instructions for inspection and maintenance (IEC 82079-1); circuit diagrams, connection diagrams, terminal lists, cable lists and an overview of the cable routes (IEC 61082-1); a parts list and a list of spare parts for a set period (IEC 62027); a list of tools."]
 - key: documentation_safety
   kind: check
   title: "Documentation: residual risks and settings"
   question: "Does it name residual risks, the training and protective equipment needed, the restriction of access by key or tool to skilled or instructed persons, the settings such as DIP switches and parameter values, and how safety-related control functions are verified after repairs and at periodic tests?"
   text: "EN 60204-1, 17.2 f)"
-  instructions: ["Look for the part on safety and for a list of settings: parameters, DIP switches. Where the machine has safety functions, look for how they are tested."]
+  instructions: ["Look for the part on safety and for a list of settings: parameters, DIP switches. Where the machine has safety functions, look for how they are tested.", "Kinds of document for this, after Annex I: instructions for inspection and maintenance (IEC 82079-1) and a list of parameters, for example for converters."]
 - key: documentation_handling
   kind: check
   title: "Documentation: transport and disposal"
   question: "Does it state, where needed, how to handle, transport and store the equipment, and how to dismantle it and treat its components?"
   text: "EN 60204-1, 17.2 g), h)"
-  instructions: ["Look for the parts on transport, storage and disposal. For a machine that stands in place a short statement is enough."]
+  instructions: ["Look for the parts on transport, storage and disposal. For a machine that stands in place a short statement is enough.", "Kinds of document for this, after Annex I: instructions for handling, transport and storage and instructions for dismantling (IEC 82079-1)."]
 - key: conformity
   kind: check
   title: "Agreement with the documentation"
@@ -73,7 +73,7 @@ steps:
   title: "Reference designations"
   question: "Can every enclosure, assembly, control device and component be identified by the reference designation the documentation shows?"
   text: "EN 60204-1, 16.5"
-  instructions: ["Take samples: choose three components in the cabinet and one at the machine, read the designation on each and find the same one in the diagram."]
+  instructions: ["Take samples: choose three components in the cabinet and one at the machine, read the designation on each and find the same one in the diagram.", "Annex I names the standards the designations follow: IEC 81346-1 and IEC 81346-2 for reference designations, IEC 61666 for terminals, IEC 62491 for cables and cores."]
 - key: warning_signs
   kind: check
   title: "Warning signs"

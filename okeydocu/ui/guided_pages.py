@@ -126,7 +126,7 @@ class CheckPage(QWidget):
         asked = step.question if step.question != step.title else ""
         self.asked.setText(asked)
         self.asked.setVisible(bool(asked))
-        told = " ".join(escape(line) for line in step.instructions)
+        told = "<br>".join(escape(line) for line in step.instructions)
         self.how.setText(f"<b>{escape(tr('How to check:'))}</b> {told}")
         self.how.setVisible(bool(told))
         self.expected = step.expected

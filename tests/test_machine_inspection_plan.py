@@ -7,6 +7,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from okeydocu.campaign.plan import load_plans
+from okeydocu.l10n import speaking
 
 
 def plan():
@@ -36,4 +37,14 @@ def test_no_step_has_the_title_or_the_key_of_another():
 
 
 def test_every_question_says_how_it_is_checked():
-    assert all(len(step.instructions) == 1 and step.instructions[0] for step in plan().steps)
+    assert all(step.instructions and all(step.instructions) for step in plan().steps)
+
+
+def test_a_question_on_the_documentation_names_the_kinds_of_document_that_serve_it():
+    for language, annex in (("en", "Annex I"), ("de", "Anhang I")):
+        with speaking(language):
+            documents = [step for step in plan().steps if step.key.startswith("documentation_")]
+        assert len(documents) == 8
+        for step in documents:
+            how, kinds = step.instructions
+            assert annex in kinds and "IEC " in kinds and annex not in how
