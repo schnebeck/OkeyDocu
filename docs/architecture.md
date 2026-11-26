@@ -767,6 +767,14 @@ judged. A frequency more than a hundredth off 50 Hz, or off what the element sta
 supply frequency, is named as well. Both spans are those EN 60204-1, 4.3.2, builds a machine
 for.
 
+The short-circuit current depends on the place. The installation states the impedance and
+the short-circuit current of its supply, as the enquiry form of EN 60204-1, annex B, asks the
+operator for them; a machine states what its maker rates its equipment for, the short-circuit
+current rating. A short-circuit current received above that rating is named below the result
+(`campaign/short_circuit.py`, 7.2.9 and 7.10): it holds for the supply measured at. One below
+it is not judged: a loop measurement between two conductors gives less than the current
+between three line conductors and may be off by up to 30 % (IEC 61557-3, 6.2).
+
 ## Campaign templates
 
 A campaign template (`campaign/templates.py`) keeps the element tree below the installation it

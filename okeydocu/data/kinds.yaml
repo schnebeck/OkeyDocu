@@ -11,7 +11,10 @@
 #
 # What is supplied through a connection of its own, a machine, a device or a piece of
 # equipment, can state the RCD in front of it: one of the building installation, which is no
-# element of its structure.
+# element of its structure. The short-circuit current depends on the place: the installation
+# states the impedance and the short-circuit current of its supply, as the enquiry form of
+# EN 60204-1, annex B, asks the operator for them; a machine states what its maker rates its
+# equipment for, the short-circuit current rating (7.10).
 #
 # Producer: thorsten.schnebeck@gmx.net
 # Generator: Claude Opus 5.5
@@ -23,7 +26,10 @@ kinds:
      features: [Line conductors, N conductor,
                 Operator, Person responsible, Installer, Year of installation, Network operator,
                 Earthing system type, "Supply voltage|V", "Supply frequency|Hz", "Rated current|A",
-                Cable type, "Cross-section|mm²", "Cable length|m"]}
+                Cable type, "Cross-section|mm²", "Cable length|m",
+                {key: supply_impedance, label: Supply impedance, unit: Ω},
+                {key: supply_short_circuit_current, label: Short-circuit current at the supply,
+                 unit: kA}]}
   - {key: machine, label: Machine, icon: machine, izytron: 231, interval: 12,
      features: [Line conductors, N conductor, Supply connection,
                 CE marking, IP rating, Protection class, "Nominal voltage|V", Earthing system type,
@@ -34,7 +40,8 @@ kinds:
                 {key: upstream_residual_current, label: Upstream RCD IΔN, unit: mA,
                  list: rated_residual_current},
                 {key: upstream_rated_current, label: Upstream RCD IN, unit: A,
-                 list: rated_current}]}
+                 list: rated_current},
+                {key: short_circuit_rating, label: Short-circuit current rating, unit: kA}]}
   - {key: device, label: Device, icon: device, interval: 12,
      features: [Line conductors, N conductor, Supply connection,
                 Protection class, "Nominal voltage|V", "Rated current|A", "Rated power|kW",

@@ -19,8 +19,9 @@ from dataclasses import replace
 from ..campaign.expected_voltage import between_lines, misfits, nominal_frequency, \
     off_frequency
 from ..campaign.line_conductors import LINE_CONDUCTORS
+from ..campaign.short_circuit import RATING, above_rating
 from ..devices.guide import CONNECT, MEASURE, Guide
-from ..l10n import tr
+from ..l10n import decimal, tr
 from .station_texts import measure_text
 
 NOMINAL, FREQUENCY = "nominal_voltage", "supply_frequency"
@@ -86,10 +87,11 @@ class GuideRun:
             self._on_display()
 
     def measure_text(self) -> str:
-        return measure_text(self.guide, self.reading, self._voltage_warnings())
+        return measure_text(self.guide, self.reading, self._warnings())
 
-    def _voltage_warnings(self) -> list[str]:
-        """Voltages of the result that do not fit what the element lets expect."""
+    def _warnings(self) -> list[str]:
+        """What of the result does not fit what the element states or lets expect: voltages,
+        the frequency, a short-circuit current above the rating."""
         if self.reading is None:
             return []
         system = between_lines(self.place.stated(LINE_CONDUCTORS), self.place.stated(NOMINAL))
@@ -101,4 +103,12 @@ class GuideRun:
         return [tr("{label} {value}: about {expected} V are expected here. Check the"
                    " connection and what the element states.",
                    label=label, value=value, expected=f"{expected:.0f}")
-                for label, value, expected in misfits(self.reading.measurement, system)] + off
+                for label, value, expected in misfits(self.reading.measurement, system)] \
+            + off + self._above_rating()
+
+    def _above_rating(self) -> list[str]:
+        found = above_rating(self.reading.measurement, self.place.stated(RATING))
+        return [tr("{label} {value}: above the short-circuit current rating of {rating} kA"
+                   " stated here (EN 60204-1, 7.2.9 and 7.10).",
+                   label=label, value=value, rating=decimal(rating, 1).rstrip("0").rstrip(".,"))
+                for label, value, rating in found]

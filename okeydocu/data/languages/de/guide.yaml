@@ -134,6 +134,7 @@ texts:
   Single voltages: Einzelspannungen
   "{label} {value}: about {expected} V are expected here. Check the connection and what the element states.": "{label} {value}: Hier werden etwa {expected} V erwartet. Anschluss und Angaben am Element prüfen."
   "{label} {value}: within 1 % of {expected} Hz is what a machine is built for (EN 60204-1, 4.3.2).": "{label} {value}: Eine Maschine ist für {expected} Hz mit höchstens 1 % Abweichung gebaut (EN 60204-1, 4.3.2)."
+  "{label} {value}: above the short-circuit current rating of {rating} kA stated here (EN 60204-1, 7.2.9 and 7.10).": "{label} {value}: über dem hier angegebenen Bemessungskurzschlussstrom von {rating} kA (EN 60204-1, 7.2.9 und 7.10)."
   Switch off and pull the plug: Ausschalten und Stecker ziehen
   The protective conductor is measured without voltage.: Der Schutzleiter wird spannungsfrei gemessen.
   Find a bare metal spot: Blanke Metallstelle suchen

@@ -169,7 +169,7 @@ steps:
   title: "Short-circuit current rating"
   question: "Is the short-circuit current rating of the equipment stated, and is it at least as high as the short-circuit current to be expected at the place of installation?"
   text: "EN 60204-1, 7.2.9, 7.10"
-  instructions: ["Read the rating from the documentation and compare it with the short-circuit current at the supply: stated by the operator or taken from the loop impedance measured there."]
+  instructions: ["Read the rating from the documentation. The short-circuit current depends on the place: before delivery only the statement can be checked; at the place of installation it is compared with the current the operator or the network operator states for the supply, or with a loop impedance measured there after connecting."]
 - key: motor_protection
   kind: check
   title: "Protection of motors against overheating"
