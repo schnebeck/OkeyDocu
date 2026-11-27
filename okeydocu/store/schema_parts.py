@@ -143,6 +143,22 @@ BEGIN SELECT RAISE(ABORT, 'campaign is closed'); END;
 
 _CLOCK_CHECKS_FROZEN = _frozen_with_its_campaign("clock_checks")
 
+# Instruments booked into a campaign besides the first, which the campaign row holds itself.
+# Each keeps what it told of itself when it was booked and its clock offset at that moment.
+_CAMPAIGN_INSTRUMENTS = """
+CREATE TABLE campaign_instruments (
+    id INTEGER PRIMARY KEY,
+    campaign_id INTEGER NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    driver TEXT NOT NULL,
+    device_json TEXT NOT NULL DEFAULT '{}',
+    clock_offset_s REAL NOT NULL DEFAULT 0,
+    booked_at TEXT NOT NULL
+);
+CREATE INDEX campaign_instruments_campaign ON campaign_instruments(campaign_id);
+"""
+
+_CAMPAIGN_INSTRUMENTS_FROZEN = _frozen_with_its_campaign("campaign_instruments")
+
 # A photo keeps the time it was taken at. `placement` says what decides where it belongs:
 # the timeline, a person who pinned it to a measurement, or nothing yet on the stack.
 _PHOTOS = """

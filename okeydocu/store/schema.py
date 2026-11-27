@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from .schema_parts import (
     _ASSET_COLUMNS,
+    _CAMPAIGN_INSTRUMENTS,
+    _CAMPAIGN_INSTRUMENTS_FROZEN,
     _CAMPAIGN_NO_REOPEN,
     _CLOCK_CHECKS_FROZEN,
     _CLOCK_CHECKS_TABLE,
@@ -172,7 +174,7 @@ CREATE TABLE reports (
 
 """ + _RUNS + _PHOTOS + _PHOTO_MARKS + _PLANS_TABLE + """
 -- A closed campaign is a record: these triggers refuse every change to its data.
-""" + _MEASUREMENTS_FROZEN_UPDATE + _CLOCK_CHECKS_TABLE + "".join(_CLOCK_CHECKS_FROZEN) + "".join(
+""" + _MEASUREMENTS_FROZEN_UPDATE + _CLOCK_CHECKS_TABLE + "".join(_CLOCK_CHECKS_FROZEN) + _CAMPAIGN_INSTRUMENTS + "".join(_CAMPAIGN_INSTRUMENTS_FROZEN) + "".join(
     _READING_RULES + _MEASUREMENT_LOG
 ) + """
 CREATE TRIGGER measurements_frozen_delete BEFORE DELETE ON measurements

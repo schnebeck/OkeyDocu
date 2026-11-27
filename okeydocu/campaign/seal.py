@@ -91,6 +91,9 @@ def _extras(db, campaign) -> dict:
         "photo_gaps": _rows(
             db, "SELECT * FROM photo_gaps WHERE campaign_id=? ORDER BY at, id", campaign["id"]
         ),
+        "instruments": _rows(
+            db, "SELECT * FROM campaign_instruments WHERE campaign_id=? ORDER BY id", campaign["id"]
+        ),
     }
     for photo in tables["photos"]:
         _photo_notes(db, photo)

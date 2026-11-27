@@ -40,6 +40,7 @@ from .photo_places import PhotoPlaceMixin
 from .report_choice import ReportChoiceMixin
 from .carry_over import CarryOverMixin
 from .instrument_history import InstrumentHistoryMixin
+from .instruments import InstrumentsMixin
 from .photo_proxies import ProxyMixin
 from .photo_values import PhotoMixin
 from .plan_blocks import PlanBlockMixin
@@ -98,7 +99,7 @@ class CampaignService(
     PlanBlockMixin, ClosingMixin, OverviewMixin, StructureMixin, DueMixin, RunMixin, RepeatMixin,
     RepeatCheckMixin, PhotoMarkMixin, ProxyMixin, CarryOverMixin, InstrumentHistoryMixin,
     TemplateMixin, TemplateUseMixin, TemplateLearningMixin, ElementOrderMixin, PhotoPlaceMixin,
-    ReportChoiceMixin,
+    ReportChoiceMixin, InstrumentsMixin,
 ):
     def __init__(self, db: Database, archive_root: Path, key_store: KeyStore | None = None):
         self.db = db

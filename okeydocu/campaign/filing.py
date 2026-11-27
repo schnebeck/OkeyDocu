@@ -185,12 +185,13 @@ class FilingMixin:
         return replace(measurement, location=tuple(path.split(LOCATION_SEPARATOR)))
 
     def receive(self, campaign_id: int, reading: LiveReading,
-                asset_id: int | None = None) -> int | None:
+                asset_id: int | None = None, slot: int = 0) -> int | None:
         """Store a pushed measurement at once. The instrument keeps no copy of it.
 
         It goes to the step being worked on if it fits, otherwise it stays open
         for the operator: a question beats a wrong entry in a test record. A push
         brings no place of its own, so it lands on `asset_id`, the element chosen.
+        `slot` is the booked instrument it came from, the campaign's own by default.
         """
         measurement = reading.measurement
         known = self.db.one(
@@ -200,16 +201,19 @@ class FilingMixin:
         if known:
             return None
         campaign = self.campaign(campaign_id)
-        offset = campaign["clock_offset_s"]
+        booked = self.instrument(campaign_id, slot) if slot else None
+        offset = booked.clock_offset_s if booked else campaign["clock_offset_s"]
         local_time = measurement.taken_at - timedelta(seconds=offset)
         step_id, issue = None, ""
         if self.steps(campaign_id):
             result = assign(reading.received_at, measurement.function, self._windows(campaign_id))
             step_id, issue = result.step_id, result.issue
+        source = booked.source if booked else f"device:{campaign['driver']}"
+        identity = booked.identity if booked else self.identity(campaign_id)
         return self._insert_measurement(
             campaign_id, self._placed(measurement, asset_id, campaign["asset_id"]),
-            f"device:{campaign['driver']}", local_time, measurement.taken_at, step_id,
-            "auto" if step_id else "open", issue, self.identity(campaign_id), offset,
+            source, local_time, measurement.taken_at, step_id,
+            "auto" if step_id else "open", issue, identity, offset,
             reading.received_at, asset_id,
         )
 
