@@ -5,6 +5,7 @@ texts:
   Notice (red): Hinweis (rot)
   Field list: Feldliste
   Repeat for each step: Je Messschritt wiederholen
+  Repeat for each instrument: Je Messgerät wiederholen
   Measurements (0 / 1 / n): Messungen (0 / 1 / n)
   Photos: Fotos
   Notes and attachments on places: Notizen und Anhänge zu Orten
@@ -102,3 +103,7 @@ texts:
   Summary and defects: Zusammenfassung und Mängel
   The summary does not belong in a repetition.: Die Zusammenfassung gehört nicht in eine Wiederholung.
   "Installation: test basis": "Anlage: Prüfgrundlage"
+  "Instrument: name": "Messgerät: Name"
+  "Instrument: calibration note": "Messgerät: Hinweis zur Kalibrierung"
+  "Campaign: test conditions": "Kampagne: Prüfbedingungen"
+  "21.5 °C, 40 % r.H., measured {moment}": "21,5 °C, 40 % r. F., gemessen {moment}"

@@ -1,0 +1,10 @@
+# OkeyDocu - German words of the ambient vocabulary (data/vocabulary/ambient.yaml).
+texts:
+  Temperature: Temperatur
+  Relative humidity: Relative Luftfeuchte
+  Air temperature: Lufttemperatur
+  Battery voltage of the sensor: Batteriespannung des Sensors
+  Ambient conditions: Umgebungsbedingungen
+  # Symbols
+  r.H.: r. F.
+  T/r.H.: T/r. F.

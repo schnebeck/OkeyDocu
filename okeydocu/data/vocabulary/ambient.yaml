@@ -1,0 +1,23 @@
+# OkeyDocu - vocabulary of the surroundings a test is taken in.
+# Keys are stored with every measurement and never change; symbols and names are English
+# and translated by the language catalogues (data/languages/<code>/vocabulary_*.yaml).
+#
+# No standard asks for these figures or sets a limit for the test: they are kept without a
+# verdict, as the conditions the readings of the instruments were taken under.
+#
+# Producer: thorsten.schnebeck@gmx.net
+# Generator: Claude Opus 5.5
+# SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+quantities:
+  temperature: {unit: °C, name: Temperature}
+  humidity: {unit: "%", name: Relative humidity}
+
+results:
+  t_air: {symbol: T, quantity: temperature, name: Air temperature}
+  rh: {symbol: r.H., quantity: humidity, name: Relative humidity}
+  u_battery: {symbol: U_batt, quantity: voltage, name: Battery voltage of the sensor}
+
+functions:
+  ambient: {symbol: T/r.H., name: Ambient conditions, conditions: [u_battery]}

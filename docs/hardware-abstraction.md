@@ -161,7 +161,13 @@ serial port, such as `LEQ,A,F,78.4,2026-05-04T10:15:02`.
    - `pairing`: a `Pairing` for a wireless instrument that is paired once (button text,
      steps on the instrument, default PIN, and the function that pairs and returns the port);
    - `preparing`: what the operator is told while the program gets the instrument ready;
-   - `simulated`: for a software instrument whose readings may never be signed.
+   - `simulated`: for a software instrument whose readings may never be signed;
+   - `enrolment`: an `Enrolment` for a wireless sensor that is made known once (button text,
+     instructions, and the functions that list the sensors in reach, let one show itself and
+     keep it under a name);
+   - `companion`: the instrument is only booked beside a campaign's own, never its source;
+   - `calibrated`: `False` marks its readings in the report as for information only;
+   - `identity_of`: its identity by port without a connection, for booking it in.
 
    The application asks the registry (`driver_info`, `available_drivers`, `is_simulated`) and
    never imports a driver package. Texts in the description are English source texts; their
@@ -179,6 +185,27 @@ serial port, such as `LEQ,A,F,78.4,2026-05-04T10:15:02`.
    driver delivers `MeterMeasurement`s through a fake port. No test needs the instrument.
 
 Nothing in `ui/`, `store/`, `campaign/` or `reporting/` changes for a new instrument.
+
+## A sensor beside the instrument: the climate sensor
+
+`devices/climate/` is the second kind of driver: an instrument that applies nothing to the
+installation, so the application may take its reading (`Capability.TAKE`). It shows the parts
+such a driver brings:
+
+- **Transport and protocols.** `bluez.py` speaks to BlueZ over D-Bus; `protocols.py` holds one
+  `Protocol` per advertisement format (key, label, 16-bit UUID, decoder). A decoder takes the
+  service data and returns a `Reading` or nothing; an encrypted or unknown format is refused,
+  never guessed. Readings of several advertisements are merged, since one may carry only the
+  battery.
+- **Driver.** `driver.py` listens in a thread in short, bounded turns and keeps the latest
+  reading and how steady it is. A command (point out, rename, read the identity) waits for the
+  end of a turn and connects; the radio is never shared. `latest()` gives the reading, its age
+  and the seconds of steady readings still missing; `take()` makes a `MeterMeasurement` of it.
+- **Guide.** Two station kinds serve such sensors: `identify` (the sensor shows itself) and
+  `settle` (its readings are watched until they stand). Like every kind they are open to every
+  driver; their handling is in `ui/station_sensor.py`.
+- **Vocabulary.** `data/vocabulary/ambient.yaml`: function `ambient` with the results `t_air`,
+  `rh` and `u_battery`.
 
 ## Checklist
 

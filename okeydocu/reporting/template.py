@@ -123,6 +123,9 @@ def _resolve_blocks(blocks: list[dict], values: dict, nodes: list[Node]) -> None
         elif kind == "steps":
             for step in values["steps"]:
                 _resolve_blocks(block.get("blocks", []), {**values, "step": step}, nodes)
+        elif kind == "devices":  # its blocks once for every instrument of the campaign
+            for device in values.get("devices", []):
+                _resolve_blocks(block.get("blocks", []), {**values, "device": device}, nodes)
         elif kind == "measurements":
             nodes.extend(_resolve_measurements(block, values))
         elif kind == "structure":

@@ -323,3 +323,13 @@ texts:
   "&Help": "&Hilfe"
   "Nothing has been recorded yet. An empty campaign is deleted, not ended.": "Es wurde noch nichts erfasst. Eine leere Kampagne wird gelöscht, nicht beendet."
   nothing recorded yet: noch nichts erfasst
+  # Instruments of a campaign
+  Instruments of the campaign: Messgeräte der Kampagne
+  Instruments of the campaign …: Messgeräte der Kampagne …
+  "Books an instrument in beside the campaign's own, or out while it has not measured": "Bucht ein Messgerät neben dem eigenen der Kampagne ein, oder aus, solange es nicht gemessen hat"
+  Book in: Einbuchen
+  Book out: Ausbuchen
+  "Booked in: {name}": "Eingebucht: {name}"
+  "Booked out: {name}": "Ausgebucht: {name}"
+  It has measured in this campaign.: Es hat in dieser Kampagne gemessen.
+  The instrument has measured in this campaign.: Das Messgerät hat in dieser Kampagne gemessen.

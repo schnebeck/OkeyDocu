@@ -1,0 +1,46 @@
+# OkeyDocu - German texts: climate sensors, their enrolment and their guided measurement.
+texts:
+  # Driver and enrolment
+  Climate sensor: Klimasensor
+  "Climate sensor {name}": "Klimasensor {name}"
+  Simulated climate sensor: Simulierter Klimasensor
+  Enrol climate sensor …: Klimasensor anmelden …
+  Enrol sensor: Sensor anmelden
+  Enrol: Anmelden
+  Search: Suchen
+  Show on the sensor: Am Sensor zeigen
+  as it is to be called, e.g. a number on its back: so, wie er heißen soll, z. B. eine Nummer auf seiner Rückseite
+  Listening for sensors …: Suche nach Sensoren …
+  Connecting to the sensor …: Verbinde mit dem Sensor …
+  Enrolling the sensor …: Melde den Sensor an …
+  "{count} sensors in reach.": "{count} Sensoren in Reichweite."
+  No sensor in reach sends a reading in a known protocol.: Kein Sensor in Reichweite sendet Messwerte in einem bekannten Protokoll.
+  The sensor showing a face now is the one chosen.: Der Sensor, der jetzt ein Gesicht zeigt, ist der gewählte.
+  "<p>Bring the sensor close to this computer. Sensors in reach that send their readings in a known protocol are listed. Choose one and click <b>Show on the sensor</b>: its display shows a face for a few seconds.</p><p>A sensor running the firmware it was sold with sends nothing in the open and is not listed.</p>": "<p>Bringen Sie den Sensor in die Nähe dieses Rechners. Aufgeführt werden Sensoren in Reichweite, die ihre Messwerte in einem bekannten Protokoll senden. Wählen Sie einen und klicken Sie auf <b>Am Sensor zeigen</b>: Sein Display zeigt dann für einige Sekunden ein Gesicht.</p><p>Ein Sensor mit der Firmware, mit der er verkauft wurde, sendet nichts offen und erscheint nicht.</p>"
+  # Errors
+  No Bluetooth adapter was found.: Es wurde kein Bluetooth-Adapter gefunden.
+  No sensor is chosen.: Es ist kein Sensor gewählt.
+  The sensor did not answer.: Der Sensor hat nicht geantwortet.
+  The sensor does not offer the service needed.: Der Sensor bietet den nötigen Dienst nicht an.
+  The sensor has not sent a reading yet.: Der Sensor hat noch keinen Messwert gesendet.
+  The sensor is not enrolled.: Der Sensor ist nicht angemeldet.
+  The sensor is not in reach.: Der Sensor ist nicht in Reichweite.
+  # Guided measurement
+  Identify: Identifizieren
+  Settle: Angleichen
+  Lay out: Aufstellen
+  Air beside the equipment: Luft neben dem Betriebsmittel
+  Equipment: Betriebsmittel
+  "free air, a hand's width away": "freie Luft, eine Handbreit entfernt"
+  "Click “Show on the sensor”. The sensor in question shows its temperature with a face for a few seconds.": "Klicken Sie auf „Am Sensor zeigen“. Der betreffende Sensor zeigt für einige Sekunden seine Temperatur mit einem Gesicht."
+  Lay the sensor out at the equipment tested, at about the height of the parts measured.: Stellen Sie den Sensor am geprüften Betriebsmittel auf, etwa in der Höhe der gemessenen Teile.
+  "Keep a hand's width from the equipment and out of the warm air of its vents, out of sun, draught and the warmth of your hand.": "Halten Sie eine Handbreit Abstand zum Betriebsmittel und zur warmen Luft seiner Lüftung, fern von Sonne, Zugluft und der Wärme Ihrer Hand."
+  "Click “Take reading”: the latest reading of the sensor is stored with the element chosen.": "Klicken Sie auf „Messwert übernehmen“: Der neueste Messwert des Sensors wird beim gewählten Element gespeichert."
+  Take reading: Messwert übernehmen
+  Waiting for the first reading of the sensor …: Warte auf den ersten Messwert des Sensors …
+  "{temperature} °C, {humidity} % r.H.": "{temperature} °C, {humidity} % r. F."
+  "Still settling: {seconds} s of steady readings are missing.": "Gleicht sich noch an: Es fehlen {seconds} s gleichbleibender Messwerte."
+  "Steady: less than 0.1 °C of change for a minute.": "Angeglichen: weniger als 0,1 °C Änderung seit einer Minute."
+  "Last heard {seconds} s ago.": "Zuletzt vor {seconds} s gehört."
+  "Outside 0 to 35 °C instruments for testing installations no longer measure as specified (VDE 0413).": "Außerhalb von 0 bis 35 °C messen Prüfgeräte für Anlagen nicht mehr wie spezifiziert (VDE 0413)."
+  "Far from 20 °C: insulation and protective conductor resistances depend on the temperature; note it beside them (VDE 0100-600).": "Weit entfernt von 20 °C: Isolations- und Schutzleiterwiderstände hängen von der Temperatur ab; vermerken Sie sie dabei (VDE 0100-600)."

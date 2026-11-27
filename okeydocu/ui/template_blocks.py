@@ -10,10 +10,11 @@ from __future__ import annotations
 
 from PySide6.QtWidgets import QTreeWidgetItem
 
+from ..reporting.template_loading import REPEATS
 from ..reporting.template_model import block_summary, new_block
 
 
-TOP_ONLY = ("steps", "logo", "structure", "summary")  # blocks that never stand inside a repeat
+TOP_ONLY = (*REPEATS, "logo", "structure", "summary")  # blocks that never stand inside a repeat
 
 
 class TemplateBlocks:
@@ -27,7 +28,7 @@ class TemplateBlocks:
         for block in self.template["blocks"]:
             item = QTreeWidgetItem([block_summary(block)])
             self.tree.addTopLevelItem(item)
-            for child in block.get("blocks", ()) if block["type"] == "steps" else ():
+            for child in block.get("blocks", ()) if block["type"] in REPEATS else ():
                 item.addChild(QTreeWidgetItem([block_summary(child)]))
         self.tree.expandAll()
         self.tree.blockSignals(False)
@@ -67,7 +68,7 @@ class TemplateBlocks:
         elif kind in TOP_ONLY:  # none of them may sit inside a repeat
             self.template["blocks"].insert(path[0] + 1, block)
             target = (path[0] + 1,)
-        elif len(path) == 1 and self._block(path)["type"] == "steps":
+        elif len(path) == 1 and self._block(path)["type"] in REPEATS:
             children = self._block(path).setdefault("blocks", [])
             children.append(block)
             target = (path[0], len(children) - 1)
@@ -94,7 +95,7 @@ class TemplateBlocks:
         """Nearest repeat block next to a top-level block: the one above, else below."""
         blocks = self.template["blocks"]
         for candidate in (index - 1, index + 1):
-            if 0 <= candidate < len(blocks) and blocks[candidate]["type"] == "steps":
+            if 0 <= candidate < len(blocks) and blocks[candidate]["type"] in REPEATS:
                 return candidate
         return None
 

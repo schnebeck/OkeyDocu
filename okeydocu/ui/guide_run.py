@@ -85,6 +85,7 @@ class GuideRun:
             self.bench.panel.point_at()
             self.step_text.setText(self.measure_text())
             self._on_display()
+            self._sensor_buttons()
 
     def measure_text(self) -> str:
         return measure_text(self.guide, self.reading, self._warnings())
@@ -104,7 +105,7 @@ class GuideRun:
                    " connection and what the element states.",
                    label=label, value=value, expected=f"{expected:.0f}")
                 for label, value, expected in misfits(self.reading.measurement, system)] \
-            + off + self._above_rating()
+            + off + self._above_rating() + self._sensor_hints()
 
     def _above_rating(self) -> list[str]:
         found = above_rating(self.reading.measurement, self.place.stated(RATING))

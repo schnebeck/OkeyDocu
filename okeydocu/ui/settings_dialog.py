@@ -18,6 +18,7 @@ from .instrument_prepare import InstrumentPrepareOverlay
 from .instrument_setup import InstrumentSetupOverlay
 from .instrument_test import InstrumentTestOverlay
 from .overlay import Overlay
+from .sensor_enrolment import SensorEnrolmentOverlay
 
 FOUND = Qt.ItemDataRole.UserRole
 
@@ -41,6 +42,11 @@ class SettingsOverlay(Overlay):
             if info.pairing is not None:
                 button = QPushButton(tr(info.pairing.button, instrument=info.label))
                 button.clicked.connect(lambda _=False, info=info: self._pair(info))
+                self.pairing_buttons[info.key] = button
+            if info.enrolment is not None:
+                button = QPushButton(tr(info.enrolment.button))
+                button.clicked.connect(
+                    lambda _=False, info=info: SensorEnrolmentOverlay(info.enrolment, self).exec())
                 self.pairing_buttons[info.key] = button
         self.prepare_button = QPushButton(tr("Set up …"))
         self.prepare_button.setToolTip(tr("Checks what the instrument already has here and"

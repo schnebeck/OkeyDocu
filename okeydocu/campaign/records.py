@@ -39,7 +39,11 @@ def full_name(user) -> str:
 
 
 def identity_to_json(identity: DeviceIdentity) -> str:
-    return json.dumps(asdict(identity), default=str, ensure_ascii=False)
+    """An empty name is left out: the record holds what the instrument tells, nothing more."""
+    data = asdict(identity)
+    if not data["name"]:
+        del data["name"]
+    return json.dumps(data, default=str, ensure_ascii=False)
 
 
 def identity_from_json(text: str) -> DeviceIdentity | None:

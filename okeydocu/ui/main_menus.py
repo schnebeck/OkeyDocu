@@ -38,6 +38,7 @@ class MainMenus:
         menu.addSeparator()
         menu.addAction(campaign.edit_action)
         menu.addAction(campaign.tester_action)
+        menu.addAction(campaign.instruments_action)
         menu.addAction(campaign.assign_action)
         menu.addAction(campaign.draft_action)
         menu.addAction(campaign.finish_action)

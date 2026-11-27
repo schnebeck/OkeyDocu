@@ -39,6 +39,7 @@ class Capability(Flag):
     SELECTOR = auto()  # the position of the function selector can be read
     SIMULATED_TRIGGER = auto()  # test drivers only: the app may create a reading
     TEXTS = auto()  # the instrument hands out its words for the codes it sends
+    TAKE = auto()  # the app may take a reading; nothing is applied to the installation
 
 
 @dataclass(frozen=True)

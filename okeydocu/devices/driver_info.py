@@ -32,6 +32,18 @@ class Pairing:
 
 
 @dataclass(frozen=True)
+class Enrolment:
+    """Making a sensor known to this program: the ones in reach are listed, the one chosen
+    shows itself on its display, and it is kept under a name of the tester's choosing."""
+
+    button: str
+    instructions: str  # simple markup allowed
+    scan: Callable[[float], list[FoundInstrument]]  # seconds to listen; label and port
+    point_out: Callable[[str], None]  # port: the sensor shows itself
+    enrol: Callable[[str, str], FoundInstrument]  # port and name: kept, under that name
+
+
+@dataclass(frozen=True)
 class DriverInfo:
     key: str  # stored with every campaign; never changes
     label: str
@@ -47,3 +59,10 @@ class DriverInfo:
     softkey_view: Callable[[object, object], object] | None = None  # ... or the view it switches to
     preparing: str = PREPARING  # shown while the program gets the instrument ready
     simulated: bool = False  # random readings: shown as such, never signed
+    enrolment: Enrolment | None = None
+    # Booked beside the instrument a campaign is opened with, never as its own source.
+    companion: bool = False
+    calibrated: bool = True  # False: its readings are for information only
+    identity_of: Callable[[str], object] | None = None  # port to identity, without a link
+    # Result key to value in, untranslated texts out: what the figures mean for the test.
+    advice: Callable[[dict[str, float]], list[str]] | None = None

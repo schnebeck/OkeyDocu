@@ -15,6 +15,7 @@ from PySide6.QtCore import QPointF, QRectF
 from PySide6.QtGui import QColor, QFont, QPainter, QPen
 
 from ..l10n import tr
+from .test_object_climate import climate_sensor
 from .test_object_current import supply_cores, touchable_part
 from .test_object_monitor import imd, rcm
 from .test_object_parts import (
@@ -95,4 +96,5 @@ def _lever(painter: QPainter, module: QRectF, on: bool) -> None:
 
 DRAWINGS = {"rcd": rcd, "main_switch": main_switch, "cee_plug": cee_plug, "imd": imd,
             "rcm": rcm, "touchable_part": touchable_part, "supply_cores": supply_cores,
-            "schuko_plug": schuko_plug, "main_switch_on": main_switch_on, "supply_pe": supply_pe}
+            "schuko_plug": schuko_plug, "main_switch_on": main_switch_on, "supply_pe": supply_pe,
+            "climate_sensor": climate_sensor}

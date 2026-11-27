@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..l10n import tr
+from ..reporting.template_loading import REPEATS
 from ..reporting.template_model import BLOCK_LABELS, CONDITIONS, PLACEHOLDERS
 
 
@@ -47,7 +48,7 @@ class TemplateForms:
             builder = getattr(self, f"_form_{block['type']}", None)
             if builder:
                 builder(block, form)
-            if block["type"] != "steps":
+            if block["type"] not in REPEATS:
                 self._condition_row(block, form)
         self.form_host.setWidget(page)
 

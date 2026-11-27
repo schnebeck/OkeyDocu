@@ -18,6 +18,8 @@ texts:
   "Firmware": "Firmware"
   "Calibrated on": "Calibrado el"
   "Recalibration due": "Próxima calibración"
+  "Calibration": "Calibración"
+  "Test conditions": "Condiciones de ensayo"
   "Instrument clock": "Reloj del instrumento"
   "Recalibration of the test instrument was overdue at the time of testing ({{ device.recalibration_due }}).": "La calibración del instrumento estaba vencida en el momento del ensayo ({{ device.recalibration_due }})."
   "Not measured.{% if step.note %} Reason: {{ step.note }}{% endif %}": "No medido.{% if step.note %} Motivo: {{ step.note }}{% endif %}"

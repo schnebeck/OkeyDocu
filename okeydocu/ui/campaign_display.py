@@ -102,7 +102,7 @@ class CampaignDisplay:
         """What the context menu of a campaign offers: only what can be done with it now."""
         groups = [
             [self.resume_action, self.pause_action],
-            [self.edit_action, self.tester_action, self.assign_action],
+            [self.edit_action, self.tester_action, self.instruments_action, self.assign_action],
             [self.draft_action, self.finish_action, self.report_action],
             [self.next_order_action, self.template_action],
             [self.delete_action],
@@ -156,6 +156,7 @@ class CampaignDisplay:
         self._show_link()
         self.resume_action.setEnabled(instrument and not here)
         self.pause_action.setEnabled(self.session is not None)
+        self.instruments_action.setEnabled(is_open)
         empty = is_open and self.app.service.is_empty(campaign["id"])
         # What still stands in the way is said at the button, which waits for it.
         blockers = self.app.service.blockers(campaign["id"]) if is_open else []

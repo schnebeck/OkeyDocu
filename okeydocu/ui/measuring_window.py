@@ -38,6 +38,7 @@ from .place_station import PlaceStation
 from .repeat_run import RepeatRun
 from .station_bar import StationBar
 from .station_kinds import StationKinds
+from .station_sensor import SensorStations
 
 
 RIGHT, GAP = 1, 2  # rows of the side column: what the station shows, and the room below
@@ -59,18 +60,20 @@ class Absent:
         return False
 
 
-class MeasuringWindow(PlaceStation, DialStation, StationKinds, ListStation, RepeatRun, GuideRun,
-                      QDialog):
+class MeasuringWindow(PlaceStation, DialStation, StationKinds, SensorStations, ListStation,
+                      RepeatRun, GuideRun, QDialog):
     place_made = Signal(int)  # an element made on the way
     place_kept = Signal(int)  # the element readings now go to, made on the way or chosen
     parent_chosen = Signal(int)  # where new elements hang, kept until changed
     selector_wanted = Signal()  # the guide would like to know where the switch stands
     dial_turned = Signal(int)  # the drawn dial was clicked to this position
     simulate_wanted = Signal(str)  # a simulated instrument is to measure this function
+    sensor_read = Signal(object)  # a reading the window took from its sensor
+    pointed = Signal(str)  # the sensor was asked to show itself: empty, or what went wrong
 
     def __init__(self, app, campaign_id: int, driver: str, function: str,
                  asset_id: int | None, new_parent: int | None = None, parent=None,
-                 repeat: bool = False, simulated: bool = False):
+                 repeat: bool = False, simulated: bool = False, sensor=None):
         super().__init__(parent)
         info = driver_info(driver)
         self.app = app
@@ -134,6 +137,7 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, ListStation, Repe
             self.bench.panel.position_chosen.connect(self.dial_turned)
             self.key_press = KeyPress(self.bench.panel)
             self.bench.panel.installEventFilter(self)
+        self._sensor_setup(sensor, info.advice)
         self._lay_out()
         self.show_place(asset_id)
         self.go(0)
@@ -147,6 +151,8 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, ListStation, Repe
         column.addWidget(self.right)
         column.addStretch(1)
         column.addWidget(self.simulate)
+        column.addWidget(self.show_button)
+        column.addWidget(self.take_button)
         self.footer = FooterBar()
         self.footer.add_leading(self.back)
         self.footer.add(self.next)
@@ -166,6 +172,10 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, ListStation, Repe
     def hideEvent(self, event) -> None:
         self.poll.stop()
         super().hideEvent(event)
+
+    def done(self, result: int) -> None:
+        self._sensor_close()
+        super().done(result)
 
     @property
     def count(self) -> int:
@@ -220,5 +230,6 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, ListStation, Repe
         last = self.index == self.count - 1
         self.next.setText(tr("Done ▶") if last else tr("Next ▶"))
         self.simulate.setVisible(self.simulated and self.kind == MEASURE)
+        self._sensor_buttons()
         self._allow_next()
         getattr(self, f"_enter_{station.kind}")(station)

@@ -134,10 +134,10 @@ class CampaignActions(CampaignTasks):
             text = tr("{state}, measuring for “{title}”", state=text, title=title)
         self.link.show_link(kind, text)
 
-    def _received(self, campaign_id: int, reading) -> None:
+    def _received(self, campaign_id: int, reading, slot: int = 0) -> None:
         """Stored first. Everything else can wait, this value exists nowhere else."""
         measurement_id = self.app.service.receive(campaign_id, reading,
-                                                  self.place_target(campaign_id))
+                                                  self.place_target(campaign_id), slot=slot)
         self.guide_reading(campaign_id, reading)
         self.follow_points(campaign_id, measurement_id)
         self.list.update_campaign(campaign_id)

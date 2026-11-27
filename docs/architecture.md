@@ -258,7 +258,9 @@ sound level meter in [hardware-abstraction.md](hardware-abstraction.md).
 
 `devices/base.py` defines `MeterDriver`: `identify()`, `read_clock()`, `read_measurements()`
 and optionally `subscribe_live()`. The interface only reads. It can neither start a measurement
-nor change instrument settings, because the inspector does that at the instrument. A new instrument
+nor change instrument settings, because the inspector does that at the instrument. The one
+exception is an instrument that applies nothing to the installation, a climate sensor: with the
+capability `TAKE` the application takes its latest reading when the tester asks for it. A new instrument
 is a new driver in `devices/registry.py`; the application stays unchanged. Only its mapping knows the codes of the
 instrument (`devices/profitest_prime/mapping.py`); functions, results,
 quantities, result words and settings are named in the app after their vocabulary
@@ -266,6 +268,50 @@ quantities, result words and settings are named in the app after their vocabular
 
 When a campaign starts with an instrument, the instrument identity, the clock offset and the measurements
 already present are recorded. After that only what is new is fetched, with corrected time.
+
+### Several instruments in a campaign
+
+A campaign is opened with its own instrument, or by hand without one. Further instruments are
+booked in beside it at any time and booked out again while none of the campaign's readings came
+from them (“Campaign → Instruments of the campaign …”, `ui/instrument_booking.py`). The
+campaign's own instrument stays in the campaign row, slot 0; each further one is a row of
+`campaign_instruments` with its driver, identity, clock offset and the moment it was booked,
+its slot the row's id (`campaign/instruments.py`). A reading names its instrument by source
+(`device:<driver>`) and serial number, and `receive(..., slot=)` files it with that instrument's
+identity and offset. The table belongs to the seal: its rows are sealed with the campaign, and
+a campaign without further instruments is sealed exactly as one with a single instrument.
+
+An instrument booked beside another never becomes the campaign's own (`DriverInfo.companion`):
+when the own one leaves, the campaign is measured by hand with the others still beside it. Such
+instruments are not offered as the source of a new campaign. Every instrument counts the same
+in the report: the template block `devices` repeats its blocks for each, as `steps` does for
+each step, and the fields of `device` stand for the instrument of the repetition. Outside a
+repetition `device` is the campaign's own.
+
+### Climate sensor
+
+`devices/climate/` reads a small Bluetooth LE thermometer and hygrometer, such as the Xiaomi
+LYWSD03MMC running the open pvvx firmware. It talks to BlueZ over D-Bus (`jeepney`,
+`bluez.py`), every call with a timeout, every listening turn bounded in time and messages.
+The sensor sends its readings openly in advertisements; `protocols.py` reads BTHome v2, the
+pvvx format and the ATC1441 format, each by its 16-bit service UUID, and the firmware a sensor
+is sold with is read over a connection (`commands.py`). A further protocol is one entry in
+`PROTOCOLS`.
+
+A sensor is enrolled once (“Settings → Instruments → Enrol climate sensor …”,
+`ui/sensor_enrolment.py`): the sensors in reach are listed, the one chosen shows itself on its
+display (the pvvx command 0x22 shows a number and a face for a few seconds and stores nothing),
+and it is kept under a name of the tester's choosing, which it also takes on as its Bluetooth
+name. Address, name and what the sensor told of itself are kept in `climate-sensors.json` in
+the user's data folder, never with the program; only enrolled sensors are offered.
+
+The guided measurement “Ambient conditions” points the sensor out, lays it out in free air at
+the equipment and watches it settle: it counts as settled once its temperature has moved by
+less than 0.1 °C for a minute (`settling.py`). Only then is the reading taken. The measurement
+has no verdict; outside 0 to 35 °C or far from 20 °C the window says what that means for the
+test. The report's head names the latest such measurement as the test conditions, with its
+time and the sensor that took it, and the list of instruments marks the sensor as not
+calibrated, its values for information.
 
 ### PROFITEST PRIME
 
@@ -997,7 +1043,9 @@ desktop is left alone. The project registers the simulated PROFITEST PRIME
 (`devices/profitest_prime/simulated.py`): the panel, the dial, the guides and the setting lists
 of the instrument, with random readings. In a guided measurement a click on the drawn dial
 turns its switch, and the last station has a button that lets it measure. The plant of the
-project (`testprojects/plant.py`) is also what the pictures of the README show.
+project (`testprojects/plant.py`) is also what the pictures of the README show. A campaign with a simulated
+instrument is also offered the simulated climate sensor (`devices/climate/simulated.py`), which
+comes out of a warm pocket and settles within seconds.
 
 ## Template editor
 

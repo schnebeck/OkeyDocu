@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
 from ..campaign.measuring_place import measured_functions
 from ..campaign.plan import says_draft
 from ..campaign.service import IMPORTED
-from ..devices import Capability
+from ..devices import Capability, driver_info
 from ..l10n import N_, tr
 from .campaign_items import count_text
 from .common import AppContext, function_short
@@ -109,6 +109,12 @@ class AssignPlanOverlay(Overlay):
         return self.plan
 
 
+def booked_beside(service, campaign_id: int) -> tuple[tuple[int, str], ...]:
+    """Slot and driver of each instrument measuring beside the campaign's own."""
+    return tuple((booked.slot, booked.driver) for booked in service.instruments(campaign_id)
+                 if booked.slot and driver_info(booked.driver) is not None)
+
+
 class FreeRunView(Framed):
     """The row below the head: what to do now, measuring without a plan, and on request how
     to wire it.
@@ -170,7 +176,8 @@ class FreeRunView(Framed):
         self.simulate_function.setVisible(simulated)
         self.simulate_button.setVisible(simulated)
         self.starter.show_campaign(campaign["driver"] if driver is not None else "",
-                                   measured_functions(self.app.db, campaign["id"]))
+                                   measured_functions(self.app.db, campaign["id"]),
+                                   booked_beside(self.app.service, campaign["id"]))
         if driver is None:
             self._say(IMPORT_GUIDANCE if campaign["driver"] == IMPORTED else MANUAL_GUIDANCE)
 

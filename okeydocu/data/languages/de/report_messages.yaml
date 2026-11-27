@@ -21,3 +21,9 @@ texts:
   A logo does not belong in a repetition.: Ein Logo gehört nicht in eine Wiederholung.
   "The image {image} is missing in the template.": "Das Bild {image} fehlt in der Vorlage."
   "Error in the placeholder {text}: {error}": "Fehler im Platzhalter {text}: {error}"
+  # Instruments and surroundings
+  not calibrated, values for information: nicht kalibriert, Werte zur Information
+  "{temperature} °C": "{temperature} °C"
+  "{humidity} % r.H.": "{humidity} % r. F."
+  "measured {moment}": "gemessen {moment}"
+  "measured {moment} with {instrument}": "gemessen {moment} mit {instrument}"

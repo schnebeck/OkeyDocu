@@ -125,6 +125,7 @@ class DeviceIdentity:
     order_no: str = ""
     calibrated_on: date | None = None
     recalibration_due: date | None = None
+    name: str = ""  # what its owner calls it, where the instrument carries a name
 
     def calibration_overdue(self, today: date) -> bool:
         return self.recalibration_due is not None and self.recalibration_due < today

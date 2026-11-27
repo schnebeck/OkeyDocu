@@ -14,6 +14,7 @@ from ..campaign.clock import CLOCK_SET_ACCURACY_S
 from ..l10n import signed_seconds, tr
 from .campaign_edit import PLAN, TESTER, CampaignEditOverlay
 from .campaign_views import AssignPlanOverlay, TesterOverlay
+from .instrument_booking import InstrumentBookingOverlay
 from .setting_warning import campaign_note
 
 
@@ -27,6 +28,10 @@ class CampaignTasks:
         self.pause_action = self._action(tr("Pause measuring"), self.pause)
         self.edit_action = self._action(tr("Edit campaign …"), self.edit_campaign)
         self.tester_action = self._action(tr("Change inspector …"), self.change_tester)
+        self.instruments_action = self._action(tr("Instruments of the campaign …"),
+                                               self.book_instruments)
+        self.instruments_action.setToolTip(tr("Books an instrument in beside the campaign's"
+                                              " own, or out while it has not measured"))
         self.assign_action = self._action(tr("Assign test plan …"), self.assign_plan)
         self.draft_action = self._action(tr("Report preview"), self.show_draft)
         self.finish_action = self._action(tr("End campaign …"), self.finish)
@@ -59,6 +64,16 @@ class CampaignTasks:
         campaign = self._campaign()
         if campaign is not None and campaign["status"] != "open":
             self.new_campaign(repeat_of=campaign["id"])
+
+    def book_instruments(self) -> None:
+        campaign = self._campaign()
+        if campaign is None or campaign["status"] != "open":
+            return
+        overlay = InstrumentBookingOverlay(self.app, campaign["id"], self)
+        overlay.exec()
+        if overlay.changed:
+            self.show_campaign(campaign["id"])
+            self.changed.emit()
 
     def assign_plan(self) -> None:
         campaign = self._campaign()

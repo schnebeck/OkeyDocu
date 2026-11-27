@@ -82,6 +82,8 @@ class PlaceScene(QWidget):
 
     def _paint_state(self, painter: QPainter, state: QRectF) -> None:
         live = self.guide.live
+        if live is None:  # the measurement does not care how the installation stands
+            return
         line, back, ink = (LIVE, LIVE_BACK, LIVE_INK) if live else (DEAD, DEAD_BACK, DEAD_INK)
         painter.setPen(QPen(line, 2))
         painter.setBrush(back)

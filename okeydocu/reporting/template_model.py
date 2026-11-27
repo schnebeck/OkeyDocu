@@ -23,6 +23,7 @@ BLOCK_LABELS = {
     "notice": N_("Notice (red)"),
     "fields": N_("Field list"),
     "steps": N_("Repeat for each step"),
+    "devices": N_("Repeat for each instrument"),
     "measurements": N_("Measurements (0 / 1 / n)"),
     "structure": N_("Measurements by structure"),
     "summary": N_("Summary and defects"),
@@ -69,6 +70,9 @@ PLACEHOLDERS = [
     (N_("Instrument: calibrated on"), "{{ device.calibrated_on }}"),
     (N_("Instrument: recalibration due"), "{{ device.recalibration_due }}"),
     (N_("Instrument: clock"), "{{ campaign.clock_summary }}"),
+    (N_("Instrument: name"), "{{ device.name }}"),
+    (N_("Instrument: calibration note"), "{{ device.calibration }}"),
+    (N_("Campaign: test conditions"), "{{ campaign.conditions }}"),
     (N_("Campaign: record seal"), "{{ campaign.seal }}"),
     (N_("Step: title"), "{{ step.title }}"),
     (N_("Step: reason"), "{{ step.note }}"),
@@ -78,7 +82,7 @@ PLACEHOLDERS = [
 
 CONDITIONS = [
     (N_("Always show"), None),
-    (N_("Only if an instrument is involved"), "device.model"),
+    (N_("Only if an instrument is involved"), "devices"),
     (N_("Only if the calibration is overdue"), "device.overdue"),
     (N_("Only if there are notes or attachments on places"), "places"),
 ]
@@ -92,6 +96,7 @@ def new_block(kind: str) -> dict:
         "notice": {"text": tr("New notice")},
         "fields": {"rows": [[tr("Designation"), "{{ customer.name }}"]]},
         "steps": {"blocks": []},
+        "devices": {"blocks": []},
         "measurements": {"none": {"text": tr("Not measured.")}, "one": {},
                          "many": {"summary": True}},
         "structure": {"order": "place", "many": {"summary": True}},

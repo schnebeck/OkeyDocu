@@ -44,8 +44,10 @@ def parse_template(text: str) -> dict:
     return template
 
 
+REPEATS = ("steps", "devices")  # blocks that repeat the blocks inside them
 _KNOWN_BLOCKS = {
-    "heading", "text", "notice", "fields", "steps", "measurements", "photos", "signature", "logo",
+    "heading", "text", "notice", "fields", "steps", "devices", "measurements", "photos",
+    "signature", "logo",
     "attachments", "letterhead", "structure", "summary",
 }
 
@@ -55,7 +57,7 @@ def _validate(blocks: list, images: dict, nested: bool = False) -> None:
         kind = block.get("type") if isinstance(block, dict) else None
         if kind not in _KNOWN_BLOCKS:
             raise TemplateError(tr("Unknown block: {kind}", kind=repr(kind)))
-        if kind == "steps":
+        if kind in REPEATS:
             if nested:
                 raise TemplateError(tr("Repetitions cannot be nested."))
             _validate(block.get("blocks", []), images, nested=True)

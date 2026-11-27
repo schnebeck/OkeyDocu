@@ -15,7 +15,7 @@ from pathlib import Path
 from ..campaign.line_conductors import ConductorBook
 from ..campaign.photo_view import PhotoView
 from ..campaign.service import MANUAL, CampaignService
-from ..devices import is_simulated, setting_words
+from ..devices import driver_info, is_simulated, setting_words
 from ..l10n import N_, in_language, tr
 from ..model import (
     SIGHT_CHECK_FUNCTION,
@@ -26,6 +26,7 @@ from ..model import (
 )
 from ..vocabulary import function_markup
 from .attached import Attached, places, sort_attached
+from .conditions import conditions_text
 from .context_texts import (
     campaign_signature,
     clock_summary,
@@ -105,6 +106,24 @@ def _point_title(service: CampaignService, step, title: str) -> str:
     where = service.place_path(step.asset_id) if step.asset_id is not None else ""
     conductor = conductor_of(Parameter(*item) for item in step.parameters)
     return " · ".join(part for part in (title, where, conductor) if part)
+
+
+def device_fields(identity, last_day, driver: str = "") -> dict:
+    """What a report tells of one instrument: `name` is what its owner calls it, else what
+    its driver calls it; `calibration` says when its readings serve for information only."""
+    info = driver_info(driver) if driver else None
+    return {
+        "name": identity.name or (tr(info.label) if info else ""),
+        "calibration": tr("not calibrated, values for information")
+        if info is not None and not info.calibrated else "",
+        "manufacturer": identity.manufacturer,
+        "model": identity.model,
+        "serial_no": identity.serial_no,
+        "firmware": identity.firmware,
+        "calibrated_on": day(identity.calibrated_on),
+        "recalibration_due": day(identity.recalibration_due),
+        "overdue": identity.calibration_overdue(last_day),
+    }
 
 
 def build_context(service: CampaignService, campaign_id: int) -> dict:
@@ -202,18 +221,16 @@ def build_context(service: CampaignService, campaign_id: int) -> dict:
                 campaign, service.clock_checks(campaign_id),
                 [row["clock_offset_s"] for row in service.measurements(campaign_id)]),
             "seal": campaign["seal"],
-            "simulated": is_simulated(campaign["driver"]),
+            "conditions": conditions_text(service, campaign_id, {
+                booked.identity.serial_no: booked.identity.name or booked.identity.model
+                for booked in service.instruments(campaign_id) if booked.identity}),
+            "simulated": any(is_simulated(booked.driver)
+                             for booked in service.instruments(campaign_id)),
             "draft": campaign["status"] == "open",
         },
-        "device": {
-            "manufacturer": identity.manufacturer,
-            "model": identity.model,
-            "serial_no": identity.serial_no,
-            "firmware": identity.firmware,
-            "calibrated_on": day(identity.calibrated_on),
-            "recalibration_due": day(identity.recalibration_due),
-            "overdue": identity.calibration_overdue(last_day),
-        },
+        "device": device_fields(identity, last_day),
+        "devices": [device_fields(booked.identity, last_day, booked.driver)
+                    for booked in service.instruments(campaign_id) if booked.identity],
         "steps": steps,
         "report": {"date": day(signing_day(campaign))},
         "structure": structure_levels(service, campaign["asset_id"], measured),

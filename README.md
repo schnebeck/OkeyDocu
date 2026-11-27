@@ -60,6 +60,14 @@ data or the booking is put right. A setting the RCD does not state is named inst
 
 ![An RCD tested with 300 mA and type AC, where the RCD states 30 mA and type A](docs/images/settings-check.png)
 
+**Several instruments, and the conditions of the test.** Further instruments are booked into a
+campaign beside its own and out again while they have not measured; each reading names the
+instrument it came from, and the report lists every instrument. A small Bluetooth climate sensor
+(such as the LYWSD03MMC with the open pvvx firmware) is one of them: enrolled once under a name
+of its own, pointed out by a face on its display, laid out at the equipment and watched until its
+readings stand. Temperature and humidity are kept without a verdict and named in the report's
+head as the test conditions, the sensor marked as not calibrated.
+
 **Guided measurement.** A measurement is guided station by station, and each instrument brings
 its own flow. With the PROFITEST PRIME there are six: installation, rotary switch, test leads,
 supply, mode and limits, measure. The first station shows the structure tree: elements of every

@@ -26,8 +26,12 @@ from .screen import Key, Screen
 
 PLACE, SELECT, CONNECT, PREPARE, CONFIGURE, MEASURE = (
     "place", "select", "connect", "prepare", "configure", "measure")
+# A sensor that measures when asked: it is pointed out among others in reach, and its
+# readings are watched until it has taken on the air around it.
+IDENTIFY, SETTLE = "identify", "settle"
 KIND_TITLES = {PLACE: N_("Installation"), SELECT: N_("Function"), CONNECT: N_("Test leads"),
-               PREPARE: N_("Preparation"), CONFIGURE: N_("Settings"), MEASURE: N_("Measure")}
+               PREPARE: N_("Preparation"), CONFIGURE: N_("Settings"), MEASURE: N_("Measure"),
+               IDENTIFY: N_("Identify"), SETTLE: N_("Settle")}
 
 
 PROBE, CLAMP = "probe", "clamp"
@@ -86,7 +90,9 @@ class Guide:
     caution: str = ""
     owner_feature: str = ""  # a feature the kind of element measured has, such as an RCD type
     element_features: tuple[str, ...] = ()  # what the guide needs that element to state
-    live: bool = True  # whether the installation stays energised while measuring
+    # Whether the installation stays energised while measuring; None: the measurement
+    # touches nothing of it, any state will do.
+    live: bool | None = True
     preparation: tuple[tuple[str, str], ...] = ()  # what to do beforehand: heading, text
     selector_label: str = ""  # the target position as printed on the dial
     selector_note: str = ""  # what the position measures, to be translated

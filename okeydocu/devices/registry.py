@@ -35,9 +35,11 @@ def is_simulated(key: str) -> bool:
     return info is not None and info.simulated
 
 
-def find_instruments() -> list[FoundInstrument]:
-    """Every instrument that can be chosen right now, real ones only."""
-    return [found for driver in available_drivers() if driver.find for found in driver.find()]
+def find_instruments(companions: bool = False) -> list[FoundInstrument]:
+    """Every instrument that can be chosen right now, real ones only; with `companions` also
+    those that are only booked beside another."""
+    return [found for driver in available_drivers()
+            if driver.find and (companions or not driver.companion) for found in driver.find()]
 
 
 def setting_words(db) -> SettingWords:
@@ -58,8 +60,12 @@ def create_driver(key: str, **options) -> MeterDriver:
 def _load_builtin() -> None:
     if "simulator" in _DRIVERS:  # a driver registered from outside does not stand for them
         return
+    from .climate.info import DRIVER as CLIMATE
+    from .climate.simulated import DRIVER as SIMULATED_CLIMATE
     from .profitest_prime.info import DRIVER as PROFITEST_PRIME
     from .simulator import DRIVER as SIMULATOR
 
     register_driver(PROFITEST_PRIME)
     register_driver(SIMULATOR)
+    register_driver(CLIMATE)
+    register_driver(SIMULATED_CLIMATE)

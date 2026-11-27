@@ -8,13 +8,15 @@
 
 """The window stays open beside the campaign, which keeps receiving. The element kept at the
 first station becomes where the campaign's readings go, so the result of the last station
-lands there. Where new elements hang is kept per campaign until it is changed."""
+lands there. Where new elements hang is kept per campaign until it is changed. A guide of an
+instrument booked beside the campaign's own brings that instrument along: the window holds it
+open, takes its reading and the reading is filed as that instrument's."""
 
 from __future__ import annotations
 
 from shiboken6 import isValid
 
-from ..devices import Capability
+from ..devices import Capability, DeviceError, create_driver
 from .measuring_window import MeasuringWindow
 
 
@@ -35,11 +37,20 @@ class CampaignGuide:
         campaign_id = campaign["id"]
         driver = self.session.driver if self.session is not None else None
         simulated = driver is not None and Capability.SIMULATED_TRIGGER in driver.capabilities
-        window = MeasuringWindow(self.app, campaign_id, campaign["driver"], function,
+        slot = self.free.starter.slot_of(function)
+        booked = self.app.service.instrument(campaign_id, slot) if slot else None
+        try:
+            sensor = create_driver(booked.driver, port=booked.identity.serial_no) \
+                if booked is not None else None
+        except DeviceError:
+            return
+        window = MeasuringWindow(self.app, campaign_id,
+                                 booked.driver if booked else campaign["driver"], function,
                                  self.place_targets.get(campaign_id),
                                  self.new_parents.get(campaign_id), self.window(),
                                  repeat=not self.free.starter.is_first(function),
-                                 simulated=simulated)
+                                 simulated=simulated and booked is None, sensor=sensor)
+        window.sensor_read.connect(lambda reading: self._guide_took(campaign_id, slot, window, reading))
         window.dial_turned.connect(self._guide_turns_dial)
         window.simulate_wanted.connect(self._guide_simulates)
         window.place_kept.connect(lambda asset_id: self._guide_place(campaign_id, asset_id))
@@ -75,6 +86,12 @@ class CampaignGuide:
         driver = self.session.driver if self.session is not None else None
         if driver is not None and function in getattr(driver, "simulated_functions", ()):
             driver.simulate_measurement(function)
+
+    def _guide_took(self, campaign_id: int, slot: int, window, reading) -> None:
+        """A reading the window took from the instrument it holds."""
+        self._received(campaign_id, reading, slot)
+        if isValid(window):
+            window.show_reading(reading)
 
     def _guide_closed(self, window: MeasuringWindow) -> None:
         if self.guide_window is window:

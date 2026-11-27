@@ -9,7 +9,7 @@
 from .base import Cancelled, Capability, DeviceError, MeterDriver
 from .base import DeviceBlocked, DeviceTexts, FoundInstrument, LinkState, LiveReading
 from .base import SelectorPosition
-from .driver_info import PREPARING, DriverInfo, Pairing
+from .driver_info import PREPARING, DriverInfo, Enrolment, Pairing
 from .registry import (
     available_drivers,
     create_driver,
@@ -39,6 +39,7 @@ __all__ = [
     "DriverInfo",
     "PREPARING",
     "Pairing",
+    "Enrolment",
     "driver_info",
     "is_simulated",
 ]

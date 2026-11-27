@@ -141,7 +141,8 @@ def test_the_context_menu_offers_what_an_open_campaign_allows(window, app, place
     menu = page.campaign_menu(campaign)
     shown = [action.text() for action in menu.actions() if not action.isSeparator()]
     assert page.campaign_id == campaign
-    assert shown[:3] == ["Kampagne bearbeiten …", "Prüfer ändern …", "Messplan zuweisen …"]
+    assert shown[:4] == ["Kampagne bearbeiten …", "Prüfer ändern …", "Messgeräte der Kampagne …",
+                         "Messplan zuweisen …"]
     assert "Kampagne beenden …" in shown
     assert "Protokoll erstellen …" not in shown
 

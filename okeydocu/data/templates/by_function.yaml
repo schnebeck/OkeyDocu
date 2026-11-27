@@ -43,18 +43,21 @@ blocks:
   - type: fields
     rows:
       - [Test plan, "{{ campaign.plan }}"]
+      - [Test conditions, "{{ campaign.conditions }}"]
   - type: heading
-    when: device.model
+    when: devices
     level: 2
     text: Test instrument
-  - type: fields
-    when: device.model
-    rows:
-      - [Type, "{{ device.manufacturer }} {{ device.model }}"]
-      - [Serial number, "{{ device.serial_no }}"]
-      - [Firmware, "{{ device.firmware }}"]
-      - [Calibrated on, "{{ device.calibrated_on }}"]
-      - [Recalibration due, "{{ device.recalibration_due }}"]
+  - type: devices
+    blocks:
+      - type: fields
+        rows:
+          - [Type, "{{ device.manufacturer }} {{ device.model }}"]
+          - [Serial number, "{{ device.serial_no }}"]
+          - [Firmware, "{{ device.firmware }}"]
+          - [Calibrated on, "{{ device.calibrated_on }}"]
+          - [Recalibration due, "{{ device.recalibration_due }}"]
+          - [Calibration, "{{ device.calibration }}"]
   - type: heading
     level: 2
     text: Summary
