@@ -19,7 +19,6 @@ from .driver import ProfitestPrimeDriver
 from .guides import GUIDES, guide_for
 from .setting_lists import setting_list, softkey_view
 
-PAIRING_BUTTON = N_("Set up {instrument} via Bluetooth …")
 PAIRING_STEPS = N_(
     "<ol>"
     "<li>Unplug the USB cable.</li>"
@@ -45,7 +44,7 @@ DRIVER = DriverInfo(
     find=find_instruments,
     words=InstrumentWords(DRIVER_KEY, mapping.is_code, mapping.culture),
     instructions=mapping.instruction_folder(),
-    pairing=Pairing(PAIRING_BUTTON, PAIRING_STEPS, _pair, pairing.DEFAULT_PIN),
+    pairing=Pairing(PAIRING_STEPS, _pair, pairing.DEFAULT_PIN),
     panel=panel.DRAWING,
     guide=guide_for,
     guided=tuple(GUIDES),

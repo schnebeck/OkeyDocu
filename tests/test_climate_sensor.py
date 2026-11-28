@@ -19,6 +19,7 @@ from okeydocu.devices.climate.known import KnownSensor, forget, known_sensors, r
 from okeydocu.devices.climate.protocols import Reading
 from okeydocu.devices.climate.settling import Settling
 from okeydocu.devices.climate.simulated import SimulatedClimate
+from okeydocu.devices.instrument_check import NOTE, OK, run_checks
 from okeydocu.l10n import speaking
 from okeydocu.reporting.context import build_context
 
@@ -39,7 +40,7 @@ def test_a_reading_becomes_a_measurement_without_verdict():
     taken = measurement(Reading(21.31, 37.39, 3022, 100), datetime(2026, 3, 2, 9, 0, 0, 5))
     values = {value.key: value.quantity.raw for value in taken.results}
     assert taken.function == "ambient" and taken.verdict.value == "not_evaluated"
-    assert values == {"t_air": "21.31°C", "rh": "37.4%", "u_battery": "3.022V"}
+    assert values == {"t_air": "21.31\u00b0C", "rh": "37.4%", "u_battery": "3.022V"}
     assert taken.taken_at.microsecond == 0
 
 
@@ -98,7 +99,13 @@ def test_the_report_names_the_conditions_and_the_sensor_as_not_calibrated(servic
     service.receive(campaign, LiveReading(taken, datetime(2026, 3, 2, 9, 30)), slot=slot)
     with speaking("de"):
         context = build_context(service, campaign)
-    assert context["campaign"]["conditions"].startswith("23,5 °C, 29 % r. F., gemessen")
+    assert context["campaign"]["conditions"].startswith("23,5 \u00b0C, 29 % r. F., gemessen")
     assert identity.model in context["campaign"]["conditions"]
     listed = context["devices"]
     assert [device["calibration"] for device in listed] == ["nicht kalibriert, Werte zur Information"]
+
+
+def test_a_sensor_is_tested_for_who_it_is_and_a_reading_and_said_to_be_uncalibrated():
+    run = run_checks(SimulatedClimate("sim-7"), datetime(2026, 3, 2).date(), calibrated=False)
+    states = {check.key: check.state for check in run.checks}
+    assert states == {"identity": OK, "calibration": NOTE, "reading": OK} and run.ready

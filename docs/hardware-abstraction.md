@@ -158,13 +158,16 @@ serial port, such as `LEQ,A,F,78.4,2026-05-04T10:15:02`.
    - `find`: lists the instruments that can be chosen now;
    - `words`: an `InstrumentWords`, if the instrument names its own codes;
    - `instructions`: its folder of instructions;
-   - `pairing`: a `Pairing` for a wireless instrument that is paired once (button text,
-     steps on the instrument, default PIN, and the function that pairs and returns the port);
+   - `pairing`: a `Pairing` for a wireless instrument that is paired once (steps on the
+     instrument, default PIN, and the function that pairs and returns the port);
    - `preparing`: what the operator is told while the program gets the instrument ready;
    - `simulated`: for a software instrument whose readings may never be signed;
-   - `enrolment`: an `Enrolment` for a wireless sensor that is made known once (button text,
-     instructions, and the functions that list the sensors in reach, let one show itself and
-     keep it under a name);
+   - `enrolment`: an `Enrolment` for a wireless sensor that is made known once (instructions,
+     and the functions that list the sensors in reach, let one show itself, keep it under a
+     name, drop it and tell whether it is kept);
+
+   The settings offer every kind with a pairing or an enrolment in one searchable choice,
+   “Add instrument”, so their number does not change the card.
    - `companion`: the instrument is only booked beside a campaign's own, never its source;
    - `calibrated`: `False` marks its readings in the report as for information only;
    - `identity_of`: its identity by port without a connection, for booking it in.

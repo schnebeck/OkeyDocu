@@ -28,6 +28,11 @@ from .station_texts import actions_text
 TICK_MS = 1000
 
 
+def shown_text(number: int) -> str:
+    return tr("Within a few seconds the sensor chosen shows {number} with a face, for half a"
+              " minute and in turn with its temperature.", number=number)
+
+
 class SensorStations:
     """Mixed into the measuring window, which declares the signals `sensor_read` and `pointed`."""
 
@@ -37,7 +42,7 @@ class SensorStations:
         """`advice` is the driver's: what the figures of a reading mean for the test."""
         self.sensor = sensor
         self.advice = advice or (lambda values: [])
-        self.show_button = QPushButton(tr("Show on the sensor"))
+        self.show_button = QPushButton(tr("Identify sensor"))
         self.show_button.clicked.connect(self._point_out)
         self.take_button = QPushButton(tr("Take reading"))
         self.take_button.clicked.connect(self._take_reading)
@@ -70,15 +75,14 @@ class SensorStations:
 
         def work():
             try:
-                self.sensor.point_out()
-                self.pointed.emit("")
+                self.pointed.emit(shown_text(self.sensor.point_out()))
             except DeviceError as error:
                 self.pointed.emit(tr(str(error)))
         threading.Thread(target=work, daemon=True, name="point-out").start()
 
-    def _pointed(self, problem: str) -> None:
+    def _pointed(self, said: str) -> None:
         self.show_button.setEnabled(True)
-        self.sensor_note = problem or tr("The sensor showing a face now is the one chosen.")
+        self.sensor_note = said
         if self.kind == IDENTIFY:
             self._identify_text()
 

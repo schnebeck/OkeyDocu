@@ -22,6 +22,7 @@ from ...model import DeviceIdentity, MeterMeasurement
 from ..base import Capability, DeviceError, LiveReading, MeterDriver
 from ..driver_info import DriverInfo
 from . import guides
+from .commands import SHOW_S, SHOWN
 from .driver import STALE_S, measurement
 from .protocols import Reading
 from .settling import Settling
@@ -31,7 +32,7 @@ SPAN_S, PACE_S = 5.0, 3.0  # steady span, and how fast it takes on the air
 
 
 class SimulatedClimate(MeterDriver):
-    capabilities = Capability.LIVE_RESULTS | Capability.CLOCK | Capability.TAKE
+    capabilities = Capability.TAKE
 
     def __init__(self, port: str = "", **_):
         self.address = port or "sim-climate"
@@ -67,9 +68,10 @@ class SimulatedClimate(MeterDriver):
     def identify(self) -> DeviceIdentity:
         return DeviceIdentity("OkeyDocu", N_("Simulated climate sensor"), self.address, "1.0")
 
-    def point_out(self, seconds: int = 5) -> None:
+    def point_out(self, seconds: int = SHOW_S) -> int:
         if not self.started:
             raise DeviceError(N_("The sensor is not in reach."))
+        return random.randint(*SHOWN)
 
     def read_clock(self) -> datetime:
         return datetime.now()

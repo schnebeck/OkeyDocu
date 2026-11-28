@@ -69,7 +69,7 @@ class MeasuringWindow(PlaceStation, DialStation, StationKinds, SensorStations, L
     dial_turned = Signal(int)  # the drawn dial was clicked to this position
     simulate_wanted = Signal(str)  # a simulated instrument is to measure this function
     sensor_read = Signal(object)  # a reading the window took from its sensor
-    pointed = Signal(str)  # the sensor was asked to show itself: empty, or what went wrong
+    pointed = Signal(str)  # the sensor was asked to show itself: what it shows, or what failed
 
     def __init__(self, app, campaign_id: int, driver: str, function: str,
                  asset_id: int | None, new_parent: int | None = None, parent=None,

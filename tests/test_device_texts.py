@@ -146,7 +146,7 @@ def test_the_instruments_dialog_sets_up_the_chosen_instrument(app, qtbot, monkey
     from okeydocu.devices import FoundInstrument
     from okeydocu.ui import settings_dialog
     found = FoundInstrument("profitest-prime", "PROFITEST PRIME (USB)", "/dev/ttyACM0")
-    monkeypatch.setattr(settings_dialog, "find_instruments", lambda: [found])
+    monkeypatch.setattr(settings_dialog, "find_instruments", lambda **_: [found])
     opened = []
     monkeypatch.setattr(settings_dialog.InstrumentPrepareOverlay, "__init__",
                         lambda self, app, key, port, parent=None: opened.append((key, port)))
@@ -172,7 +172,8 @@ def test_pairing_over_bluetooth_goes_straight_on_to_setting_up(app, qtbot, monke
     monkeypatch.setattr(settings_dialog.InstrumentSetupOverlay, "exec", paired)
     dialog = settings_dialog.SettingsOverlay(None, app)
     qtbot.addWidget(dialog)
-    dialog.pairing_buttons["profitest-prime"].click()
+    dialog.adding.choose("profitest-prime")
+    dialog.adding.add_button.click()
     assert opened == [("profitest-prime", "bt:00:11:22:33:44:55")]
 
 

@@ -43,7 +43,8 @@ def book_sensor(page, app):
     return next(booked.slot for booked in app.service.instruments(page.campaign_id) if booked.slot)
 
 
-def test_a_sensor_booked_beside_is_guided_and_its_reading_filed_as_its_own(page, app, clock):
+def test_a_sensor_booked_beside_is_guided_and_its_reading_filed_as_its_own(page, app, clock,
+                                                                         qtbot):
     slot = book_sensor(page, app)
     starter = page.free.starter
     assert starter.slot_of("ambient") == slot and starter.slot_of("u") == 0
@@ -53,6 +54,9 @@ def test_a_sensor_booked_beside_is_guided_and_its_reading_filed_as_its_own(page,
     window._choose(window.root)  # measured at the installation itself
     window.next.click()
     assert window.kind == IDENTIFY and window.show_button.isVisibleTo(window)
+    with qtbot.waitSignal(window.pointed, timeout=5000) as shown:
+        window.show_button.click()
+    assert "mit einem Gesicht" in shown.args[0] and shown.args[0] in window.step_text.text()
     window.go_to(SETTLE)
     window._sensor_tick()
     assert not window.next.isEnabled()

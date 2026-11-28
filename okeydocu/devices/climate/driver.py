@@ -14,6 +14,7 @@ the sensor has no clock and no memory, so its time is the laptop's."""
 
 from __future__ import annotations
 
+import random
 import threading
 import time
 import uuid
@@ -44,7 +45,7 @@ def measurement(reading: Reading, moment: datetime) -> MeterMeasurement:
 
 
 class ClimateSensor(MeterDriver):
-    capabilities = Capability.LIVE_RESULTS | Capability.CLOCK | Capability.TAKE
+    capabilities = Capability.TAKE
 
     def __init__(self, port: str = "", **_):
         if not port:
@@ -57,6 +58,7 @@ class ClimateSensor(MeterDriver):
         self._radio = threading.Lock()
         self._waiting = threading.Event()  # a command waits for the radio
         self._stop = threading.Event()
+        self.aborted = threading.Event()  # a test waiting for a reading gives up
         self._thread: threading.Thread | None = None
         self._on_reading = None
 
@@ -148,18 +150,24 @@ class ClimateSensor(MeterDriver):
                     found[key] = commands.text(bus.read(bus.characteristic(self.address, uuid_)))
                 except DeviceError:
                     found[key] = ""
-            return DeviceIdentity(serial_no=self.address, **found)
+            return DeviceIdentity(serial_no=self.address, name=bus.name(self.address), **found)
         return self._connected(work)
 
-    def point_out(self, seconds: int = 5) -> None:
-        """Shows the temperature and a face on the display of this very sensor."""
-        temperature = self.reading.temperature or 0.0
+    def point_out(self, seconds: int = commands.SHOW_S) -> int:
+        """Shows a number of its own and a face on the display of this very sensor; the number,
+        for the tester to look for among several sensors."""
+        number = random.randint(*commands.SHOWN)
+        # The display shows what was written; its echo is not waited for.
         self._connected(lambda bus: bus.ask(bus.characteristic(self.address, commands.COMMANDS),
-                                            commands.show(temperature, seconds)))
+                                            commands.show(number, seconds), needed=False))
+        return number
 
     def rename(self, name: str) -> None:
         self._connected(lambda bus: bus.ask(bus.characteristic(self.address, commands.COMMANDS),
                                             commands.rename(name)))
+
+    def abort(self) -> None:
+        self.aborted.set()
 
     def read_clock(self) -> datetime:
         return datetime.now()  # no clock of its own: the laptop's time stands for it

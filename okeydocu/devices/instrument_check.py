@@ -13,12 +13,13 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Callable
 
-from ..l10n import day, signed_seconds, tr
+from ..l10n import day, decimal, signed_seconds, tr
 from ..model import DeviceIdentity
 from .base import Capability, DeviceError, MeterDriver
 
 OK, NOTE, FAILED = "ok", "note", "failed"  # a note does not keep the instrument from measuring
 CLOCK_NOTE_S = 3.0
+READING_S, LOW_BATTERY_MV = 30.0, 2500  # a sensor's wait for a reading; its battery runs low
 
 
 @dataclass(frozen=True)
@@ -41,8 +42,10 @@ class TestRun:
 
 
 def run_checks(driver: MeterDriver, today: date,
-               on_check: Callable[[Check], None] = lambda check: None) -> TestRun:
-    """Stops at the first failure that leaves nothing more to try, such as no connection."""
+               on_check: Callable[[Check], None] = lambda check: None,
+               calibrated: bool = True) -> TestRun:
+    """Stops at the first failure that leaves nothing more to try, such as no connection.
+    An instrument not `calibrated` is said to be so instead of having its due date asked."""
     run = TestRun(checks=[])
 
     def report(key: str, title: str, state: str, detail: str = "") -> None:
@@ -58,8 +61,11 @@ def run_checks(driver: MeterDriver, today: date,
         return run
     try:
         seconds = f"{time.monotonic() - started:.1f}"
-        report("connect", tr("Connection"), OK, tr("up after {seconds} s", seconds=seconds))
-        _identity(driver, run, report, today)
+        if Capability.TAKE not in driver.capabilities:  # a sensor connects to tell who it is
+            report("connect", tr("Connection"), OK, tr("up after {seconds} s", seconds=seconds))
+        _identity(driver, run, report, today, calibrated)
+        if Capability.TAKE in driver.capabilities:
+            _reading(driver, report)
         if Capability.CLOCK in driver.capabilities:
             _clock(driver, run, report)
         if Capability.SELECTOR in driver.capabilities:
@@ -71,7 +77,7 @@ def run_checks(driver: MeterDriver, today: date,
     return run
 
 
-def _identity(driver, run: TestRun, report, today: date) -> None:
+def _identity(driver, run: TestRun, report, today: date, calibrated: bool) -> None:
     try:
         who = run.identity = driver.identify()
     except DeviceError as err:
@@ -81,12 +87,37 @@ def _identity(driver, run: TestRun, report, today: date) -> None:
            tr("{model}, serial number {serial}, firmware {firmware}",
               model=who.model, serial=who.serial_no, firmware=who.firmware))
     due = who.recalibration_due
-    if due is None:
+    if not calibrated:
+        report("calibration", tr("Calibration"), NOTE, tr("not calibrated, values for information"))
+    elif due is None:
         report("calibration", tr("Calibration"), NOTE, tr("due date unknown"))
     elif who.calibration_overdue(today):
         report("calibration", tr("Calibration"), NOTE, tr("overdue since {day}", day=day(due)))
     else:
         report("calibration", tr("Calibration"), OK, tr("due on {day}", day=day(due)))
+
+
+def _reading(driver, report) -> None:
+    """Waits a bounded time for a whole reading of a sensor that measures when asked."""
+    deadline = time.monotonic() + READING_S
+    aborted = getattr(driver, "aborted", None)  # set from another thread to give up
+    reading = None
+    while time.monotonic() < deadline and not (aborted is not None and aborted.is_set()):
+        reading, age, _ = driver.latest()
+        if reading.complete and age < READING_S:
+            break
+        reading = None
+        time.sleep(0.5)
+    if reading is None:
+        report("reading", tr("Reading"), FAILED, tr("The sensor has not sent a reading yet."))
+        return
+    text = tr("{temperature} \u00b0C, {humidity} % r.H.",
+              temperature=decimal(reading.temperature, 1), humidity=decimal(reading.humidity, 0))
+    if reading.battery_mv:
+        text += ", " + tr("battery {volts} V", volts=decimal(reading.battery_mv / 1000, 2))
+    low = reading.battery_mv is not None and reading.battery_mv < LOW_BATTERY_MV
+    report("reading", tr("Reading"), NOTE if low else OK,
+           text + (" \u2013 " + tr("replace the battery") if low else ""))
 
 
 def _clock(driver, run: TestRun, report) -> None:

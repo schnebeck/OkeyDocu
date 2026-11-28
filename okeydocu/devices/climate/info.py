@@ -19,15 +19,17 @@ from ..driver_info import DriverInfo, Enrolment
 from . import guides
 from .bluez import Bluez
 from .driver import ClimateSensor
-from .known import KnownSensor, known_sensors, remember
+from .known import KnownSensor, forget, known_sensors, remember
 from .protocols import decode
 
 KEY = "climate"
-INSTRUCTIONS = N_("<p>Bring the sensor close to this computer. Sensors in reach that send"
-                  " their readings in a known protocol are listed. Choose one and click"
-                  " <b>Show on the sensor</b>: its display shows a face for a few seconds.</p>"
-                  "<p>A sensor running the firmware it was sold with sends nothing in the"
-                  " open and is not listed.</p>")
+INSTRUCTIONS = N_("<p>Supported are sensors such as the Xiaomi LYWSD03MMC running the pvvx"
+                  " firmware (ATC_MiThermometer), which sends its readings as BTHome v2, in"
+                  " the pvvx or in the ATC1441 format. Readings of the ATC1441 firmware are"
+                  " read as well; such a sensor can be neither identified nor named. With the"
+                  " firmware it is sold with a sensor sends no readings and is not listed.</p>"
+                  "<p>Search, choose a sensor and identify it: its display shows the number"
+                  " named below. Enter a name and enrol it.</p>")
 
 
 def find() -> list[FoundInstrument]:
@@ -35,36 +37,46 @@ def find() -> list[FoundInstrument]:
             for sensor in known_sensors()]
 
 
-def scan(seconds: float) -> list[FoundInstrument]:
+def scan(seconds: float, heard=lambda found: None, stopped=lambda: False) -> list[FoundInstrument]:
+    """Every sensor heard within `seconds`, each told to `heard` the moment it is; `stopped`
+    ends the search early."""
     found: dict[str, FoundInstrument] = {}
     bus = Bluez()
     try:
-        for advert in bus.listen(seconds):
+        for advert in bus.listen(seconds, stopped):
             decoded = decode(advert.service_data)
             if decoded is not None and advert.address not in found:
                 protocol, reading = decoded
                 label = f"{advert.name or advert.address}  {tr(protocol.label)}"
                 if reading.temperature is not None:
                     label += f"  {reading.temperature:.1f} \u00b0C"
-                found[advert.address] = FoundInstrument(KEY, label, advert.address)
+                found[advert.address] = FoundInstrument(KEY, label, advert.address,
+                                                        advert.name or "")
+                heard(found[advert.address])
     finally:
         bus.close()
     return list(found.values())
 
 
-def point_out(port: str) -> None:
-    sensor = ClimateSensor(port)
-    sensor.point_out()
+def point_out(port: str) -> int:
+    return ClimateSensor(port).point_out()
 
 
-def enrol(port: str, name: str) -> FoundInstrument:
+def enrol(port: str, name: str, given_up=lambda: False) -> FoundInstrument | None:
+    """Nothing is kept once the tester has given up, however far it got. Without a name
+    given the sensor keeps the one it calls itself."""
     sensor = ClimateSensor(port)
     identity = sensor.identify()
-    if name:
+    if given_up():
+        return None
+    if name and name != identity.name:
         try:
             sensor.rename(name)
         except DeviceError:
             pass  # kept under the name chosen; the sensor keeps calling itself what it did
+    if given_up():
+        return None
+    name = name or identity.name
     remember(KnownSensor(port, name or identity.model, "", identity.manufacturer,
                          identity.model, identity.firmware))
     return FoundInstrument(KEY, tr("Climate sensor {name}", name=name or identity.model), port)
@@ -87,7 +99,9 @@ DRIVER = DriverInfo(
     find=find,
     guide=guides.guide_for,
     guided=tuple(guides.GUIDES),
-    enrolment=Enrolment(N_("Enrol climate sensor \u2026"), INSTRUCTIONS, scan, point_out, enrol),
+    enrolment=Enrolment(INSTRUCTIONS, scan, point_out, enrol,
+                        forget, lambda port: any(sensor.address == port
+                                                 for sensor in known_sensors())),
     companion=True,
     calibrated=False,
     advice=guides.hints,

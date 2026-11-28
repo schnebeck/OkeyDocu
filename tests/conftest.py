@@ -37,7 +37,7 @@ def isolated_data(tmp_path, monkeypatch):
 def no_real_instruments(monkeypatch):
     """Tests must not depend on what happens to be paired with this computer."""
     monkeypatch.setattr("okeydocu.ui.campaign_dialog.find_instruments", lambda: [])
-    monkeypatch.setattr("okeydocu.ui.settings_dialog.find_instruments", lambda: [])
+    monkeypatch.setattr("okeydocu.ui.settings_dialog.find_instruments", lambda **_: [])
 
 
 @pytest.fixture(autouse=True)

@@ -25,7 +25,6 @@ PREPARING = N_("The instrument is being prepared for this program. Please do not
 class Pairing:
     """First contact with a wireless instrument, needed once per instrument."""
 
-    button: str  # may name the instrument as {instrument}
     instructions: str  # what the operator does on the instrument; simple markup allowed
     pair: Callable[[str, Callable[[str], None]], str]  # PIN and progress in, port out
     default_pin: str = ""
@@ -36,11 +35,16 @@ class Enrolment:
     """Making a sensor known to this program: the ones in reach are listed, the one chosen
     shows itself on its display, and it is kept under a name of the tester's choosing."""
 
-    button: str
     instructions: str  # simple markup allowed
-    scan: Callable[[float], list[FoundInstrument]]  # seconds to listen; label and port
-    point_out: Callable[[str], None]  # port: the sensor shows itself
-    enrol: Callable[[str, str], FoundInstrument]  # port and name: kept, under that name
+    # Seconds to listen, what to tell of each sensor the moment it is heard, and whether to
+    # stop early; all heard.
+    scan: Callable[[float, Callable[[FoundInstrument], None], Callable[[], bool]],
+                   list[FoundInstrument]]
+    point_out: Callable[[str], int]  # port in; the number the sensor now shows out
+    # Port, name and whether the tester has given up in; the sensor kept, or None if given up.
+    enrol: Callable[[str, str, Callable[[], bool]], FoundInstrument | None]
+    forget: Callable[[str], None]  # port: the sensor is no longer offered
+    enrolled: Callable[[str], bool]  # port: whether the sensor is enrolled
 
 
 @dataclass(frozen=True)

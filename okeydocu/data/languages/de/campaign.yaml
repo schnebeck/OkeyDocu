@@ -333,3 +333,9 @@ texts:
   "Booked out: {name}": "Ausgebucht: {name}"
   It has measured in this campaign.: Es hat in dieser Kampagne gemessen.
   The instrument has measured in this campaign.: Das Messgerät hat in dieser Kampagne gemessen.
+  # Adding an instrument
+  Add instrument: Gerät hinzufügen
+  Kind of instrument: Gerätetyp
+  Add …: Hinzufügen …
+  "{instrument} – pair over Bluetooth": "{instrument} – über Bluetooth koppeln"
+  "{instrument} – enrol": "{instrument} – anmelden"

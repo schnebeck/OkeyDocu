@@ -14,7 +14,7 @@ from PySide6.QtCore import QThread, Signal
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QProgressBar, QPushButton
 
-from ..devices import Capability
+from ..devices import Capability, driver_info
 from ..devices.instrument_check import FAILED, NOTE, OK, Check, run_checks
 from ..l10n import N_, tr
 from .common import AppContext
@@ -36,12 +36,13 @@ class TestWorker(QThread):
     checked = Signal(object)
     finished_with = Signal(object)
 
-    def __init__(self, driver, parent=None):
+    def __init__(self, driver, parent=None, calibrated: bool = True):
         super().__init__(parent)
-        self.driver = driver
+        self.driver, self.calibrated = driver, calibrated
 
     def run(self) -> None:
-        self.finished_with.emit(run_checks(self.driver, date.today(), self.checked.emit))
+        self.finished_with.emit(run_checks(self.driver, date.today(), self.checked.emit,
+                                           self.calibrated))
 
 
 class InstrumentTestOverlay(Overlay):
@@ -50,7 +51,9 @@ class InstrumentTestOverlay(Overlay):
     def __init__(self, app: AppContext, driver_key: str, port: str, label: str, parent=None):
         super().__init__(tr("Test the instrument"), parent)
         self.app, self.driver_key = app, driver_key
-        self.connection = "Bluetooth" if port.startswith("bt:") else "USB"
+        info = driver_info(driver_key)
+        sensor = info is not None and info.enrolment is not None
+        self.connection = "Bluetooth" if port.startswith("bt:") or sensor else "USB"
         self.run = None
         intro = QLabel(f"<b>{label}</b><br>{tr(INTRO)}")
         intro.setWordWrap(True)
@@ -75,7 +78,7 @@ class InstrumentTestOverlay(Overlay):
         driver = app.devices.new_driver(driver_key, port)
         self.driver = driver
         self.capabilities = driver.capabilities
-        self.worker = TestWorker(driver, self)
+        self.worker = TestWorker(driver, self, calibrated=info is None or info.calibrated)
         self.worker.checked.connect(self._checked)
         self.worker.finished_with.connect(self._finished)
         self.worker.start()

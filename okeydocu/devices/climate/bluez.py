@@ -25,6 +25,11 @@ from ..base import DeviceError
 from .protocols import uuid16
 
 BLUEZ, DEVICE, CHARACTERISTIC = "org.bluez", "org.bluez.Device1", "org.bluez.GattCharacteristic1"
+ADAPTER = "org.bluez.Adapter1"
+# BlueZ ends an attempt it cannot make by itself; cutting it short leaves it running and the
+# next one is refused while it does.
+CONNECT_S, ATTEMPTS = 40.0, 3
+FIND_AGAIN_S = 15.0
 PROPERTIES, OBJECTS = "org.freedesktop.DBus.Properties", "org.freedesktop.DBus.ObjectManager"
 MAX_MESSAGES = 5000  # per listening, as a bound
 
@@ -50,7 +55,7 @@ class Bluez:
         except (OSError, ConnectionError) as error:
             raise DeviceError(tr("Bluetooth is not available: {error}", error=error)) from error
         self.adapter = next((path for path, ifaces in self._objects().items()
-                             if "org.bluez.Adapter1" in ifaces), None)
+                             if ADAPTER in ifaces), None)
         if self.adapter is None:
             self.close()
             raise DeviceError(tr("No Bluetooth adapter was found."))
@@ -87,32 +92,32 @@ class Bluez:
         finally:
             heard.close()
 
-    def listen(self, seconds: float) -> Iterator[Advert]:
+    def listen(self, seconds: float, stopped=lambda: False) -> Iterator[Advert]:
         """The advertisements heard within `seconds`, as they arrive. Closing the iterator
-        ends listening."""
+        ends listening, and so does `stopped` once it is true, within half a second."""
         known = self._objects()
         self._names.update({path: _value(ifaces[DEVICE].get("Name"), "")
                             for path, ifaces in known.items() if DEVICE in ifaces})
         self._watch(interface=PROPERTIES, member="PropertiesChanged", path_namespace=self.adapter)
         self._watch(interface=OBJECTS, member="InterfacesAdded")
-        self._call(self.adapter, "org.bluez.Adapter1", "SetDiscoveryFilter", "a{sv}",
+        self._call(self.adapter, ADAPTER, "SetDiscoveryFilter", "a{sv}",
                    ({"Transport": ("s", "le"), "DuplicateData": ("b", True)},))
-        self._call(self.adapter, "org.bluez.Adapter1", "StartDiscovery")
+        self._call(self.adapter, ADAPTER, "StartDiscovery")
         end = time.monotonic() + seconds
         try:
             for _ in range(MAX_MESSAGES):
                 left = end - time.monotonic()
-                if left <= 0:
+                if left <= 0 or stopped():
                     return
                 try:
-                    message = self._bus.receive(timeout=left)
+                    message = self._bus.receive(timeout=min(left, 0.5))
                 except TimeoutError:
-                    return
+                    continue
                 advert = self._advert(message)
                 if advert is not None:
                     yield advert
         finally:
-            self._call(self.adapter, "org.bluez.Adapter1", "StopDiscovery")
+            self._call(self.adapter, ADAPTER, "StopDiscovery")
 
     def _advert(self, message) -> Advert | None:
         member, path = message.header.fields.get(3), message.header.fields.get(1, "")
@@ -135,17 +140,46 @@ class Bluez:
     def device(self, address: str) -> str:
         return f"{self.adapter}/dev_{address.replace(':', '_')}"
 
+    def _settled_radio(self) -> None:
+        """Waits up to 5 s until the adapter has stopped discovering. A search that has just
+        ended, here or by another client, can still hold the radio, and a connection asked
+        for meanwhile is never made."""
+        for _ in range(20):
+            found = self._call(self.adapter, PROPERTIES, "Get", "ss", (ADAPTER, "Discovering"))
+            if not _value(found[0], False):
+                return
+            time.sleep(0.25)
+
     def connect(self, address: str) -> None:
-        """Connects and waits until the services of the device are resolved; before that
-        its characteristics may be known from a cache but cannot be used."""
+        """Connects in up to three short attempts and waits until the services of the device
+        are resolved; before that its characteristics may be known from a cache but cannot be
+        used. An attempt that is not answered is ended, and the device is heard again before
+        the next: BlueZ forgets a device it has not heard for a while."""
         path = self.device(address)
-        self._call(path, DEVICE, "Connect", timeout=25.0)
+        for attempt in range(ATTEMPTS):
+            self._settled_radio()
+            try:
+                self._call(path, DEVICE, "Connect", timeout=CONNECT_S)
+                break
+            except DeviceError:
+                self.disconnect(address)
+                last = attempt == ATTEMPTS - 1
+                if last or self.find(FIND_AGAIN_S, lambda a: a.address == address) is None:
+                    raise
         for _ in range(40):
             resolved = self._call(path, PROPERTIES, "Get", "ss", (DEVICE, "ServicesResolved"))
             if _value(resolved[0], False):
                 return
             time.sleep(0.25)
         raise DeviceError(tr("The sensor did not answer."))
+
+    def name(self, address: str) -> str:
+        """The name the device gives itself, as BlueZ last heard it; empty if it gives none."""
+        try:
+            found = self._call(self.device(address), PROPERTIES, "Get", "ss", (DEVICE, "Name"))
+        except DeviceError:
+            return ""
+        return str(_value(found[0], ""))
 
     def disconnect(self, address: str) -> None:
         try:
@@ -171,9 +205,11 @@ class Bluez:
         self._call(path, CHARACTERISTIC, "WriteValue", "aya{sv}",
                    (data, {"type": ("s", "request")}))
 
-    def ask(self, path: str, data: bytes, seconds: float = 5.0) -> bytes:
+    def ask(self, path: str, data: bytes, seconds: float = 5.0, needed: bool = True) -> bytes:
         """Writes a command and waits for the notification that answers it. The filter is
-        set before the write, since the answer may come before the write is acknowledged."""
+        set before the write, since the answer may come before the write is acknowledged.
+        Without the answer `needed`, the acknowledged write is enough and gives b"". Ending
+        the notifications afterwards may fail on a link going down; the answer stands."""
         self._watch(interface=PROPERTIES, member="PropertiesChanged", path=path)
         # Locally the signal carries the unique name of BlueZ, not its well-known one.
         local = MatchRule(type="signal", interface=PROPERTIES, member="PropertiesChanged",
@@ -195,6 +231,11 @@ class Bluez:
                     answer = bytes(value[1]) if value else b""
                     if answer[:1] == data[:1]:
                         return answer
-                raise DeviceError(tr("The sensor did not answer."))
+                if needed:
+                    raise DeviceError(tr("The sensor did not answer."))
+                return b""
             finally:
-                self._call(path, CHARACTERISTIC, "StopNotify")
+                try:
+                    self._call(path, CHARACTERISTIC, "StopNotify")
+                except DeviceError:
+                    pass

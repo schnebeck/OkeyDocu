@@ -18,8 +18,8 @@ from __future__ import annotations
 from ...l10n import N_
 from ..guide import IDENTIFY, MEASURE, PLACE, PREPARE, SETTLE, Action, Guide, Station
 
-IDENTIFIED = Action((), N_("Click \u201cShow on the sensor\u201d. The sensor in question"
-                           " shows its temperature with a face for a few seconds."))
+IDENTIFIED = Action((), N_("Click \u201cIdentify sensor\u201d. Within a few seconds the"
+                           " sensor in question shows the number named here with a face."))
 PLACED = (
     Action((), N_("Lay the sensor out at the equipment tested, at about the height of the"
                   " parts measured.")),

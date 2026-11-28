@@ -39,7 +39,9 @@ class Capability(Flag):
     SELECTOR = auto()  # the position of the function selector can be read
     SIMULATED_TRIGGER = auto()  # test drivers only: the app may create a reading
     TEXTS = auto()  # the instrument hands out its words for the codes it sends
-    TAKE = auto()  # the app may take a reading; nothing is applied to the installation
+    # The app may take a reading, nothing is applied to the installation: the driver has
+    # `latest()` (reading, its age, seconds still to settle) and `take()`.
+    TAKE = auto()
 
 
 @dataclass(frozen=True)
@@ -57,6 +59,7 @@ class FoundInstrument:
     key: str
     label: str
     port: str = ""
+    name: str = ""  # what the instrument calls itself, where it tells
 
 
 class LinkState(Enum):

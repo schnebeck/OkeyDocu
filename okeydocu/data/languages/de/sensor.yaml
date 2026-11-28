@@ -4,19 +4,20 @@ texts:
   Climate sensor: Klimasensor
   "Climate sensor {name}": "Klimasensor {name}"
   Simulated climate sensor: Simulierter Klimasensor
-  Enrol climate sensor …: Klimasensor anmelden …
   Enrol sensor: Sensor anmelden
   Enrol: Anmelden
   Search: Suchen
-  Show on the sensor: Am Sensor zeigen
-  as it is to be called, e.g. a number on its back: so, wie er heißen soll, z. B. eine Nummer auf seiner Rückseite
+  Identify sensor: Sensor identifizieren
+  Unenrol: Abmelden
+  "The sensor is no longer offered for campaigns; its readings stay where they are": "Der Sensor wird für Kampagnen nicht mehr angeboten; seine Messwerte bleiben, wo sie sind"
   Listening for sensors …: Suche nach Sensoren …
   Connecting to the sensor …: Verbinde mit dem Sensor …
   Enrolling the sensor …: Melde den Sensor an …
+  "{count} sensor in reach.": "{count} Sensor in Reichweite."
   "{count} sensors in reach.": "{count} Sensoren in Reichweite."
   No sensor in reach sends a reading in a known protocol.: Kein Sensor in Reichweite sendet Messwerte in einem bekannten Protokoll.
-  The sensor showing a face now is the one chosen.: Der Sensor, der jetzt ein Gesicht zeigt, ist der gewählte.
-  "<p>Bring the sensor close to this computer. Sensors in reach that send their readings in a known protocol are listed. Choose one and click <b>Show on the sensor</b>: its display shows a face for a few seconds.</p><p>A sensor running the firmware it was sold with sends nothing in the open and is not listed.</p>": "<p>Bringen Sie den Sensor in die Nähe dieses Rechners. Aufgeführt werden Sensoren in Reichweite, die ihre Messwerte in einem bekannten Protokoll senden. Wählen Sie einen und klicken Sie auf <b>Am Sensor zeigen</b>: Sein Display zeigt dann für einige Sekunden ein Gesicht.</p><p>Ein Sensor mit der Firmware, mit der er verkauft wurde, sendet nichts offen und erscheint nicht.</p>"
+  "Within a few seconds the sensor chosen shows {number} with a face, for half a minute and in turn with its temperature.": "In wenigen Sekunden zeigt der gewählte Sensor {number} mit einem Gesicht, eine halbe Minute lang im Wechsel mit seiner Temperatur."
+  "<p>Supported are sensors such as the Xiaomi LYWSD03MMC running the pvvx firmware (ATC_MiThermometer), which sends its readings as BTHome v2, in the pvvx or in the ATC1441 format. Readings of the ATC1441 firmware are read as well; such a sensor can be neither identified nor named. With the firmware it is sold with a sensor sends no readings and is not listed.</p><p>Search, choose a sensor and identify it: its display shows the number named below. Enter a name and enrol it.</p>": "<p>Unterstützt werden Sensoren wie der Xiaomi LYWSD03MMC mit der Firmware pvvx (ATC_MiThermometer); sie sendet ihre Messwerte als BTHome v2, im pvvx- oder im ATC1441-Format. Messwerte der Firmware ATC1441 werden ebenfalls gelesen; ein solcher Sensor lässt sich weder identifizieren noch benennen. Mit der Firmware, mit der er verkauft wird, sendet ein Sensor keine Messwerte und erscheint nicht.</p><p>Suchen, Sensor wählen und identifizieren: Sein Display zeigt die unten genannte Zahl. Namen eingeben und anmelden.</p>"
   # Errors
   No Bluetooth adapter was found.: Es wurde kein Bluetooth-Adapter gefunden.
   No sensor is chosen.: Es ist kein Sensor gewählt.
@@ -32,7 +33,7 @@ texts:
   Air beside the equipment: Luft neben dem Betriebsmittel
   Equipment: Betriebsmittel
   "free air, a hand's width away": "freie Luft, eine Handbreit entfernt"
-  "Click “Show on the sensor”. The sensor in question shows its temperature with a face for a few seconds.": "Klicken Sie auf „Am Sensor zeigen“. Der betreffende Sensor zeigt für einige Sekunden seine Temperatur mit einem Gesicht."
+  "Click “Identify sensor”. Within a few seconds the sensor in question shows the number named here with a face.": "Klicken Sie auf „Sensor identifizieren“. In wenigen Sekunden zeigt der betreffende Sensor die hier genannte Zahl mit einem Gesicht."
   Lay the sensor out at the equipment tested, at about the height of the parts measured.: Stellen Sie den Sensor am geprüften Betriebsmittel auf, etwa in der Höhe der gemessenen Teile.
   "Keep a hand's width from the equipment and out of the warm air of its vents, out of sun, draught and the warmth of your hand.": "Halten Sie eine Handbreit Abstand zum Betriebsmittel und zur warmen Luft seiner Lüftung, fern von Sonne, Zugluft und der Wärme Ihrer Hand."
   "Click “Take reading”: the latest reading of the sensor is stored with the element chosen.": "Klicken Sie auf „Messwert übernehmen“: Der neueste Messwert des Sensors wird beim gewählten Element gespeichert."
@@ -44,3 +45,9 @@ texts:
   "Last heard {seconds} s ago.": "Zuletzt vor {seconds} s gehört."
   "Outside 0 to 35 °C instruments for testing installations no longer measure as specified (VDE 0413).": "Außerhalb von 0 bis 35 °C messen Prüfgeräte für Anlagen nicht mehr wie spezifiziert (VDE 0413)."
   "Far from 20 °C: insulation and protective conductor resistances depend on the temperature; note it beside them (VDE 0100-600).": "Weit entfernt von 20 °C: Isolations- und Schutzleiterwiderstände hängen von der Temperatur ab; vermerken Sie sie dabei (VDE 0100-600)."
+  # Test
+  Reading: Messwert
+  "battery {volts} V": "Batterie {volts} V"
+  replace the battery: Batterie tauschen
+  "Enrolled: {name}": "Angemeldet: {name}"
+  "Unenrolled: {name}": "Abgemeldet: {name}"

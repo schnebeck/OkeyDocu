@@ -144,7 +144,7 @@ def test_configuration_is_reached_from_the_menu(qtbot, app, monkeypatch):
 
 
 def test_configuration_lists_instruments_by_name(qtbot, monkeypatch):
-    monkeypatch.setattr("okeydocu.ui.settings_dialog.find_instruments", lambda: [PRIME])
+    monkeypatch.setattr("okeydocu.ui.settings_dialog.find_instruments", lambda **_: [PRIME])
     dialog = SettingsOverlay()
     qtbot.addWidget(dialog)
     assert dialog.instruments.item(0).text() == "PROFITEST PRIME (Bluetooth)"
@@ -162,8 +162,9 @@ def test_instrument_appears_right_after_setting_it_up(qtbot, monkeypatch):
     dialog = SettingsOverlay()
     qtbot.addWidget(dialog)
     monkeypatch.setattr(InstrumentSetupOverlay, "exec", lambda self: 1)
-    monkeypatch.setattr("okeydocu.ui.settings_dialog.find_instruments", lambda: [PRIME])
-    dialog.pairing_buttons[PRIME_DRIVER.key].click()
+    monkeypatch.setattr("okeydocu.ui.settings_dialog.find_instruments", lambda **_: [PRIME])
+    dialog.adding.choose(PRIME_DRIVER.key)
+    dialog.adding.add_button.click()
     assert dialog.instruments.count() == 1
 
 
