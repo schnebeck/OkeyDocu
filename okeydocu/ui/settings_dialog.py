@@ -104,14 +104,17 @@ class SettingsOverlay(Overlay):
         self.forget_button.setVisible(enrolled)
         self.log_button.setEnabled(self.app is not None)
 
-    def _add(self, info: DriverInfo) -> None:
-        if info.pairing is not None:
-            self._pair(info)
+    def _add(self, chosen) -> None:
+        """A model is paired or enrolled; a class of sensors is searched for at once."""
+        if isinstance(chosen, list):
+            self._enrol(chosen)
+        elif chosen.pairing is not None:
+            self._pair(chosen)
         else:
-            self._enrol(info)
+            self._enrol([chosen])
 
-    def _enrol(self, info: DriverInfo) -> None:
-        SensorEnrolmentOverlay(info.enrolment, self).exec()
+    def _enrol(self, infos: list[DriverInfo]) -> None:
+        SensorEnrolmentOverlay(infos, self).exec()
         self.refresh()
 
     def _forget_chosen(self) -> None:

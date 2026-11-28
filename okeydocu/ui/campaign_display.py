@@ -19,6 +19,7 @@ from ..l10n import tr
 from .campaign_items import SEPARATOR
 from .campaign_views import ELSEWHERE, ENDED, PAUSED
 from .dashboard_card import MAKE_REPORT, MENU, OPEN_REPORT, RESUME
+from .instrument_booking import booked_label
 from .report_signing import open_report
 
 
@@ -34,6 +35,14 @@ class CampaignDisplay:
         if campaign["status"] != "open" or campaign["driver"] in NO_INSTRUMENT:
             return None
         return self.app.devices.driver(campaign)
+
+    def _instruments_line(self, campaign) -> str:
+        """The instruments booked, each by its name; in an open campaign a link to book."""
+        names = [booked_label(booked) for booked in self.app.service.instruments(campaign["id"])]
+        text = escape(SEPARATOR.join(names)) or escape(tr("by hand"))
+        if campaign["status"] != "open":
+            return text
+        return f'{text} \u00b7 <a href="instruments">{escape(tr("Book in or out \u2026"))}</a>'
 
     def show_campaign(self, campaign_id: int) -> None:
         """Only shows. Whatever is measuring goes on measuring."""
@@ -52,7 +61,8 @@ class CampaignDisplay:
         lines = ((tr("Customer"), escape(customer["name"])),
                  (tr("Installation"), escape(asset["name"])),
                  (tr("Job") if campaign["job_number"] else tr("Contact person"), escape(job)),
-                 (tr("Inspector"), tester), (tr("Test plan"), escape(plan)))
+                 (tr("Inspector"), tester), (tr("Instruments"), self._instruments_line(campaign)),
+                 (tr("Test plan"), escape(plan)))
         self.header.show_details([line for line in lines if line[1]])
         self.values.show_campaign(campaign_id)
         self.guided.only = self.plan_runs.get(campaign_id)

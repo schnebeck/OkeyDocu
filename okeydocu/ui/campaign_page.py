@@ -157,6 +157,7 @@ class CampaignPage(CampaignDisplay, CampaignActions, CampaignConfirm, CampaignPh
         self.home.campaign_requested.connect(self._from_home)
         self.home.due_requested.connect(self.new_campaign)
         self.header.tester_requested.connect(self.change_tester)
+        self.header.instruments_requested.connect(self.book_instruments)
         self.header.edit_requested.connect(self.edit_campaign)
         self.header.home_requested.connect(self.show_home)
         self.header.check_requested.connect(self._follow_check)

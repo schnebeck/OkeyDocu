@@ -36,6 +36,7 @@ class CampaignHeader(Framed):
     """Says which campaign this is and offers what can be done with it now."""
 
     tester_requested = Signal()
+    instruments_requested = Signal()
     edit_requested = Signal()
     home_requested = Signal()
     check_requested = Signal(str)  # a link in the checks: what to look at
@@ -58,7 +59,9 @@ class CampaignHeader(Framed):
         self.edit_button.clicked.connect(self.edit_requested)
         self.details = WrappingLabel()
         self.details.setTextFormat(Qt.TextFormat.RichText)
-        self.details.linkActivated.connect(lambda _: self.tester_requested.emit())
+        self.details.linkActivated.connect(
+            lambda link: (self.instruments_requested if link == "instruments"
+                          else self.tester_requested).emit())
         self.resume_button = QPushButton(tr("Resume measuring"))
         self.pause_button = QPushButton(tr("Pause measuring"))
         self.photos_button = QPushButton(tr("Photos …"))

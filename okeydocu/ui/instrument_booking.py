@@ -27,10 +27,16 @@ SLOT = Qt.ItemDataRole.UserRole
 
 
 def booked_label(booked) -> str:
+    """The instrument by the name its owner gave it, else by model and serial number."""
     info = driver_info(booked.driver)
     name = tr(info.label) if info else booked.driver
     who = booked.identity
-    return f"{name}: {who.manufacturer} {who.model} ({who.serial_no})" if who else name
+    if who is None:
+        return name
+    if who.name:
+        return f"{name} {who.name}"
+    # A simulated instrument's model is an English source text.
+    return f"{tr(who.model)} ({who.serial_no})" if who.model else name
 
 
 class InstrumentBookingOverlay(Overlay):

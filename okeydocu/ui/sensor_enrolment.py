@@ -13,70 +13,42 @@ Nothing is chosen for the tester: with several sensors in reach the one to enrol
 dropped, and an enrolment given up keeps nothing. An enrolled sensor carries a green dot in
 the list; chosen, it is unenrolled by the same button. Any sensor in reach can be identified.
 A sensor can be used as soon as it is listed: identifying or enrolling it ends the search, which
-holds the radio, and follows at once."""
+holds the radio, and follows at once. The card searches for one model or for a whole class
+of them at once, and a filter narrows what it has found."""
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt, QThread, Signal
-from PySide6.QtGui import QColor, QIcon, QPainter, QPixmap
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, \
     QPushButton
 
-from ..devices import DeviceError, Enrolment
 from ..l10n import plural, tr
 from .button_width import widest
 from .overlay import Overlay
+from .sensor_steps import Step, mark, scan_all
 from .station_sensor import shown_text
 
 FOUND = Qt.ItemDataRole.UserRole
 SCAN_S = 30.0  # a sensor that has just been connected may stay silent for a while
-DOT = 12  # pixels of the mark of an enrolled sensor
-_RUNNING: set[QThread] = set()  # steps outliving the card they were started from
-
-
-class Step(QThread):
-    failed = Signal(str)
-    done = Signal(object)
-    news = Signal(object)  # something the work tells on its way
-
-    def __init__(self, work):
-        super().__init__()
-        self.work = work
-        _RUNNING.add(self)
-        self.finished.connect(lambda: _RUNNING.discard(self))
-
-    def run(self) -> None:
-        try:
-            self.done.emit(self.work())
-        except DeviceError as error:
-            self.failed.emit(tr(str(error)))
-
-
-def mark(enrolled: bool) -> QIcon:
-    """A green dot, or an empty place of its size so that the names stay in line."""
-    picture = QPixmap(DOT, DOT)
-    picture.fill(Qt.GlobalColor.transparent)
-    if enrolled:
-        painter = QPainter(picture)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setPen(Qt.PenStyle.NoPen)
-        painter.setBrush(QColor("#2e9d4f"))
-        painter.drawEllipse(1, 1, DOT - 2, DOT - 2)
-        painter.end()
-    return QIcon(picture)
 
 
 class SensorEnrolmentOverlay(Overlay):
-    def __init__(self, enrolment: Enrolment, parent=None):
+    def __init__(self, infos, parent=None):
+        """`infos`: the descriptions of the models searched for, each with its enrolment."""
         super().__init__(tr("Enrol sensor"), parent, width=620)
-        self.enrolment = enrolment
+        self.enrolments = {info.key: info.enrolment for info in infos}
+        self.kinds = {info.key: tr(info.label) for info in infos}
         self.step: Step | None = None
         self.given_up = False
         self.searching = False
         self.pending = None  # what follows once the search has ended
         self.found = None  # the sensor kept, once it is
-        guide = QLabel(tr(enrolment.instructions))
+        guide = QLabel("".join(dict.fromkeys(tr(info.enrolment.instructions) for info in infos)))
         guide.setWordWrap(True)
+        self.filter = QLineEdit()
+        self.filter.setPlaceholderText(tr("Filter by kind, name or protocol"))
+        self.filter.setClearButtonEnabled(True)
+        self.filter.textChanged.connect(lambda _: self._narrow())
         self.sensors = QListWidget()
         self.sensors.setMinimumHeight(120)
         self.sensors.currentRowChanged.connect(lambda _: self._chose())
@@ -104,6 +76,7 @@ class SensorEnrolmentOverlay(Overlay):
         buttons.addWidget(self.show_button)
         buttons.addStretch()
         self.body.addWidget(guide)
+        self.body.addWidget(self.filter)
         self.body.addWidget(self.sensors)
         self.body.addLayout(naming)
         self.body.addLayout(buttons)
@@ -127,9 +100,12 @@ class SensorEnrolmentOverlay(Overlay):
     def _busy(self) -> bool:
         return self.step is not None and self.step.isRunning()
 
+    def _of(self, found):
+        return self.enrolments[found.key]
+
     def _enrolled(self) -> bool:
         found = self._chosen()
-        return found is not None and self.enrolment.enrolled(found.port)
+        return found is not None and self._of(found).enrolled(found.port)
 
     def _update(self) -> None:
         free, chosen = not self._busy(), self._chosen() is not None
@@ -140,7 +116,7 @@ class SensorEnrolmentOverlay(Overlay):
         self.enrol_button.setText(tr("Unenrol") if self._enrolled() else tr("Enrol"))
         for row in range(self.sensors.count()):
             item = self.sensors.item(row)
-            item.setIcon(mark(self.enrolment.enrolled(item.data(FOUND).port)))
+            item.setIcon(mark(self._of(item.data(FOUND)).enrolled(item.data(FOUND).port)))
 
     def _run(self, work, said: str, then, news=None) -> None:
         """`work` takes the step, to tell `news` on its way."""
@@ -182,17 +158,24 @@ class SensorEnrolmentOverlay(Overlay):
             return
         self.sensors.clear()
         self.name.clear()
-        self._run(lambda step: self.enrolment.scan(SCAN_S, step.news.emit,
-                                                   lambda: self.pending is not None
-                                                   or self.given_up),
+        self._run(lambda step: scan_all(self.enrolments, SCAN_S, step.news.emit,
+                                        lambda: self.pending is not None or self.given_up),
                   tr("Listening for sensors \u2026"), self._listed, self._add)
         self.searching = True
 
     def _add(self, sensor) -> None:
-        item = QListWidgetItem(sensor.label)
+        """Each row names the model too, as a search may span several."""
+        item = QListWidgetItem(f"{self.kinds[sensor.key]} \u00b7 {sensor.label}")
         item.setData(FOUND, sensor)
         self.sensors.addItem(item)
+        self._narrow()
         self._update()
+
+    def _narrow(self) -> None:
+        wanted = self.filter.text().strip().lower()
+        for row in range(self.sensors.count()):
+            item = self.sensors.item(row)
+            item.setHidden(bool(wanted) and wanted not in item.text().lower())
 
     def _listed(self, found) -> None:
         listed = {self.sensors.item(row).data(FOUND).port for row in range(self.sensors.count())}
@@ -208,7 +191,8 @@ class SensorEnrolmentOverlay(Overlay):
         if self._chosen() is None or self._after_search(self.point_out):
             return
         port = self._chosen().port
-        self._run(lambda _: self.enrolment.point_out(port), tr("Connecting to the sensor \u2026"),
+        enrolment = self._of(self._chosen())
+        self._run(lambda _: enrolment.point_out(port), tr("Connecting to the sensor \u2026"),
                   lambda number: self.status.setText(shown_text(number)))
 
     def accept(self) -> None:
@@ -216,12 +200,13 @@ class SensorEnrolmentOverlay(Overlay):
         if self._chosen() is None or self._after_search(self.accept) or self._busy():
             return
         port, name = self._chosen().port, self.name.text().strip()
+        enrolment = self._of(self._chosen())
         if self._enrolled():
-            self.enrolment.forget(port)
+            enrolment.forget(port)
             self.status.setText(tr("Unenrolled: {name}", name=name or port))
             self._update()
             return
-        self._run(lambda _: self.enrolment.enrol(port, name, lambda: self.given_up),
+        self._run(lambda _: enrolment.enrol(port, name, lambda: self.given_up),
                   tr("Enrolling the sensor \u2026"), self._kept)
 
     def _kept(self, found) -> None:

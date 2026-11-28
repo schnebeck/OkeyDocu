@@ -51,3 +51,4 @@ texts:
   replace the battery: Batterie tauschen
   "Enrolled: {name}": "Angemeldet: {name}"
   "Unenrolled: {name}": "Abgemeldet: {name}"
+  Filter by kind, name or protocol: Filtern nach Typ, Name oder Protokoll

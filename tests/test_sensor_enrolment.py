@@ -36,13 +36,17 @@ class Sensor:
         pass
 
 
-def enrolment(release: threading.Event):
+def climate(**changed):
+    """The climate sensor's description, its enrolment changed as given."""
     info = registry.driver_info("climate")
+    return [replace(info, enrolment=replace(info.enrolment, **changed))]
 
+
+def enrolment(release: threading.Event):
     def slow_enrol(port, name, given_up):
         release.wait(5)
         return enrol(port, name, given_up)
-    return replace(info.enrolment, scan=lambda seconds, heard, stopped: [FOUND], enrol=slow_enrol)
+    return climate(scan=lambda seconds, heard, stopped: [FOUND], enrol=slow_enrol)
 
 
 def test_an_enrolment_given_up_keeps_nothing_and_the_card_closes_at_once(window, qtbot,
@@ -78,7 +82,7 @@ def test_an_enrolled_sensor_is_listed_in_the_settings_and_dropped_there(window, 
 
 def test_a_sensor_chosen_offers_its_own_name_and_keeps_it_without_another(window, monkeypatch):
     monkeypatch.setattr("okeydocu.devices.climate.info.ClimateSensor", Sensor)
-    card = SensorEnrolmentOverlay(registry.driver_info("climate").enrolment, window)
+    card = SensorEnrolmentOverlay(climate(), window)
     card._listed([FOUND])
     assert card._chosen() is None and not card.enrol_button.isEnabled()  # nothing chosen
     card.sensors.setCurrentRow(0)
@@ -89,7 +93,7 @@ def test_a_sensor_chosen_offers_its_own_name_and_keeps_it_without_another(window
 
 def test_an_enrolled_sensor_is_marked_and_its_button_unenrols_it(window, monkeypatch):
     monkeypatch.setattr("okeydocu.devices.climate.info.ClimateSensor", Sensor)
-    card = SensorEnrolmentOverlay(registry.driver_info("climate").enrolment, window)
+    card = SensorEnrolmentOverlay(climate(), window)
     card._listed([FOUND])
     card.sensors.setCurrentRow(0)
     assert card.enrol_button.text() == tr("Enrol")
@@ -113,8 +117,7 @@ def test_the_list_fills_while_the_search_runs(window, qtbot):
                 break
             release.wait(0.05)
         return [FOUND]
-    card = SensorEnrolmentOverlay(replace(registry.driver_info("climate").enrolment, scan=scan),
-                                  window)
+    card = SensorEnrolmentOverlay(climate(scan=scan), window)
     card.search()
     qtbot.waitUntil(lambda: card.sensors.count() == 1, timeout=3000)
     assert card._busy()  # still listening
@@ -134,9 +137,8 @@ def test_a_sensor_listed_is_usable_at_once_and_ends_the_search(window, qtbot, mo
                 break
             threading.Event().wait(0.05)
         return [FOUND]
-    enrolment = replace(registry.driver_info("climate").enrolment, scan=scan,
-                        point_out=lambda port: shown.append(port) or 123)
-    card = SensorEnrolmentOverlay(enrolment, window)
+    card = SensorEnrolmentOverlay(climate(scan=scan, point_out=lambda port: shown.append(port)
+                                          or 123), window)
     card.search()
     qtbot.waitUntil(lambda: card.sensors.count() == 1, timeout=3000)
     card.sensors.setCurrentRow(0)
@@ -150,7 +152,7 @@ def test_a_sensor_listed_is_usable_at_once_and_ends_the_search(window, qtbot, mo
 def test_the_kinds_to_add_are_one_searchable_choice(window, monkeypatch):
     opened = []
     monkeypatch.setattr(settings_dialog.SettingsOverlay, "_enrol",
-                        lambda self, info: opened.append(info.key))
+                        lambda self, infos: opened.append([info.key for info in infos]))
     card = settings_dialog.SettingsOverlay(window, window.app)
     completer = card.adding.kinds.completer()
     completer.setCompletionPrefix("lima")  # any part of a name finds it
@@ -158,4 +160,17 @@ def test_the_kinds_to_add_are_one_searchable_choice(window, monkeypatch):
     assert not card.adding.add_button.isEnabled()  # nothing chosen yet
     card.adding.choose("climate")
     card.adding.add_button.click()
-    assert opened == ["climate"]
+    assert opened == [["climate"]]
+    card.adding.kinds.setCurrentIndex(0)  # the class: every sensor at once
+    card.adding.add_button.click()
+    assert opened[-1] == ["climate"]
+
+
+def test_the_sensors_found_are_narrowed_by_a_filter(window):
+    card = SensorEnrolmentOverlay(climate(), window)
+    other = FoundInstrument("climate", "Hall 9  pvvx", "00:11:22:33:44:66", "Hall 9")
+    card._listed([FOUND, other])
+    card.filter.setText("pvvx")
+    shown = [card.sensors.item(row).text() for row in range(card.sensors.count())
+             if not card.sensors.item(row).isHidden()]
+    assert len(shown) == 1 and "Hall 9" in shown[0] and shown[0].startswith(tr("Climate sensor"))

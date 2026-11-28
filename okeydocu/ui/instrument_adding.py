@@ -6,9 +6,10 @@
 # SPDX-FileCopyrightText: (C) 2026 Thorsten Schnebeck <thorsten.schnebeck@gmx.net>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""One entry per kind that is made known to the program once: paired over Bluetooth or
-enrolled as a sensor. Typing in the field narrows the entries to those containing what is
-typed, so a long list is searched rather than scrolled."""
+"""One entry per model that is made known to the program once, paired over Bluetooth or
+enrolled as a sensor, and before them one for the whole class of sensors, searched for at
+once. Typing in the field narrows the entries to those containing what is typed, so a long
+list is searched rather than scrolled."""
 
 from __future__ import annotations
 
@@ -18,11 +19,12 @@ from PySide6.QtWidgets import QComboBox, QCompleter, QHBoxLayout, QLabel, QPushB
 from ..devices import available_drivers
 from ..l10n import N_, tr
 
-PAIR, ENROL = N_("{instrument} – pair over Bluetooth"), N_("{instrument} – enrol")
+PAIR, ENROL = N_("{instrument} \u2013 pair over Bluetooth"), N_("{instrument} \u2013 enrol")
+EVERY_SENSOR = N_("Every sensor \u2013 enrol")
 
 
 class InstrumentAdding(QWidget):
-    chosen = Signal(object)  # the DriverInfo of the kind to add
+    chosen = Signal(object)  # the DriverInfo of the model to add, or a list for a class
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -30,7 +32,11 @@ class InstrumentAdding(QWidget):
         self.kinds.setEditable(True)
         self.kinds.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
         self.kinds.lineEdit().setPlaceholderText(tr("Kind of instrument"))
-        for info in sorted(available_drivers(), key=lambda info: tr(info.label).lower()):
+        drivers = sorted(available_drivers(), key=lambda info: tr(info.label).lower())
+        sensors = [info for info in drivers if info.enrolment is not None]
+        if sensors:
+            self.kinds.addItem(tr(EVERY_SENSOR), sensors)
+        for info in drivers:
             if info.pairing is not None or info.enrolment is not None:
                 way = PAIR if info.pairing is not None else ENROL
                 self.kinds.addItem(tr(way, instrument=tr(info.label)), info)
@@ -39,7 +45,7 @@ class InstrumentAdding(QWidget):
         completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.kinds.setCompleter(completer)
         self.kinds.setCurrentIndex(-1)
-        self.add_button = QPushButton(tr("Add …"))
+        self.add_button = QPushButton(tr("Add \u2026"))
         self.add_button.clicked.connect(self._add)
         self.kinds.currentIndexChanged.connect(lambda _: self._update())
         self.kinds.editTextChanged.connect(lambda _: self._update())
@@ -59,8 +65,8 @@ class InstrumentAdding(QWidget):
         self.add_button.setEnabled(self._info() is not None)
 
     def choose(self, key: str) -> None:
-        index = next((i for i in range(self.kinds.count()) if self.kinds.itemData(i).key == key),
-                     -1)
+        index = next((i for i in range(self.kinds.count())
+                      if getattr(self.kinds.itemData(i), "key", None) == key), -1)
         self.kinds.setCurrentIndex(index)
 
     def _add(self) -> None:

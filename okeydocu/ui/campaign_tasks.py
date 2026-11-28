@@ -28,7 +28,7 @@ class CampaignTasks:
         self.pause_action = self._action(tr("Pause measuring"), self.pause)
         self.edit_action = self._action(tr("Edit campaign …"), self.edit_campaign)
         self.tester_action = self._action(tr("Change inspector …"), self.change_tester)
-        self.instruments_action = self._action(tr("Instruments of the campaign …"),
+        self.instruments_action = self._action(tr("Instruments of the campaign \u2026"),
                                                self.book_instruments)
         self.instruments_action.setToolTip(tr("Books an instrument in beside the campaign's"
                                               " own, or out while it has not measured"))
