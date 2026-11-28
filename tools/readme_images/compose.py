@@ -26,7 +26,9 @@ ORANGE, INK = (245, 158, 36), (26, 30, 36)
 PLAIN = {"campaign": "campaign-en", "overview": "overview-en", "guide-dial": "guide-dial-en",
          "guide-leads": "guide-leads-en", "photo-marks": "photo-marks-en",
          "settings-check": "settings-check-en", "report": "report-en-1",
-         "languages": "languages", "banner": "banner"}
+         "languages": "languages", "banner": "banner",
+         "instruments-head": "instruments-head-en", "sensor-enrol": "sensor-enrol-en",
+         "sensor-settle": "sensor-settle-en"}
 BULLETS = ("Live readings by Push/Print from the PROFITEST PRIME",
            "Guided measurements on the instrument's own front panel",
            "Campaign templates that learn \u00b7 sealed, signed reports")

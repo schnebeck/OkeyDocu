@@ -41,8 +41,8 @@ def right(widget, page) -> int:
 
 def test_the_head_gives_each_detail_a_line_of_its_own(page):
     details = page.header.details.text()
-    assert details.count("<tr>") == 4
-    for name in ("Kunde", "Anlage", "Prüfer", "Messplan"):
+    assert details.count("<tr>") == 5
+    for name in ("Kunde", "Anlage", "Prüfer", "Messgeräte", "Messplan"):
         assert f">{name}</td>" in details
     assert "Muster AG" in details and "Halle 1" in details
 

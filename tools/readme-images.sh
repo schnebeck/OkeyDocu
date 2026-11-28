@@ -28,7 +28,8 @@ shoot() {  # language, then the scripts to run
 }
 
 # The photos are cut out of the pictures of the guide, so the guide comes first.
-shoot en $HERE/shot_guide.py $HERE/shot_photos.py $HERE/shot_campaign.py $HERE/shot_report.py
+shoot en $HERE/shot_guide.py $HERE/shot_photos.py $HERE/shot_campaign.py $HERE/shot_report.py \
+    $HERE/shot_instruments.py
 shoot de $HERE/shot_campaign.py
 timeout 300 .venv/bin/python $HERE/compose.py "$README_OUT" "$PWD"
 echo "Pictures written to docs/images"
